@@ -42,12 +42,9 @@ natbib, draftwatermark, setspace, hyperref, lmodern
      \title{thesis title}
      \author{author's name} 
      \degree{Master of Science, Doctor of Philosophy, etc.} 
-     \subject{author's department}
-          - Computer Science if omitted 
-     \submitdate{month year in which submitted}
-          - dated by LaTeX if omitted 
-     \copyrightyear{year degree conferred (next year if submitted in Dec.)}
-          - assumes current year (or next year, in December) if omitted 
+     \subject{author's department} % Computer Science if omitted 
+     \submitdate{month year in which submitted} % Dated by LaTeX if omitted 
+     \copyrightyear{year degree conferred (next year if submitted in Dec.)} % Assumes current year (or next year, in December) if omitted 
  
  The preface environment allows for the use of sections that precede the main
  document; such as Abstract and  Acknowlegements. These sections should be
