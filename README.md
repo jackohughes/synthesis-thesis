@@ -24,7 +24,8 @@ is used as a switch for the UoKExtentions package.
     
 * __draft__ - Puts the entire document into draft mode. Applies all the effect
 of draftmark above, but also propergates to other packages used.
-copyright - Adds a copyright page between the title page and the preface.
+
+* __copyright__ - Adds a copyright page between the title page and the preface.
     
 * __nofig__ - Disables output of the list of figures in the preface.
     
