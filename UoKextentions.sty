@@ -1,0 +1,55 @@
+% UoK Thesis Extentions Fuctionallity
+%
+% Updated by Keith Greenhow September 2013
+% please report any problem to Dan Knox
+%
+% This file provides some additional functionality that may be of use whilst
+% writing your thesis.
+%
+% Commands provided:
+% \note{Some text} - Whilst in draft mode, the text will be displayed in red;
+%                    where as, in standard mode the text will not be output at
+%                    all. Used to identity add note for yourself or for others
+%                    reviewing your draft versions.
+% \todo{Some text} - Similar to the \note command, but will display in blue
+%                    whilst in draft mode and not at all in standard mode. Used
+%                    to mark sections or paragraphs you intend to write.
+% \tocite{Some text} - Functionally similar to \todo, but surrounded with [ ].
+%                      Used to identify a citation/reference you intend to add
+%                      but is not currently in your bibliography file.
+% \rewrite{Some text} - This will always display the text, but will highlight it
+%                       dark green in draft mode. Used to signify a section/
+%                       paragraph that you feel needs to be rewritten.
+% \placeholder{Some text} - An alias for rewrite.
+%\cite{NEEDED} - Extends the standard cite command to show a 'citation needed'
+%                note in the output document.
+
+\usepackage[usenames]{xcolor}
+
+% Adds a collection of note/draft commands useful for when developing your thesis document
+\ifdraft
+	%note command
+	\newcommand{\note}[1]{\textit{\color{red}#1\textsuperscript{[note]}}}
+	%placeholder for information yet to be added
+	\newcommand{\todo}[1]{\textcolor{blue}{TODO: #1}}
+	%sentences to be rewritten
+	\definecolor{DarkGreen}{rgb}{0.1,0.4,0.1}
+	\newcommand{\rewrite}[1]{\textcolor{DarkGreen}{#1\textsuperscript{[rewrite]}}}
+	%placeholder for terminology
+	\newcommand{\placeholder}[1]{\textcolor{DarkGreen}{#1\textsuperscript{[placeholder]}}}
+	% Use “\cite{NEEDED}” to get Wikipedia-style “citation needed” in document
+	\usepackage{ifthen}
+	\let\oldcite=\cite
+	\renewcommand\cite[1]{\ifthenelse{\equal{#1}{NEEDED}}{\textsuperscript{\color{red}[citation~needed]}}{\oldcite{#1}}}
+\else
+	%note command
+	\newcommand{\note}[1]{}
+	%placeholder for information yet to be added
+	\newcommand{\todo}[1]{}
+	%citations yet to be added to bibliography
+	\newcommand{\tocite}[1]{}
+	%sentences to be rewritten
+	\newcommand{\rewrite}[1]{#1}
+	%placeholder for terminology
+	\newcommand{\placeholder}[1]{#1}
+\fi
