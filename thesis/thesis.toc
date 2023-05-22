@@ -1,0 +1,20 @@
+\contentsline {chapter}{Abstract}{ii}{chapter*.1}%
+\contentsline {chapter}{Acknowledgements}{iii}{chapter*.2}%
+\contentsline {chapter}{Contents}{iv}{section*.3}%
+\contentsline {chapter}{List of Tables}{vi}{section*.5}%
+\contentsline {chapter}{List of Figures}{vii}{section*.7}%
+\contentsline {chapter}{List of Algorithms}{viii}{section*.9}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Background}{2}{chapter.2}%
+\contentsline {paragraph}{Linear types}{3}{section*.11}%
+\contentsline {paragraph}{Graded types}{3}{section*.12}%
+\contentsline {section}{\numberline {2.1}Two target languages}{3}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Linear-base}{4}{subsection.2.1.1}%
+\contentsline {paragraph}{Metatheory}{6}{section*.14}%
+\contentsline {subsection}{\numberline {2.1.2}Graded-base}{6}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Related systems}{8}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Conclusion}{8}{section.2.3}%
+\contentsline {chapter}{\numberline {3}A core synthesis calculus}{9}{chapter.3}%
+\contentsline {chapter}{\numberline {4}Deriving graded combinators}{10}{chapter.4}%
+\contentsline {chapter}{\numberline {5}An extended synthesis calculus}{11}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Conclusion}{12}{chapter.6}%

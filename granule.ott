@@ -1,0 +1,1062 @@
+%watchman-make -p 'granule.ott' --run make
+
+embed
+ {{ tex-preamble
+
+\IfFileExists{xcolor.sty}{
+	\RequirePackage{xcolor}
+}{
+	\RequirePackage{color}
+}
+
+
+ \usepackage{stmaryrd}
+ \usepackage{mathtools}
+ \usepackage{halloweenmath}
+ %\definecolor{coeffectColor}{HTML}{0750D0}
+ \definecolor{coeffectColor}{HTML}{000000}
+ \definecolor{effectColor}{HTML}{D64800}
+
+ }}
+
+metavar termvar, a {{ tex \alpha }}, b {{ tex \beta }} , gam {{ tex
+\gamma }} , l {{ tex \mathcal{L} }}, x, y, z, f, g, h, adv {{ tex \mathit{adv} }} ::=
+
+indexvar index, i, j, n, m ::=
+
+grammar
+
+
+Foc :: 'Foc_' ::= {{ com Focusing phase }}
+  | Async ::  :: Async {{ com Async }} {{ tex \textsc{A} }}
+  | Sync ::  :: Sync {{ com Sync }} {{ tex \textsc{S} }}
+
+t , v :: 'Term_' ::= {{ com Terms }}
+  | t1 t2 :: :: App {{ com Application }}
+  | let < p > = t1 in t2 :: :: LetDiamond
+    {{ com Effectful Let Binding }}
+    {{tex  \textbf{let} \, \langle [[ p ]] \rangle\!\shortleftarrow\! [[ t1 ]] \, \textbf{in} \, [[ t2 ]]}}
+  | case t of Cases :: :: Case {{ com Case }}
+    {{ tex \textbf{case} \ [[ t ]] \ \textbf{of} \ [[ Cases ]] }}
+  | ( t ) :: M :: Bracket {{ com Brackets }}
+  | \ p . t :: :: Abs {{ com Function }} {{tex \lambda [[ p ]] . [[ t ]] }}
+  | \ p ^ c . t  :: :: AbsAnn {{ com Function with graded annotation on its binder }} {{ tex \lambda [[ p ]] . [[ t ]] }}
+  | [ t ] :: :: Promote {{ com Promote }}
+  | < t > :: :: Pure {{ com Pure }}
+  | x :: :: Var {{ com Variable }}
+  | Con t0 ... tn :: :: Con {{ com Constructor }}
+  | Con v * :: M :: ConValuesPref {{ com Constructor with some values prefix }}
+     {{ tex [[ Con ]]\ \overline{[[ v ]]} }}
+  | Con . :: :: Con0 {{ tex [[ Con ]] }}
+  | n  :: :: IntConst {{ com Integer constructors }}
+  | t ++ t' :: M :: Addition {{ com Plus }} {{ tex [[ t ]] + [[ t' ]] }}
+  | let [ p ] = t1 in t2 :: S :: LetBox
+    {{ com Modal let-binding }}
+    {{tex  \textbf{let} \, [ [[ p ]] ] = [[ t1 ]] \, \textbf{in} \, [[ t2 ]]}}
+  | pair t1 t2 :: :: Pair {{ com A pair of terms }} {{ tex ([[ t1 ]], [[ t2 ]])}}
+  | hole :: :: Hole {{ com Hole }} {{ tex - }}
+
+
+% Meta-level operations and syntax for the operational semantics
+  | [ t1 / x ] t2 :: M :: Subst
+    {{ com Syntactic substitution }}
+    {{ tex [ [[ t1 ]] / [[ x ]] ] [[ t2 ]] }}
+  | ti+1 :: M :: TiNext {{ tex t_{i+1} }}
+  | tn+1 :: M :: TiEnd {{ tex t_{n+1} }}
+  | ti+1' :: M :: TiNextP {{ tex t'_{i+1} }}
+  | tn+1' :: M :: TiEndP {{ tex t'_{n+1} }}
+
+  | ( v |> p ) t :: M :: PatSubst {{ tex ( [[ v ]] \rhd [[ p ]] ) [[ t ]] }}
+  | ( v |>g p ) t :: M :: PatSubstG {{ tex ( [[ v ]] \rhd_G [[ p ]] ) [[ t ]] }}
+  | { t } :: M :: Brackett {{ tex [[ t ]] }}
+  | t @ { Ix } :: M :: TermAtIndex {{ tex [[ t ]]_{[[ Ix ]]} }}
+
+% K {{ tex K }} :: 'TyConstructor_' ::= {{ com Type constructors }}
+
+Con {{ tex C }} :: 'Constructor_' ::= {{ com Constructors }}
+  | (,) ::  :: Pair {{ com Pair constructor }}
+  | inl ::  :: Left {{ com Left injection }}
+  | inr ::  :: Right {{ com Right injection }}
+  | 1   ::  :: Unit {{ com Unit }} {{ tex \mathsf{unit} }}
+  | True    :: :: True {{ tex \mathsf{tt} }}
+  | False   :: :: False {{ tex \mathsf{ff} }}
+  | Just    :: :: Just {{ tex \mathsf{Just} }}
+  | Nothing :: :: Nothing {{ tex \mathsf{Nothing} }}
+
+
+%  | True :: M :: True {{ com True }}
+%  | False :: M :: False {{ com False }}
+
+Cases :: 'Cases_' ::= {{ com Value-level cases }}
+  | p -> t ; Cases :: :: CaseExt {{ com Case cons }}
+  | p -> t         :: :: CaseOne {{ com One case }}
+  | p -*> t         :: :: CaseOneOverline {{ com One case overline }} {{ tex \overline{ [[ p ]] \mapsto [[ t ]]} }}
+  | p -> t ; * ; p' -> t' :: S :: CasesMany {{ com Many cases (syntactic sugar) }} {{ tex [[ p ]] \mapsto [[ t ]]; ... ; [[ p' ]] \mapsto [[ t' ]] }}
+
+p :: 'Pat_' ::= {{ com Patterns }}
+  | x :: :: Var {{ com Variable }}
+  | _ :: :: Wild {{ com Wildcard }} {{ tex \_ }}
+  | [ p ] :: :: Unbox {{ com Unbox }}
+  | [| p |] :: :: DoubleUnbox {{ com Double unboxing }} {{ tex \lbrack [ [[p]] ] \rbrack }}
+  | Con p1 ... pn :: :: Con {{ com Constructor }}
+  | Con Ix1 Ix2 Ix3 p1 p2 :: :: ConIndexed {{ com ConstructorIndexed }} {{ tex [[ Con ]] \ [[ p1 ]]^[[ Ix3 ]]_[[ Ix1 ]] ... [[ p2 ]]^[[ Ix3 ]]_[[ Ix2 ]] }}
+  | Con .  :: :: ConN {{ com Nullary Constructor }} {{ tex [[ Con ]] }}
+  | n :: :: Int {{ com Int constructor }}
+  | ( p ) :: :: Brackets
+  | { p } :: M :: HiddenBrackets {{ tex [[ p ]] }}
+  | Special y :: :: Hack {{ com Hack }} {{ tex [[y]]^i_j }}
+  | Pair p1 p2 :: :: Pair {{ com Pair }} {{ tex ([[p1]], [[p2]]) }}
+
+%% SOME SUGAR
+  | p @ { Ix } :: S :: PatternAtIndex {{ com Pattern at index n+m }} {{ tex [[ p ]]^{[[ Ix ]]} }}
+
+
+
+Ix :: 'Index_' ::= {{ com More complex index expressions }}
+  | 0 :: :: Zero
+  | 1 :: :: One
+  | 2 :: :: Two
+  | Ix1 + Ix2 :: :: Plus
+  | m :: :: Em {{ tex m }}
+  | Var1 :: :: E1 {{ tex 1 }}
+  | Var2 :: :: E2 {{ tex 2 }}
+  | Var3 :: :: E3 {{ tex 3 }}
+  | Var4 :: :: E4 {{ tex 4 }}
+  | Vari :: :: Ei {{ tex i }}
+  | Varj :: :: Ej {{ tex j }}
+  | Varn :: :: En {{ tex n }}
+  | Varm :: :: VEm {{ tex m }}
+
+
+Eqn :: 'EquationDef_' ::= {{ com Equations }}
+  | x p1 .. pn = t :: :: Def {{ com Eq }}
+
+Def :: 'Definitions_' ::= {{ com Definitions }} {{ tex \textit{Def} }}
+  | x : T ; Eqn1 .. Eqnn :: :: Eqs {{ com Multi-eq def }}
+
+A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
+  | . :: :: Empty {{ com Empty }} {{ tex \cdot }}
+  | A -> B :: :: Fun {{ com Function }}
+  | A Dec :: :: Dec {{ com Dec }} {{ tex [[A]]_{ \textsc{Dec} } }}
+  | A ^ c -> B :: :: GradedFun {{ com Graded Function }} {{ tex [[ A ]]^[[ c ]] \rightarrow [[ B ]] }}
+  | A ^ c -o B :: :: GradedLinFun {{ com Graded Linear Function }} {{ tex [[ A ]]^[[ c ]] \multimap [[ B ]] }}
+  | A -o B :: S :: LinFun {{ com Linear Function }} {{ tex [[ A ]] \multimap [[ B ]] }}
+  | K :: :: Con {{ com Constructor }} {{ tex K }}
+  | @* K A B :: :: ConApp {{ com Constructor }} {{ tex K [[ A ]] \ldots [[ B ]] }}
+  | a :: :: Var {{ com Variable }}
+  | A B :: :: Ap {{ com Application }}
+  | A Ix1 Ix2 :: :: Var2IndexTy {{ com Var2IndexTy }} {{ tex [[A]]^[[ Ix1 ]]_[[ Ix2 ]] }}
+  | ! A :: :: BlankBox {{ com BlankBox }} {{ tex \Box [[ A ]] }}
+  | [] c A :: :: Box {{ com Box }} {{ tex \Box_{ [[c]] } [[A]] }}
+  | [] { c : B } A :: :: BoxTy {{ com Box with coeffect type }} {{ tex \Box_{\textcolor{coeffectColor}{[[c]] : [[ B ]]} } [[A]] }}
+  | Int :: :: Int {{ com Integers }}  {{ tex \mathsf{Int} }}
+  | Char :: :: Char {{ com Characters }}  {{ tex \mathsf{Char} }}
+  | Unit :: :: Unit {{ com unit }} {{ tex \mathsf{Unit} }}
+  | Prod :: :: Product {{ com Products }} {{ tex \otimes }}
+  | Bool :: :: Bool {{ com Bool }} {{ tex \mathbb{B} }}
+  | IO :: :: IO {{ com IO }} {{ tex \mathsf{IO} }}
+  | [ A / a ] B :: M :: TySub {{ com Type substitution }}
+  | [ A /* a ] B :: M :: TySubs
+      {{ com Type substitution }}
+      {{ tex \overrightarrow{ [  [[ A ]]  / [[ a ]]  ] } [[ B ]] }}
+  | R :: :: coeffectTypes {{ com Coeffect types }}
+  | R' :: M :: coeffectTypesP {{ com Coeffect types }}
+  | n :: :: TyInt {{ com Type-level integers }}
+  | A op B :: :: InfixOp {{ com InfixOp }} {{ tex [[ A ]] \, [[  op ]]
+  \, [[ B ]] }}
+  | Tup A B :: :: Tuple {{ com Tuple }} {{ tex ([[ A ]] \, \times \, [[ B ]]) }}
+  | Sum A B :: :: Sum {{ com Sum }} {{ tex ([[ A ]] \, + \, [[ B ]]) }}
+  | A opBool B :: M :: InfixOpBool {{ com Infix boolean operators alt syntax }}
+     {{ com InfixOp }}
+     {{ tex [[ A ]] \, \{ <, >, =, \neq, \wedge, \vee \} \, [[ B ]] }}
+  | Vec n A :: M :: Vec {{ tex \mathsf{Vec} \, [[ n ]] \, [[ A ]] }}
+  | Set A1 An :: :: TySet {{ tex \{ [[ A1 ]], ...,  [[An]] \} }}
+  | demote k :: :: Demote {{ tex {\downarrow\![[ k ]] } }}
+  | SetCon A :: :: Set {{ tex \mathsf{Set} \, [[ A ]] }}
+  % Meta operations
+  | Th A :: M :: Subst {{ com Substitution on types }} {{ tex [[ Th ]] [[ A ]] }}
+  | ( A ) :: M :: Brackts {{ com Brackets }}
+  | { A } :: M :: MetaBrackets {{ tex [[ A ]] }}
+  | A Many :: M :: ManyAs {{ tex \vec{[[ A ]]} }}
+  % Syntactic sugar
+  | B1 .*. Bn -> A :: S :: MultiFun {{ com n-Ary Function }}
+     {{ tex [[ B1 ]]^1 [[ -> ]]\! ... \![[ -> ]] [[ Bn ]]^1 [[ -> ]] [[ A ]] }}
+  | B1 - r1 .*. Bn - rn -> A :: S :: MultiFunWithGrades {{ com n-Ary Function w grades }}
+     {{ tex [[ B1 ]]^{q_1} [[ -> ]]\! ... \![[ -> ]] [[ Bn ]]^{q_n} [[ -> ]] [[ A ]] }}
+
+op {{ tex \textsf{op} }} :: 'Operator_' ::= {{com Type operators}}
+ | OPlus :: :: PlusOp {{ tex + }}
+ | OTimes :: :: TimesOp {{ tex * }}
+ | OMinus :: :: MinusOp {{ tex - }}
+ | OLessEq :: :: LessEqOp {{ tex \leq }}
+ | OLess :: :: LessOp {{ tex < }}
+ | OGreater :: :: GreaterOp {{ tex > }}
+ | OGreaterEq :: :: GreaterEqOp {{ tex \geq }}
+ | OEq :: :: EqOp {{ tex = }}
+ | ONEq :: :: NeqOp {{ tex \neq }}
+ | OJoin :: :: JoinOp {{ tex \sqcup }}
+ | OMeet :: :: MeetOp {{ tex \sqcap }}
+
+R, S :: 'CoeffectTypes_' ::= {{com Coeffect types}}
+  | Nat :: :: Nat {{ com Nat }}       {{ tex \mathsf{Nat} }}
+  | Level :: :: Level {{ com Level }} {{ tex \mathsf{Level} }}
+  | Ext :: :: Ext {{ com Extending }} {{ tex \mathsf{Ext} }}
+  | Interval :: :: Interval {{ com Interval }} {{ tex \mathsf{Interval} }}
+  | A <*> B :: :: Products {{ com Products }} {{ tex [[ A ]] \times [[ B ]] }}
+  | R S :: :: Ap {{ com Application }}
+  | |a| :: :: Var {{ com Variable }} {{ tex \alpha }}
+  | |b| :: :: VarB {{ com VariableB }} {{ tex \beta }}
+
+Constraints {{ tex \textit{Cons} }} :: 'Constraints_' ::= {{com Constraints/Predicates }}
+  | A , Constraints :: :: Ext
+  | A               :: :: Singleton
+  | A1 , .. , An    :: :: Many
+  | A *              :: :: ManyVector {{ tex \overrightarrow{[[ A ]]} }}
+  | ( Constraints ) :: :: Brackets
+  | { Constraints } :: M :: MetaBrackets {{ tex [[ Constraints ]] }}
+
+c, r, s, q :: 'Coeffect_' ::=
+  | c Ix1 Ix2 :: :: Var2Index {{ com Var2Index }} {{ tex [[c]]^[[ Ix1 ]]_[[ Ix2 ]] }}
+  | Ix1 c :: :: Var1Index {{ com Var1Index }} {{ tex [[c]]_[[ Ix1 ]] }}
+  | c1 + c2 :: :: Add {{ com Addition }}
+  | c1 * c2 :: :: Mult {{ com Multiplication }}
+  | 0 :: :: Zero {{ com Additive Unit }} {{ tex 0 }}
+  | 1 :: :: One {{ com Multiplicative Unit }} {{ tex 1 }}
+  | c1 \/ c2 :: :: Join {{ com Join }} {{ tex [[ c1 ]] \sqcup [[ c2 ]] }}
+  | c1 /\ c2 :: :: Meet {{ com Meet }} {{ tex [[ c1 ]] \sqcap [[ c2 ]] }}
+  | c1 /*\ c2 :: :: MultiMeet {{ com MultiMeet }} {{ tex [[ c1 ]] \sqcap ... \sqcap [[ c2 ]] }}
+  | c1 \*/ c2 :: :: MultiJoin {{ com MultiJoin }} {{ tex [[ c1 ]] \sqcup ... \sqcup [[ c2 ]] }}
+  | c1 = c2 :: :: CoeffEq {{ com CoeffEq }} {{ tex [[ c1 ]] = [[ c2 ]] }}
+  | BigJoin c :: :: BigJoin {{ com BigJoin }} {{ tex \bigsqcup_1^n [[ c ]] }}
+  | { c } :: M :: CoeffectGroupI {{ com Implicit grouping }} {{ tex [[ c ]] }}
+  | ( c ) :: M :: CoeffectGroupE {{ com Explicit grouping }}
+  | Flatten c1 A c2 B :: :: Flatten {{ com Flatten }}
+     {{ tex [[ Flatten ]] ([[ c1 ]], [[ A ]], [[ c2 ]], [[ B ]]) }}
+  | Hi :: M :: HiLevel {{ com Hi }} {{ tex \textsf{Hi} }}
+  | Lo :: M :: LoLevel {{ com Lo }} {{ tex \textsf{Lo} }}
+  | Private :: M :: PrivateLevel {{ com Private }} {{ tex \priv }}
+  | Public :: M :: PublicLevel {{ com Public }} {{ tex \publ }}
+  | Dunno :: M :: DunnoLevel {{ com Dunno }} {{ tex \dunno }}
+  | Unused :: M :: UnusedLevel {{ com Unused }} {{ tex \unused }}
+  | n :: M :: Nats {{ com Nat }}
+  | IntervalSyn c1 c2 :: :: Intervals {{ tex \textcolor{coeffectColor}{[[c1]]}..\textcolor{coeffectColor}{[[c2]]} }}
+  | IntervalSynB c1 c2 :: M :: IntervalsBlackAndWhite {{ tex {[[c1]]}..{[[c2]]} }}
+  | Inf :: :: Inf {{ tex \infty }}
+  | ProdSyn c1 c2 :: :: Prod {{ tex ([[ c1 ]], [[ c2 ]]) }}
+  | Th c :: :: Substitution {{ tex [[ Th ]] [[ c ]] }}
+  | 2 :: S :: SugarForTwo
+  | 3 :: S :: SugarForThree
+  | 4 :: S :: SugarForFour
+  | omega :: M :: Singleton {{ tex \omega }}
+  | c1 # c2 :: M :: Converge {{ tex [[ c1 ]] \,\#\, [[ c2 ]] }}
+  | c iprev :: :: PrevCoeffect {{ tex [[ c ]]_{i - 1} }}
+  | c : A   :: M :: Sig {{ tex [[ c ]] : [[ A ]] }}
+
+
+Rel :: 'Rel_' ::= {{ com Relations on grades }}
+ | c1 <= c2         :: :: Leq   {{ tex [[ c1 ]] \sqsubseteq [[ c2 ]] }}
+ | c1 <= c2 <= c3   :: :: Leq3  {{ tex [[ c1 ]] \sqsubseteq [[ c2 ]] \sqsubseteq [[ c3 ]] }}
+ | c1 >= c2         :: :: Geq   {{ tex [[ c1 ]] \sqsupseteq [[ c2 ]] }}
+ | c1 >= c2 >= c3   :: :: Geq3  {{ tex [[ c1 ]] \sqsupseteq [[ c2 ]] \sqsupseteq [[ c3 ]] }}
+ | Rel1 && Rel2     :: :: And   {{ tex [[ Rel1 ]] \wedge [[ Rel2 ]] }}
+
+
+k {{ tex \kappa }} :: 'Kind_' ::=
+  | Type :: :: Type {{ com Type }} {{tex \mathsf{Type} }}
+  | lift A :: :: Promote
+      {{ com Promote a type to a kind }}
+      {{ tex {\uparrow\![[ A ]] } }}
+  | Effect :: :: Effect {{ com Effect grades }} {{ tex \mathsf{Effect} }}
+  | Coeffect :: :: Coeffect {{ com Coeffect grades }} {{ tex
+  \mathsf{Coeffect} }}
+  | Eff :: :: EffectAbrv {{ tex \mathsf{Eff} }}
+  | Coeff :: :: CoeffectAbrv {{ tex \mathsf{Coeff} }}
+  | EffCoeff :: :: EffectCoeffectAbrv {{ tex \mathsf{(Co)eff} }}
+  | Predicate :: :: Predicate {{ com Predicates }} {{ tex \mathsf{Predicate} }}
+  | k1 -> k2 :: :: KindFun {{ com Kind function }}
+  | k1 U k2 :: :: KindUnion {{ tex [[ k1 ]] \cup [[ k2 ]] }}
+  | Th k :: :: SubstKind {{ com Substitutions }} {{ tex [[ Th ]][[ k ]] }}
+  | ( k ) :: :: Brackets
+
+Defines {{ tex D }} :: 'DefCtx_' ::=
+  | /.  :: :: Empty {{ com Empty }} {{ tex \emptyset }}
+  | Defines1 , Defines2 :: :: Cat
+  | ( Defines ) :: :: Bracket
+
+Ass {{ tex As }} :: 'Assume_' ::=
+  %% Assumptions
+  | x : T :: :: Singleton
+      {{ com Singleton context }}
+      {{ tex [[ x ]] : [[ T ]] }}
+
+
+  | x : [ T ] r :: :: SingletonGrad
+      {{ com Singleton context w/ graded assumption }}
+      {{ tex [[ x ]] :_{\textcolor{coeffectColor}{ [[ r ]] } }  [[ T ]] }}
+
+  | { x Ix1 Ix2 } : [ T ] c :: :: VarIndexed {{ com Indexed Variable }} {{ tex { [[ x ]]^[[ Ix1 ]]_[[ Ix2 ]] }:_{\textcolor{coeffectColor}{ [[ c ]] } }  [[ T ]] }}
+  | { x Ix1 } : [ T ] c :: :: VarIndexedOne {{ com Indexed Variable 1 }} {{ tex { [[ x ]]^[[ Ix1 ]] }:_{\textcolor{coeffectColor}{ [[ c ]] } }  [[ T ]] }}
+
+
+G {{ tex \Gamma }}, D {{ tex \Delta }}, O {{ tex \Omega }} :: 'TyCtx_' ::=
+  | . :: :: Empty {{ com Empty }} {{ tex \emptyset }}
+  | Ass :: :: Assumption {{ com Single assumption }}
+
+  %% Operations
+  | G # G' :: M :: CtxtConverge {{ com ContextConverge }} {{ tex [[ G ]] \,\#\, [[ G' ]] }}
+  | G1 + .. + Gn :: M :: CtxPlus {{ com CtxPlus }}
+  | G1 \/ G2 :: M :: Join {{ com Join }}
+  | c * G :: M :: ScalarMult {{ com Scalar Multiplication }}
+      {{ tex \textcolor{coeffectColor}{[[ c ]] [[ * ]]} [[ G ]] }}
+  | ( c : A ) * G :: M :: ScalarMulTyped {{ com Scalar Multiplication with type }}
+     % {{tex [[ c ]] : [[ A ]] [[ * ]] [[ G ]] }}
+
+  | [ G ] :: M :: Discharged {{ com Discharged }}
+  | [ G , R ] :: M :: DischargedR
+       {{ com Discharged at a coeffect type }}
+       {{ tex {[ [[ G ]] ]}_{[[ R ]]} }}
+  | G \\ G' :: M :: Remove {{ com Remove }} {{ tex [[ G ]]\!\setminus\![[ G' ]] }}
+  | G \ t :: M :: RemoveVar {{ com RemoveVar }} {{ tex [[ G ]]\!\setminus\! [[ t ]] }}
+  | G \* t1 t2 :: M :: MultiRemoveVar {{ com MultiRemoveVar }} {{ tex [[ G ]]\!\setminus\! [[ t1 ]]\ ... \!\setminus\![[ t2 ]] }}
+  | G1 , G2 :: M :: CtxCat {{ com Disjoint-context concatenation }}
+  | G1 , .M. , Gn :: M :: CtxtCatMulti {{ tex [[ G1 ]] , ... , [[ Gn ]] }}
+  | subst Th G :: M :: SubstContext {{ com Substitute on a context }} {{ tex [[ Th ]] [[ G ]] }}
+
+  % Various other context operations to do with algorithmic type checking
+  | [ G , c : A ] :: M :: GenGradedKind
+     {{ com Create graded context of Kind }}
+     {{ tex [ [[ G ]] ]_{[[ c ]] : [[ A ]]} }}
+
+  | [ G , c ] :: M :: GenGraded
+     {{ com Create graded context }}
+     {{ tex [ [[ G ]] ]_{[[ c ]]} }}
+
+  | BigCat G :: M :: BigCat {{ com Concat of many disjoint contexts }} {{ tex \overrightarrow{[[G]]} }}
+
+  | Sum G :: M :: Sum {{ com Big plus of many contexts }} {{ tex \sum_i [[G]] }}
+
+  | G ^ FV( t ) :: M :: Relevant
+    {{ com Relevant sub context }}
+    {{ tex [[ G ]] \cap \mathsf{FV}([[ t ]]) }}
+
+  | G ^ D :: M :: Intersect
+    {{ com Context intersection (non commutative) }}
+    {{ tex [[ G ]] \cap [[ D ]] }}
+
+  | G -< D :: M :: Subscontext
+    {{ com Subcontext }}
+    {{ tex [[ G ]] \subseteq [[ D ]] }}
+
+  | G - Uc :: M :: SubUc {{ com 'Subtract' usage context }} {{ tex [[ G ]] - [[ Uc ]] }}
+
+  | G ++- D :: M :: CtxtCombineSub
+  {{ com Context Combine Sub }}
+  {{ tex [[ G ]] \sqcap [[ D ]] }}
+
+  | G ++*- D :: M :: CtxtCombineSubMulti
+  {{ com Context Combine Sub }}
+  {{ tex [[ G ]] \sqcap ... \sqcap [[ D ]] }}
+
+  | G +++ D :: M :: CtxtCombineAdd
+  {{ com Context Combine Add }}
+  {{ tex [[ G ]] \sqcup [[ D ]] }}
+
+  | G ++*+ D :: M :: CtxtCombineAddMulti
+  {{ com Context Combine Add }}
+  {{ tex [[ G ]] \sqcup ...  \sqcup [[ D ]] }}
+
+  % probably deprecated
+  | types H  :: M :: GetTypes {{ com Extract typing context from typed heap }} {{ tex \mathsf{ty}( [[ H ]] ) }}
+
+
+  %% Grouping
+  | ( G ) :: M :: CtxtGroupI {{ com Explicit grouping }}
+  | { G } :: M :: CtxtGroupE {{ com Implicit grouping }} {{ tex [[ G ]] }}
+
+  % Restrictions
+  | Rest G1 G2               :: M :: Restrict
+  {{tex \restrict{[[G1]]}{[[G2]]} }}
+  | NRest G1 G2               :: M :: NRestrict
+  {{tex \nrestrict{[[G1]]}{[[G2]]} }}
+
+  % some differnt ways of subscripting!
+  | Ga :: M :: Gammaa {{ tex \Gamma_a }}
+  | Gb :: M :: Gammab {{ tex \Gamma_b }}
+
+  % indexing
+  | G @ { Ix } :: M :: GammaAtIndex {{ tex [[ G ]]_{[[ Ix ]]} }}
+
+
+CoeffInfo {{ tex \textit{r} :? \textit{R} }} :: 'MaybeCoeffectInformation_' ::=
+  | c : R :: :: JustCoeffTy {{ tex [[ c ]] }}
+  | none  :: :: NoneCoeffTy {{ tex - }}
+  | ( CoeffInfo ) :: :: Brackets
+  | Th CoeffInfo :: :: Subst {{ tex [[ Th ]][[ CoeffInfo ]] }}
+
+P {{ tex P }} :: 'Predicates_' ::=
+  | P1 & P2 :: :: And {{ tex [[ P1 ]] \wedge [[ P2 ]] }}
+  | P1 && Pn :: :: MultiAnd {{ tex [[ P1 ]] \wedge\!...\!\wedge [[ Pn ]] }}
+  | P1 || P2 :: :: Or {{ tex [[ P1 ]] \vee [[ P2 ]] }}
+  | P1 -> P2 :: :: Impl {{ tex [[ P1 ]] \rightarrow [[ P2 ]] }}
+  | forall a . P :: :: Universal {{ tex \forall [[ a ]] . [[ P ]] }}
+  | ! P :: :: Neg {{ tex \neg [[ P ]] }}
+  | exists a . P :: :: Exists {{ tex \exists [[ a ]] . [[ P ]] }}
+  | Comp1 = Comp2 :: :: Eq {{ tex [[ Comp1 ]] \equiv [[ Comp2 ]] }}
+  | Comp1 <= Comp2 :: :: Approx {{ tex [[ Comp1 ]] \sqsubseteq [[ Comp2 ]] }}
+  | True :: :: True {{ tex \top }}
+  | ( P ) :: :: Brackets
+  | { P } :: M :: Grouping {{ tex [[ P ]] }}
+  | interp Th :: :: SubstToPred {{ tex \llbracket{[[ Th ]]}\rrbracket }}
+  | interp Constraints :: :: ConstrToPred {{ tex \llbracket{[[ Constraints ]]}\rrbracket }}
+
+Comp {{ tex \mathbf{t} }} :: 'CompiledTerm_' ::=
+  | interp c :: :: Coeffect {{ tex \llbracket{\textcolor{coeffectColor}{[[ c ]]} }\rrbracket }}
+  | asCoeff A :: :: Type {{ tex \llbracket{\textcolor{coeffectColor}{[[ A ]] } }\rrbracket }}
+
+Th {{ tex \theta }} , Thk {{ tex \theta_\kappa }} :: 'SubstCtx_' ::=
+  | /. :: :: Empty {{ com Empty }} {{ tex \emptyset }}
+  | Th1 U Th2 :: :: Union {{ com Union }} {{ tex [[ Th1 ]] \uplus [[ Th2 ]] }}
+  | x |-> B  :: :: SingletonTy {{ com SingletonTy }}
+  | x |-> k  :: :: SingletonKind {{ com SingletonKind }}
+  | x |-> c  :: :: SingletonCoeff {{ com Singleton Coeffect }}
+  | ( Th ) :: M :: Brackets {{ com Brackets }}
+  | { Th } :: M :: MetaBracket {{ tex [[ Th ]] }}
+  | Th Th' :: :: SubstSubst
+      {{ com Substitution over a substitution }}
+      {{ tex [[ Th ]] [[ Th' ]] }}
+
+  | Th1 .*. Th2 :: :: MultiCompose {{ tex [[ Th1 ]] \uplus \ldots \uplus [[ Th2 ]] }}
+  | Th , Th' :: :: DisjointCat {{ com Disjoint cat }}
+
+  | Th \\ x :: :: RemoveSubst {{ com Remove a substition for a
+    variable }} {{ tex [[ Th ]] [[ \\ ]] [[ x ]] }}
+
+CostDict {{ tex \mathcal{C} }} :: 'ConstDict_' ::=
+  | x |-> c :: :: SingletonExt
+  | CostDict + CostDict' :: :: DictComb
+  | CostDict , CostDict' :: :: DictCat
+  | ( CostDict ) :: :: Brackets
+  | { CostDict } :: :: Meta {{ tex [[ CostDict ]] }}
+  | /../ :: :: Empty {{ tex \emptyset }}
+  | c * CostDict :: :: Scale {{ tex \textcolor{coeffectColor}{[[ c ]][[ * ]]}[[ CostDict ]] }}
+
+terminals :: 'terminals_' ::=
+  | <- :: :: larrow {{ tex \leftarrow }}
+  | -> :: :: rarrow {{ tex \rightarrow }}
+  | < :: :: ldiamond {{ tex \langle }}
+  | > :: :: rdiamond {{ tex \rangle }}
+  | -> :: :: lolli {{ tex \rightarrow }}
+  | \ :: :: lam {{ tex \lambda }}
+  | . :: :: empty {{ tex \emptyset }}
+  | case :: :: case {{ tex \textbf{case} }}
+  | forall :: :: forall {{ tex \forall }}
+  | == :: :: equiv {{ tex \equiv }}
+  | <= :: :: check {{ tex \Leftarrow }}
+  | => :: :: synthesise {{ tex \Rightarrow }}
+  | ==> :: :: implies {{ tex \implies }}
+  | |- :: :: entails {{ tex \vdash }}
+  | Bool :: :: bool {{ tex \mathbb{B} }}
+  | True :: :: true {{ tex \texttt{True} }}
+  | False :: :: false {{ tex \texttt{False} }}
+  | U :: :: union {{ tex \cup }}
+  | [] :: :: box {{ tex \Box }}
+  | <> :: :: diamond {{ tex \lozenge }}
+  | |-> :: :: mapsTo {{ tex \mapsto }}
+  | elem :: :: elem {{ tex \in }}
+  | \\ :: :: minus {{ tex \setminus }}
+  | * :: :: mult {{ tex \textcolor{coeffectColor}{\,\cdot\,} }}
+  | != :: :: notEq {{ tex \neq }}
+  | ~~> :: :: red {{ tex \rightarrow }}
+  | <<= :: :: approx {{ tex \textcolor{coeffectColor}{\sqsubseteq}  }}
+  | absent :: :: absent {{ tex \not\in }}
+  | |>  :: :: output {{ tex \rhd }}
+  | ~ :: :: unif {{ tex \sim }}
+  | OR :: :: Disj {{ tex \vee }}
+  | AND :: :: Conj {{ tex \wedge }}
+  | neg :: :: Not {{ tex \neg }}
+  | Flatten :: :: Flatten {{ tex \textsf{flatten} }}
+
+formula :: 'formula_' ::=
+ | judgement                  ::   :: judgement
+ | { formula }                 :: M :: metaBracker {{ tex [[ formula ]] }}
+ | A => formula               ::   :: impl {{ tex [[ A ]] \implies [[ formula ]] }}
+ | A1 & An => formula         ::   :: implMany {{ tex [[ A1 ]] \wedge \ldots \wedge [[ An ]] \implies [[ formula ]] }}
+ | formula1 && formula2       ::   :: Quad {{ tex [[ formula1 ]] \quad\;\; [[ formula2 ]] }}
+ | formula1 , ..,  formula2       ::   :: ManyFormula {{ tex [[ formula1 ]] \ ... \ [[ formula2 ]] }}
+ | formula1 /*\ formula2  ::   :: ManyConj {{ tex [[ formula1 ]] \wedge ... \wedge [[ formula2 ]] }}
+ | formula1 ==> formula2      ::   :: ImplFormula {{ tex [[ formula1 ]] \implies [[ formula2 ]] }}
+ {{tex [[formula1]] \quad\;\; [[formula2]] }}
+ | ( formula )                :: S :: parens
+ {{tex [[formula]] }}
+ %%
+ | x != y  :: :: NotEqIds
+ | [ t1 / x ] t2 , c :: M :: SubstAccounting
+ | c1 <= c2 :: :: ApproxLatticeDirection {{ tex [[c1]] \, {\leq} \, [[c2]] }}
+ | c1 <<= c2 :: :: Approx {{ tex [[c1]] \, \textcolor{coeffectColor}{\sqsubseteq} \, [[c2]] }}
+ | G <<= G' :: :: ApproxContext {{ tex [[ G ]]\ [[ <<= ]]\ [[ G' ]] }}
+ | A <: B :: :: SubType {{ tex [[ A ]] <: [[ B ]] }}
+
+ | Con : ( T , Th ) in Defines :: :: Constructor {{ tex ([[ Con ]] : ([[ T ]], [[ Th ]])) \in [[ Defines ]] }}
+ | Con : T in Defines :: :: ConstructorSimple {{ tex ([[ Con ]] : [[ T ]]) \in [[ Defines ]] }}
+ | x : T in Defines :: :: TopLevel {{ tex ([[ x ]] : [[ T ]]) \in [[ Defines ]] }}
+ | Ass in G :: :: Variable {{ tex ([[ Ass ]]) \in [[ G ]] }}
+ | G == G' :: :: CtxtEquals
+ | formula1 OR formula2 :: :: FormulaDisjunction {{ tex ( [[ formula1 ]] ) [[ OR ]] ( [[ formula2 ]] ) }}
+ | k == k' :: :: KindEq
+ | Flatten c1 R c2 S = ( c3 , R' ) :: :: Flatten {{ com Flatten }}
+       {{ tex \textsf{flatten}([[ c1 ]], [[ R ]], [[ c2 ]], [[ S ]]) =
+               ([[ c3 ]] , [[ R' ]]) }}
+ | assert A :: :: AssertAPredicate
+    {{ com Assert a predicate in declarative type }}
+    {{ tex [[ A ]] }}
+ | op in Ring :: :: RingOps {{ tex \mathsf{op} \!\in\! \{ + , *, \sqcap, \sqcup \} }}
+ | op in Boolean :: :: BooleanOps {{ tex \mathsf{op} \!\in\! \{ \leq , =
+ , \neq \} }}
+ | E in Set A B :: :: TySetF {{ tex [[ E ]] \!\in\! \{ [[ A ]] , ..., [[ B ]] \} }}
+ | cardinality A = 1 :: :: Cardinality {{ tex \mathsf{cardinality} \; [[ A ]]  \equiv 1 }}
+ | x notin FV( p ) :: :: NoBinder {{ tex [[ x ]] \not\in \mathsf{FV}([[ p ]]) }}
+ | FV( t ) :: :: FreeVars {{ tex \mathsf{FV}( [[ t ]] ) }}
+ | vars t = CostDict :: :: VarsDict {{ tex \mathsf{FV}([[ t ]]) \leadsto [[ CostDict ]] }}
+ | R /= S :: :: CoeffectTypeNeq {{ tex [[ R ]] \neq [[ S ]] }}
+ | | A | == 1 :: :: MonoShape {{ tex | [[ A ]] | = 1 }}
+ | | A | > 1 :: :: Polyshape {{ tex | [[ A ]] | > 1 }}
+ | PolyCon A q1 qn r :: :: PolyCondition {{ tex | [[ A ]] | > 1 \Rightarrow 1 \sqsubseteq ([[ q1 ]] \sqcup ... \sqcup [[ qn ]]) \cdot [[ r ]]    }}
+  | PolyConSimple A r :: :: PolyConditionSimple {{ tex | [[ A ]] | > 1 \Rightarrow 1 \sqsubseteq [[ r ]] }}
+ | No  H |- t |> p :: :: NoMatch {{ tex [[ H ]] \vdash [[ t ]] \not\rhd [[ p ]] }}
+ | No  H |- t |> p ~> :: :: NoMatchStep {{ tex [[ H ]] \vdash [[ t ]] \rhd [[ p ]] \not\leadsto }}
+ | Yes H |- t |> p :: :: YesMatch {{ tex [[ H ]] \vdash [[ t ]] \rhd [[ p ]] }}
+ | Yes ( i <= Ix ) H |- t |> p :: :: YesMatchUpTo {{ tex [[ H ]] \vdash [[ t ]] \rhd [[ p ]] \;\; (i \leq [[ Ix ]]) }}
+ | ifthen G1 G2 c1 c2 :: :: IfPredicate {{ tex \text{if} \ [[ G1 ]]  \in  [[ G2 ]] \ \text{then} \ [[ c1 ]] \sqsubseteq [[ c2 ]] \ \text{else} \ 0 \sqsubseteq [[ c2 ]] }}
+ | G1 in G2 :: :: In {{ tex [[ G1 ]] \in [[G2]] }}
+
+ | exists c . Rel :: :: existRel {{ tex \exists [[ c ]] .\, [[ Rel ]] }}
+
+ | If G Gi Di :: :: If {{ tex \text{if} \ i > 1 \ \text{then} \ [[ Gi ]] = [[ Di ]] \ \text{else} \ [[Gi]] = [[G]] }}
+ | IfThenElse formula1 formula2 formula3 :: :: IfThenElse {{ tex \text{if} \ [[formula1]] \ \text{then} \ [[formula2]] \ \text{else}\ [[formula3]] }}
+
+ | ( Con : A1 .*. An -> B ) elem Defines :: :: NArityConstrTy {{ tex ( [[ Con ]] : [[ A1 ]]^1 \rightarrow ... \rightarrow [[ An ]]^1 \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
+ | ( Con : A1 - c1 .*. An - cn -> B ) elem Defines :: :: NArityConstrTyCoeffects {{ tex ( [[ Con ]] : [[ A1 ]]^[[ c1 ]] \rightarrow ... \rightarrow [[ An ]]^[[ cn ]] \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
+ | ( Con : A1 -* c1 .*. An -* cn -> B ) elem Defines :: :: NArityConstrTyCoeffects' {{ tex ( [[ Con ]] : [[ A1 ]]^{q_1^i} \rightarrow ... \rightarrow [[ An ]]^{q_n^i} \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
+ | ( Null Con : B ) elem Defines :: :: NullConstrTy {{ tex ( [[ Con ]] : [[ B ]] ) \in [[ Defines ]] }}
+
+
+ | minimal( i )  :: :: Minimality {{ tex \textsf{minimal}( [[ i ]] ) }}
+
+ | t1 ~>* t2 :: :: Multistep {{ tex [[ t1 ]] \leadsto^\ast [[ t2 ]] }}
+ | A = B orAtomic :: :: RAsyncFocus {{ tex [[ A ]] = [[ B ]]\ \lor \textsc{atomic}([[ A ]]) }}
+ | ifdecreasing G A G' O :: :: IfDecPredicate {{ tex \text{if}\ \textsc{decr}([[ A ]]) \ \text{then} \ [[ G' ]] , [[ G ]] \ \text{else} \ [[O ]] , [[ G]] }}
+ | lAsyncPred A1 A2 A3 A4 :: :: lAsyncPredicate {{ tex [[ A1 ]] = [[ A2 ]] \lor [[ A3 ]] \lor [[ A4 ]] \lor \textsc{atomic}([[ A1 ]]) }}
+ | focusRPred A1 A2 A3 :: :: focusRPred {{ tex [[ A1 ]] = [[ A2 ]] \lor [[ A3 ]] }}
+ | blurRPred A1 A2 A3 :: :: blurRRed {{ tex [[ A1 ]] = [[ A2 ]] \lor [[ A3 ]] \lor \textsc{atomic}([[ A1 ]]) }}
+ | blurLPred A1 A2 A3 :: :: blurLPred {{ tex [[ A1 ]] = [[ A2 ]] \lor [[ A3 ]] }}
+ | IfDecr A1 A2 :: :: IfDecr {{ tex \text{if}\ \textsc{decr}([[ A1 ]])\ \text{then} \ [[A1]] = [[A2]] \ \text{else} \ [[ A1 ]] = [[ A1 ]] }}
+ | IfZero c1 c2 :: :: IfZero {{ tex  \text{if}\ [[ c1 ]] = 0 \ \text{then} \ 0 \sqsubseteq [[c2]] }}
+ | IfZeroMany c1 c2 c3 :: :: IfZeroMany {{ tex  \text{if}\ [[ c1 ]] = 0 \ \lor ... \lor [[ c2 ]] = 0 \ \text{then} \ 0 \sqsubseteq [[c3]] }}
+ | IfOneIndent c1 c2 :: :: IfOneIndent {{ tex  \hspace{2em} \text{if}\ [[ c1 ]] = 1 \ \text{then} \ 0 \sqsubseteq [[c2]] }}
+ | outputUsageIndent c1 G1 G2 Ix :: :: OutputUsageIndent {{ tex \hspace{2em} [[ c1 ]] = \textbf{outputUsage} ([[G1]] , [[G2]] , [[Ix]] ) }}
+ | outputUsage c1 G1 G2 Ix :: :: OutputUsage {{ tex [[c1]] = \textbf{outputUsage} ([[G1]] , [[G2]] , [[Ix]] ) }}
+ | IfApp G1 G2 G3 G4 c :: :: IfApp {{ tex \text{if}\ [[ G1 ]] \notin [[ G2 ]] \wedge [[ G3 ]] \notin [[G4]] \ \text{then} \ 0 \sqsubseteq [[c]] \ \text{else}  }}
+ | assn c1 c2 :: :: Assign {{ tex [[ c1 ]] = [[ c2 ]]  }}
+ | Ix = Size A :: :: SizeAssertion {{ tex [[ Ix ]] = | [[ A ]] | }}
+
+defns
+  Judgements :: '' ::=
+
+
+defn
+G |- t : A :: :: checkMiniDecl :: 'Ty'
+{{ tex [[ G ]] \vdash [[ t ]] : [[ A ]] }}
+{{ com \section{Typing} }}
+
+by
+
+--------------- :: Var
+{ 0 * G }, x : [A] 1 |- x : A
+
+
+G, x : [A] r |- t : B
+------------------------- :: Abs
+G |- \x . t : A ^ r -> B
+
+G1 |- t1 : A ^ r -> B  && G2 |- t2 : A
+---------------------------------------- :: App
+G1 + r * G2 |- t1 t2 : B
+
+( Con : B1 - q1 .*. Bn - qn -> {K {A Many}} ) elem Defines
+---------------------------- :: Con
+0 * G |- Con . : {B1 - r1 .*. Bn - rn -> {K {A Many}}}
+
+G |- t : A
+---------------------------- :: Pr
+r * G |- [ t ] : [] r A
+
+
+G, x : [A] r, G' |- t : B  &&  r <<= s
+----------------------------------------- :: Approx
+G, x : [A] s, G' |- t : B
+
+(G |- t : A   &&  r |- pi : A |> Di)   && G' , Di |- ti : B
+------------------------------------------------------------------ :: Case
+{r * G}  + G' |- case t of p1 -> t1 ; * ; pn -> tn : B
+
+
+defn
+c |- p : A |> G :: :: patternTyping :: 'Pat'
+{{ com Declarative pattern checking for Granule Mini (monomorphic) }}
+{{tex [[ c ]] \vdash \, [[ p ]] : [[ A ]] \, \rhd \, [[ G ]] }}
+by
+
+0 <<= r
+------------------------------------------------------------------------------ :: Wild
+r |- _ : A |> .
+
+----------------------------------------------------------------------- :: Var
+r |- p : A |> x : [ A ] r
+
+r * s |- p : A |> G
+------------------------------------------------------------------------------ :: Box
+r |- [ p ] : [] s A |> G
+
+
+
+
+( Con : B1 - q1 .*. Bn - qn -> {K {A Many}} ) elem Defines
+qi * r |- pi : Bi |> Gi && {PolyConSimple {K {A Many}} r}
+------------------------------------------------------------------------------------------------ :: Con
+r |- Con p1 ... pn : {K {A Many}} |> BigCat Gi
+
+%%( Con : B1 - q1 .*. Bn - qn -> {K {A Many}} ) elem Defines
+%%qi * r |- pi : Bi |> Gi && |A| == 1
+%%------------------------------------------------------------------------------------------------ :: ConMono
+%%(q1 \*/ qn) * r  |- Con p1 ... pn : A |> BigCat Gi
+
+
+
+defn
+G1 |- A =>- t | G2 :: :: synthesiseSub :: 'Sub'
+{{ tex [[ G1 ]] \vdash [[ A ]] \Rightarrow^{-} [[ t ]]\ |\ [[ G2 ]] }}
+by
+
+%%by
+%%
+%%exists q . r >= c + q
+%%------------------------- :: Var
+%%G, x : [A] r |-^ c A =>- t ; G, x : [A] q
+%%
+%%
+%%G, x : [A] q |-^ c B =>- t ; D, x : [A] r && 0 <<= r
+%%------------------------- :: Abs
+%%G |-^ c {A ^ q -> B} =>- \ x ^ q . t ; D
+%%
+%%
+%%
+%%
+%%exists r2 . r1 >= c + r2
+%%G, x1 : [ A ^ q -> B ] r2, x2 : [B] r3 |-^ c C =>- t1 ; D1, x1 : [A ^ q -> B] r4, x2 : [B] r5
+%%D1, x1 : [ A ^ q -> B ] r4 |-^ {q * c} A =>- t2 ; D2, x1 : [A ^ q -> B] r6
+%%exists r7 . r >= r7 + {r6 * r5}
+%%------------------------------------------------------- :: App
+%%G, x1 : [ A ^ q -> B ] r1 |-^ c C =>- {[ ( x1 t2 ) / x2 ] t1} ; D2, x1 : [A ^ q -o B] r7
+%%
+%%
+%%G |-^ {r * c} A =>- t ; D
+%%--------------------------------- :: Prom
+%%G |-^ c {[] r A} =>- [ t ] ; D
+%%
+%%
+%%
+%%( Con : B1 .*. Bn -> {K A} ) elem Defines
+%%If G Gi Di-1
+%%Gi |-^ c Bi =>- ti ; Di
+%%--------------------------------- :: Con
+%%G |-^ c A =>- Con t1 ... tn ; D
+%%
+%%
+%%
+%%exists {r Vari Var2} . r1 >= c + {r Vari Var2} && ( Coni : B1 - q1 .*. Bn - qn -> {K A2} ) elem Defines
+%%{ { G, x : [ {K A1} ] {r Vari Var2} }, {y Vari Var1} : [B1] {r1 * q1} } , .M. , {y Vari Varn} : [Bn] {r1 * qn} |-^ c A2 =>- ti ; {{Di, x : [K A] {r Vari Var3}}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+%%exists {r Vari Var4} . r1 >= {r Vari Var4} + {{r Vari Var3} * ({s Vari Var1} /*\ {s Varn Var1})}
+%%--------------------------------- :: Case
+%%G, x : [ {K A1} ] r1 |-^ c A2 =>- case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A1}  ] { {r Var1 Var4} /*\ {r Varn Var4} }
+%%
+%%
+%%%%( Coni : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
+%%%%{G, {y Vari Var1} : [B1] {r * r1} } , .M. , {y Vari Varn} : [Bn] {r * rn} |-^ c B' =>- ti ; {Di, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+%%%%%% {0 <<= {s Vari Var1}, ..,  0 <<= {s Vari Varn}} && {exists q . {r >= {q + c}}}
+%%%%--------------------------------- :: Case
+%%%%G, x : [ {K A} ] r |-^ c B' =>- case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A}  ] { {s Vari Vari} /*\ {s Varn Varn} }
+%%
+%%%( Coni : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
+%%%{ { G, x : [ {K A} ] {q} }, {y Vari Var1} : [B1] {r1} } , .M. , {y Vari Varn} : [Bn] {rn} |-^ c B' =>- ti ; {{Di, x : [K A] r}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+%%%{0 <<= {s Vari Var1}, ..,  0 <<= {s Vari Varn}} && exists r . q >= c + r
+%%%--------------------------------- :: Case
+%%%G, x : [ {K A} ] q |-^ c B' =>- case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A}  ] { r }
+%%
+%%%( Coni : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
+%%%{ { G}, {y Vari Var1} : [B1] {r * r1} } , .M. , {y Vari Varn} : [Bn] {r * rn} |-^ c B' =>- ti ; {{Di}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+%%%{0 <<= {s Vari Var1}, ..,  0 <<= {s Vari Varn}}
+%%%--------------------------------- :: Case2
+%%%G, x : [ {K A} ] q |-^ c B' =>- case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A}  ] { 0 }
+%%
+%%%( Coni : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
+%%%{ { G}, {y Vari Var1} : [B1] {r * r1} } , .M. , {y Vari Varn} : [Bn] {r * rn} |-^ c B' =>- ti ; {{Di}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+%%%--------------------------------- :: Case3
+%%%G, x : [ {K A} ] q |-^ c B' =>- case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A}  ] { {s Vari Varn} /*\ {s Vari Varn} }
+%%
+%%
+%%
+%%%%G, y : [ A ] { r * q } |-^ c B =>- t ; D, y : [ A ] s
+%%%%ifthen {y : [ A ] s} D s {r * q}
+%%%%exists r' . s >= r * q
+%%%%--------------------------------- :: CaseUnbox
+%%%%G, x : [ [] q A ] r |-^ c B =>- case x of [ y ] -> t ; D, x : [ [] q A ] r'
+%%
+%%exists s . r1 >= c + r2
+%%G, x : [ [] q1 A ] {r2}, y : [ A ] { r1 * q1 }  |-^ c B =>- t ; D, x : [ [] q1 A ] {r3}, y : [ A ] q2
+%%exists r4 . r1 >= r4 + (r3 * q2)
+%%--------------------------------- :: Unbox
+%%G, x : [ [] q1 A ] r1 |-^ c B =>- case x of [ y ] -> t ; D, x : [ [] q1 A ] r4
+
+
+defn
+G |- A =>+ t ; D :: :: SynthesiseAdd :: ''
+{{ tex [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]] }}
+
+by
+
+
+------------------------- :: Var
+G, x : [A] r |- A =>+ x ; {0 * G}, x : [A] 1
+
+
+G, x : [A] q |- B =>+ t ; D, x : [A] r && r <<= q
+---------------------------------------------------- :: Abs
+G |- {A ^ q -> B} =>+ \ x ^ q . t ; D
+
+
+G, x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 |- C =>+ t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
+G, x1 : [ A ^ q -> B ] r1 |- A =>+ t2 ; D2, x1 : [ A ^ q -> B ] s3
+------------------------------------------------------- :: App
+G, x1 : [ A ^ q -> B ] r1 |- C =>+ {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -o B] {s2 + {s1 + {(s2 * {q * s3})}}}
+
+
+G |- A =>+ t ; D
+--------------------------------- :: Box
+G |- {[] r A} =>+ [ t ] ; r * D
+
+
+
+( Con : B1 - q1 .*. Bn - qn -> {K {A Many}} ) elem Defines
+G |- Bi =>+ ti ; Di
+--------------------------------- :: Con
+G |- K {A Many} =>+ Con t1 ... tn ; {0 * G} + {(q1 * D1) + ... + (qn * Dn)}
+
+
+
+( Con : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
+G, x :  [B1 - r1 .*. Bn - r1 -> {K A} ] 1 |- A1 =>+ t ; D, x : [B1 - r1 .*. Bn - r1 -> {K A} ] 1
+------------------------------------------------------- :: ConAlt
+G |- A1 =>+ t ; D
+
+
+( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
+{ {G, x : [K A] {r}}, {y Vari Var1} : [B1] {{q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {{q Vari Varn}} |- B =>+ ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+{s Vari Varj} <<= {q Vari Varj}
+assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
+--------------------------------- :: Case
+G, x : [ {K A} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s} \*/ {Varn s})}}
+
+
+( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
+{ {G, x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B =>+ ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj}
+assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}}
+{PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}}
+--------------------------------- :: CaseAlt
+G, x : [ {K {A Many}} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}
+
+
+( Coni : B1 -* q1 .*. Bn -* qn -> {K A} ) elem Defines
+{ {G, x : [K A] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}}} , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B =>+ ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
+assn {Vari q} {{q Vari Var1} \*/ {q Vari Varn}}
+exists {Vari s'} . {Vari s} <= {Vari s'} * {Vari q} <= r * {Vari q}
+--------------------------------- :: CaseAltAlt
+G, x : [ {K A} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s'} \*/ {Varn s'})}}
+
+
+G, y : [ A ] { r * q }, x : [ [] q A ] r |- B =>+ t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2
+% s1 <<= {r * q}
+exists s3 . s1 <= {s3 * q} <= {r * q}
+--------------------------------- :: Unbox
+G, x : [ [] q A ] r |- B =>+ case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2}
+
+
+
+( Coni : B1 - q1 .*. Bn - qn -> {K A} ) elem Defines
+{ { G, x : [ {K A} ] {r} }, {y Vari Var1} : [B1] {r * q1} } , .M. , {y Vari Varn} : [Bn] {r * qn} |- B =>+ ti ; {{Di, x : [K A] {r Vari Var1}}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+exists {r Vari Var2} . r >= {r Vari Var2} + {{r Vari Var1} * ({s Vari Var1} /*\ {s Varn Var1})}
+--------------------------------- :: CaseSub
+G, x : [ {K A} ] r1 |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A}  ] { {r Var1 Var2} /*\ {r Varn Var2} }
+
+
+
+defn
+G ; O |- A async => t ; D :: :: RASynFocus :: ''
+{{ tex [[ G ]] ; \Omega \vdash [[ A ]] \Uparrow \Rightarrow [[ t ]] \mid [[ D ]] }}
+
+by
+
+G ; O, x : [A] q |- B async => t ; D, x : [A] r && r <<= q
+---------------------------------------------------- :: AbsF
+G ; O |- {A ^ q -> B} async => \ x ^ q . t ; D
+
+
+defn
+G ; O async |- A => t ; D :: :: LASynFocus :: ''
+{{ tex [[ G ]] ; [[ O ]] \Uparrow \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]] }}
+
+by
+
+( Coni : B1 - q1 .*. Bn - qn -> {K A} ) elem Defines
+G ; {{{O, x : [K A1] {r}}, {y Vari Var1} : [B1] {q1} } , .M. , {y Vari Varn} : [Bn] {qn}} async |- B => ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+{s Vari Varj} <<= qj
+assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
+--------------------------------- :: CaseF
+G ; {O, x : [ {K A} ] r} async |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s} \*/ {Varn s})}}
+
+
+G ; {O, y : [ A ] { r * q }, x : [ [] q A ] r} async |- B => t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2
+% s1 <<= {r * q}
+exists s3 . s3 * q <= s1
+--------------------------------- :: UnboxF
+G ; {O, x : [ [] q A ] r} async |- B => case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2}
+
+
+
+defn
+G |- A sync => t ; D :: :: RSSynFocus :: ''
+{{ tex [[ G ]] \vdash [[ A ]] \Downarrow [[ t ]] \mid [[ D ]] }}
+
+by
+
+G |- A sync => t ; D
+--------------------------------- :: BoxF
+G |- {[] r A} sync => [ t ] ; r * D
+
+
+( Con : B1 .*. Bn -> {K A} ) elem Defines
+G |- Bi sync => ti ; Di
+--------------------------------- :: ConF
+G |- {K A} sync => Con t1 ... tn ; {D1 + ... + Dn}
+
+
+
+defn
+G ; O sync |- A => t ; D :: :: LSSynFocus :: ''
+{{ tex [[ G ]] ; [[ O ]] \Downarrow \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]] }}
+
+by
+
+------------------------- :: VarF
+G ; x : [A] r sync |- A => x ; {0 * G}, x : [A] 1
+
+G ; {x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 } sync |- C => t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
+G ; x1 : [ A ^ q -> B ] r1 sync |- A => t2 ; D2, x1 : [ A ^ q -> B ] s3
+------------------------------------------------------- :: AppF
+G ; x1 : [ A ^ q -> B ] r1 sync |- C => {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -o B] {s2 + {s1 + {(s2 * {q * s3})}}}
+
+
+
+
+
+%G ; O, x : [ A ] r |-^ s . ; B =>+ Sync t ; D
+%------------------------- :: FocusL
+%G, x : [A] r ; O |-^ s . ; B =>+ Async t ; D
+
+
+%G ; . |-^ s . ; B =>+ Sync t ; D
+%focusRPred A (K A) ([] r A)
+%------------------------- :: FocusR
+%G ; . |-^ s . ; B =>+ Async t ; D
+
+
+
+
+%%defn
+%%G ; O |-^ c A ; B =>- Foc t ; D :: :: subFocus :: 'SubF'
+%%{{ tex [[ G ]] ; [[ O ]] \vdash_{[[ c ]]} [[ A ]] ; [[ B ]] \xRightarrow[-]{[[ Foc ]]} [[ t ]] ; [[ D ]] }}
+%%{{ com \section{Sub Focus} }}
+%%
+%%by
+%%
+%%
+%%G ; O, x : [A] q |-^ s B ; . =>- Async t ; D, x : [A] r && 0 <<= r
+%%------------------------- :: Abs
+%%G ; O |-^ s {A ^ q -> B} ; . =>- Async \ x ^ q . t ; D
+%%
+%%
+%%G ; O |-^ s . ; A =>- Async t ; D
+%%(A = {K A} orAtomic  )
+%%------------------------- :: R
+%%G ; O |-^ s A ; . =>- Async t ; D
+%%
+%%
+%%( Coni : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
+%%{ifdecreasing {{y Vari Var1} : [B1] {r1}} B1 G O}, .., {ifdecreasing {{y Vari Varn} : [Bn] {rn}} Bn G O}
+%%{ G, x : [ {K A} ] {q} } ; O |-^ c . ; B0 =>- Async ti ; {{Di, x : [K A] r}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+%%{0 <<= {s Vari Var1}, ..,  0 <<= {s Vari Varn}} && exists r . q >= c + r
+%%------------------------- :: Case
+%%G ; O, x : [ {K A} ] q |-^ c . ; B0 =>- Async {case x of Coni Var1 Varn Vari y y -*> ti} ; D
+%%
+%%
+%%G ; y : [ A ] { r * q } |-^ c . ; B =>- Async t ; D, y : [ A ] q'
+%%0 <<= q'
+%%--------------------------------- :: Unbox
+%%G ; x : [ [] q A ] r |-^ c . ; B =>- Async case x of [ y ] -> t ; D, x : [ [] q A ] 0
+%%
+%%
+%%G, x : [ A ] r  ; O |-^ s . ; A =>- Async t ; D
+%%lAsyncPred A {(K A) Dec} (A ^ q -> B) ([] r A)
+%%------------------------- :: LL
+%%G ; O, x : [ A ] r |-^ s B ; . =>- Async t ; D
+%%
+%%
+%%G ; O, x : [ A ] r |-^ s . ; B =>- Sync t ; D
+%%------------------------- :: FocusL
+%%G, x : [A] r ; O |-^ s . ; B =>- Async t ; D
+%%
+%%
+%%G ; . |-^ s . ; B =>- Sync t ; D
+%%focusRPred A (K A) ([] r A)
+%%------------------------- :: FocusR
+%%G ; . |-^ s . ; B =>- Async t ; D
+%%
+%%
+%%( Con : B1 .*. Bn -> {K A} ) elem Defines
+%%If G Gi Di-1
+%%IfDecr Bi {Bi Dec}
+%%Gi ; . |-^ s Bi ; . =>- Sync ti ; Di
+%%--------------------------------- :: Con
+%%G ; . |-^ s {K A} ; . =>- Sync {Con t1 ... tn} ; D
+%%
+%%
+%%G ; . |-^ {r * s} A ; . =>- Sync t ; D
+%%--------------------------------- :: Prom
+%%G ; . |-^ s {[] r A} ; . =>- Sync [ t ] ; D
+%%
+%%
+%%G ; . |-^ s A ; . =>- Async t ; D
+%%blurRPred A (K A) Dec (A ^ q -> B)
+%%------------------------- :: BlurR
+%%G ; . |-^ s A ; . =>- Sync t ; D
+%%
+%%
+%%G ; x2 : [B] r |-^ s . ; C =>- Sync t1 ; D1, x2 : [B] r'
+%%0 <<= r' && D1 ; . |-^ {q * s} A ; . =>- Sync t2 ; D2
+%%------------------------------------------------------- :: App
+%%G ; x1 : [ A ^ q -> B ] r |-^ s . ; C =>- Sync {[ ( x1 t2 ) / x2 ] t1} ; D2, x1 : [A ^ q -o B] r'
+%%
+%%G ; x1 : [A ^ q -> B ] r',  x2 : [B] r |-^ s . ; C =>- Sync t1 ; D1, x2 : [B] r''
+%%if x1 : [A ^ q -> B] r''' in D1 then 0 <<= r''' /\ r'' else
+%%D1 / x1 ; . |-^ {q * s} A ; . =>- Sync t2 ; D2
+%%------------------------------------------------------- :: App2
+%%G ; x1 : [ A ^ q -> B ] r |-^ s . ; C =>- Sync {[ ( x1 t2 ) / x2 ] t1} ; D2, x1 : [A ^ q -o B] r'
+%%
+%%
+%%exists q . r >= s + q
+%%------------------------- :: Var
+%%G ; x : [A] r |-^ s . ; A =>- Sync t ; G, x : [A] q
+%%
+%%
+%%G ; x : [A] r |-^ s . ; B =>- Async t ; D
+%%blurLPred A (K A) ([] r A)
+%%------------------------- :: BlurL
+%%G ; x : [A] r |-^ s . ; B =>- Sync t ; D
+%%
+%%
+%%
+%%
+%%defn
+%%G ; O |-^ c A ; B =>+ Foc t ; D :: :: addFocus :: 'AddF'
+%%{{ tex [[ G ]] ; [[ O ]] \vdash_{[[ c ]]} [[ A ]] ; [[ B ]] \xRightarrow[+]{[[ Foc ]]} [[ t ]] ; [[ D ]] }}
+%%{{ com \section{Add Focus} }}
+%%
+%%by
+%%
+%%
+%%G ; O, x : [A] q |-^ s B ; . =>+ Async t ; D && ifthen {x : [A] r } D r q
+%%------------------------- :: Abs
+%%G ; O |-^ s {A ^ q -> B} ; . =>+ Async \ x ^ q . t ; D \ x
+%%
+%%
+%%G ; O |-^ s . ; A =>+ Async t ; D
+%%(A = {K A} orAtomic  )
+%%------------------------- :: R
+%%G ; O |-^ s A ; . =>+ Async t ; D
+%%
+%%
+%%( Coni : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
+%%{ifdecreasing {{y Vari Var1} : [B1] {r * r1}} B1 G O}, .., {ifdecreasing {{y Vari Varn} : [Bn] {r * rn}} B1 G O}
+%%G, x : [ {K A} ] r ; O |-^ c . ; B' =>+ Async ti ; Di
+%%(ifthen { {y Vari Var1} : [B1] {s Vari Var1}} Di {s Vari Var1} {r * r1}) /*\  (ifthen { {y Vari Varn} : [Bn] {s Vari Varn}} Di {s Vari Varn} {r * rn})
+%%--------------------------------- :: Case
+%%G ; x : [ {K A} ] r |-^ c . ; B' =>+ Async case x of Coni Var1 Varn Vari y y -*> ti ; ((D1 \* {y Var1 Var1} {y Var1 Varn}) ++*+ (Dn \* {y Varn Var1} {s Varn Varn})), {x : [ {K A} ] r}
+%%
+%%
+%%G ; y : [ A ] { r * q }, x : [ [] q A ] r |-^ c . ; B =>+ Async t ; D
+%%ifthen {y : [ A ] s'} D {s'} {r * q}
+%%exists r' . s' <= r' * q <= r * q
+%%--------------------------------- :: Unbox
+%%G ; x : [ [] q A ] r |-^ c . ; B =>+ Async case x of [ y ] -> t ; D + x : [ [] q A ] r'
+%%
+%%
+%%G, x : [ A ] r ; O |-^ s . ; A =>+ Async t ; D
+%%lAsyncPred A {(K A) Dec} (A ^ q -> B) ([] r A)
+%%------------------------- :: LL
+%%G ; O, x : [ A ] r |-^ s B ; . =>+ Async t ; D
+%%
+%%
+%%G ; O, x : [ A ] r |-^ s . ; B =>+ Sync t ; D
+%%------------------------- :: FocusL
+%%G, x : [A] r ; O |-^ s . ; B =>+ Async t ; D
+%%
+%%
+%%G ; . |-^ s . ; B =>+ Sync t ; D
+%%focusRPred A (K A) ([] r A)
+%%------------------------- :: FocusR
+%%G ; . |-^ s . ; B =>+ Async t ; D
+%%
+%%
+%%( Con : B1 .*. Bn -> {K A} ) elem Defines
+%%IfDecr Bi {Bi Dec}
+%%G ; . |-^ s Bi ; . =>+ Sync ti ; Di
+%%--------------------------------- :: Con
+%%G ; . |-^ s {K A} ; . =>+ Sync Con t1 ... tn ; {D1 + ... + Dn}
+%%
+%%
+%%G ; . |-^ {r * s} A ; . =>+ Sync t ; D
+%%--------------------------------- :: Prom
+%%G ; . |-^ s {[] r A} ; . =>+ Sync [ t ] ; D
+%%
+%%
+%%G ; . |-^ s A ; . =>+ Async t ; D
+%%blurRPred A (K A) Dec (A ^ q -> B)
+%%------------------------- :: BlurR
+%%G ; . |-^ s A ; . =>+ Sync t ; D
+%%
+%%
+%%G ; x2 : [B] r |-^ s . ; C =>+ Async t1 ; D1 && G ; . |-^ {q * s} A ; . =>+ Async t2 ; D2
+%%ifthen {x2 : [B] r'} D1 r' r
+%%------------------------------------------------------- :: App
+%%G ; x1 : [ A ^ q -> B ] r |-^ s . ; C =>+ Async {[ ( x1 t2 ) / x2 ] t1} ; ({D1 \ x2} + D2), x1 : [A ^ q -o B] r'
+%%
+%%
+%%------------------------- :: Var
+%%G ; x : [A] r |-^ s . ; A =>+ Sync t ; G, x : [A] s
+%%
+%%
+%%G ; x : [A] r |-^ s . ; B =>+ Async t ; D
+%%blurLPred A (K A) ([] r A)
+%%------------------------- :: BlurL
+%%G ; x : [A] r |-^ s . ; B =>+ Sync t ; D

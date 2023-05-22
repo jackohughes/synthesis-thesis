@@ -1,0 +1,343 @@
+\jnote{Try to outline the approach of the background - the focus is on
+  introducing the two languages: graded and linear base. Why do we need two languages? What is the
+  difference between them? What do we use each language for in synthesis - i.e.
+  why do we decide to do the initial calculus in the linear base and then shift
+  to the graded base for the more advanced stuff?}
+This chapter provides the background material necessary for understanding the
+design of synthesis calculi. This is done primarily by formally introducing two programming languages
+which include resourceful types. Language features, and concepts, are explained
+as they arise. We begin with an outline of linear and graded
+types themselves, briefly charting their origins from linear logic and bounded
+linear logic. Following this, two languages are presented which make use of
+these resourceful types in different ways. These two languages will become the
+bases of the target languages of two synthesis calculi in subsequent chapters.
+
+
+
+\jnote{How much detail should be provided here? It's very likely that we will
+  cover a brief history of graded type systems (from linear logic to graded
+  modal types) in the intro. So should we use this space to go into further
+  detail? Or cut it here and leave it in the intro}
+\paragraph{Linear types}
+
+
+
+\paragraph{Graded types}
+
+
+\jnote{possibly doesn't need to be its own section}
+\section{Two target languages}
+When designing a type-directed synthesis tool, a natural first consideration would be
+the \textit{target} language of synthesis: what programming language
+will synthesised programs be written in? What types will be used to specify a
+desired program?
+If we strip away all but the most essential language elements that we wish to
+include in our target language, a good starting point would be the simply typed
+linear $\lambda$-calculus, extended with a graded modal type. The linear
+$\lambda$-calculus has the same syntax as the standard simply typed $\lambda$
+calculus only with the structural rules of weakening and contraction
+prohibited, making terms which express non-linear behaviour ill-typed.
+
+
+This calculus is equivalent to the core calculus Granule,
+\textsc{GrMini}\cite{}. Granule's full type system is an extension of this
+graded linear core, introducing (G)ADTs and recurison.
+
+For this chapter we concern ourselves only with the $\lambda$-calculus core.
+In subsequent chapters these calculi will be extended further to become more
+full-fledged programming languages.\jnote{How?}
+
+
+
+An alternative approach is to replace this underlying linear system  with a
+\textit{graded} $\lambda$-calculus.
+
+In this system, function types are augmented with a grade: $\GRANULEnt{A} ^ \GRANULEnt{r}  \rightarrow  \GRANULEnt{B}$
+which desrcibes how the value of the argument type may be used in the body of
+the function. This approach more closely resembles the graded systems of
+\jnote{list some systems here, linear haskell, QTT, etc.}.
+
+The different approaches to graded types here gives rise to the question: how might the
+features of the target language influence the design of a synthesis tool?
+
+\jnote{It's still not clear why we choose these two languages - or why we choose
+two languages at all instead of focusing on one, possibly need to come up with a
+better justification}
+
+The two approaches are now outlined formally in turn, beginning with the
+linear-base calculus.
+
+\subsection{Linear-base}
+\label{sec:linear-base}
+The types of the graded linear $\lambda$-calculus are defined as:
+\begin{align*}
+\hspace{-0.9em}\GRANULEnt{A} , \GRANULEnt{B} & ::=
+       \GRANULEnt{A} \multimap \GRANULEnt{B}
+  \mid \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}
+{\small{\tag{types}}}
+\end{align*}
+The type $\Box_{r} A$ is an indexed family of type operators where $r$ is a
+\textit{grade} ranging over the elements of a pre-ordered semiring
+$({\mathcal{R}}, {*}, {1}, {+}, {0},
+{\sqsubseteq})$ parameterising the calculus (where $\ast$ and $+$
+are monotonic with respect to the pre-order $\sqsubseteq$).
+
+The syntax of terms provides the elimination and introduction forms:
+\begin{align*}
+\hspace{-0.8em} \GRANULEnt{t} ::= \;
+       & \GRANULEmv{x}
+  \mid \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}
+  \mid \GRANULEnt{t_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}
+  \mid \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}
+  \mid \textbf{let} \, [  \GRANULEmv{x}  ] =  \GRANULEnt{t_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}
+{\small{\tag{terms}}}
+\end{align*}
+In addition the the terms of the linear $\lambda$-calculus, we also have the
+construct $\GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}$ which introduces a graded modal type $\Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}$ by `promoting' a term $t$ to the graded modality, and it's dual $\textbf{let} \, [  \GRANULEmv{x}  ] =  \GRANULEnt{t_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}$ eliminates a graded modal value $\GRANULEnt{t_{{\mathrm{1}}}}$, binding a graded variable $x$
+in scope of $\GRANULEnt{t_{{\mathrm{2}}}}$. The typing rules provide further understanding of the
+behaviour of these terms.
+
+Typing judgments are of the form $\Gamma  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}$, where $\Gamma$ ranges over contexts:
+\begin{equation*}
+  \Gamma ::= \emptyset
+  \mid \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}
+  \mid \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}
+\tag{contexts}
+\end{equation*}
+
+Thus, a context may be empty $\emptyset$, extended with a
+linear assumption $\GRANULEmv{x}  :  \GRANULEnt{A}$ or extended with a graded assumption $\GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}$. For linear assumptions, structural rules of weakening
+and contraction are disallowed. Graded assumptions may be used
+non-linearly according to the constraints given by their grade, the
+semiring element $r$. Throughout, comma denotes disjoint context
+concatenation.
+
+Various operations on contexts are used to capture non-linear data flow
+via grading. Firstly, \emph{context addition} provides an
+analogue to contraction, combining contexts that have come from
+typing multiple subterms in a rule.
+Context addition, written $\Gamma_{{\mathrm{1}}}  \GRANULEsym{+}  \Gamma_{{\mathrm{2}}}$, is undefined if $\Gamma_{{\mathrm{1}}}$ and $\Gamma_{{\mathrm{2}}}$
+overlap in their linear assumptions. Otherwise graded assumptions appearing
+in both contexts are combined via the semiring $+$ of their grades.
+
+
+\begin{definition}[Context addition]\label{def:contextAdd}
+  For all $\Gamma_{{\mathrm{1}}}, \Gamma_{{\mathrm{2}}}$
+  \emph{context addition} is defined
+as follows by ordered cases matching inductively on the structure of
+$\Gamma_{{\mathrm{2}}}$:
+\begin{align*}
+\Gamma_{{\mathrm{1}}}  \GRANULEsym{+}  \Gamma_{{\mathrm{2}}} = \left\{\begin{matrix}
+    \begin{array}{ll}
+    \Gamma_{{\mathrm{1}}} &
+     \Gamma_{{\mathrm{2}}} = \emptyset
+             \\
+      ((\Gamma'_{{\mathrm{1}}}, \Gamma''_{{\mathrm{1}}}) + \Gamma'_{{\mathrm{2}}}), \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEsym{(}  \GRANULEnt{r}  \GRANULEsym{+}  \GRANULEnt{s}  \GRANULEsym{)}  } }   \GRANULEnt{A} \; &
+\Gamma_{{\mathrm{2}}} = \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \wedge \Gamma_{{\mathrm{1}}} = \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A},\Gamma''_{{\mathrm{1}}}  \\
+ (\Gamma_{{\mathrm{1}}} + \Gamma'_{{\mathrm{2}}}), \GRANULEmv{x}  :  \GRANULEnt{A} & \Gamma_{{\mathrm{2}}} = \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}\ \wedge\  \GRANULEmv{x}  :  \GRANULEnt{A} \notin \Gamma_{{\mathrm{1}}}
+    \end{array}
+  \end{matrix}\right.
+\end{align*}
+\end{definition}
+
+
+\jnote{Possibly some example programs in this section? The problem might be that
+they'll have to be purely lambda calc programs}
+
+
+\begin{figure}[t]
+\hspace{-0.5em}
+\begin{align*}
+\hspace{-0.5em}
+  \begin{array}{c}
+  \inferrule*[right = Var]
+  {\;}
+  {\GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A}}
+\;\;
+  \inferrule*[right = Abs]
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+  {\Gamma  \vdash   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   :  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}}
+\;\;
+  \inferrule*[right = App]
+  {\Gamma_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B} \;\;\;
+   \Gamma_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A} }
+  {\Gamma_{{\mathrm{1}}}  \GRANULEsym{+}  \Gamma_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+\\[0.75em]
+ \inferrule*[right = Weak]
+  {\Gamma  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}
+  {\Gamma  \GRANULEsym{,}  \,  \GRANULEsym{,}    [  \Delta  ]_{  0  }    \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}
+\;\;\;
+\inferrule*[right = Der]
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+\;\;\;
+\inferrule*[right = Approx]
+{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}    \GRANULEsym{,}  \,  \GRANULEsym{,}  \Gamma'  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A} \quad r \sqsubseteq s }
+{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}    \GRANULEsym{,}  \,  \GRANULEsym{,}  \Gamma'  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}
+\\[0.75em]
+\inferrule*[right = Pr]
+  {\GRANULEsym{[}  \Gamma  \GRANULEsym{]}  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}
+  {\textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }   \GRANULEsym{[}  \Gamma  \GRANULEsym{]}    \vdash  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+\;\;\;
+\inferrule*[right = Let$\Box$]
+  {\Gamma_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A} \;\;\;
+   \Gamma_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B} }
+    {\Gamma_{{\mathrm{1}}}  \GRANULEsym{+}  \Gamma_{{\mathrm{2}}}  \vdash   \textbf{let} \, [  \GRANULEmv{x}  ] =  \GRANULEnt{t_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   :  \GRANULEnt{B}}
+\end{array}
+\end{align*}
+\vspace{-1.25em}
+  \caption{Typing rules of the graded linear $\lambda$-calculus}
+\label{fig:typing}
+\vspace{-0.65em}
+ \end{figure}
+
+
+Figure~\ref{fig:typing} defines the typing rules.
+Linear variables are typed in a singleton context
+(\textsc{Var}). Abstraction (\textsc{Abs}) and application (\textsc{App})
+follow the rules of the linear $\lambda$-calculus.
+The $\textsc{Weak}$ rule captures
+weakening of assumptions graded by $0$ (where $[  \Delta  ]_{  0  }$ denotes a context
+containing only graded assumptions graded by $0$). Dereliction ($\textsc{Der}$),
+allows a linear assumption to be converted to a graded assumption with grade
+$1$. Grade approximation is captured by the $\textsc{Approx}$
+rule, which allows a grade $s$ to be converted to another grade $r$,
+providing that $r$ \textit{approximates} $s$, where the relation
+$\sqsubseteq$ is the pre-order provided
+with the semiring.
+Introduction and elimination of the graded modality is provided by the
+$\textsc{Pr}$ and $\textsc{Let}$ rules
+respectively. The $\textsc{Pr}$ rule propagates the grade $r$ to the
+assumptions through \emph{scalar multiplication} of $\Gamma$ by $r$ where
+every assumption in $\Gamma$ must already be graded (written $\GRANULEsym{[}  \Gamma  \GRANULEsym{]}$ in the rule), defined:
+%
+%
+\begin{definition}[Scalar context multiplication]
+  \label{def:scalar}
+\begin{align*}
+   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }   \emptyset = \emptyset
+    \qquad\qquad
+    \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{)} = \GRANULEsym{(}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Gamma   \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEsym{(}  \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s}  \GRANULEsym{)}  } }   \GRANULEnt{A}
+\end{align*}
+\end{definition}
+
+The $\textsc{Let}$ rule eliminates a graded modal value $\Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}$
+into a graded assumption $\GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}$ with a matching
+grade in the scope of the \textbf{let} body.
+
+
+\paragraph{Metatheory}
+The admissibility of substitution is a key result that holds
+for this language~\cite{DBLP:journals/pacmpl/OrchardLE19}, which is
+leveraged in soundness of the synthesis calculi.
+%
+\begin{restatable}[Admissibility of substitution]{lemma}{linearSubst}
+Let $\Delta  \vdash  \GRANULEnt{t'}  :  \GRANULEnt{A}$, then:
+\label{lemma:substitution}
+\begin{itemize}[leftmargin=1em]
+\item (Linear) \hspace{0.04em} If $\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}    \GRANULEsym{,}  \,  \GRANULEsym{,}   \Gamma'   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}$ then $\Gamma  \GRANULEsym{+}  \Delta  \GRANULEsym{+}  \Gamma'  \vdash   [  \GRANULEnt{t'}  /  \GRANULEmv{x}  ]  \GRANULEnt{t}   :  \GRANULEnt{B}$
+\item (Graded) If $\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}    \GRANULEsym{,}  \,  \GRANULEsym{,}   \Gamma'   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}$
+then $\Gamma  \GRANULEsym{+}  \GRANULEsym{(}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta   \GRANULEsym{)}  \GRANULEsym{+}  \Gamma'  \vdash   [  \GRANULEnt{t'}  /  \GRANULEmv{x}  ]  \GRANULEnt{t}   :  \GRANULEnt{B}$
+\end{itemize}
+\end{restatable}
+
+
+\subsection{Graded-base}
+\label{sec:graded-base}
+
+We now define our second core language with graded types. This system will be familiar to
+those who have encountered graded types before, drawing from the coeffect calculus of \citet{petricek2014coeffects}, Quantitative Type Theory (QTT) by \citet{McBride2016} and refined further by \citet{quantitative-type-theory} (although we omit dependent types from our language), the calculus of \citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type theories~\cite{quantitative-type-theory,DBLP:conf/esop/MoonEO21}. Similar
+systems also form the basis of the core of the linear types extension to Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}.
+This calculus shares much in common with languages based on linear types, such
+as the graded monadic-comonadic calculus of~\cite{combining2016}, generalisations of Bounded
+Linear Logic~\cite{DBLP:conf/esop/BrunelGMZ14,DBLP:conf/esop/GhicaS14}
+
+
+This system corresponds to Granule's ``graded base'' language extension rather than its
+default linear types basis outlined above.
+
+Again, our system is parameterised by a graded necessity modality. The syntax of types is given by:
+
+\begin{align*}
+\hspace{-0.9em}\GRANULEnt{A} , \GRANULEnt{B} & ::=
+       \GRANULEnt{A} ^ \GRANULEnt{r}  \rightarrow  \GRANULEnt{B}
+  \mid \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}
+{\small{\tag{\textit{types}}}}
+\end{align*}
+
+
+where the function space $\GRANULEnt{A} ^ \GRANULEnt{r}  \rightarrow  \GRANULEnt{B}$ annotates the input type with a \emph{grade} $\GRANULEnt{r}$
+drawn from a pre-ordered semiring $(\mathcal{R}, {\ast}, {1}, {+}, {0}, \sqsubseteq)$ parameterising
+the calculus. Type constructors $K$ include the unit and multiplicative linear product type but
+are also extended by user-defined ADTs in the implementation which can be formed by products, coproducts,
+and recursive types (although we do not given an explicit syntax to the latter two type formers here).
+The graded necessity modality $\Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}$ is similarly annotated by the grade $\GRANULEnt{r}$ being
+an element of the semiring. %The syntax $\alpha$ denotes a type variable
+
+
+
+\jnote{Do we want to include pattern matching here? In fact, do we want to
+  include it in the linear-base calculus from the start as well?}
+The syntax of terms is given as:
+%
+\begin{align*}
+\hspace{-0.8em} \GRANULEnt{t} ::= \;
+       & \GRANULEmv{x}
+  \mid \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}
+  \mid \GRANULEnt{t_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}
+  \mid \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}
+  \mid C \, \GRANULEnt{t_{{\mathrm{1}}}} \, ... \, \GRANULEnt{t_{\GRANULEmv{n}}}
+  \mid \textbf{case} \  \GRANULEnt{t}  \ \textbf{of} \   \GRANULEnt{p_{{\mathrm{1}}}}  \mapsto  \GRANULEnt{t_{{\mathrm{1}}}} ; ... ;  \GRANULEnt{p_{\GRANULEmv{n}}}  \mapsto  \GRANULEnt{t_{\GRANULEmv{n}}}
+{\small{\tag{\textit{terms} }}}
+         \\
+\hspace{-0.8em} \GRANULEnt{p} ::= \;
+       & \GRANULEmv{x}
+  \mid \_
+  \mid \GRANULEsym{[}  \GRANULEnt{p}  \GRANULEsym{]}
+  \mid C \, \GRANULEnt{p_{{\mathrm{1}}}} \, ... \, \GRANULEnt{p_{\GRANULEmv{n}}}
+{\small{\tag{\textit{patterns}}}}
+\end{align*}
+%
+Terms consist of a graded $\lambda$-calculus, a \textit{promotion} construct [t] which introduces a graded modality explicitly, as well as data constructor introduction ($C \, \GRANULEnt{t_{{\mathrm{1}}}} \, ... \, \GRANULEnt{t_{\GRANULEmv{n}}}$) and elimination via
+ $\textbf{case}$ expressions which are defined via the syntax of patterns $\GRANULEnt{p}$.
+
+
+
+ \jnote{Talk about how we overload the definition from linear-base but removing
+   the linear assumption case}
+\begin{definition}[Context addition]\label{def:contextAdd}
+  For all $\Gamma_{{\mathrm{1}}}, \Gamma_{{\mathrm{2}}}$
+  \emph{context addition} is defined
+as follows by ordered cases matching inductively on the structure of
+$\Gamma_{{\mathrm{2}}}$:
+\begin{align*}
+\Gamma_{{\mathrm{1}}}  \GRANULEsym{+}  \Gamma_{{\mathrm{2}}} = \left\{\begin{matrix}
+    \begin{array}{ll}
+    \Gamma_{{\mathrm{1}}} &
+    \Gamma_{{\mathrm{2}}} = \emptyset
+             \\
+      ((\Gamma'_{{\mathrm{1}}}, \Gamma''_{{\mathrm{1}}}) + \Gamma'_{{\mathrm{2}}}), \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEsym{(}  \GRANULEnt{r}  \GRANULEsym{+}  \GRANULEnt{s}  \GRANULEsym{)}  } }   \GRANULEnt{A} \; &
+\Gamma_{{\mathrm{2}}} = \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \wedge \Gamma_{{\mathrm{1}}} = \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A},\Gamma''_{{\mathrm{1}}} \\
+ \GRANULEsym{(}  \Gamma_{{\mathrm{1}}}  \GRANULEsym{+}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} & \Gamma_{{\mathrm{2}}} = \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \wedge \GRANULEmv{x} \not\in \mathsf{dom}(\Gamma_{{\mathrm{1}}})
+\end{array}
+  \end{matrix}\right.
+\end{align*}
+\end{definition}
+
+\jnote{No need to redefine scalar context multiplication}
+
+\section{Related systems}
+
+\section{Conclusion}
+This chapter introduced some of the key features of languages with resourceful
+types. Linear and graded types embed usage constraints in the typing rules,
+enforcing the notion that a well-typed program is also \textit{well-resourced}.
+
+
+The next chapter focuses on the linear-base core calculus of
+section~\ref{sec:linear-base}, extending this calculus with multiplicative and additive
+types, as well as a unit type to form a more practical programming language. This
+then comprises the target language of a synthesis algorithm. Likewise, the graded-base
+calculus is revisited in chapter~\ref{chapter:graded-base}, where it is extended
+with (G)ADTs, and recursion, providing a target language for a more in-depth and
+featureful synthesis tool.

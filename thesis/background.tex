@@ -1,0 +1,350 @@
+\jnote{Try to outline the approach of the background - the focus is on
+  introducing the two languages: graded and linear base. Why do we need two languages? What is the
+  difference between them? What do we use each language for in synthesis - i.e.
+  why do we decide to do the initial calculus in the linear base and then shift
+  to the graded base for the more advanced stuff?}
+This chapter provides the background material necessary for understanding the
+design of synthesis calculi. This is done primarily by formally introducing two programming languages
+which include resourceful types. Language features, and concepts, are explained
+as they arise. We begin with an outline of linear and graded
+types themselves, briefly charting their origins from linear logic and bounded
+linear logic. Following this, two languages are presented which make use of
+these resourceful types in different ways. These two languages will become the
+bases of the target languages of two synthesis calculi in subsequent chapters.
+
+
+
+\jnote{How much detail should be provided here? It's very likely that we will
+  cover a brief history of graded type systems (from linear logic to graded
+  modal types) in the intro. So should we use this space to go into further
+  detail? Or cut it here and leave it in the intro}
+\paragraph{Linear types}
+
+
+
+\paragraph{Graded types}
+
+
+\jnote{possibly doesn't need to be its own section}
+\section{Two target languages}
+When designing a type-directed synthesis tool, a natural first consideration would be
+the \textit{target} language of synthesis: what programming language
+will synthesised programs be written in? What types will be used to specify a
+desired program?
+If we strip away all but the most essential language elements that we wish to
+include in our target language, a good starting point would be the simply typed
+linear $\lambda$-calculus, extended with a graded modal type. The linear
+$\lambda$-calculus has the same syntax as the standard simply typed $\lambda$
+calculus only with the structural rules of weakening and contraction
+prohibited, making terms which express non-linear behaviour ill-typed.
+
+
+This calculus is equivalent to the core calculus Granule,
+\textsc{GrMini}\cite{}. Granule's full type system is an extension of this
+graded linear core, introducing (G)ADTs and recurison.
+
+For this chapter we concern ourselves only with the $\lambda$-calculus core.
+In subsequent chapters these calculi will be extended further to become more
+full-fledged programming languages.\jnote{How?}
+
+
+
+An alternative approach is to replace this underlying linear system  with a
+\textit{graded} $\lambda$-calculus.
+
+In this system, function types are augmented with a grade: $[[ A ^ r -> B ]]$
+which desrcibes how the value of the argument type may be used in the body of
+the function. This approach more closely resembles the graded systems of
+\jnote{list some systems here, linear haskell, QTT, etc.}.
+
+The different approaches to graded types here gives rise to the question: how might the
+features of the target language influence the design of a synthesis tool?
+
+\jnote{It's still not clear why we choose these two languages - or why we choose
+two languages at all instead of focusing on one, possibly need to come up with a
+better justification}
+
+The two approaches are now outlined formally in turn, beginning with the
+linear-base calculus.
+
+\subsection{Linear-base}
+\label{sec:linear-base}
+The types of the graded linear $\lambda$-calculus are defined as:
+\begin{align*}
+\hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+       [[ A ]] \multimap [[ B ]]
+  \mid [[ [] r A ]]
+{\small{\tag{types}}}
+\end{align*}
+The type $\Box_{r} A$ is an indexed family of type operators where $r$ is a
+\textit{grade} ranging over the elements of a pre-ordered semiring
+$({\mathcal{R}}, {*}, {1}, {+}, {0},
+{\sqsubseteq})$ parameterising the calculus (where $\ast$ and $+$
+are monotonic with respect to the pre-order $\sqsubseteq$).
+
+The syntax of terms provides the elimination and introduction forms:
+\begin{align*}
+\hspace{-0.8em} [[ t ]] ::= \;
+       & [[ x ]]
+  \mid [[ \x . t ]]
+  \mid [[ t1 t2 ]]
+  \mid [[ [t] ]]
+  \mid [[ let [ x ] = t1 in t2 ]]
+{\small{\tag{terms}}}
+\end{align*}
+In addition the the terms of the linear $\lambda$-calculus, we also have the
+construct $[[ [t] ]]$ which introduces a graded modal type $[[ [] r A
+]]$ by `promoting' a term $t$ to the graded modality, and it's dual $[[ let [x] = t1
+in t2 ]]$ eliminates a graded modal value $[[ t1 ]]$, binding a graded variable $x$
+in scope of $[[ t2 ]]$. The typing rules provide further understanding of the
+behaviour of these terms.
+
+Typing judgments are of the form $[[ G |- t : A ]]$, where $[[ G ]]$ ranges over contexts:
+\begin{equation*}
+  [[ G ]] ::= \emptyset
+  \mid [[ G , x : A ]]
+  \mid [[ G , x : [ A ] r ]]
+\tag{contexts}
+\end{equation*}
+
+Thus, a context may be empty $\emptyset$, extended with a
+linear assumption $[[ x : A ]]$ or extended with a graded assumption $[[x : [A]
+r]]$. For linear assumptions, structural rules of weakening
+and contraction are disallowed. Graded assumptions may be used
+non-linearly according to the constraints given by their grade, the
+semiring element $r$. Throughout, comma denotes disjoint context
+concatenation.
+
+Various operations on contexts are used to capture non-linear data flow
+via grading. Firstly, \emph{context addition} provides an
+analogue to contraction, combining contexts that have come from
+typing multiple subterms in a rule.
+Context addition, written $[[ G1 + G2]]$, is undefined if $[[ G1 ]]$ and $[[ G2 ]]$
+overlap in their linear assumptions. Otherwise graded assumptions appearing
+in both contexts are combined via the semiring $+$ of their grades.
+
+
+\begin{definition}[Context addition]\label{def:contextAdd}
+  For all $[[ G1 ]], [[ G2 ]]$
+  \emph{context addition} is defined
+as follows by ordered cases matching inductively on the structure of
+$[[ G2 ]]$:
+\begin{align*}
+[[G1 + G2]] = \left\{\begin{matrix}
+    \begin{array}{ll}
+    [[G1]] &
+     [[G2]] = \emptyset
+             \\
+      (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
+[[ G2]] = [[G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']]  \\
+ ([[G1]] + [[G2']]), [[x : A]] & [[G2]] = [[G2', x : A]]\ \wedge\  [[x
+                                  : A]] \notin [[ G1 ]]
+    \end{array}
+  \end{matrix}\right.
+\end{align*}
+\end{definition}
+
+
+\jnote{Possibly some example programs in this section? The problem might be that
+they'll have to be purely lambda calc programs}
+
+
+\begin{figure}[t]
+\hspace{-0.5em}
+\begin{align*}
+\hspace{-0.5em}
+  \begin{array}{c}
+  \inferrule*[right = Var]
+  {\;}
+  {[[ x : A |- x : A ]]}
+\;\;
+  \inferrule*[right = Abs]
+  {[[ G , x : A |- t : B ]]}
+  {[[ G |- \x . t : A -> B ]]}
+\;\;
+  \inferrule*[right = App]
+  {[[ G1 |- t1 : A -> B ]] \;\;\;
+   [[ G2 |- t2 : A ]] }
+  {[[ G1 + G2 |- t1 t2 : B ]]}
+\\[0.75em]
+ \inferrule*[right = Weak]
+  {[[ G |- t : A ]]}
+  {[[ G ,, {[ D , 0 ]} |- t : A ]]}
+\;\;\;
+\inferrule*[right = Der]
+  {[[ G , x : A |- t : B ]]}
+  {[[ G , x : [ A ] 1 |- t : B]]}
+\;\;\;
+\inferrule*[right = Approx]
+{[[ {G, x : [A] r},, G' |- t : A ]] \quad r \sqsubseteq s }
+{[[ {G, x : [A] s},, G' |- t : A ]]}
+\\[0.75em]
+\inferrule*[right = Pr]
+  {[[ [ G ] |- t : A ]]}
+  {[[ r * {[ G ]} |- [t] : [] r A ]]}
+\;\;\;
+\inferrule*[right = Let$\Box$]
+  {[[ G1 |- t1 : [] r A ]] \;\;\;
+   [[ G2, x : [ A ] r |- t2 : B ]] }
+    {[[ G1 + G2 |- let [x] = t1 in t2 : B ]]}
+\end{array}
+\end{align*}
+\vspace{-1.25em}
+  \caption{Typing rules of the graded linear $\lambda$-calculus}
+\label{fig:typing}
+\vspace{-0.65em}
+ \end{figure}
+
+
+Figure~\ref{fig:typing} defines the typing rules.
+Linear variables are typed in a singleton context
+(\textsc{Var}). Abstraction (\textsc{Abs}) and application (\textsc{App})
+follow the rules of the linear $\lambda$-calculus.
+The $\textsc{Weak}$ rule captures
+weakening of assumptions graded by $0$ (where $[[ [ D , 0 ] ]]$ denotes a context
+containing only graded assumptions graded by $0$). Dereliction ($\textsc{Der}$),
+allows a linear assumption to be converted to a graded assumption with grade
+$1$. Grade approximation is captured by the $\textsc{Approx}$
+rule, which allows a grade $s$ to be converted to another grade $r$,
+providing that $r$ \textit{approximates} $s$, where the relation
+$\sqsubseteq$ is the pre-order provided
+with the semiring.
+Introduction and elimination of the graded modality is provided by the
+$\textsc{Pr}$ and $\textsc{Let}$ rules
+respectively. The $\textsc{Pr}$ rule propagates the grade $r$ to the
+assumptions through \emph{scalar multiplication} of $[[G]]$ by $r$ where
+every assumption in $[[ G ]]$ must already be graded (written $[[ [ G
+] ]]$ in the rule), defined:
+%
+%
+\begin{definition}[Scalar context multiplication]
+  \label{def:scalar}
+\begin{align*}
+   [[ r * . ]] = \emptyset
+    \qquad\qquad
+    [[ r * (G , x : [ A ] s) ]] = [[ (r * G), x : [ A ] (r * s) ]]
+\end{align*}
+\end{definition}
+
+The $\textsc{Let}$ rule eliminates a graded modal value $[[ [] r A ]]$
+into a graded assumption $[[ x : [ A ] r ]]$ with a matching
+grade in the scope of the \textbf{let} body.
+
+
+\paragraph{Metatheory}
+The admissibility of substitution is a key result that holds
+for this language~\cite{DBLP:journals/pacmpl/OrchardLE19}, which is
+leveraged in soundness of the synthesis calculi.
+%
+\begin{restatable}[Admissibility of substitution]{lemma}{linearSubst}
+Let $[[ D |- t' : A]]$, then:
+\label{lemma:substitution}
+\begin{itemize}[leftmargin=1em]
+\item (Linear) \hspace{0.04em} If $[[ {G, x : A}
+    ,, { G' } |- t : B]]$ then $[[ G + D + G' |-
+[ t' / x ] t : B ]]$
+\item (Graded) If $[[ {G, x : [A] r} ,, { G' } |- t : B]]$
+then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
+\end{itemize}
+\end{restatable}
+
+
+\subsection{Graded-base}
+\label{sec:graded-base}
+
+We now define our second core language with graded types. This system will be familiar to
+those who have encountered graded types before, drawing from the coeffect calculus of \citet{petricek2014coeffects}, Quantitative Type Theory (QTT) by \citet{McBride2016} and refined further by \citet{quantitative-type-theory} (although we omit dependent types from our language), the calculus of \citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type theories~\cite{quantitative-type-theory,DBLP:conf/esop/MoonEO21}. Similar
+systems also form the basis of the core of the linear types extension to Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}.
+This calculus shares much in common with languages based on linear types, such
+as the graded monadic-comonadic calculus of~\cite{combining2016}, generalisations of Bounded
+Linear Logic~\cite{DBLP:conf/esop/BrunelGMZ14,DBLP:conf/esop/GhicaS14}
+
+
+This system corresponds to Granule's ``graded base'' language extension rather than its
+default linear types basis outlined above.
+
+Again, our system is parameterised by a graded necessity modality. The syntax of types is given by:
+
+\begin{align*}
+\hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+       [[ A ^ r -> B ]]
+  \mid [[ [] r A ]]
+{\small{\tag{\textit{types}}}}
+\end{align*}
+
+
+where the function space $[[ A ^ r -> B ]]$ annotates the input type with a \emph{grade} $[[ r ]]$
+drawn from a pre-ordered semiring $(\mathcal{R}, {\ast}, {1}, {+}, {0}, \sqsubseteq)$ parameterising
+the calculus. Type constructors $K$ include the unit and multiplicative linear product type but
+are also extended by user-defined ADTs in the implementation which can be formed by products, coproducts,
+and recursive types (although we do not given an explicit syntax to the latter two type formers here).
+The graded necessity modality $[[ [] r A ]]$ is similarly annotated by the grade $[[ r ]]$ being
+an element of the semiring. %The syntax $[[ a ]]$ denotes a type variable
+
+
+
+\jnote{Do we want to include pattern matching here? In fact, do we want to
+  include it in the linear-base calculus from the start as well?}
+The syntax of terms is given as:
+%
+\begin{align*}
+\hspace{-0.8em} [[ t ]] ::= \;
+       & [[ x ]]
+  \mid [[ \x ^ c . t ]]
+  \mid [[ t1 t2 ]]
+  \mid [[ [t] ]]
+  \mid [[ Con t1 ... tn ]]
+  \mid [[ case t of p1 -> t1 ; * ; pn -> tn  ]]
+{\small{\tag{\textit{terms} }}}
+         \\
+\hspace{-0.8em} [[ p ]] ::= \;
+       & [[ x ]]
+  \mid [[ _ ]]
+  \mid [[ [p] ]]
+  \mid [[ Con p1 ... pn ]]
+{\small{\tag{\textit{patterns}}}}
+\end{align*}
+%
+Terms consist of a graded $\lambda$-calculus, a \textit{promotion} construct [t] which introduces a graded modality explicitly, as well as data constructor introduction ($[[ Con t1 ... tn ]]$) and elimination via
+ $\textbf{case}$ expressions which are defined via the syntax of patterns $[[ p ]]$.
+
+
+
+ \jnote{Talk about how we overload the definition from linear-base but removing
+   the linear assumption case}
+\begin{definition}[Context addition]\label{def:contextAdd}
+  For all $[[ G1 ]], [[ G2 ]]$
+  \emph{context addition} is defined
+as follows by ordered cases matching inductively on the structure of
+$[[ G2 ]]$:
+\begin{align*}
+[[G1 + G2]] = \left\{\begin{matrix}
+    \begin{array}{ll}
+    [[G1]] &
+    [[G2]] = \emptyset
+             \\
+      (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
+[[ G2]] = [[ G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']] \\
+ [[ (G1 + G2'), x : [A] s ]] & [[ G2 ]] = [[ G2' , x : [A] s ]] \wedge [[ x ]] \not\in \mathsf{dom}([[ G1 ]])
+\end{array}
+  \end{matrix}\right.
+\end{align*}
+\end{definition}
+
+\jnote{No need to redefine scalar context multiplication}
+
+\section{Related systems}
+
+\section{Conclusion}
+This chapter introduced some of the key features of languages with resourceful
+types. Linear and graded types embed usage constraints in the typing rules,
+enforcing the notion that a well-typed program is also \textit{well-resourced}.
+
+
+The next chapter focuses on the linear-base core calculus of
+section~\ref{sec:linear-base}, extending this calculus with multiplicative and additive
+types, as well as a unit type to form a more practical programming language. This
+then comprises the target language of a synthesis algorithm. Likewise, the graded-base
+calculus is revisited in chapter~\ref{chapter:graded-base}, where it is extended
+with (G)ADTs, and recursion, providing a target language for a more in-depth and
+featureful synthesis tool.

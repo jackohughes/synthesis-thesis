@@ -1,0 +1,114 @@
+\documentclass[12pt,draft]{UoKthesis}
+
+% Note: The UoKextentions package includes the xcolor package with the [usenames]
+% options. If you need to add further options, these can be given to UoKextentions
+% to be propogated through.
+\usepackage{UoKextentions}
+\usepackage{lipsum}
+\usepackage{comment}
+\usepackage{dashrule}
+\usepackage{color}
+\usepackage{mathpartir}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{natbib}
+\usepackage{caption}
+\usepackage{xypic}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+
+
+\usepackage{multirow}
+
+\newcommand{\jnote}[1]{\textcolor{purple}{\textsc{joh}: #1}}
+
+\usetikzlibrary{automata, positioning, arrows}
+\usetikzlibrary{shapes.multipart}
+\usepackage{thmtools}
+\usepackage{thm-restate}
+\declaretheorem[name=Proposition,numberwithin=section]{prop}
+
+\newcommand{\coeff}[1]{\textcolor{coeffectColor}{#1}}
+
+\theoremstyle{plain}% default
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem*{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{remark}{Remark}
+\newtheorem{question}{Question}[section]
+
+% Used to configure the algorithm enviroment
+\usepackage[ruled,vlined,linesnumbered,commentsnumbered,resetcount]{algorithm2e}
+
+% Used to generate sample image.
+\let\oldincludegraphics\includegraphics\renewcommand{\includegraphics}[1]{\IfFileExists{#1}{\oldincludegraphics{#1}}{\fbox{\phantom{\rule{150pt}{100pt}}}}}
+
+
+\input{granule-ott}
+
+\begin{document}
+\normalsize
+%Cover page information
+\title{University of Kent\\Thesis Template}
+\author{Jack Hughes}
+\subject{computer science}
+\degree{PhD}
+
+%thesis preface
+\begin{preface}
+\section{Abstract}
+A type-directed program synthesis tool can leverage the information provided by
+resourceful types (linear and graded types) to prune ill-resourced programs from
+the search space of candidate programs. Therefore, barring any other
+specification information, a synthesise tool will synthesise a target program
+(if one exists) more quickly when given a type specification which includes
+resourceful types than when given an equivalent non-resourceful type.
+
+
+\section{Acknowledgements}
+\end{preface}
+
+%main content
+
+\chapter{Introduction}
+\label{chapter:intro}
+\input{intro-ottput}
+
+% Name tbd?
+\chapter{Background}
+\label{chapter:background}
+\input{background-ottput}
+
+\chapter{A core synthesis calculus}
+\label{chapter:core}
+\input{core-ottput}
+
+\chapter{Deriving graded combinators}
+\label{chapter:deriving}
+\input{deriving-ottput}
+
+\chapter{An extended synthesis calculus}
+\label{chapter:extended}
+\input{extended-ottput}
+
+\chapter{Conclusion}
+\label{chapter:conclusion}
+\input{conclusion-ottput}
+
+\bibliography{biblio}
+
+\appendix
+% \chapter{Long Proof}
+% \lipsum[15-24]
+\end{document}

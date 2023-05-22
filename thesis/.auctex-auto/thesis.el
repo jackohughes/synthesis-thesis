@@ -1,0 +1,67 @@
+(TeX-add-style-hook
+ "thesis"
+ (lambda ()
+   (TeX-add-to-alist 'LaTeX-provided-class-options
+                     '(("UoKthesis" "12pt" "draft")))
+   (TeX-add-to-alist 'LaTeX-provided-package-options
+                     '(("algorithm2e" "ruled" "vlined" "linesnumbered" "commentsnumbered" "resetcount")))
+   (TeX-run-style-hooks
+    "latex2e"
+    "granule-ott"
+    "intro-ottput"
+    "background-ottput"
+    "core-ottput"
+    "deriving-ottput"
+    "extended-ottput"
+    "conclusion-ottput"
+    "UoKthesis"
+    "UoKthesis12"
+    "UoKextentions"
+    "lipsum"
+    "comment"
+    "dashrule"
+    "color"
+    "mathpartir"
+    "amsmath"
+    "amsfonts"
+    "amssymb"
+    "amsthm"
+    "tikz"
+    "tikz-cd"
+    "natbib"
+    "caption"
+    "xypic"
+    "enumitem"
+    "hyperref"
+    "graphicx"
+    "multirow"
+    "thmtools"
+    "thm-restate"
+    "algorithm2e")
+   (TeX-add-symbols
+    '("includegraphics" 1)
+    '("coeff" 1)
+    '("jnote" 1)
+    "oldincludegraphics")
+   (LaTeX-add-labels
+    "chapter:intro"
+    "chapter:background"
+    "chapter:core"
+    "chapter:deriving"
+    "chapter:extended"
+    "chapter:conclusion")
+   (LaTeX-add-environments
+    '("GRANULEfundefnblock" LaTeX-env-args ["argument"] 2)
+    '("GRANULEdefnblock" LaTeX-env-args ["argument"] 2)
+    "theorem"
+    "lemma"
+    "proposition"
+    "definition"
+    "conjecture"
+    "example"
+    "remark"
+    "question")
+   (LaTeX-add-bibliographies
+    "biblio"))
+ :latex)
+
