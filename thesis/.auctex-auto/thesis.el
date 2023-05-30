@@ -2,9 +2,9 @@
  "thesis"
  (lambda ()
    (TeX-add-to-alist 'LaTeX-provided-class-options
-                     '(("UoKthesis" "12pt" "draft")))
+                     '(("UoKthesis" "11pt")))
    (TeX-add-to-alist 'LaTeX-provided-package-options
-                     '(("algorithm2e" "ruled" "vlined" "linesnumbered" "commentsnumbered" "resetcount")))
+                     '(("caption" "tableposition=top") ("algorithm2e" "ruled" "vlined" "linesnumbered" "commentsnumbered" "resetcount")))
    (TeX-run-style-hooks
     "latex2e"
     "granule-ott"
@@ -15,7 +15,7 @@
     "extended-ottput"
     "conclusion-ottput"
     "UoKthesis"
-    "UoKthesis12"
+    "UoKthesis11"
     "UoKextentions"
     "lipsum"
     "comment"
@@ -34,6 +34,8 @@
     "enumitem"
     "hyperref"
     "graphicx"
+    "float"
+    "booktabs"
     "multirow"
     "thmtools"
     "thm-restate"
