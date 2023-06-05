@@ -50,6 +50,11 @@
 \newtheorem{remark}{Remark}
 \newtheorem{question}{Question}[section]
 
+
+
+\definecolor{mypink3}{cmyk}{0, 0.82, 0.98, 0.28}
+\newcommand{\maximal}[4]{\forall #2 . #3 \sqsupseteq #4 \implies #1 \sqsupseteq #2}
+
 % Used to configure the algorithm enviroment
 \usepackage[ruled,vlined,linesnumbered,commentsnumbered,resetcount]{algorithm2e}
 
@@ -58,11 +63,13 @@
 
 
 \input{granule-ott}
+\input{names-ottput}
+
 
 \begin{document}
 \normalsize
 %Cover page information
-\title{University of Kent\\Thesis Template}
+\title{University of Kent\\Program Synthesis from Linear and Graded Types}
 \author{Jack Hughes}
 \subject{computer science}
 \degree{PhD}
@@ -108,9 +115,11 @@ resourceful types than when given an equivalent non-resourceful type.
 \label{chapter:conclusion}
 \input{conclusion-ottput}
 
-\bibliography{biblio}
+\bibliography{references}{}
 
+\newpage
 \appendix
+\input{appendix-ottput}
 % \chapter{Long Proof}
 % \lipsum[15-24]
 \end{document}

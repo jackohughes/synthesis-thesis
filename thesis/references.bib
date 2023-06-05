@@ -1,0 +1,549 @@
+@article{HODAS1994327,
+title = "{Logic Programming in a Fragment of Intuitionistic Linear Logic}",
+journal = "Information and Computation",
+volume = "110",
+number = "2",
+pages = "327 - 365",
+year = "1994",
+issn = "0890-5401",
+doi = "https://doi.org/10.1006/inco.1994.1036",
+author = "J.S. Hodas and D. Miller",
+abstract = "When logic programming is based on the proof theory of intuitionistic logic, it is natural to allow implications in goals and in the bodies of clauses. Attempting to prove a goal of the form D ⊃ G from the context (set of formulas) Γ leads to an attempt to prove the goal G in the extended context Γ ∪ {D}. Thus contexts, represented as the left-hand side of intuitionistic sequents, grow as stacks during the bottom-up search for a cut-free proof. While such an intuitionistic notion of context provides for elegant specifications of many computations, contexts can be made more expressive and flexible if they are based on linear logic. After presenting two equivalent formulations of a fragment of linear logic, we show that the fragment has a goal-directed interpretation, thereby partially justifying calling it a logic program-ming language. Logic programs based on the intuitionistic theory of hereditary Harrop formulas can be modularly embedded into this linear logic setting. Programming examples taken from theorem proving, natural language parsing, and data base programming are presented: each example requires a linear, rather than intuitionistic, notion of context to be modeled adequately. An interpreter for this logic programming language must address the problem of splitting contexts; that is, in the attempt to prove a multiplicative conjunction (tensor), say G1 ⊗ G2, from the context Δ the latter must be split into disjoint contexts Δ1 and Δ2 for which G1 follows from Δ1 and G2 follows from Δ2. Since there is an exponential number of such splits, it is important to delay the choice of a split as much as possible. A mechanism for the lazy splitting of contexts is presented based on viewing proof search as a process that takes a context, consumes part of it, and returns the rest (to be consumed elsewhere). In addition, we use collections of Kripke interpretations indexed by a commutative monoid to provide models for this logic programming language and show that logic programs admit canonical models."
+}
+@article{CERVESATO2000133,
+title = "Efficient resource management for linear logic proof search",
+journal = "Theoretical Computer Science",
+volume = "232",
+number = "1",
+pages = "133 - 163",
+year = "2000",
+issn = "0304-3975",
+doi = "https://doi.org/10.1016/S0304-3975(99)00173-5",
+author = "Iliano Cervesato and Joshua S. Hodas and Frank Pfenning",
+keywords = "Linear logic, Theorem proving, Logic programming",
+abstract = "The design of linear logic programming languages and theorem provers opens a number of new implementation challenges not present in more traditional logic languages such as Horn clauses (Prolog) and hereditary Harrop formulas (λProlog and Elf). Among these, the problem of efficiently managing the linear context when solving a goal is of crucial importance for the use of these systems in non-trivial applications. This paper studies this problem in the case of Lolli [10], though its results have application to other systems including those based on linear type theory. We first give a proof-theoretic presentation of the operational semantics of this language as a resolution calculus. We then present a series of resource management systems designed to eliminate the non-determinism in the distribution of linear formulas that undermines the efficiency of a direct implementation of this system."
+}
+
+@article{diffprivacysynthesis,
+author = {Smith, Calvin and Albarghouthi, Aws},
+title = {Synthesizing Differentially Private Programs},
+year = {2019},
+issue_date = {July 2019},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {3},
+number = {ICFP},
+doi = {10.1145/3341698},
+journal = {Proc. ACM Program. Lang.},
+month = jul,
+articleno = {Article 94},
+numpages = {29},
+keywords = {linear type systems, program synthesis, differential privacy}
+}
+
+
+
+@article{DBLP:journals/corr/abs-1904-07415,
+  author    = {Tristan Knoth and
+               Di Wang and
+               Nadia Polikarpova and
+               Jan Hoffmann},
+  title     = {Resource-{G}uided {P}rogram {S}ynthesis},
+  journal   = {CoRR},
+  volume    = {abs/1904.07415},
+  year      = {2019},
+  url       = {http://arxiv.org/abs/1904.07415},
+  archivePrefix = {arXiv},
+  eprint    = {1904.07415},
+  timestamp = {Thu, 25 Apr 2019 13:55:01 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1904-07415.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@article{10.1145/2480359.2429113,
+author = {Gaboardi, Marco and Haeberlen, Andreas and Hsu, Justin and Narayan, Arjun and Pierce, Benjamin C.},
+title = {Linear Dependent Types for Differential Privacy},
+year = {2013},
+issue_date = {January 2013},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {48},
+number = {1},
+issn = {0362-1340},
+doi = {10.1145/2480359.2429113},
+journal = {SIGPLAN Not.},
+month = jan,
+pages = {357–370},
+numpages = {14},
+keywords = {differential privacy, type systems, dependent types, linear logic}
+}
+
+@inproceedings{10.1145/2429069.2429113,
+author = {Gaboardi, Marco and Haeberlen, Andreas and Hsu, Justin and Narayan, Arjun and Pierce, Benjamin C.},
+title = {Linear Dependent Types for Differential Privacy},
+year = {2013},
+isbn = {9781450318327},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+doi = {10.1145/2429069.2429113},
+booktitle = {Proceedings of the 40th Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {357–370},
+numpages = {14},
+keywords = {differential privacy, type systems, dependent types, linear logic},
+location = {Rome, Italy},
+series = {POPL ’13}
+}
+@inproceedings{10.1007/11532231_6,
+author = {Chaudhuri, Kaustuv and Pfenning, Frank},
+title = {{A Focusing Inverse Method Theorem Prover for First-Order Linear Logic}},
+year = {2005},
+isbn = {3540280057},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+doi = {10.1007/11532231\_6},
+booktitle = {Proceedings of the 20th International Conference on Automated Deduction},
+pages = {69–83},
+numpages = {15},
+location = {Tallinn, Estonia},
+series = {CADE’ 20}
+}
+@inproceedings{10.1007/11538363_15,
+author = {Chaudhuri, Kaustuv and Pfenning, Frank},
+title = {{Focusing the Inverse Method for Linear Logic}},
+year = {2005},
+isbn = {3540282319},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+doi = {10.1007/11538363\_15},
+booktitle = {Proceedings of the 19th International Conference on Computer Science Logic},
+pages = {200–215},
+numpages = {16},
+location = {Oxford, UK},
+series = {CSL’05}
+}
+@article{DBLP:journals/corr/PolikarpovaS15,
+  author    = {Nadia Polikarpova and
+               Armando Solar{-}Lezama},
+  title     = {Program Synthesis from {P}olymorphic {R}efinement {T}ypes},
+  journal   = {CoRR},
+  volume    = {abs/1510.08419},
+  year      = {2015},
+  url       = {http://arxiv.org/abs/1510.08419},
+  archivePrefix = {arXiv},
+  eprint    = {1510.08419},
+  timestamp = {Mon, 13 Aug 2018 16:46:41 +0200},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@article{oseraMYTH1,
+author = {Osera, Peter-Michael and Zdancewic, Steve},
+title = {Type-and-Example-Directed Program Synthesis},
+year = {2015},
+issue_date = {June 2015},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {50},
+number = {6},
+issn = {0362-1340},
+doi = {10.1145/2813885.2738007},
+journal = {SIGPLAN Not.},
+month = jun,
+pages = {619–630},
+numpages = {12},
+keywords = {Program Syn- thesis, Proof Search, Type Theory, Functional Programming}
+}
+@article{article,
+author = {Tammet, Tanel},
+year = {1994},
+month = {07},
+pages = {},
+title = {Proof Strategies in Linear Logic},
+volume = {12},
+journal = {Journal of Automated Reasoning},
+doi = {10.1007/BF00885763}
+}
+
+@article{girard1992bounded,
+  title={Bounded linear logic: a modular approach to polynomial-time computability},
+  author={Girard, Jean-Yves and Scedrov, Andre and Scott, Philip J},
+  journal={Theoretical computer science},
+  volume={97},
+  number={1},
+  pages={1--66},
+  year={1992},
+  publisher={Elsevier}
+}
+@article{harlandpym,
+  author    = {James Harland and
+               David J. Pym},
+  title     = {Resource-distribution via Boolean constraints},
+  journal   = {CoRR},
+  volume    = {cs.LO/0012018},
+  year      = {2000},
+  url       = {https://arxiv.org/abs/cs/0012018},
+  timestamp = {Fri, 10 Jan 2020 12:58:45 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/cs-LO-0012018.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+@article{dfuzz,
+author = {Gaboardi, Marco and Haeberlen, Andreas and Hsu, Justin and Narayan, Arjun and Pierce, Benjamin C.},
+title = {Linear Dependent Types for Differential Privacy},
+year = {2013},
+issue_date = {January 2013},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {48},
+number = {1},
+issn = {0362-1340},
+doi = {10.1145/2480359.2429113},
+journal = {SIGPLAN Not.},
+month = jan,
+pages = {357–370},
+numpages = {14},
+keywords = {type systems, differential privacy, linear logic, dependent types}
+}
+@article{girard1987linear,
+title = "Linear logic",
+journal = "Theoretical Computer Science",
+volume = "50",
+number = "1",
+pages = "1 - 101",
+year = "1987",
+issn = "0304-3975",
+doi = "https://doi.org/10.1016/0304-3975(87)90045-4",
+author = "Jean-Yves Girard",
+abstract = "The familiar connective of negation is broken into two operations: linear negation which is the purely negative part of negation and the modality “of course” which has the meaning of a reaffirmation. Following this basic discovery, a completely new approach to the whole area between constructive logics and programmation is initiated."
+}
+
+@article{DBLP:journals/pacmpl/OrchardLE19,
+  author    = {Dominic Orchard and
+               Vilem{-}Benjamin Liepelt and
+               Harley Eades III},
+  title     = {Quantitative program reasoning with graded modal types},
+  journal   = {{PACMPL}},
+  volume    = {3},
+  number    = {{ICFP}},
+  pages     = {110:1--110:30},
+  year      = {2019},
+  doi       = {10.1145/3341714},
+  timestamp = {Mon, 21 Oct 2019 15:15:21 +0200},
+  biburl    = {https://dblp.org/rec/journals/pacmpl/OrchardLE19.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{logict,
+author = {Kiselyov, Oleg and Shan, Chung-chieh and Friedman, Daniel P. and Sabry, Amr},
+title = {Backtracking, Interleaving, and Terminating Monad Transformers: (Functional Pearl)},
+year = {2005},
+issue_date = {September 2005},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {40},
+number = {9},
+issn = {0362-1340},
+doi = {10.1145/1090189.1086390},
+journal = {SIGPLAN Not.},
+month = sep,
+pages = {192–203},
+numpages = {12},
+keywords = {Prolog, control delimiters, continuations, streams, Haskell, logic programming}
+}
+
+@article{focusing,
+    author = {Andreoli, Jean-Marc},
+    title = {Logic Programming with Focusing Proofs in Linear Logic},
+    journal = {Journal of Logic and Computation},
+    volume = {2},
+    number = {3},
+    pages = {297-347},
+    year = {1992},
+    month = {06},
+    issn = {0955-792X},
+    doi = {10.1093/logcom/2.3.297},
+    eprint = {https://academic.oup.com/logcom/article-pdf/2/3/297/6137548/2-3-297.pdf},
+}
+
+@inproceedings{z3,
+author = {de Moura, Leonardo and Bjørner, Nikolaj},
+year = {2008},
+month = {04},
+pages = {337-340},
+title = {Z3: an efficient SMT solver},
+volume = {4963},
+journal = {Tools and Algorithms for the Construction and Analysis of Systems},
+}
+@article{Gentzen1935UntersuchungenD,
+  title={Untersuchungen {\"u}ber das logische Schlie{\ss}en. II},
+  author={Gerhard Gentzen},
+  journal={Mathematische Zeitschrift},
+  year={1935},
+  volume={39},
+  pages={405-431}
+}
+
+@incollection{curryhoward1980,
+  author    = { Howard, William A. },
+  editor    = { Seldin, Jonathan P. and Hindley, J. Roger },
+  title     = { The {F}ormulae-as-types {N}otion of {C}onstruction },
+  booktitle = { To H.B. Curry: Essays on Combinatory Logic, Lambda Calculus and Formalism },
+  publisher = { Academic Press },
+  year      = { 1980 },
+}
+
+@incollection{DEGTYAREV2001179,
+title = "Chapter 4 - The Inverse Method",
+editor = "Alan Robinson and Andrei Voronkov",
+booktitle = "Handbook of Automated Reasoning",
+publisher = "North-Holland",
+address = "Amsterdam",
+pages = "179 - 272",
+year = "2001",
+series = "Handbook of Automated Reasoning",
+isbn = "978-0-444-50813-3",
+doi = "https://doi.org/10.1016/B978-044450813-3/50006-0",
+author = "Anatoli Degtyarev and Andrei Voronkov"
+}
+
+@misc{lygon,
+title={Logic Programming with Linear Logic},
+url={http://www.cs.rmit.edu.au/lygon/.},
+note={Accessed 19th June 2020}
+}
+
+@inproceedings{allais2018typing,
+  title={{Typing with Leftovers-A mechanization of Intuitionistic Multiplicative-Additive Linear Logic}},
+  author={Allais, Guillaume},
+  booktitle={23rd International Conference on Types for Proofs and Programs (TYPES 2017)},
+  year={2018},
+  organization={Schloss Dagstuhl-Leibniz-Zentrum fuer Informatik}
+}
+
+@article{zalakain2020pi,
+  title={Pi with leftovers: a mechanisation in {A}gda},
+  author={Zalakain, Uma and Dardha, Ornela},
+  journal={arXiv preprint arXiv:2005.05902},
+  year={2020}
+}
+
+@inproceedings{DBLP:conf/popl/Katsumata14,
+  author    = {Shin{-}ya Katsumata},
+  editor    = {Suresh Jagannathan and
+               Peter Sewell},
+  title     = {Parametric effect monads and semantics of effect systems},
+  booktitle = {The 41st Annual {ACM} {SIGPLAN-SIGACT} Symposium on Principles of
+               Programming Languages, {POPL} '14, San Diego, CA, USA, January 20-21,
+               2014},
+  pages     = {633--646},
+  publisher = {{ACM}},
+  year      = {2014},
+  doi       = {10.1145/2535838.2535846},
+  timestamp = {Tue, 06 Nov 2018 11:07:44 +0100},
+  biburl    = {https://dblp.org/rec/conf/popl/Katsumata14.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{DBLP:conf/fossacs/Katsumata18,
+  author    = {Shin{-}ya Katsumata},
+  editor    = {Christel Baier and
+               Ugo Dal Lago},
+  title     = {A Double Category Theoretic Analysis of Graded Linear Exponential
+               Comonads},
+  booktitle = {Foundations of Software Science and Computation Structures - 21st
+               International Conference, {FOSSACS} 2018,
+               Thessaloniki, Greece, April 14-20, 2018},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {10803},
+  pages     = {110--127},
+  publisher = {Springer},
+  year      = {2018},
+  doi       = {10.1007/978-3-319-89366-2\_6},
+  timestamp = {Fri, 31 Jan 2020 21:32:20 +0100},
+  biburl    = {https://dblp.org/rec/conf/fossacs/Katsumata18.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+@inproceedings{DBLP:conf/icfp/GaboardiKOBU16,
+  author    = {Marco Gaboardi and
+               Shin{-}ya Katsumata and
+               Dominic A. Orchard and
+               Flavien Breuvart and
+               Tarmo Uustalu},
+  editor    = {Jacques Garrigue and
+               Gabriele Keller and
+               Eijiro Sumii},
+  title     = {Combining effects and coeffects via grading},
+  booktitle = {Proceedings of the 21st {ACM} {SIGPLAN} International Conference on
+               Functional Programming, {ICFP} 2016, Nara, Japan, September 18-22,
+               2016},
+  pages     = {476--489},
+  publisher = {{ACM}},
+  year      = {2016},
+  doi       = {10.1145/2951913.2951939},
+  timestamp = {Sun, 02 Jun 2019 21:13:13 +0200},
+  biburl    = {https://dblp.org/rec/conf/icfp/GaboardiKOBU16.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{DBLP:conf/esop/BrunelGMZ14,
+  author    = {Alo{\"{\i}}s Brunel and
+               Marco Gaboardi and
+               Damiano Mazza and
+               Steve Zdancewic},
+  editor    = {Zhong Shao},
+  title     = {A Core Quantitative Coeffect Calculus},
+  booktitle = {Programming Languages and Systems - 23rd European Symposium on Programming,
+               {ESOP} 2014, Held as Part of the European Joint Conferences on Theory
+               and Practice of Software, {ETAPS} 2014, Grenoble, France, April 5-13,
+               2014, Proceedings},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {8410},
+  pages     = {351--370},
+  publisher = {Springer},
+  year      = {2014},
+  doi       = {10.1007/978-3-642-54833-8\_19},
+  timestamp = {Tue, 14 May 2019 10:00:41 +0200},
+  biburl    = {https://dblp.org/rec/conf/esop/BrunelGMZ14.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+@inproceedings{DBLP:journals/corr/abs-1904-06850,
+  author    = {Carlos Olarte and
+               Valeria de Paiva and
+               Elaine Pimentel and
+               Giselle Reis},
+  editor    = {Thomas Ehrhard and
+               Maribel Fern{\'{a}}ndez and
+               Valeria de Paiva and
+               Lorenzo Tortora de Falco},
+  title     = {The {ILLTP} Library for Intuitionistic Linear Logic},
+  booktitle = {Proceedings Joint International Workshop on Linearity {\&} Trends
+               in Linear Logic and Applications, Linearity-TLLA@FLoC 2018, Oxford,
+               UK, 7-8 July 2018},
+  series    = {{EPTCS}},
+  volume    = {292},
+  pages     = {118--132},
+  year      = {2018},
+  doi       = {10.4204/EPTCS.292.7},
+  timestamp = {Fri, 27 Mar 2020 08:38:57 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1904-06850.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+
+@inproceedings{DBLP:conf/esop/GhicaS14,
+  author    = {Dan R. Ghica and
+               Alex I. Smith},
+  editor    = {Zhong Shao},
+  title     = {Bounded Linear Types in a Resource Semiring},
+  booktitle = {Programming Languages and Systems - 23rd European Symposium on Programming,
+               {ESOP} 2014},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {8410},
+  pages     = {331--350},
+  publisher = {Springer},
+  year      = {2014},
+  doi       = {10.1007/978-3-642-54833-8\_18},
+  timestamp = {Tue, 14 May 2019 10:00:41 +0200},
+  biburl    = {https://dblp.org/rec/conf/esop/GhicaS14.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{manna1980deductive,
+  title={A deductive approach to program synthesis},
+  author={Manna, Zohar and Waldinger, Richard},
+  journal={ACM Transactions on Programming Languages and Systems (TOPLAS)},
+  volume={2},
+  number={1},
+  pages={90--121},
+  year={1980},
+  publisher={ACM New York, NY, USA}
+}
+
+@article{frankle2016example,
+  title={Example-directed synthesis: a type-theoretic interpretation},
+  author={Frankle, Jonathan and Osera, Peter-Michael and Walker, David and Zdancewic, Steve},
+  journal={ACM SIGPLAN Notices},
+  volume={51},
+  number={1},
+  pages={802--815},
+  year={2016},
+  publisher={ACM New York, NY, USA}
+}
+
+@inproceedings{gvero2013complete,
+  title={Complete completion using types and weights},
+  author={Gvero, Tihomir and Kuncak, Viktor and Kuraj, Ivan and Piskac, Ruzica},
+  booktitle={Proceedings of the 34th ACM SIGPLAN conference on Programming language design and implementation},
+  pages={27--38},
+  year={2013}
+}
+
+@article{liang2009focusing,
+  title={Focusing and polarization in linear, intuitionistic, and classical logics},
+  author={Liang, Chuck and Miller, Dale},
+  journal={Theoretical Computer Science},
+  volume={410},
+  number={46},
+  pages={4747--4768},
+  year={2009},
+  publisher={Elsevier}
+}
+
+@inproceedings{hughes2020,
+ title = {Deriving distributive laws for graded linear types (extended abstract)},
+ author = {Hughes, Jack and Orchard, Dominic},
+ year = {2020}
+}
+
+@article{DBLP:journals/lmcs/BucciarelliKR18,
+  author    = {Antonio Bucciarelli and
+               Delia Kesner and
+               Simona Ronchi Della Rocca},
+  title     = {Inhabitation for Non-idempotent Intersection Types},
+  journal   = {Log. Methods Comput. Sci.},
+  volume    = {14},
+  number    = {3},
+  year      = {2018},
+  url       = {https://doi.org/10.23638/LMCS-14(3:7)2018},
+  doi       = {10.23638/LMCS-14(3:7)2018},
+  timestamp = {Thu, 18 Jun 2020 22:15:52 +0200},
+  biburl    = {https://dblp.org/rec/journals/lmcs/BucciarelliKR18.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/igpl/BucciarelliKV17,
+  author    = {Antonio Bucciarelli and
+               Delia Kesner and
+               Daniel Ventura},
+  title     = {Non-idempotent intersection types for the Lambda-Calculus},
+  journal   = {Log. J. {IGPL}},
+  volume    = {25},
+  number    = {4},
+  pages     = {431--464},
+  year      = {2017},
+  url       = {https://doi.org/10.1093/jigpal/jzx018},
+  doi       = {10.1093/jigpal/jzx018},
+  timestamp = {Fri, 06 Mar 2020 22:00:04 +0100},
+  biburl    = {https://dblp.org/rec/journals/igpl/BucciarelliKV17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{paolini2017essential,
+  title={Essential and relational models},
+  author={Paolini, Luca and Piccolo, Mauro and Della Rocca, Simona Ronchi},
+  journal={Mathematical Structures in Computer Science},
+  volume={27},
+  number={5},
+  pages={626},
+  year={2017},
+  publisher={Cambridge University Press}
+}
+
+@article{clarke2017scrap,
+  title={Scrap Your Reprinter},
+  author={Clarke, Harry and Liepelt, Vilem-Benjamin and Orchard, Dominic},
+  year={2017}
+}

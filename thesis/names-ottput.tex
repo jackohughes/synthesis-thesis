@@ -1,0 +1,487 @@
+% SUBTRACTIVE RULE NAMES
+\newcommand{\subLinVarName}{\textsc{LinVar$^{-}$}}
+\newcommand{\subGrVarName}{\textsc{GrVar$^{-}$}}
+\newcommand{\subAbsName}{$\multimap^{-}_{R}$}
+\newcommand{\subAppName}{$\multimap^{-}_{L}$}
+\newcommand{\subBoxName}{$\square^{-}_{R}$}
+\newcommand{\subUnboxName}{$\square^{-}_{L}$}
+\newcommand{\subPairIntroName}{$\otimes^{-}_{R}$}
+\newcommand{\subPairElimName}{$\otimes^{-}_{L}$}
+\newcommand{\subSumIntroLname}{$\oplus1^{-}_{R}$}
+\newcommand{\subSumIntroRname}{$\oplus2^{-}_{R}$}
+\newcommand{\subSumElimName}{$\oplus^{-}_{L}$}
+\newcommand{\subUnitIntroName}{1$^{-}_{R}$}
+\newcommand{\subUnitElimName}{1$^{-}_{L}$}
+\newcommand{\subDerName}{\textsc{der$^{-}$}}
+
+
+% ADDITIVE RULE NAMES
+\newcommand{\addLinVarName}{\textsc{LinVar$^{+}$}}
+\newcommand{\addGrVarName}{\textsc{GrVar$^{+}$}}
+\newcommand{\addDerName}{\textsc{der$^{+}$}}
+\newcommand{\addAbsName}{$\multimap^{+}_{R}$}
+\newcommand{\addAppName}{$\multimap^{+}_{L}$}
+\newcommand{\addPruningAppName}{$\multimap'^{+}_{L}$}
+\newcommand{\addBoxName}{$\square^{+}_{R}$}
+\newcommand{\addUnboxName}{$\square^{+}_{L}$}
+\newcommand{\addPairIntroName}{$\otimes^{+}_{R}$}
+\newcommand{\addPruningPairIntroName}{$\otimes'^{+}_{R}$}
+\newcommand{\addPairElimName}{$\otimes^{+}_{L}$}
+\newcommand{\addSumIntroLName}{$\oplus1_{R}^{+}$}
+\newcommand{\addSumIntroRName}{$\oplus2_{R}^{+}$}
+\newcommand{\addSumElimName}{$\oplus^{+}_{L}$}
+\newcommand{\addUnitIntroName}{1$^{+}_{R}$}
+\newcommand{\addUnitElimName}{1$^{+}_{L}$}
+
+% SUBTRACTIVE RULES
+\newcommand*{\subLinVar}{
+                             \inferrule*[right=\subLinVarName]
+                             {\quad}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEmv{x} \ |\  \Gamma}
+  }
+
+  \newcommand*{\subGrVar}{
+      \inferrule*[right=\subGrVarName]
+  {\exists  \GRANULEnt{s}  .\,   \GRANULEnt{r}  \sqsubseteq   \GRANULEnt{s}  \GRANULEsym{+}   1}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEmv{x} \ |\  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}}
+    }
+
+  \newcommand*{\subAbs}{
+      \inferrule*[right=\subAbsName]
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \quad\; \GRANULEmv{x}  \not\in | \Delta |}{\Gamma  \vdash   \GRANULEnt{A}  \multimap  \GRANULEnt{B}   \Rightarrow^-   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}  \ |\  \Delta}
+    }
+  \newcommand*{\subApp}{
+  \inferrule*[right=\subAppName]
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \qquad \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | \qquad \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}}}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^-   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}  \ |\  \Delta_{{\mathrm{2}}}}
+    }
+  \newcommand*{\subDer}{
+      \inferrule*[right=\subDerName]
+{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A} \\
+\GRANULEmv{y}  \not\in | \Delta | \\
+\exists  \GRANULEnt{s}  .\,   \GRANULEnt{r}  \sqsupseteq  \GRANULEnt{s}  \GRANULEsym{+}   1
+}
+{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}  \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}}
+    }
+  \newcommand*{\subBox}{
+  \inferrule*[right=\subBoxName]
+  {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}{\Gamma  \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^-  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]} \ |\  \Gamma  \GRANULEsym{-}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}}
+    }
+  \newcommand*{\subBoxAlt}{
+  \inferrule*[right=R${\square'^{-}}$]
+  {\texttt{\textcolor{red}{<<no parses (char 3): G /*** r \mbox{$\mid$}- A =>- t ; D >>}}}{\Gamma  \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^-  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]} \ |\   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta}
+    }
+  \newcommand*{\subUnbox}{
+  \inferrule*[right=\subUnboxName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}    \quad\;\;    0   \, {\leq} \,  \GRANULEnt{s}}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{B}  \Rightarrow^-   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}  \ |\  \Delta}
+    }
+  \newcommand*{\subPairIntro}{
+    \inferrule*[right=\subPairIntroName]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \\ \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}}}{\Gamma  \vdash   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}   \Rightarrow^-   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )  \ |\  \Delta_{{\mathrm{2}}}}
+    }
+  \newcommand*{\subPairElim}{
+    \inferrule*[right=\subPairElimName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta \\ \GRANULEmv{x_{{\mathrm{1}}}}  \not\in | \Delta | \\ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta |}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^-   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}  \ |\  \Delta}
+    }
+  \newcommand*{\subSumIntroL}{
+    \inferrule*[right=\subSumIntroLname]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^-  \GRANULEkw{inl} \, \GRANULEnt{t} \ |\  \Delta}
+    }
+  \newcommand*{\subSumIntroR}{
+    \inferrule*[right=\subSumIntroRname]
+    {\Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^-  \GRANULEkw{inr} \, \GRANULEnt{t} \ |\  \Delta}
+    }
+  \newcommand*{\subSumElim}{
+    \inferrule*[right=\subSumElimName]
+      {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \quad\,
+       \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} \quad\, \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | \quad \GRANULEmv{x_{{\mathrm{3}}}}  \not\in | \Delta_{{\mathrm{2}}} |}
+{\Gamma, x_1 : \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B} \vdash C \Rightarrow^- \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} \ | \ \Delta_1 \sqcap \Delta_2}
+    }
+  \newcommand*{\subUnitIntro}{
+    \inferrule*[right=\subUnitIntroName]
+    {\quad}
+    {\Gamma  \vdash   \mathsf{1}   \Rightarrow^-  \GRANULEsym{()} \ |\  \Gamma}
+    }
+  \newcommand*{\subUnitElim}{
+    \inferrule*[right=\subUnitElimName]
+    {\Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t} \ |\  \Delta}
+    }
+
+% ADDITIVE RULES
+\newcommand*{\addLinVar}{
+    \inferrule*[right=LinVar$^{+}$]
+    {\quad}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEmv{x}  ;\,   \GRANULEmv{x}  :  \GRANULEnt{A}}
+  }
+
+  \newcommand*{\addGrVar}{
+    \inferrule*[right=GrVar$^{+}$]
+    {\quad}
+      {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEmv{x}  ;\,   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A} }
+    }
+
+  \newcommand*{\addAbs}{
+    \inferrule*[right=\addAbsName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}}{\Gamma  \vdash   \GRANULEnt{A}  \multimap  \GRANULEnt{B}   \Rightarrow^+   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   ;\,  \Delta}
+    }
+  \newcommand*{\addApp}{
+    \inferrule*[right=\addAppName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \\ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^+   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;\,  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} }
+    }
+\newcommand*{\addPruneApp}{
+\inferrule*[right=\addPruningAppName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \\ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^+   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;\,  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} }
+}
+  \newcommand*{\addDer}{
+\inferrule*[right=\addDerName]
+{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A} }
+{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   ;\,  \Delta  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A} }
+    }
+  \newcommand*{\addBox}{
+    \inferrule*[right=\addBoxName]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}{\Gamma  \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^+  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  ;\,   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta}
+    }
+  \newcommand*{\addUnbox}{
+    \inferrule*[right=\addUnboxName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \\ \textit{if}\ \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \in
+      \Delta\ \textit{then}\ s \sqsubseteq r \ \textit{else}\  0 \sqsubseteq r}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{B}  \Rightarrow^+   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   ;\,  \GRANULEsym{(}   \Delta \!\setminus\!  \GRANULEmv{x_{{\mathrm{2}}}}   \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+    }
+  \newcommand*{\addPairIntro}{
+    \inferrule*[right=\addPairIntroName]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}} \\ \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}   \Rightarrow^+   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}}
+    }
+  \newcommand*{\addPrunePairIntro}{
+    \inferrule*[right=\addPruningPairIntroName]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}} \\ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}   \Rightarrow^+   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}}
+    }
+  \newcommand*{\addPairElim}{
+    \inferrule*[right=\addPairElimName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^+   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}}
+    }
+  \newcommand*{\addSumIntroL}{
+    \inferrule*[right=\addSumIntroLName]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^+  \GRANULEkw{inl} \, \GRANULEnt{t}  ;\,  \Delta}
+    }
+  \newcommand*{\addSumIntroR}{
+    \inferrule*[right=\addSumIntroRName]
+    {\Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^+  \GRANULEkw{inr} \, \GRANULEnt{t}  ;\,  \Delta}
+    }
+  \newcommand*{\addSumElim}{
+    \inferrule*[right=\addSumElimName]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A} \\ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}}
+{\Gamma, x_1 : \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B} \vdash C \Rightarrow^- \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} \ |\ \Delta_1 \sqcup \Delta_2, \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}}
+    }
+  \newcommand*{\addUnitIntro}{
+    \inferrule*[right=\addUnitIntroName]
+    {\quad}
+    {\Gamma  \vdash   \mathsf{1}   \Rightarrow^+  \GRANULEsym{()}  ;\,   \emptyset}
+    }
+  \newcommand*{\addUnitElim}{
+    \inferrule*[right=\addUnitElimName]
+    {\Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}}
+    }
+
+% FOCUSED SUBTRACTIVE RULE NAMES
+\newcommand*{\fSubAbsName}{$\multimap^{-}_{R}$}
+\newcommand*{\fSubRAsyncTransitionName}{$\Uparrow^{-}_{R}$}
+\newcommand*{\fSubPairElimName}{$\otimes^{-}_{L}$}
+\newcommand*{\fSubSumElimName}{$\oplus^{-}_{L}$}
+\newcommand*{\fSubUnboxName}{$\square^{-}_{L}$}
+\newcommand*{\fSubUnitElimName}{1$^{-}_{L}$}
+\newcommand*{\fSubDerName}{der$^{-}$}
+\newcommand*{\fSubLAsyncTransitionName}{$\Uparrow^{-}_{L}$}
+\newcommand*{\fSubFocusRName}{focus$^{-}_{R}$}
+\newcommand*{\fSubFocusLName}{focus$^{-}_{L}$}
+\newcommand*{\fSubPairIntroName}{$\otimes^{-}_{R}$}
+\newcommand*{\fSubSumIntroNameL}{$\oplus1_{R}^{-}$}
+\newcommand*{\fSubSumIntroNameR}{$\oplus2_{R}^{-}$}
+\newcommand*{\fSubBoxName}{$\square^{-}_{R}$}
+\newcommand*{\fSubUnitIntroName}{1$^{-}_{R}$}
+\newcommand*{\fSubRSyncTransitionName}{$\Downarrow^{-}_{R}$}
+\newcommand*{\fSubAppName}{$\multimap^{-}_{L}$}
+\newcommand*{\fSubLinVarName}{LinVar$^{-}$}
+\newcommand*{\fSubGrVarName}{GrVar$^{-}$}
+\newcommand*{\fSubLSyncTransitionName}{$\Downarrow^{-}_{L}$}
+
+% FOCUSED ADDITIVE RULE NAMES
+\newcommand*{\fAddAbsName}{$\multimap^{+}_{R}$}
+\newcommand*{\fAddRAsyncTransitionName}{$\Uparrow^{+}_{R}$}
+\newcommand*{\fAddPairElimName}{$\otimes^{+}_{L}$}
+\newcommand*{\fAddSumElimName}{$\oplus^{+}_{L}$}
+\newcommand*{\fAddUnboxName}{$\square^{+}_{L}$}
+\newcommand*{\fAddUnitElimName}{1$^{+}_{L}$}
+\newcommand*{\fAddDerName}{der$^{+}$}
+\newcommand*{\fAddLAsyncTransitionName}{$\Uparrow^{+}_{L}$}
+\newcommand*{\fAddFocusRName}{focus$^{+}_{R}$}
+\newcommand*{\fAddFocusLName}{focus$^{+}_{L}$}
+\newcommand*{\fAddPairIntroName}{$\otimes^{+}_{R}$}
+\newcommand*{\fAddSumIntroNameL}{$\oplus1_{L}^{+}$}
+\newcommand*{\fAddSumIntroNameR}{$\oplus2_{L}^{+}$}
+\newcommand*{\fAddBoxName}{$\square^{+}_{R}$}
+\newcommand*{\fAddUnitIntroName}{1$^{+}_{R}$}
+\newcommand*{\fAddRSyncTransitionName}{$\Downarrow^{+}_{R}$}
+\newcommand*{\fAddAppName}{$\multimap^{+}_{L}$}
+\newcommand*{\fAddLinVarName}{LinVar$^{+}$}
+\newcommand*{\fAddGrVarName}{GrVar$^{+}$}
+\newcommand*{\fAddLSyncTransitionName}{$\Downarrow^{+}_{L}$}
+
+% FOCUSED SUBTRACTIVE RULES
+\newcommand*{\fSubAbsRule}{
+    \inferrule*[right=\fSubAbsName,Lab=RightAsync]
+    {\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash   \GRANULEnt{B}  \Uparrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta \quad\; \GRANULEmv{x}  \not\in | \Delta |}{\Gamma  ;  \Omega  \vdash     \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \Uparrow \   \Rightarrow^{-}   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   ;  \Delta}
+}
+\newcommand*{\fSubAbsRuleNoLabel}{
+    \inferrule*[right=\fSubAbsName]
+    {\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash   \GRANULEnt{B}  \Uparrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta \quad\; \GRANULEmv{x}  \not\in | \Delta |}{\Gamma  ;  \Omega  \vdash     \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \Uparrow \   \Rightarrow^{-}   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   ;  \Delta}
+}
+\newcommand*{\fSubRAsyncTransitionRule}{
+  \inferrule*[right=\fSubRAsyncTransitionName]
+  {\Gamma  ;   \Omega  \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta \\ \GRANULEnt{C} \text{ not right async}}{\Gamma  ;  \Omega  \vdash   \GRANULEnt{C}  \Uparrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubPairElimRule}{
+    \inferrule*[right=\fSubPairElimName,lab=LeftAsync]
+    {\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta \\ \GRANULEmv{x_{{\mathrm{1}}}}  \not\in | \Delta | \\ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta |}{\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}     \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   ;  \Delta}
+}
+\newcommand*{\fSubPairElimRuleNoLabel}{
+    \inferrule*[right=\fSubPairElimName]
+    {\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta \\ \GRANULEmv{x_{{\mathrm{1}}}}  \not\in | \Delta | \\ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta |}{\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}     \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   ;  \Delta}
+}
+\newcommand*{\fSubSumElimRule}{
+    \inferrule*[right=\fSubSumElimName]
+    {\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \quad\, \Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}} \quad\, \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | \quad \GRANULEmv{x_{{\mathrm{3}}}}  \not\in | \Delta_{{\mathrm{2}}} |}
+{\Gamma ; \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}     \Uparrow \ \vdash C \Rightarrow^- \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} \ | \ \Delta_1 \sqcap \Delta_2}
+    % {\texttt{\textcolor{red}{<<no parses (char 19): G ; \{O, x1 : A + B\}*** async \mbox{$\mid$}- C =>- case x2 of inl x2 -> t1 \mbox{$\mid$} inr x3 -> t2 ; D1 ++- D2 >>}}}
+}
+\newcommand*{\fSubUnboxRule}{
+    \inferrule*[right=\fSubUnboxName]
+    {\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{B}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}    \quad\;\;    0   \, {\leq} \,  \GRANULEnt{s}}{\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}     \Uparrow \   \vdash  \GRANULEnt{B}  \Rightarrow^{-}   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   ;  \Delta}
+}
+\newcommand*{\fSubUnitElimRule}{
+    \inferrule*[right=\fSubUnitElimName]
+    {\Gamma  ;   \emptyset   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+    {\Gamma  ;   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubDerRule}{
+\inferrule*[right=\fSubDerName]
+{\Gamma  ;     \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{B}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A} \\
+\GRANULEmv{y}  \not\in | \Delta | \\
+\exists  \GRANULEnt{s}  .\,   \GRANULEnt{r}  \sqsupseteq  \GRANULEnt{s}  \GRANULEsym{+}   1
+}
+{\Gamma  ;     \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{B}  \Rightarrow^{-}   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}}
+}
+\newcommand*{\fSubLAsyncTransitionRule}{
+  \inferrule*[right=\fSubLAsyncTransitionName]
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;   \Omega  \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta \\ \text{ A not left async}}{\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubFocusRRule}{
+\inferrule*[right=\fSubFocusRName,lab=Focus]
+  {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{C}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta \\ \text{ C not atomic}}{\Gamma  ;    \emptyset   \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubFocusRRuleNoLabel}{
+\inferrule*[right=\fSubFocusRName]
+  {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{C}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta \\ \text{ C not atomic}}{\Gamma  ;    \emptyset   \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubFocusLRule}{
+\inferrule*[right=\fSubFocusLName]
+  {\Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;    \emptyset   \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubPairIntroRule}{
+    \inferrule*[right=\fSubPairIntroName,lab=RightSync]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \\ \Delta_{{\mathrm{1}}}  ;   \emptyset   \vdash   \GRANULEnt{B}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;   \emptyset   \vdash     \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \Downarrow \   \Rightarrow^{-}   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;  \Delta_{{\mathrm{2}}}}
+}
+\newcommand*{\fSubPairIntroRuleNoLabel}{
+    \inferrule*[right=\fSubPairIntroName]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \\ \Delta_{{\mathrm{1}}}  ;   \emptyset   \vdash   \GRANULEnt{B}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\texttt{\textcolor{red}{<<no parses (char 37): G ; .
+  \mbox{$\mid$}- \{Tup A B\} sync
+    =>- t1,*** t2 ; D2 >>}}}
+}
+\newcommand*{\fSubSumIntroRuleL}{
+    \inferrule*[right=\fAddSumIntroNameL]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}{\Gamma  ;   \emptyset   \vdash     \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \Downarrow \   \Rightarrow^{-}  \GRANULEkw{inl} \, \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubSumIntroRuleR}{
+    \inferrule*[right=\fAddSumIntroNameR]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{B}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}{\Gamma  ;   \emptyset   \vdash     \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \Downarrow \   \Rightarrow^{-}  \GRANULEkw{inr} \, \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubBoxRule}{
+    \inferrule*[right=\fSubBoxName]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Uparrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}{\Gamma  ;   \emptyset   \vdash     \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Gamma  \GRANULEsym{-}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}}
+}
+\newcommand*{\fSubUnitIntroRule}{
+    \inferrule*[right=\fSubUnitIntroName]
+    {\quad}
+    {\Gamma  \vdash   \mathsf{1}   \Rightarrow^-  \GRANULEsym{()} \ |\  \Gamma}
+}
+\newcommand*{\fSubRSyncTransitionRule}{
+  \inferrule*[right=\fSubRSyncTransitionName]
+  {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Uparrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}{ \Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fSubAppRule}{
+    \inferrule*[right=\fSubAppName,lab=LeftSync]
+    {\Gamma  ;     \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \qquad \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | \qquad  \Delta_{{\mathrm{1}}}  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;     \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}     \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;  \Delta_{{\mathrm{2}}}}
+}
+\newcommand*{\fSubAppRuleNoLabel}{
+    \inferrule*[right=\fSubAppName]
+    {\Gamma  ;     \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \qquad \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | \qquad  \Delta_{{\mathrm{1}}}  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{-}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;     \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}     \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;  \Delta_{{\mathrm{2}}}}
+}
+\newcommand*{\fSubLinVarRule}{
+    \inferrule*[right=\fSubLinVarName]
+    {\quad}{\Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow \   \vdash  \GRANULEnt{A}  \Rightarrow^{-}  \GRANULEmv{x}  ;  \Gamma}
+}
+\newcommand*{\fSubGrVarRule}{
+    \inferrule*[right=\fSubGrVarName]
+    {\texttt{\textcolor{red}{<<no parses (char 8): exists e***x >>}}}{\Gamma  ;     \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}    \Downarrow \   \vdash  \GRANULEnt{A}  \Rightarrow^{-}  \GRANULEmv{x}  ;  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}}
+}
+\newcommand*{\fSubLSyncTransitionRule}{
+  \inferrule*[right=\fSubLSyncTransitionName]
+  {\Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta \\ \text{ A not atomic and not left sync}}{\Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  ;  \Delta}
+}
+
+% FOCUSED ADDITIVE RULES
+\newcommand*{\fAddAbsRule}{
+    \inferrule*[right=\fAddAbsName, lab=RightAsync]
+    {\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash   \GRANULEnt{B}  \Uparrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}}{\Gamma  ;  \Omega  \vdash     \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \Uparrow \   \Rightarrow^{+}   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   ;  \Delta}
+}
+\newcommand*{\fAddAbsRuleNoLabel}{
+    \inferrule*[right=\fAddAbsName]
+    {\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash   \GRANULEnt{B}  \Uparrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}}{\Gamma  ;  \Omega  \vdash     \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \Uparrow \   \Rightarrow^{+}   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   ;  \Delta}
+}
+\newcommand*{\fAddRAsyncTransitionRule}{
+  \inferrule*[right=\fAddRAsyncTransitionName]
+  {\Gamma  ;   \Omega  \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta \\ \GRANULEnt{C} \text{ not right async}}{\Gamma  ;  \Omega  \vdash   \GRANULEnt{C}  \Uparrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddPairElimRule}{
+    \inferrule*[right=\fAddPairElimName,lab=LeftAsync]
+    {\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}}{\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^{+}   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}}
+}
+\newcommand*{\fAddPairElimRuleNoLabel}{
+    \inferrule*[right=\fAddPairElimName]
+    {\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}}{\texttt{\textcolor{red}{<<no parses (char 15): G ; O, x3 : A **** B \mbox{$\mid$}- C =>+ letpair x1 x2
+  = x3 in t2 ; D, x3 : Tup A B  >>}}}
+}
+\newcommand*{\fAddSumElimRule}{
+    \inferrule*[right=\fAddSumElimName]
+    {\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A} \\ \Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}}
+  {\Gamma ; \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}     \Uparrow \ \vdash C \Rightarrow^- \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} \ |\ \Delta_1 \sqcup \Delta_2, \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}}
+}
+\newcommand*{\fAddUnboxRule}{
+    \inferrule*[right=\fAddUnboxName]
+    {\Gamma  ;   \Omega  \GRANULEsym{,}     \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \Uparrow \     \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta \\ \textit{if}\ \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}
+                                                               \in \Delta\ \textit{then}\ \GRANULEnt{s}
+                                                               \sqsubseteq \GRANULEnt{r}\ \textit{else}\  0
+   \sqsubseteq \GRANULEnt{r}}
+  {\Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{B}  \Rightarrow^{+}   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   ;  \GRANULEsym{(}   \Delta \!\setminus\!  \GRANULEmv{x_{{\mathrm{2}}}}   \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+}
+\newcommand*{\fAddUnitElimRule}{
+    \inferrule*[right=\fAddUnitElimName]
+    {\Gamma  ;   \emptyset   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+    {\Gamma  ;   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}}
+}
+\newcommand*{\fAddDerRule}{
+  \inferrule*[right=\fAddDerName]
+  { \Gamma  ;     \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A} }
+  { \Gamma  ;    \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \Uparrow \   \vdash  \GRANULEnt{B}  \Rightarrow^{+}   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   ;  \Delta  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A} }
+}
+\newcommand*{\fAddLAsyncTransitionRule}{
+  \inferrule*[right=\fAddLAsyncTransitionName]
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;   \Omega  \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta \\ \text{ A not left async}}{\Gamma  ;    \Omega  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddFocusRRule}{
+\inferrule*[right=\fAddFocusRName,lab=Focus]
+  {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{C}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta \\ \text{ C not atomic}}{\Gamma  ;    \emptyset   \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddFocusRRuleNoLabel}{
+\inferrule*[right=\fAddFocusRName]
+  {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{C}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta \\ \text{ C not atomic}}{\Gamma  ;    \emptyset   \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddFocusLRule}{
+\inferrule*[right=\fAddFocusLName]
+  {\Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;    \emptyset   \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddPairIntroRule}{
+    \inferrule*[right=\fAddPairIntroName,lab=RightSync]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \\ \Gamma  ;   \emptyset   \vdash   \GRANULEnt{B}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;   \emptyset   \vdash     \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \Downarrow \   \Rightarrow^{+}   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}}
+}
+\newcommand*{\fAddPairIntroRuleNoLabel}{
+    \inferrule*[right=\fAddPairIntroName]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \\ \Gamma  ;   \emptyset   \vdash   \GRANULEnt{B}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;   \emptyset   \vdash     \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \Downarrow \   \Rightarrow^{+}   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}}
+}
+\newcommand*{\fAddSumIntroRuleL}{
+    \inferrule*[right=\fAddSumIntroNameL]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}{\Gamma  ;   \emptyset   \vdash     \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \Downarrow \   \Rightarrow^{+}  \GRANULEkw{inl} \, \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddSumIntroRuleR}{
+    \inferrule*[right=\fAddSumIntroNameR]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{B}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}{\Gamma  ;   \emptyset   \vdash     \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \Downarrow \   \Rightarrow^{+}  \GRANULEkw{inr} \, \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddBoxRule}{
+    \inferrule*[right=\fAddBoxName]
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Uparrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}{\Gamma  ;   \emptyset   \vdash     \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \Downarrow \   \Rightarrow^{+}  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  ;   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta}
+}
+\newcommand*{\fAddUnitIntroRule}{
+    \inferrule*[right=\fAddUnitIntroName]
+    {\quad}
+    {\Gamma  ;   \emptyset   \vdash   \mathsf{1}   \Rightarrow^{+}  \GRANULEsym{()}  ;   \emptyset}
+}
+\newcommand*{\fAddRSyncTransitionRule}{
+  \inferrule*[right=\fAddRSyncTransitionName]
+  {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Uparrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}{ \Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+}
+\newcommand*{\fAddAppRule}{
+    \inferrule*[right=\fAddAppName,lab=LeftSync]
+    {\Gamma  ;     \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \\ \Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;     \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}     \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}}
+}
+\newcommand*{\fAddAppRuleNoLabel}{
+    \inferrule*[right=\fAddAppName]
+    {\Gamma  ;     \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \\ \Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow \   \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;     \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}     \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}}
+}
+\newcommand*{\fAddLinVarRule}{
+    \inferrule*[right=\fAddLinVarName]
+  {\quad}{\Gamma  ;   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEmv{x}  ;   \GRANULEmv{x}  :  \GRANULEnt{A}}
+}
+\newcommand*{\fAddGrVarRule}{
+    \inferrule*[right=\fAddGrVarName]
+    {\quad}{\Gamma  ;   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEmv{x}  ;   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}}
+}
+\newcommand*{\fAddLSyncTransitionRule}{
+  \inferrule*[right=\fAddLSyncTransitionName]
+  {\Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Uparrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta \\ \text{ A not atomic and not left sync
+  }}{\Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow \   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  ;  \Delta}
+}
+
+% ALTERNATIVE ADDITIVE FOCUS RULES
+
+\newcommand*{\fAddAltAppName}{$\multimap'^{+}_{L}$}
+\newcommand*{\fAddAltPairIntroName}{$\otimes'^{+}_{R}$}
+
+\newcommand*{\fAddAltAppRule}{
+    \inferrule*[right=\fAddAltAppName]
+    {\Gamma  ;   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \\ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  ;   \emptyset   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}{\Gamma  ;   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^{+}   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} }
+}
+\newcommand*{\fAddAltPairIntroRule}{
+    \inferrule*[right=\fAddAltPairIntroName]
+    {\Gamma  ;   \emptyset   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  ;  \Delta_{{\mathrm{1}}} \\ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  ;   \emptyset   \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  ;  \Delta_{{\mathrm{2}}}}
+    {\Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}   \Rightarrow^{+}   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}}
+}
+
+% graded base renames
+\renewcommand{\GRANULEdruleTyVarName}{$\textsc{Var}$}
+\renewcommand{\GRANULEdruleTyAbsName}{$\textsc{Abs}$}
+\renewcommand{\GRANULEdruleTyAppName}{$\textsc{App}$}
+\renewcommand{\GRANULEdruleTyConName}{$\textsc{Con}$}
+\renewcommand{\GRANULEdruleTyCaseName}{$\textsc{Case}$}
+\renewcommand{\GRANULEdruleTyPrName}{$\textsc{Pr}$}
+\renewcommand{\GRANULEdruleTyApproxName}{$\textsc{Approx}$}
+
+% Pattern typing rules
+\renewcommand{\GRANULEdrulePatWildName}{$\textsc{PWild}$}
+\renewcommand{\GRANULEdrulePatVarName}{$\textsc{PVar}$}
+\renewcommand{\GRANULEdrulePatBoxName}{$\textsc{PBox}$}
+\renewcommand{\GRANULEdrulePatConName}{$\textsc{PCon}$}

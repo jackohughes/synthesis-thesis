@@ -8,12 +8,14 @@
    (TeX-run-style-hooks
     "latex2e"
     "granule-ott"
+    "names-ottput"
     "intro-ottput"
     "background-ottput"
     "core-ottput"
     "deriving-ottput"
     "extended-ottput"
     "conclusion-ottput"
+    "appendix-ottput"
     "UoKthesis"
     "UoKthesis11"
     "UoKextentions"
@@ -42,6 +44,7 @@
     "algorithm2e")
    (TeX-add-symbols
     '("includegraphics" 1)
+    '("maximal" 4)
     '("coeff" 1)
     '("jnote" 1)
     "oldincludegraphics")
@@ -64,6 +67,6 @@
     "remark"
     "question")
    (LaTeX-add-bibliographies
-    "biblio"))
+    "references"))
  :latex)
 

@@ -1,0 +1,62 @@
+This is BibTeX, Version 0.99d (TeX Live 2023)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: thesis.aux
+The style file: kentHarvard.bst
+Database file #1: references.bib
+Warning--I didn't find a database entry for ""
+Warning--I didn't find a database entry for "petricek2014coeffects"
+Warning--I didn't find a database entry for "McBride2016"
+Warning--I didn't find a database entry for "quantitative-type-theory"
+Warning--I didn't find a database entry for "DBLP:journals/pacmpl/AbelB20"
+Warning--I didn't find a database entry for "DBLP:conf/esop/MoonEO21"
+Warning--I didn't find a database entry for "DBLP:journals/pacmpl/BernardyBNJS18"
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Warning--empty pages in allais2018typing
+`journal' is a missing field, not a string, for entry clarke2017scrap
+while executing---line 1652 of file kentHarvard.bst
+Warning--empty journal in clarke2017scrap
+Warning--empty booktitle in z3
+Warning--empty booktitle in hughes2020
+Warning--empty pages in hughes2020
+You've used 14 entries,
+            3351 wiz_defined-function locations,
+            772 strings with 7694 characters,
+and the built_in function-call counts, 12302 in all, are:
+= -- 1214
+> -- 427
+< -- 10
++ -- 189
+- -- 126
+* -- 826
+:= -- 1625
+add.period$ -- 40
+call.type$ -- 14
+change.case$ -- 105
+chr.to.int$ -- 15
+cite$ -- 19
+duplicate$ -- 1044
+empty$ -- 868
+format.name$ -- 162
+if$ -- 2580
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 131
+newline$ -- 49
+num.names$ -- 60
+pop$ -- 497
+preamble$ -- 1
+purify$ -- 99
+quote$ -- 0
+skip$ -- 394
+stack$ -- 0
+substring$ -- 992
+swap$ -- 427
+text.length$ -- 10
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 126
+warning$ -- 5
+while$ -- 89
+width$ -- 0
+write$ -- 156
+(There was 1 error message)
