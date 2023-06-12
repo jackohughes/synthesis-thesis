@@ -53,8 +53,15 @@ t , v :: 'Term_' ::= {{ com Terms }}
   | let [ p ] = t1 in t2 :: S :: LetBox
     {{ com Modal let-binding }}
     {{tex  \textbf{let} \, [ [[ p ]] ] = [[ t1 ]] \, \textbf{in} \, [[ t2 ]]}}
+  | inl t   :: :: Inl {{ com Inl }}
+  | inr t   :: :: Inr {{ com Inr }}
+  | letpair x1 x2 = t1 in t2 :: S :: LetPair
+    {{ com Pair let-binding }}
+    {{tex  \textbf{let} \, ([[ x1 ]], [[ x2 ]]) = [[ t1 ]] \, \textbf{in} \, [[ t2 ]]}}
   | pair t1 t2 :: :: Pair {{ com A pair of terms }} {{ tex ([[ t1 ]], [[ t2 ]])}}
   | hole :: :: Hole {{ com Hole }} {{ tex - }}
+  | let () = t1 in t2 :: :: UnitElim {{ com UnitElim }}
+  | ()       :: :: Unit {{ com Unit }}
 
 
 % Meta-level operations and syntax for the operational semantics
@@ -151,7 +158,7 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
   | [] { c : B } A :: :: BoxTy {{ com Box with coeffect type }} {{ tex \Box_{\textcolor{coeffectColor}{[[c]] : [[ B ]]} } [[A]] }}
   | Int :: :: Int {{ com Integers }}  {{ tex \mathsf{Int} }}
   | Char :: :: Char {{ com Characters }}  {{ tex \mathsf{Char} }}
-  | Unit :: :: Unit {{ com unit }} {{ tex \mathsf{Unit} }}
+  | Unit :: :: Unit {{ com unit }} {{ tex \mathsf{1} }}
   | Prod :: :: Product {{ com Products }} {{ tex \otimes }}
   | Bool :: :: Bool {{ com Bool }} {{ tex \mathbb{B} }}
   | IO :: :: IO {{ com IO }} {{ tex \mathsf{IO} }}
@@ -164,8 +171,8 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
   | n :: :: TyInt {{ com Type-level integers }}
   | A op B :: :: InfixOp {{ com InfixOp }} {{ tex [[ A ]] \, [[  op ]]
   \, [[ B ]] }}
-  | Tup A B :: :: Tuple {{ com Tuple }} {{ tex ([[ A ]] \, \times \, [[ B ]]) }}
-  | Sum A B :: :: Sum {{ com Sum }} {{ tex ([[ A ]] \, + \, [[ B ]]) }}
+  | Tup A B :: :: Tuple {{ com Tuple }} {{ tex [[ A ]] \, \otimes \, [[ B ]] }}
+  | Sum A B :: :: Sum {{ com Sum }} {{ tex [[ A ]] \, \oplus \, [[ B ]] }}
   | A opBool B :: M :: InfixOpBool {{ com Infix boolean operators alt syntax }}
      {{ com InfixOp }}
      {{ tex [[ A ]] \, \{ <, >, =, \neq, \wedge, \vee \} \, [[ B ]] }}
@@ -183,6 +190,8 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
      {{ tex [[ B1 ]]^1 [[ -> ]]\! ... \![[ -> ]] [[ Bn ]]^1 [[ -> ]] [[ A ]] }}
   | B1 - r1 .*. Bn - rn -> A :: S :: MultiFunWithGrades {{ com n-Ary Function w grades }}
      {{ tex [[ B1 ]]^{q_1} [[ -> ]]\! ... \![[ -> ]] [[ Bn ]]^{q_n} [[ -> ]] [[ A ]] }}
+  | A async :: :: AsyncType {{ com AsyncTy }} {{ tex [[ A ]] \Uparrow\ }}
+  | A sync :: :: SyncType {{ com SyncTy }} {{ tex [[ A ]] \Downarrow\ }}
 
 op {{ tex \textsf{op} }} :: 'Operator_' ::= {{com Type operators}}
  | OPlus :: :: PlusOp {{ tex + }}
@@ -234,8 +243,8 @@ c, r, s, q :: 'Coeffect_' ::=
      {{ tex [[ Flatten ]] ([[ c1 ]], [[ A ]], [[ c2 ]], [[ B ]]) }}
   | Hi :: M :: HiLevel {{ com Hi }} {{ tex \textsf{Hi} }}
   | Lo :: M :: LoLevel {{ com Lo }} {{ tex \textsf{Lo} }}
-  | Private :: M :: PrivateLevel {{ com Private }} {{ tex \priv }}
-  | Public :: M :: PublicLevel {{ com Public }} {{ tex \publ }}
+  | Private :: :: Private {{ tex \mathsf{Hi} }}
+  | Public  :: :: Public  {{ tex \mathsf{Lo} }}
   | Dunno :: M :: DunnoLevel {{ com Dunno }} {{ tex \dunno }}
   | Unused :: M :: UnusedLevel {{ com Unused }} {{ tex \unused }}
   | n :: M :: Nats {{ com Nat }}
@@ -244,13 +253,22 @@ c, r, s, q :: 'Coeffect_' ::=
   | Inf :: :: Inf {{ tex \infty }}
   | ProdSyn c1 c2 :: :: Prod {{ tex ([[ c1 ]], [[ c2 ]]) }}
   | Th c :: :: Substitution {{ tex [[ Th ]] [[ c ]] }}
-  | 2 :: S :: SugarForTwo
-  | 3 :: S :: SugarForThree
-  | 4 :: S :: SugarForFour
+  | 2 :: S :: Two
+  | 3 :: S :: Three
+  | 4 :: S :: Four
+  | 5 :: S  :: Five
+  | 6 :: S :: Six
+  | 10 :: S :: Ten
+  | 15 :: S :: Fifteen
+   | 20 :: S :: Twenty
   | omega :: M :: Singleton {{ tex \omega }}
   | c1 # c2 :: M :: Converge {{ tex [[ c1 ]] \,\#\, [[ c2 ]] }}
   | c iprev :: :: PrevCoeffect {{ tex [[ c ]]_{i - 1} }}
   | c : A   :: M :: Sig {{ tex [[ c ]] : [[ A ]] }}
+  | Irrelevant :: :: Irrelevant {{ tex \mathsf{Unused} }}
+  | Intrv r s :: :: Interval {{ tex [ [[ r ]] ... [[ s ]] ] }}
+  | lub r s :: M :: Lub {{ com LeastUpperBound }} {{ tex [[ r ]] \sqcup [[ s ]] }}
+  | glb r s :: M :: Glb {{ com GreatestLowerBound }} {{ tex  [[ r ]] \sqcap [[ s ]] }}
 
 
 Rel :: 'Rel_' ::= {{ com Relations on grades }}
@@ -321,6 +339,12 @@ G {{ tex \Gamma }}, D {{ tex \Delta }}, O {{ tex \Omega }} :: 'TyCtx_' ::=
   | G1 , G2 :: M :: CtxCat {{ com Disjoint-context concatenation }}
   | G1 , .M. , Gn :: M :: CtxtCatMulti {{ tex [[ G1 ]] , ... , [[ Gn ]] }}
   | subst Th G :: M :: SubstContext {{ com Substitute on a context }} {{ tex [[ Th ]] [[ G ]] }}
+  | G async :: M :: AsyncContext
+     {{ com All variables are of async type }}
+     {{ tex  [[ G ]] \Uparrow\  }}
+  | G sync :: M :: SyncContext
+     {{ com All variables are of sync type }}
+     {{ tex  [[ G ]] \Downarrow\ }}
 
   % Various other context operations to do with algorithmic type checking
   | [ G , c : A ] :: M :: GenGradedKind
@@ -348,6 +372,9 @@ G {{ tex \Gamma }}, D {{ tex \Delta }}, O {{ tex \Omega }} :: 'TyCtx_' ::=
     {{ tex [[ G ]] \subseteq [[ D ]] }}
 
   | G - Uc :: M :: SubUc {{ com 'Subtract' usage context }} {{ tex [[ G ]] - [[ Uc ]] }}
+
+  | G - D :: M :: CtxtSub
+    {{ com Context Subtraction }}
 
   | G ++- D :: M :: CtxtCombineSub
   {{ com Context Combine Sub }}
@@ -527,6 +554,8 @@ formula :: 'formula_' ::=
  | Yes H |- t |> p :: :: YesMatch {{ tex [[ H ]] \vdash [[ t ]] \rhd [[ p ]] }}
  | Yes ( i <= Ix ) H |- t |> p :: :: YesMatchUpTo {{ tex [[ H ]] \vdash [[ t ]] \rhd [[ p ]] \;\; (i \leq [[ Ix ]]) }}
  | ifthen G1 G2 c1 c2 :: :: IfPredicate {{ tex \text{if} \ [[ G1 ]]  \in  [[ G2 ]] \ \text{then} \ [[ c1 ]] \sqsubseteq [[ c2 ]] \ \text{else} \ 0 \sqsubseteq [[ c2 ]] }}
+ | x notin D                  ::   :: nonMember {{ tex [[ x ]] \not\in |[[ D ]]| }}
+
  | G1 in G2 :: :: In {{ tex [[ G1 ]] \in [[G2]] }}
 
  | exists c . Rel :: :: existRel {{ tex \exists [[ c ]] .\, [[ Rel ]] }}
@@ -719,44 +748,44 @@ by
 
 
 defn
-G |- A =>+ t ; D :: :: SynthesiseAdd :: ''
+G |- A => t ; D :: :: SynthesiseAdd :: ''
 {{ tex [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]] }}
 
 by
 
 
 ------------------------- :: Var
-G, x : [A] r |- A =>+ x ; {0 * G}, x : [A] 1
+G, x : [A] r |- A => x ; {0 * G}, x : [A] 1
 
 
-G, x : [A] q |- B =>+ t ; D, x : [A] r && r <<= q
+G, x : [A] q |- B => t ; D, x : [A] r && r <<= q
 ---------------------------------------------------- :: Abs
-G |- {A ^ q -> B} =>+ \ x ^ q . t ; D
+G |- {A ^ q -> B} => \ x ^ q . t ; D
 
 
-G, x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 |- C =>+ t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
-G, x1 : [ A ^ q -> B ] r1 |- A =>+ t2 ; D2, x1 : [ A ^ q -> B ] s3
+G, x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 |- C => t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
+G, x1 : [ A ^ q -> B ] r1 |- A => t2 ; D2, x1 : [ A ^ q -> B ] s3
 ------------------------------------------------------- :: App
-G, x1 : [ A ^ q -> B ] r1 |- C =>+ {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -o B] {s2 + {s1 + {(s2 * {q * s3})}}}
+G, x1 : [ A ^ q -> B ] r1 |- C => {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -> B] {s2 + {s1 + {(s2 * {q * s3})}}}
 
 
-G |- A =>+ t ; D
+G |- A => t ; D
 --------------------------------- :: Box
-G |- {[] r A} =>+ [ t ] ; r * D
+G |- {[] r A} => [ t ] ; r * D
 
 
 
 ( Con : B1 - q1 .*. Bn - qn -> {K {A Many}} ) elem Defines
-G |- Bi =>+ ti ; Di
+G |- Bi => ti ; Di
 --------------------------------- :: Con
-G |- K {A Many} =>+ Con t1 ... tn ; {0 * G} + {(q1 * D1) + ... + (qn * Dn)}
+G |- K {A Many} => Con t1 ... tn ; {0 * G} + {(q1 * D1) + ... + (qn * Dn)}
 
 
 
 ( Con : B1 - r1 .*. Bn - rn -> {K A} ) elem Defines
-G, x :  [B1 - r1 .*. Bn - r1 -> {K A} ] 1 |- A1 =>+ t ; D, x : [B1 - r1 .*. Bn - r1 -> {K A} ] 1
+G, x :  [B1 - r1 .*. Bn - r1 -> {K A} ] 1 |- A1 => t ; D, x : [B1 - r1 .*. Bn - r1 -> {K A} ] 1
 ------------------------------------------------------- :: ConAlt
-G |- A1 =>+ t ; D
+G |- A1 => t ; D
 
 
 ( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
@@ -764,46 +793,46 @@ G |- A1 =>+ t ; D
 {s Vari Varj} <<= {q Vari Varj}
 assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
 --------------------------------- :: Case
-G, x : [ {K A} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s} \*/ {Varn s})}}
+G, x : [ {K A} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s} \*/ {Varn s})}}
 
 
 ( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
-{ {G, x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B =>+ ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+{ {G, x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B => ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
 exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj}
 assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}}
 {PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}}
 --------------------------------- :: CaseAlt
-G, x : [ {K {A Many}} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}
+G, x : [ {K {A Many}} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}
 
 
 ( Coni : B1 -* q1 .*. Bn -* qn -> {K A} ) elem Defines
-{ {G, x : [K A] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}}} , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B =>+ ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+{ {G, x : [K A] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}}} , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B => ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
 assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
 assn {Vari q} {{q Vari Var1} \*/ {q Vari Varn}}
 exists {Vari s'} . {Vari s} <= {Vari s'} * {Vari q} <= r * {Vari q}
 --------------------------------- :: CaseAltAlt
-G, x : [ {K A} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s'} \*/ {Varn s'})}}
+G, x : [ {K A} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s'} \*/ {Varn s'})}}
 
 
-G, y : [ A ] { r * q }, x : [ [] q A ] r |- B =>+ t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2
+G, y : [ A ] { r * q }, x : [ [] q A ] r |- B => t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2
 % s1 <<= {r * q}
 exists s3 . s1 <= {s3 * q} <= {r * q}
 --------------------------------- :: Unbox
-G, x : [ [] q A ] r |- B =>+ case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2}
+G, x : [ [] q A ] r |- B => case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2}
 
 
 
 ( Coni : B1 - q1 .*. Bn - qn -> {K A} ) elem Defines
-{ { G, x : [ {K A} ] {r} }, {y Vari Var1} : [B1] {r * q1} } , .M. , {y Vari Varn} : [Bn] {r * qn} |- B =>+ ti ; {{Di, x : [K A] {r Vari Var1}}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+{ { G, x : [ {K A} ] {r} }, {y Vari Var1} : [B1] {r * q1} } , .M. , {y Vari Varn} : [Bn] {r * qn} |- B => ti ; {{Di, x : [K A] {r Vari Var1}}, {y Vari Var1} : [B1] {s Vari Var1}}, .M. , {y Vari Varn} : [Bn] {s Vari Varn}
 exists {r Vari Var2} . r >= {r Vari Var2} + {{r Vari Var1} * ({s Vari Var1} /*\ {s Varn Var1})}
 --------------------------------- :: CaseSub
-G, x : [ {K A} ] r1 |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A}  ] { {r Var1 Var2} /*\ {r Varn Var2} }
+G, x : [ {K A} ] r1 |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*- Dn), x : [  {K A}  ] { {r Var1 Var2} /*\ {r Varn Var2} }
 
 
 
 defn
 G ; O |- A async => t ; D :: :: RASynFocus :: ''
-{{ tex [[ G ]] ; \Omega \vdash [[ A ]] \Uparrow \Rightarrow [[ t ]] \mid [[ D ]] }}
+{{ tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Uparrow \Rightarrow [[ t ]] \mid [[ D ]] }}
 
 by
 
@@ -818,12 +847,17 @@ G ; O async |- A => t ; D :: :: LASynFocus :: ''
 
 by
 
-( Coni : B1 - q1 .*. Bn - qn -> {K A} ) elem Defines
-G ; {{{O, x : [K A1] {r}}, {y Vari Var1} : [B1] {q1} } , .M. , {y Vari Varn} : [Bn] {qn}} async |- B => ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
-{s Vari Varj} <<= qj
-assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
+
+
+( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
+G ; O, {{{x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}}} async |- B => ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj}
+assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}}
+{PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}}
 --------------------------------- :: CaseF
-G ; {O, x : [ {K A} ] r} async |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s} \*/ {Varn s})}}
+G ; {O, x : [ {K {A Many}} ] r} async |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}
+
+
 
 
 G ; {O, y : [ A ] { r * q }, x : [ [] q A ] r} async |- B => t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2
@@ -840,15 +874,16 @@ G |- A sync => t ; D :: :: RSSynFocus :: ''
 
 by
 
-G |- A sync => t ; D
+
+G ; . |- A sync => t ; D
 --------------------------------- :: BoxF
-G |- {[] r A} sync => [ t ] ; r * D
+G ; . |- {[] r A} sync => [ t ] ; r * D
 
 
-( Con : B1 .*. Bn -> {K A} ) elem Defines
-G |- Bi sync => ti ; Di
+( Con : B1 .*. Bn -> {K {A Many}} ) elem Defines
+G ; . |- {Bi sync} => ti ; Di
 --------------------------------- :: ConF
-G |- {K A} sync => Con t1 ... tn ; {D1 + ... + Dn}
+G ; . |- {K A} sync => Con t1 ... tn ; {D1 + ... + Dn}
 
 
 
@@ -1060,3 +1095,304 @@ G ; x1 : [ A ^ q -> B ] r1 sync |- C => {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q 
 %%blurLPred A (K A) ([] r A)
 %%------------------------- :: BlurL
 %%G ; x : [A] r |-^ s . ; B =>+ Sync t ; D
+
+
+defn
+G |- A =>- t ; D :: :: SynthesisSub :: 'Syn_sub_'
+{{tex [[ G ]] \vdash [[ A ]] \Rightarrow^- [[ t ]]\ |\ [[ D ]] }}
+by
+
+------------------------ :: lin_var
+G, x : A |- A =>- x ; G
+
+
+exists ex
+------------------------ :: gr_var
+G, x : [A] r |- A =>- x ; G, x : [A] s
+
+
+G, x : [A] r, y : A |- B =>- t ; D, x : [A] s
+y notin D
+exists s' . s = s' + 1
+-------------------------------------------------- :: der
+G, x : [A] r |- B =>- [y/x] t ; D, x : [A] s'
+
+x notin D
+G, x : A |- B =>- t ; D
+------------------------ :: abs
+G |- A -> B =>- \x . t ; D
+
+
+x2 notin D1
+G, x2 : B |- C =>- t1 ; D1
+D1 |- A =>- t2 ; D2
+------------------------ :: app
+G, x1 : A -> B |- C =>- [(x1 t2) / x2] t1 ; D2
+
+
+
+G |- A =>- t ; D
+------------------------ :: box
+G |- [] r A =>- t ; G - r * (G - D)
+
+
+G, x2 : [A] r |- B =>- t ; D, x2 : [A] s && 0 <= s
+-------------------------------------------------- :: unbox
+G, x1 : [] r A |- B =>- let [x2] = x1 in t ; D
+
+
+G |- A =>- t1 ; D1
+D1 |- B =>- t2 ; D2
+------------------------ :: pair_intro
+G |- A * B =>- t1, t2 ; D2
+
+
+x1 notin D
+x2 notin D
+G, x1 : A, x2 : B |- C =>- t2 ; D
+------------------------ :: pair_elim
+G, x3 : A * B |- C =>- let x1, x2 = x3 in t2 ; D
+
+
+
+G |- A =>- t ; D
+------------------------ :: sum_intro_left
+G |- A + B =>- inl t ; D
+
+
+G |- B =>- t ; D
+------------------------ :: sum_intro_right
+G |- A + B =>- inr t ; D
+
+
+x2 notin D1
+x3 notin D2
+G, x2 : A |- C =>- t1 ; D1
+G, x3 : B |- C =>- t2 ; D2
+------------------------ :: sum_elim
+G, x1 : A + B |- C =>- case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
+
+
+------------------------ :: unit_intro
+G |- Unit =>- () ; G
+
+
+G |- C =>- t ; D
+------------------------ :: unit_elim
+G, x : Unit |- C =>- let () = x in t ; D
+
+
+defn
+G |- A =>+ t ; D :: :: SynthesisAdd :: 'Syn_add_'
+{{tex [[ G ]] \vdash [[ A ]] \Rightarrow^+ [[ t ]] ;\, [[ D ]] }}
+by
+
+------------------------ :: lin_var
+G, x : A |- A =>+ x ; x : A
+
+
+------------------------ :: gr_var
+G, x : [A] r |- A =>+ x ; x : [A] 1
+
+
+G, x : [A]s, y : A |- B =>+ t ; D, y : A
+------------------------------------------ :: der
+G, x : [A]s |- B =>+ [y / x] t ; D + x : [A]1
+
+
+G, x : A |- B =>+ t ; D, x : A
+------------------------ :: abs
+G |- A -> B =>+ \x . t ; D
+
+
+G, x2 : B |- C =>+ t1 ; D1, x2 : B
+G - (D1, x2 : B) |- A =>+ t2 ; D2
+------------------------ :: app
+G, x1 : A -> B |- C =>+ [(x1 t2) / x2] t1 ; (D1 + D2), x1: A -> B
+
+
+G |- A =>+ t ; D
+---------------------------- :: box
+G |- [] r A =>+ [t] ; r * D
+
+
+G, x2 : [A] r |- B =>+ t ; D, x2 : [A] s    && s <= r
+--------------------------------------------------------- :: unbox
+G, x1 : [] r A |- B =>+ let [x2] = x1 in t ; D, x1 : [] r A
+
+
+G |- A =>+ t1 ; D1
+G - D1 |- B =>+ t2 ; D2
+------------------------ :: pair_intro
+G |- A * B =>+ t1, t2 ; D1 + D2
+
+
+G, x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B
+------------------------ :: pair_elim
+G, x3 : A * B |- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B
+
+
+G |- A =>+ t ; D
+------------------------ :: sum_intro_left
+G |- A + B =>+ inl t ; D
+
+
+G |- B =>+ t ; D
+------------------------ :: sum_intro_right
+G |- A + B =>+ inr t ; D
+
+
+------------------------ :: unit_intro
+G |- Unit =>+ () ; .
+
+
+G |- C => t ; D
+------------------------ :: unit_elim
+G, x : Unit |- C => let () = x in t ; D, x : Unit
+
+G, x2 : A |- C =>+ t1 ; D1, x2 : A
+G, x3 : B |- C =>+ t2 ; D2, x3 : B
+------------------------ :: sum_elim
+G, x1 : A + B |- C =>+ case x1 of inl x2 -> t1 | inr x3 -> t2 ; (D1 +++ D2), x1 : A + B
+
+
+defn
+G ; O |- A =>- t ; D :: :: FocusSynthesisSub :: 'focus_syn_sub_'
+{{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{-} [[ t ]] \ |\ [[ D ]] }}
+by
+
+------------------------ :: lin_var
+G ; x : A |- A => x ; G
+
+
+1 <= r
+exists ex
+------------------------ :: gr_var
+G ; x : [A] r |- A => x ; G, x : [A] s
+
+G ; x : [A] r, y : A |- B => t; D, x : [A] s
+y notin D
+exists s . r >= s + 1
+---------------------------------------------- :: der
+G ; x : [A] r |- B => [y/x] t; D, x : [A] s'
+
+
+x notin D
+G ; O, x : A |- B => t ; D
+------------------------ :: abs
+G ; O |- A -> B => \x . t ; D
+
+
+x2 notin D1
+G ; x2 : B |- C => t1 ; D1
+D1 ; . |- A => t2 ; D2
+------------------------ :: app
+G ; x1 : A -> B |- C => [(x1 t2) / x2] t1 ; D2
+
+
+G ; . |- A => t ; D
+------------------------ :: box
+G ; . |- [] r A => t ; G - r * (G - D)
+
+
+G ; O, x2 : [A] r |- B => t ; D, x2 : [A] s && 0 <= s
+-------------------------------------------------- :: unbox
+G ; O, x1 : [] r A |- B => let [x2] = x1 in t ; D
+
+
+G ; . |- A => t1 ; D1
+D1 ; . |- B => t2 ; D2
+------------------------ :: pair_intro
+G ; . |- A * B => t1, t2 ; D2
+
+
+x1 notin D
+x2 notin D
+G ; O, x1 : A, x2 : B |- C => t2 ; D
+------------------------ :: pair_elim
+G ; O, x3 : A * B |- C => let x1, x2 = x3 in t2 ; D
+
+
+
+G ; . |- A => t ; D
+------------------------ :: sum_intro_left
+G ; . |- A + B => inl t ; D
+
+
+G ; . |- B => t ; D
+------------------------ :: sum_intro_right
+G ; . |- A + B => inr t ; D
+
+x2 notin D1
+x3 notin D2
+G ; O, x2 : A |- C => t1 ; D1
+G ; O, x3 : B |- C => t2 ; D2
+------------------------ :: sum_elim
+G ; O, x1 : A + B |- C => case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
+
+
+defn
+G ; O |- A =>+ t ; D :: :: FocusSynthesisAdd :: 'focus_syn_add_'
+{{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{+} [[ t ]] \ | \ [[ D ]] }}
+by
+
+------------------------ :: lin_var
+G ; x : A |- A =>+ x ; x : A
+
+
+1 <= r
+exists ex
+------------------------ :: gr_var
+G ; x : [A] r |- A =>+ x ; x : [A] 1
+
+
+G ; x : [A] s, y : A |- B =>+ t ; D, y : A
+---------------------------------------------------- :: der
+G ; x : [A] s |- B =>+ [y / x] t ; D + x : [A] 1
+
+G ; O, x : A |- B =>+ t ; D, x : A
+------------------------ :: abs
+G ; O |- A -> B =>+ \x . t ; D
+
+
+G ; x2 : B |- C =>+ t1 ; D1, x2 : B
+G - (D1, x2 : B) ; . |- A =>+ t2 ; D2
+------------------------ :: app
+G ; x1 : A -> B |- C =>+ [(x1 t2) / x2] t1 ; (D1 + D2), x1: A -> B
+
+
+G ; . |- A =>+ t ; D
+---------------------------- :: box
+G ; . |- [] r A =>+ [t] ; r * D
+
+
+G ; O, x2 : [A] r |- B =>+ t ; D, x2 : [A] s    && s <= r
+--------------------------------------------------------- :: unbox
+G ; O, x1 : [] r A |- B =>+ let [x2] = x1 in t ; D, x1 : [] r A
+
+
+G ; . |- A =>+ t1 ; D1
+G - D1 ; . |- B =>+ t2 ; D2
+------------------------ :: pair_intro
+G ; . |- A * B =>+ t1, t2 ; D1 + D2
+
+
+G ; O, x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B
+------------------------ :: pair_elim
+G ; O, x3 : A * B |- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B
+
+
+G ; . |- A =>+ t ; D
+------------------------ :: sum_intro_left
+G ; . |- A + B =>+ inl t ; D
+
+
+G ; . |- B =>+ t ; D
+------------------------ :: sum_intro_right
+G ; . |- A + B =>+ inr t ; D
+
+
+G ; O, x2 : A |- C =>+ t1 ; D1, x2 : A
+G ; O, x3 : B |- C =>+ t2 ; D2, x3 : B
+------------------------ :: sum_elim
+G ; O, x1 : A + B |- C =>+ case x1 of inl x2 -> t1 | inr x3 -> t2 ; (D1 +++ D2), x1 : A + B

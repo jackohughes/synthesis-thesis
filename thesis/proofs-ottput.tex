@@ -1,0 +1,2170 @@
+\section{Linear-base Proofs}
+\label{sec:linear-proofs}
+This section gives the proofs of Lemma~\ref{lemma:subSynthSound} and
+Lemma~\ref{lemma:addSynthSound}, along with soundness results for the
+variant systems: additive pruning and subtractive division.
+
+We first state and prove some intermediate results about context manipulations
+which are needed for the main lemmas.
+
+\begin{definition}[Context approximation]
+For contexts $\Gamma_{{\mathrm{1}}}$, $\Gamma_{{\mathrm{2}}}$ then:
+%
+\begin{align*}
+\begin{array}{c}
+\dfrac{}{\emptyset  \  \textcolor{coeffectColor}{\sqsubseteq} \   \emptyset}
+\qquad
+\dfrac{\Gamma_{{\mathrm{1}}} \sqsubseteq \Gamma_{{\mathrm{2}}}}
+      {\Gamma_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} \sqsubseteq \Gamma_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}}
+\qquad \\[1.5em]
+\dfrac{\Gamma_{{\mathrm{1}}} \sqsubseteq \Gamma_{{\mathrm{2}}} \qquad \GRANULEnt{r} \sqsubseteq \GRANULEnt{s}}
+      {\Gamma_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} \sqsubseteq \Gamma_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}}
+\qquad
+\dfrac{ \Gamma_{{\mathrm{1}}} \sqsubseteq \Gamma_{{\mathrm{2}}} \qquad 0 \sqsubseteq \GRANULEnt{s}}
+      { \Gamma_{{\mathrm{1}}} \sqsubseteq \Gamma_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}}
+\end{array}
+\end{align*}
+%
+This is actioned in type checking by iterative application of $\textsc{Approx}$.
+\end{definition}
+
+\begin{restatable}[$\Gamma  \GRANULEsym{+}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)} \sqsubseteq \GRANULEsym{(}  \Gamma  \GRANULEsym{+}  \Gamma'  \GRANULEsym{)}  \GRANULEsym{-}  \Gamma''$]{lemma}{contextLemma1}
+  \label{lemma:contextLemma1}
+\end{restatable}
+
+\begin{proof}
+  Induction over the structure of both $\Gamma'$ and $\Gamma''$. The possible forms of
+  $\Gamma'$ and $\Gamma''$ are considered in turn:
+  \begin{enumerate}
+    \item $\Gamma'$ = $\emptyset$ and $\Gamma''$ = $\emptyset$\\
+      We have:
+      \begin{align*}
+        (\Gamma + \emptyset) - \emptyset = \Gamma + (\emptyset - \emptyset)
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side:
+      \begin{align*}
+        (\Gamma + \emptyset) - \emptyset &= \Gamma + \emptyset \\
+                                &= \Gamma
+      \end{align*}
+      and on the right-hand side:
+      \begin{align*}
+        \Gamma + (\emptyset - \emptyset) &= \Gamma + \emptyset \\
+                                &= \Gamma
+      \end{align*}
+      making both the left and right hand sides equivalent:
+      \begin{align*}
+        \Gamma = \Gamma
+      \end{align*}
+    \item $\Gamma'$ = $\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$ and $\Gamma''$ = $\emptyset$\\
+      We have
+      \begin{align*}
+        (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) - \emptyset = \Gamma + (\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} - \emptyset)
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side we have:
+      \begin{align*}
+        (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) - \emptyset &= (\Gamma, \Gamma'), \GRANULEmv{x}  :  \GRANULEnt{A} - \emptyset \\
+                                        &= (\Gamma, \Gamma'), \GRANULEmv{x}  :  \GRANULEnt{A}
+      \end{align*}
+      and on the right hand side:
+      \begin{align*}
+        \Gamma + (\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} - \emptyset) &= \Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}\\
+                                       &= (\Gamma, \Gamma', \GRANULEmv{x}  :  \GRANULEnt{A})
+      \end{align*}
+      making both the left and right hand sides equal:
+      \begin{align*}
+        (\Gamma,\Gamma'), \GRANULEmv{x}  :  \GRANULEnt{A} = (\Gamma,\Gamma'), \GRANULEmv{x}  :  \GRANULEnt{A}
+      \end{align*}
+
+
+    \item $\Gamma'$ = $\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$ and $\Gamma''$ = $\Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$\\
+      We have
+      \begin{align*}
+        (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} = \Gamma + (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} -
+        \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A})
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side we have:
+      \begin{align*}
+        (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} &= (\Gamma,\Gamma'), \GRANULEmv{x}  :  \GRANULEnt{A} -
+                                                   \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} \\
+                                                 &= \Gamma, \Gamma' - \Gamma''
+      \end{align*}
+      and on the right hand side:
+      \begin{align*}
+        \Gamma + (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) &= \Gamma + (\Gamma' - \Gamma'') \\
+                                                &= \Gamma, \Gamma' - \Gamma''
+      \end{align*}
+      making both the left and right hand sides equivalent:
+      \begin{align*}
+        \Gamma, \Gamma' - \Gamma'' = \Gamma, \Gamma' - \Gamma''
+      \end{align*}
+
+    \item $\Gamma'$ = $\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}$ and $\Gamma''$ = $\emptyset$\\
+      We have
+      \begin{align*}
+        (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}) - \emptyset = \Gamma + (\GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} - \emptyset)
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side we have:
+      \begin{align*}
+        (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}) - \emptyset &= (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}) \\
+                                            &= (\Gamma, \Gamma'), \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}
+      \end{align*}
+      and on the right hand side:
+      \begin{align*}
+        \Gamma + (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} - \emptyset) &= \Gamma + (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A})
+                                            &= (\Gamma,\Gamma'),\GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}
+      \end{align*}
+      making both the left and right hand sides equivalent:
+      \begin{align*}
+        (\Gamma,\Gamma'),\GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} = (\Gamma,\Gamma'),\GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}
+      \end{align*}
+
+
+    \item $\Gamma'$ = $\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}$ and $\Gamma''$ = $\Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}$\\
+
+      Thus we have (for the LHS of the inequality term):
+      %
+       \begin{align*}
+        \Gamma + (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A})
+      \end{align*}
+      %
+    which by context subtraction yields:
+      \begin{align*}
+       \Gamma + (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}) &= \Gamma + (\Gamma' -
+                                                         \Gamma''), \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q'}  } }   \GRANULEnt{A}
+      \end{align*}
+      where:
+      \begin{align*}
+        \exists q' . \GRANULEnt{r} \sqsupseteq \GRANULEnt{q'} + \GRANULEnt{s}
+\quad \maximal{q'}{\hat{q'}}{r}{\hat{q'}+s} \qquad (2)
+      \end{align*}
+       %
+       And for the LHS of the inequality, from
+       definitions~\ref{def:contextAdd} and~\ref{def:contextSub}
+       we have:
+      \begin{align*}
+        (\Gamma + \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}) - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} &
+= (\Gamma + \Gamma'), \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \\
+  &= ((\Gamma + \Gamma') -  \Gamma''), \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} - \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \\
+  &= ((\Gamma + \Gamma') -  \Gamma''), \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}
+      \end{align*}
+      where:
+      \begin{align*}
+        \exists q . \GRANULEnt{r} \sqsupseteq \GRANULEnt{q} + \GRANULEnt{s}
+\quad \maximal{q}{\hat{q}}{r}{\hat{q}+s} \qquad (1)
+      \end{align*}
+    %
+    %Applying maximality (1) to $q'$ yields that $\texttt{\textcolor{red}{<<multiple parses>>}}$
+    Applying $\exists q . \GRANULEnt{r} \sqsupseteq \GRANULEnt{q} + \GRANULEnt{s}$ to
+    maximality (2) (at $\hat{q'} = q$) then yields that $q \sqsubseteq q'$.
+
+    Therefore, applying induction, we derive:
+    %
+     \begin{align*}
+      \dfrac{\GRANULEsym{(}  \Gamma  \GRANULEsym{+}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{)} \sqsubseteq \GRANULEsym{(}  \GRANULEsym{(}  \Gamma  \GRANULEsym{+}  \Gamma'  \GRANULEsym{)}  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)} \qquad \GRANULEnt{q} \sqsubseteq \GRANULEnt{q'}}
+             {\GRANULEsym{(}  \Gamma  \GRANULEsym{+}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A} \sqsubseteq \GRANULEsym{(}  \GRANULEsym{(}  \Gamma  \GRANULEsym{+}  \Gamma'  \GRANULEsym{)}  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q'}  } }   \GRANULEnt{A}}
+     \end{align*}
+    %
+    satisfying the lemma statement.
+    %\dnote{if partial order then $\GRANULEnt{q} = \GRANULEnt{q'}$, but we can be weaker
+    %  and weaken Lemma 4 to be a context approximation.}
+    %  making both the left and right hand sides equivalent:
+
+  \end{enumerate}
+\end{proof}
+
+\begin{restatable}[$\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Gamma'  \GRANULEsym{)}  \GRANULEsym{+}  \Gamma' \sqsubseteq \Gamma$]{lemma}{contextLemma2}
+  \label{lemma:contextLemma2}
+\end{restatable}
+\begin{proof}
+ The proof follows by induction over the structure of $\Gamma'$. The possible
+ forms of $\Gamma'$ are considered in turn:
+ \begin{enumerate}
+     \item $\Gamma'$ = $\emptyset$\\
+     We have:
+     \begin{align*}
+       (\Gamma - \emptyset) + \emptyset = \Gamma
+     \end{align*}
+     From definition~\ref{def:contextSub}, we know that:
+     \begin{align*}
+       \Gamma - \emptyset = \Gamma
+     \end{align*}
+     and from definition~\ref{def:contextAdd}, we know:
+     \begin{align*}
+       \Gamma + \emptyset = \Gamma
+     \end{align*}
+     giving us:
+     \begin{align*}
+       \Gamma = \Gamma
+     \end{align*}
+
+
+     \item $\Gamma'$ = $\Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$\\
+     and let $\Gamma = \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$.
+
+     \begin{align*}
+       (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) + \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} = \Gamma
+     \end{align*}
+     From definition~\ref{def:contextAdd}, we know that:
+     \begin{align*}
+       (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) + \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}
+       & =  ((\Gamma'  \GRANULEsym{-}  \Gamma'') + \Gamma''), \GRANULEmv{x}  :  \GRANULEnt{A} \\
+ \textit{induction}  & = \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A} \\
+                     & = \Gamma
+     \end{align*}
+     thus satisfying the lemma statement by equality.
+
+     \item $\Gamma'$ = $\Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}$\\
+       and let $\Gamma = \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}$.
+
+     We have:
+     \begin{align*}
+       (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}) + \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}
+     \end{align*}
+     From definition~\ref{def:contextSub}, we know that:
+     %
+
+       \begin{align*}
+      & (\Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} - \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}) + \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} \\
+    =\ & \GRANULEsym{(}  \Gamma'  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A} + \Gamma''  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A} \\
+    =\ & \GRANULEsym{(}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{+}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{r}   } }   \GRANULEnt{A}
+       \end{align*}
+
+     %
+     where $\GRANULEnt{s}  \sqsupseteq  \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{r}$ and $\maximal{q}{q'}{s}{q' + r}$.
+
+     Then by induction we derive the ordering:
+     %
+     \begin{align*}
+       \dfrac{\GRANULEsym{(}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{+}  \Gamma''  \GRANULEsym{)} \sqsubseteq \Gamma' \qquad \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{r}  \sqsubseteq \GRANULEnt{s}}
+            {\GRANULEsym{(}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{-}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{+}  \Gamma''  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{r}   } }   \GRANULEnt{A} \sqsubseteq \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}}
+     \end{align*}
+     %
+     which satifies the lemma statement.
+ \end{enumerate}
+\end{proof}
+
+\begin{lemma}[Context negation]
+\label{lemma:context-neg}
+For all contexts $\Gamma$:
+\begin{align*}
+\emptyset \sqsubseteq \Gamma  \GRANULEsym{-}  \Gamma
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+By induction on the structure of $\Gamma$:
+%
+\begin{itemize}
+\item $\Gamma = \emptyset$ Trivial.
+
+\item $\Gamma = \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$ then
+$\GRANULEsym{(}  \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \GRANULEsym{)} = \Gamma'  \GRANULEsym{-}  \Gamma'$ so proceed by
+induction.
+
+\item $\Gamma = \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}$ then
+$\exists q. $
+$\GRANULEsym{(}  \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)} = \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Gamma'  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}$
+
+such that $\GRANULEnt{r} \sqsupseteq \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{r}$ and
+$\maximal{q}{q'}{r}{q'+r}$.
+
+Instantiating maximality with $q' = 0$ and reflexivity then we have
+$0 \sqsubseteq \GRANULEnt{q}$. From this, and the inductive hypothesis, we can construct:
+%
+\begin{align*}
+\dfrac{ \emptyset \sqsubseteq \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Gamma'  \GRANULEsym{)} \quad 0 \sqsubseteq \GRANULEnt{q}}
+{ \emptyset \sqsubseteq \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Gamma'  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A} }
+\end{align*}
+%
+\end{itemize}
+%
+\end{proof}
+
+\begin{lemma}
+\label{lemma:contexts-subsub}
+For all contexts $\Gamma_{{\mathrm{1}}}$, $\Gamma_{{\mathrm{2}}}$, where
+$\GRANULEsym{[}  \Gamma_{{\mathrm{2}}}  \GRANULEsym{]}$ (i.e., $\Gamma_{{\mathrm{2}}}$ is all graded)
+then:
+%
+\begin{align*}
+\Gamma_{{\mathrm{2}}} \sqsubseteq \Gamma_{{\mathrm{1}}}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma_{{\mathrm{2}}}  \GRANULEsym{)}
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+By induction on the structure of $\Gamma_{{\mathrm{2}}}$.
+
+\begin{itemize}
+\item $\Gamma_{{\mathrm{2}}} = \sqsubseteq$
+
+Then $\Gamma_{{\mathrm{1}}}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma_{{\mathrm{1}}}  \GRANULEsym{-}   \emptyset   \GRANULEsym{)} = \Gamma_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma_{{\mathrm{1}}}$.
+
+By Lemma~\ref{lemma:context-neg}, then $ \emptyset \sqsubseteq \GRANULEsym{(}  \Gamma_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma_{{\mathrm{1}}}  \GRANULEsym{)}$
+satisfying this case.
+
+\item $\Gamma_{{\mathrm{2}}} = \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}$
+
+By the premises $\Gamma_{{\mathrm{1}}} \sqsubseteq \Gamma_{{\mathrm{2}}}$ then we can
+assume $\GRANULEmv{x} \in \Gamma_{{\mathrm{1}}}$ and thus (by context
+rearrangement) $\Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}$.
+
+Thus we consider $\GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{)}$.
+
+\begin{align*}
+  \; & \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{)} \\
+= \; & \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \GRANULEsym{)} \\
+= \; & \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q'}  } }   \GRANULEnt{A}
+\end{align*}
+%
+where (1) $\exists  \GRANULEnt{q}  .\,   \GRANULEnt{r}  \sqsupseteq  \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{s}$ with
+(2) $(\maximal{q}{\hat{q}}{r}{\hat{q}+s})$
+
+and (3) $\exists  \GRANULEnt{q'}  .\,   \GRANULEnt{r}  \sqsupseteq  \GRANULEnt{q'}  \GRANULEsym{+}  \GRANULEnt{q}$
+with (4) $(\maximal{q'}{\hat{q'}}{r}{\hat{q'}+s})$.
+
+Apply (1) to (4) by letting $\hat{q'} = {s}$
+and by commutativity of $+$ then we get that
+$\GRANULEnt{q'}  \sqsupseteq  \GRANULEnt{s}$.
+
+By induction we have that
+%
+\begin{align*}
+\Gamma'_{{\mathrm{1}}} \sqsubseteq \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{)} \tag{ih}
+\end{align*}
+%
+%
+Thus we get that:
+%
+\begin{align*}
+\dfrac{\GRANULEnt{s} \sqsubseteq \GRANULEnt{q'} \quad
+\Gamma'_{{\mathrm{1}}} \sqsubseteq \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{)}}
+{ \Gamma'_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \sqsubseteq \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma'_{{\mathrm{1}}}  \GRANULEsym{-}  \Gamma'_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q'}  } }   \GRANULEnt{A} }
+\end{align*}
+%
+\item $\Gamma_{{\mathrm{2}}} = \Gamma'_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$ Trivial as it violates the grading
+  condition of the premise.
+\end{itemize}
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subSynthSound*
+
+\begin{proof}
+Structural induction over the synthesis rules. Each of the possible synthesis
+rules are considered in turn.
+
+\begin{enumerate}[itemsep=1em]
+  \item Case \subLinVarName \\
+  In the case of linear variable synthesis, we have the derivation:
+  \[
+    \subLinVar{}
+  \]
+  %
+  By the definition of context subtraction,
+  $(\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}) - \Gamma = \GRANULEmv{x}  :  \GRANULEnt{A}$, thus we
+  can construct the following typing derivation, matching the
+  conclusion:
+  \[
+    \inferrule*[Right=\textsc{Var}]
+    {\quad}
+    {\GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A}}
+  \]
+
+\item Case \subGrVarName{} \\
+    Matching the form of the lemma, we have the derivation:
+    \[
+    \subGrVar{}
+    \]
+    %
+    By the definition of context subtraction,
+    $ \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{)} = \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}$
+    where (1) $\exists  \GRANULEnt{q}  .\,   \GRANULEnt{r}  \sqsupseteq  \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{s}$ and $\maximal{q}{q'}{r}{q' + s}$.
+
+    Applying maximality (1) with $q = 1$ then we have that $1 \sqsubseteq \GRANULEnt{q}$ (*)
+
+    Thus, from this we can construct the typing derivation, matching the conclusion:
+    %
+    \[
+    \inferrule*[Right=\textsc{Approx}]
+    {
+      \inferrule*[Right=\textsc{Der}]
+        {\inferrule*[Right=\textsc{Var}]
+          {\quad}
+          {\GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A}}
+        }
+        {\GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A} \qquad 1 \sqsubseteq \GRANULEnt{q} \; (*)}
+    }{
+      \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A}
+    }
+    \]
+
+  \item Case \subAbsName \\
+    We thus have the derivation:
+    %
+    \[
+    \subAbs{}
+    \]
+    %
+    By induction we then have that:
+    %
+    \[
+      \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}
+    \]
+    %
+    Since $\GRANULEmv{x}  \not\in | \Delta |$ then by the definition of context
+    subtraction we have that $\GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \Delta = \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}$.
+    From this, we can construct the following derivation, matching the
+    conclusion:
+    %
+    \[
+    \inferrule*[Right=Abs]
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}{\Gamma  \GRANULEsym{-}  \Delta  \vdash   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}}
+    \]
+
+
+  \item Case \subAppName \\
+    %
+    Matching the form of the lemma, the application derivation is:
+    \[
+      \subApp{}
+    \]
+    %
+    By induction, we have that:
+    %
+      \begin{align*}
+        \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \tag{ih1} \\
+        \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A} \tag{ih2}
+      \end{align*}
+    %
+    By the definition of context subtraction and since $\GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} |$ then (ih1) is equal to:
+    %
+      \begin{align*}
+        \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \tag{ih1'}
+      \end{align*}
+    %
+    We can thus construct the following typing derivation, making use of
+    of the admissibility of linear substitution
+    (Lemma~\ref{lemma:substitution}):
+    %
+    {\scriptsize{
+    \[
+    \hspace{-8em}
+    \inferrule*[Right=\textsc{app}]
+    {\inferrule*[right=\textsc{abs}, leftskip=5em]
+       {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :   \GRANULEnt{B}  \multimap  \GRANULEnt{C}    \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C}}
+       {\Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash   \lambda  \GRANULEmv{x_{{\mathrm{2}}}}  .  \GRANULEnt{t_{{\mathrm{1}}}}   :   \GRANULEnt{B}  \multimap  \GRANULEnt{C}} \\
+    \inferrule*[right=\textsc{app}, rightskip=15em]
+    {\inferrule*[right=\textsc{var}, leftskip=2em]
+    {\quad}
+    {\GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}} \\ {\Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A}}}  {\GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}, \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}}
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)} ,\GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   :  \GRANULEnt{C}}
+    \]
+    }}
+
+    From Lemma~\ref{lemma:contextLemma1}, we have that
+    %
+    \begin{align*}
+      \GRANULEsym{(}  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} \sqsubseteq \GRANULEsym{(}  \GRANULEsym{(}  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}
+    \end{align*}
+    %
+    and from Lemma~\ref{lemma:contextLemma2}, that:
+    %
+    \begin{align*}
+      \GRANULEsym{(}  \GRANULEsym{(}  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} \sqsubseteq \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}
+    \end{align*}
+    %
+    %% JACK: this arguments needs strengthening, but it is true.
+    %% easy to given a proof of output contexts being subsets of input
+    which, since $\GRANULEmv{x_{{\mathrm{1}}}}$ is not in $\Delta_{{\mathrm{2}}}$ (as $\GRANULEmv{x_{{\mathrm{1}}}}$ is not
+    in $\Gamma$)
+    %%
+    $\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} = \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}$. Applying
+    these inequalities with \textsc{Approx} then yields the lemma's
+    conclusion $\GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}   \vdash   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   :  \GRANULEnt{C}$.
+
+  \item Case \subBoxName{} \\
+    %
+    The synthesis rule for boxing can be constructed as:
+    %
+    \[
+      \subBox{}
+    \]
+    %
+    By induction on the premise we get:
+    %
+    \begin{align*}
+      \Gamma  \GRANULEsym{-}  \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}
+    \end{align*}
+    %
+    Since we apply scalar multipication ih the conclusion of the rule
+    to $\Gamma  \GRANULEsym{-}  \Delta$ then we know that all of $\Gamma  \GRANULEsym{-}  \Delta$ must be
+    graded assumptions.
+
+    From this, we can construct the typing derivation:
+    %
+    \[
+    \inferrule*[Right=\textsc{Pr}]
+    {\GRANULEsym{[}   \Gamma  \GRANULEsym{-}  \Delta   \GRANULEsym{]}  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}{\textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{[}   \Gamma  \GRANULEsym{-}  \Delta   \GRANULEsym{]}   \vdash  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+    \]
+    Via Lemma~\ref{lemma:contexts-subsub}, we then have that
+    $\GRANULEsym{(}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }   \Gamma  \GRANULEsym{-}  \Delta    \GRANULEsym{)} \sqsubseteq \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \GRANULEsym{(}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}   \GRANULEsym{)}  \GRANULEsym{)}  \GRANULEsym{)}$ thus, we can
+    derived:
+    %
+    \[
+    \inferrule*[Right=\textsc{Approx}]
+   {
+    \inferrule*[Right=\textsc{Pr}]
+    {\GRANULEsym{[}   \Gamma  \GRANULEsym{-}  \Delta   \GRANULEsym{]}  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}{\textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{[}   \Gamma  \GRANULEsym{-}  \Delta   \GRANULEsym{]}   \vdash  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}
+    \quad \text{Lem.~\ref{lemma:contexts-subsub}}}
+   }{ \Gamma  \GRANULEsym{-}  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \GRANULEsym{(}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}   \GRANULEsym{)}  \GRANULEsym{)}  \vdash  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+    \]
+    %
+    Satisfying the goal of the lemma.
+
+  \item Case \subUnboxName \\
+    The synthesis rule for unboxing has the form:
+    \[
+    \subUnbox{}
+    \]
+    %
+    By induction on the premise we have that:
+    %
+      \begin{align*}
+        \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}
+      \end{align*}
+   %
+   By the definition of context subtraction we get that $\exists q$ and:
+   %
+     \begin{align*}
+       \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{)}
+     = \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}
+       \end{align*}
+   %
+    such that $r = q + s$
+
+    We also have that $0 \sqsubseteq \GRANULEnt{s}$.
+
+    By monotonicity with $\GRANULEnt{q} \sqsubseteq \GRANULEnt{q}$ (reflexivity)
+    and $0 \sqsubseteq \GRANULEnt{s}$ then $\GRANULEnt{q} \sqsubseteq \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{s}$.
+
+    By context subtraction we have $r = q + s$ therefore
+    $\GRANULEnt{q} \sqsubseteq \GRANULEnt{r}$ (*).
+
+    From this, we can construct the typing derivation:
+    %
+    \[
+    \inferrule*[Right=\textsc{Let}]
+    {\inferrule*[right=\textsc{Var}]
+                    {\quad}{\GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+           \\
+      \inferrule*[right=\textsc{approx}]
+         {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B} \quad (*)}
+         {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}}
+     {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   :  \GRANULEnt{B}}
+    \]
+    %
+    Which matches the goal.
+
+  \item Case \subPairIntroName \\
+
+    The synthesis rule for pair introduction has the form:
+    %
+    \[
+      \subPairIntro{}
+    \]
+    %
+    By induction we get:
+    %
+    \begin{align*}
+      \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A} \tag{ih1} \\
+      \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B} \tag{ih2}
+    \end{align*}
+    %
+    From this, we can construct the typing derivation:
+    %
+    \[
+    \inferrule*[Right=\textsc{Pair}]
+    {\Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A} \\ \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \vdash   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}}
+    \]
+    %
+    From Lemma~\ref{lemma:contextLemma1}, we have that:
+    \begin{align*}
+      \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)} \sqsubseteq \GRANULEsym{(}  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}
+    \end{align*}
+    %
+    and from Lemma~\ref{lemma:contextLemma2}, that:
+    %
+    \begin{align*}
+      \GRANULEsym{(}  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{+}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}} \sqsubseteq \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}
+    \end{align*}
+    %
+    From which we then apply \textsc{Approx} to the
+    above derivation,
+    yielding the goal $\Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \vdash   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}$.
+
+  \item Case \subPairElimName \\
+    The synthesis rule for pair elimination has the form:
+    \[
+      \subPairElim
+    \]
+    %
+    By induction we get:
+    %
+    \begin{align*}
+      \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \GRANULEsym{)}  \GRANULEsym{-}  \Delta  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{C}
+    \end{align*}
+    %
+    since $\GRANULEmv{x_{{\mathrm{1}}}}  \not\in | \Delta | \wedge \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta |$ then
+    $\GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \GRANULEsym{)}  \GRANULEsym{-}  \Delta = \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}$.
+
+    From this, we can construct the following typing derivation,
+    matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Case}]
+    {\inferrule*[right=\textsc{Var}] {\quad} {\GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}} \\ \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{C}}
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \vdash   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   :  \GRANULEnt{C}}
+    \]
+    % JACK: tighten from context subset
+    which matches the conclusion since $\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B} = \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \GRANULEsym{)}  \GRANULEsym{-}  \Delta$ since $\GRANULEmv{x_{{\mathrm{3}}}}  \not\in | \Delta |$ by its
+    disjointness from $\Gamma$.
+
+  \item Case \subSumIntroLname and \subSumIntroRname \\
+    The synthesis rules for sum introduction are straightforward. For
+     \subSumIntroLname we have the rule:
+    \[
+       \subSumIntroL
+    \]
+    By induction we have:
+    %
+      \begin{align*}
+        \Gamma  \GRANULEsym{-}  \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A} \tag{ih1}
+       \end{align*}
+    %
+    from which we can construct the typing derivation, matching the
+    conclusion:
+    \[
+    \inferrule*[Right=\subSumIntroLname]
+    {\Gamma  \GRANULEsym{-}  \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}
+    {\Gamma  \GRANULEsym{-}  \Delta  \vdash  \GRANULEkw{inl} \, \GRANULEnt{t}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}}
+    \]
+    Matching the goal. And likewise for \subSumIntroRname.
+
+  \item Case \subSumElimName
+      The synthesis rule for sum elimination has the form:
+      \[
+        \subSumElim
+      \]
+      %
+      By induction:
+        \begin{align*}
+          \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \tag{ih}
+\\        \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \GRANULEsym{)}  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{C} \tag{ih}
+        \end{align*}
+      %
+      From this we can construct the typing derivation, matching the conclusion:
+      \[
+      \inferrule*[Right=Case]
+      {\inferrule*[right=Var,leftskip=10em]{\quad}{\GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}} \\ \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{C} \\ \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{3}}}}  :  \GRANULEnt{C}}{\GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \GRANULEsym{)} - (\Delta_{{\mathrm{1}}} \sqcap \Delta_{{\mathrm{2}}}) \vdash  \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} : C}
+      \]
+
+      \item Case \subUnitIntroName
+
+          \begin{align*}
+            \subUnitIntro{}
+           \end{align*}
+         %
+         By Lemma~\ref{lemma:context-neg} we have that $\emptyset \sqsubseteq \Gamma  \GRANULEsym{-}  \Gamma$
+         then we have:
+         %
+           \begin{align*}
+             \inferrule*[right = \textsc{Approx}]
+             {\inferrule*[right = 1]
+             {\quad}{\emptyset   \vdash  \GRANULEsym{()}  :   \mathsf{1}}}
+             {\Gamma  \GRANULEsym{-}  \Gamma  \vdash  \GRANULEsym{()}  :   \mathsf{1}}
+           \end{align*}
+         %
+         Matching the goal
+
+     \item Case \subUnitElimName
+          \begin{align*}
+            \subUnitElim{}
+           \end{align*}
+         %
+         By induction we have:
+           \begin{align*}
+             \Gamma  \GRANULEsym{-}  \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{C} \tag{ih}
+            \end{align*}
+         %
+         Then we make the derivation:
+         %
+           \begin{align*}
+             \inferrule*[right = Let$1$]
+             {\inferrule*[right = Var]{\quad}{\GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEmv{x}  :   \mathsf{1}}
+             \\ \Gamma  \GRANULEsym{-}  \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{C}}
+             {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t}  :  \GRANULEnt{C}}
+           \end{align*}
+         where the context is equal to $\GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \GRANULEsym{)}  \GRANULEsym{-}  \Delta$.
+
+  \item Case \subDerName
+
+      \begin{align*}
+        \subDer
+      \end{align*}
+     %
+     By induction:
+     %
+       \begin{align*}
+         \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \vdash  \GRANULEnt{t}  :  \GRANULEnt{B} \tag{ih}
+       \end{align*}
+     %
+     By the definition of context subtraction we have (since also $\GRANULEmv{y}  \not\in | \Delta |$)
+       \begin{align*}
+     &  \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}   \GRANULEsym{)} \\
+   =\ &  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}
+       \end{align*}
+     where $\exists  \GRANULEnt{q}  .\,   \GRANULEnt{s}  \sqsupseteq  \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{s'}$ (1) and
+     $\maximal{q}{\hat{q}}{s}{\hat{q} + s'}$ (2)
+
+       The goal context is computed by:
+       %
+       \begin{align*}
+      & \GRANULEsym{(}  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{-}  \GRANULEsym{(}  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}   \GRANULEsym{)} \\
+    =\ & \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q'}  } }   \GRANULEnt{A}
+       \end{align*}
+       where $\GRANULEnt{r}  \sqsupseteq   \GRANULEnt{q'}  \GRANULEsym{+}  \GRANULEnt{s'}$ (3)
+       and $\maximal{q'}{\hat{q'}}{r}{\hat{q'} + s'}$ (4)
+
+       From the premise of \subDerName we have
+       $\GRANULEnt{r}  \sqsupseteq  \GRANULEsym{(}  \GRANULEnt{s}  \GRANULEsym{+}   1   \GRANULEsym{)}$.
+
+       \begin{align*}
+      \begin{array}{rll}
+        \text{congruence of + and (1)} & \implies \GRANULEnt{s}  \GRANULEsym{+}   1    \sqsupseteq    \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{s'}   \GRANULEsym{+}   1 & (5) \\
+        \text{transitivity with \subDerName premise and (5)} & \implies
+                 \GRANULEnt{r}  \sqsupseteq    \GRANULEnt{q}  \GRANULEsym{+}  \GRANULEnt{s'}   \GRANULEsym{+}   1 & (6) \\
+        \text{+ assoc./comm. on (6)} & \implies \GRANULEnt{r}  \sqsupseteq    \GRANULEnt{q}  \GRANULEsym{+}   1    \GRANULEsym{+}  \GRANULEnt{s'} & (7) \\
+       \text{apply (8) to (4) with $\hat{q'} = q + 1$} & \implies
+                                                    \GRANULEnt{q'}  \sqsupseteq  \GRANULEnt{q}  \GRANULEsym{+}   1
+                                                     & (8)
+      \end{array}
+       \end{align*}
+       %
+       Using this last result we derive:
+       \begin{align*}
+         \inferrule*[right = approx]
+        {
+         \inferrule*[right = contraction]
+         {
+         \inferrule*[right = Der]
+         {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+         {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+         }
+         {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{q}  \GRANULEsym{+}   1    } }   \GRANULEnt{A}   \vdash   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   :  \GRANULEnt{B}}
+         \quad (8)}
+        {\GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q'}  } }   \GRANULEnt{A}   \vdash   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   :  \GRANULEnt{B}}
+         \end{align*}
+       Which matches the goal.
+
+\end{enumerate}
+\end{proof}
+
+\addSynthSound*
+\begin{proof}
+
+  \begin{enumerate}
+    \item Case \addLinVarName \\
+  In the case of linear variable synthesis, we have the derivation:
+  \[
+    \addLinVar
+  \]
+  Therefore we can construct the following typing derivation, matching the conclusion:
+  \[
+    \inferrule*[Right=\textsc{var}]
+    {\quad}
+    {\GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A}}
+  \]
+    \item Case \addGrVarName\\
+    Matching the form of the lemma, we have the derivation:
+    \[
+      \addGrVar
+    \]
+    From this we can construct the typing derivation, matching the conclusion:
+    \[
+      \inferrule*[Right=\textsc{Der}]
+        {\inferrule*[Right=\textsc{Var}]
+          {\quad}
+          {\GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A}}
+        }
+        {\GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash  \GRANULEmv{x}  :  \GRANULEnt{A}}
+    \]
+    \item Case \addAbsName\\
+    We thus have the derivation:
+    \[
+      \addAbs
+    \]
+    %
+    By induction on the premise we then have:
+    \[
+      \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}
+    \]
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{abs}]
+    {\Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}{\Delta  \vdash   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}}
+    \]
+    \item Case \addAppName\\
+    Matching the form of the lemma, the application derivation can be
+    constructed as:
+    \[
+      \addApp
+    \]
+    %
+    By induction on the premises we then have the following typing
+    judgments:
+    %
+    \begin{align*}
+      \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \\
+      \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A}
+    \end{align*}
+    %
+    We can thus construct the following typing derivation, making use
+    of the admissibility of linear substitution
+    (Lemma~\ref{lemma:substitution}):
+    \[
+    \inferrule*[Right=(L.~\ref{lemma:substitution})]
+    {\inferrule*[right=\textsc{app}, leftskip=2em]
+    {\inferrule*[right=\textsc{var}]
+    {\quad}
+    {\GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}} \\ {\Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A}}}
+  {\Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+    \\ \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C}}
+    {\GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   :  \GRANULEnt{C}}
+    \]
+    \item Case \addBoxName\\
+    The synthesis rule for boxing can be constructed as:
+    \[
+      \addBox
+    \]
+    By induction we then have:
+    %
+    \[
+      \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}
+    \]
+    %
+    In the conclusion of the above derivation we know that $\textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta$ is defined, therefore it must be that all of $\Delta$ are
+    graded assumptions, i.e., we have that $\GRANULEsym{[}  \Delta  \GRANULEsym{]}$ holds.
+    We can thus construct the following typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Pr}]
+    {\GRANULEsym{[}  \Delta  \GRANULEsym{]}  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}{\textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{[}  \Delta  \GRANULEsym{]}   \vdash  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+    \]
+    \item Case \addDerName\\
+    From the dereliction rule we have:
+    \[
+      \addDer
+    \]
+    %
+    By induction we get:
+    %
+      \begin{align*}
+        \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B} \tag{ih}
+      \end{align*}
+    %
+    Case on $x \in \Delta$
+    \begin{itemize}
+      \item $x \in \Delta$, i.e., $\Delta = \Delta'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}$.
+
+        Then by admissibility of contraction we can derive:
+        %
+        \begin{align*}
+          \inferrule*{
+            \inferrule*[Right=\textsc{Der}]
+             {\Delta'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}{\Delta'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+            }
+            { \GRANULEsym{(}  \Delta'  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}   \GRANULEsym{)}  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   :  \GRANULEnt{B} }
+        \end{align*}
+        %
+        Satisfying the lemma statment.
+
+     \item $x \not\in \Delta$. Then
+      again from the admissiblity of contraction, we derive the
+      typing:
+      %
+        \begin{align*}
+          \inferrule*{
+            \inferrule*[Right=\textsc{Der}]
+             {\Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}{\Delta  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+            }
+            { \Delta  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}   \vdash   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   :  \GRANULEnt{B} }
+        \end{align*}
+        %
+        which is well defined as $x \not\in \Delta$ and gives the
+        lemma conclusion.
+        \end{itemize}
+
+    \item Case \addUnboxName\\
+    The synthesis rule for unboxing has the form:
+    \[
+      \addUnbox
+    \]
+    %
+    By induction we have that:
+    %
+    \[
+      \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{B} \tag{ih}
+    \]
+    %
+    Case on $\GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \in \Delta$
+    \begin{itemize}
+        \item $\GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \in \Delta$, i.e., $\GRANULEnt{s} \sqsubseteq \GRANULEnt{r}$. \\
+        From this, we can construct the typing derivation, matching the conclusion:
+          \[
+            \inferrule*[Right=\textsc{let}$\square$]
+            {\inferrule*[right=\textsc{var}]{\quad}{\GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}} \\ \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}{\Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   :  \GRANULEnt{B}}
+          \]
+        \item $\GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \notin \Delta$, i.e., $0 \sqsubseteq \GRANULEnt{r}$. \\
+        From this, we can construct the typing derivation, matching the conclusion:
+          \[
+            \inferrule*[right=\textsc{let}$\square$]
+            {\inferrule*[right=\textsc{var}]{\quad}{\GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}} \\ \inferrule*[right=\textsc{Approx}, rightskip=5em]{\inferrule*[right=Weak]{\Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}{\Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{   0   } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}} \\ 0 \sqsubseteq \GRANULEnt{r}}{\Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}}{\Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   :  \GRANULEnt{B}}
+          \]
+    \end{itemize}
+  \item Case \addPairIntroName\\
+
+    The synthesis rule for pair introduction has the form:
+
+    \[
+      \addPairIntro
+    \]
+    %
+    By induction on the premises we have that:
+    %
+    \begin{align*}
+      \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A} \tag{ih1}\\
+      \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B} \tag{ih2}
+    \end{align*}
+    %
+    From this, we can construct the typing derivation, matching the conclusion:
+    %
+    \[
+    \inferrule*[Right=\textsc{pair}]
+    {\Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A} \\ \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+    {\Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \vdash   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}}
+    \]
+
+  \item Case \addPairElimName\\
+    The synthesis rule for pair elimination has the form:
+    \[
+      \addPairElim
+    \]
+      By induction on the premises we have that:
+    \begin{align*}
+      \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A} \tag{ih1} \\
+      \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B} \tag{ih2}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{LetPair}]
+    {\inferrule*[right=\textsc{Var}] {\quad} {\GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}} \\ \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{C}}
+    {\Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \vdash   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   :  \GRANULEnt{C}}
+    \]
+
+  \item Case \addSumIntroLName and \addSumIntroRName\\
+    The synthesis rules for sum introduction are straightforward. For
+    \addSumIntroLName we have the rule:
+    \[
+      \addSumIntroL
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A} \tag{ih}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Inl}]
+    {\Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}
+    {\Delta  \vdash  \GRANULEkw{inl} \, \GRANULEnt{t}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}}
+    \]
+    Likewise, for the \addSumIntroRName we have the
+    synthesis rule:
+    \[
+      \addSumIntroR
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{B} \tag{ih}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Inr}]
+    {\Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}
+    {\Delta  \vdash  \GRANULEkw{inl} \, \GRANULEnt{t}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}}
+    \]
+
+    \item Case \addSumElimName\\
+      The synthesis rule for sum elimination has the form:
+      \[
+      \addSumElim
+      \]
+    By induction on the premises we have that:
+    \begin{align*}
+      \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \tag{ih1}\\
+      \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{C} \tag{ih2}
+    \end{align*}
+      From this, we can construct the typing derivation, matching the
+      conclusion:
+      \[
+      \inferrule*[Right=\textsc{Case}]
+      {\inferrule*[right=\textsc{Var}, leftskip=5em]{\quad}{\GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}} \\ \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \\ \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{C}}{(\Delta_{{\mathrm{1}}} \sqcup \Delta_{{\mathrm{2}}} ), \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B} \vdash \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} : C}
+      \]
+
+  \item Case \addUnitIntroName\\
+    The synthesis rule for unit introduction has the form:
+    \[
+      \addUnitIntro
+    \]
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{1}]
+    {\quad}
+    {\emptyset   \vdash  \GRANULEsym{()}  :   \mathsf{1}}
+    \]
+
+  \item Case \addUnitElimName\\
+    The synthesis rule for unit elimination has the form:
+    \[
+      \addUnitElim
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{C} \tag{ih}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the
+    conclusion:
+    \[
+    \inferrule*[Right=\textsc{Let1}]
+    { \inferrule*[Right=\textsc{Var}]{\quad}{\GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEmv{x}  :   \mathsf{1}} \\ \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{C}}
+    {\Delta  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t}  :  \GRANULEnt{C}}
+    \]
+    %
+
+  \end{enumerate}
+\end{proof}
+\addPruningSynthSound*
+\begin{proof}
+  The cases for the rules in the additive pruning synthesis calculus are equivalent to lemma \eqref{lemma:addSynthSound}, except for the cases of the \addPruningAppName and \addPruningPairIntroName rules which we consider here:
+  \begin{enumerate}
+    \item Case \addPruningAppName\\
+    Matching the form of the lemma, the application derivation can be
+    constructed as:
+    \[
+      \addPruneApp
+    \]
+    %
+    By induction on the premises we then have the following typing
+    judgments:
+    %
+    \begin{align*}
+      \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \\
+      \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A}
+    \end{align*}
+    %
+    We can thus construct the following typing derivation, making use
+    of the admissibility of linear substitution
+    (Lemma~\ref{lemma:substitution}):
+    \[
+    \inferrule*[Right=(L.~\ref{lemma:substitution})]
+    {\inferrule*[right=\textsc{app}, leftskip=2em]
+    {\inferrule*[right=\textsc{var}]
+    {\quad}
+    {\GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}} \\ {\Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A}}}
+  {\Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+    \\ \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C}}
+    {\GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   :  \GRANULEnt{C}}
+    \]
+
+  \item Case \addPruningPairIntroName\\
+
+    The synthesis rule for the pruning alternative for pair introduction has the form:
+
+    \[
+      \addPrunePairIntro
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A} \tag{ih1} \\
+      \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B} \tag{ih2}
+    \end{align*}
+
+    From this, we can construct the typing derivation, matching the conclusion:
+
+    \[
+    \inferrule*[Right=\textsc{pair}]
+    {\Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{A} \\ \Delta_{{\mathrm{2}}}  \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+    {\Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \vdash   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}}
+    \]
+
+
+  \end{enumerate}
+\end{proof}
+
+%\focusSoundSub*
+\begin{restatable}[Soundness of focusing for subtractive synthesis]{lemma}{focusSoundSub}
+For all contexts $\Gamma$, $\Omega$ and types $\GRANULEnt{A}$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & \Gamma  ;  \Omega  \vdash   \GRANULEnt{A}  \Uparrow\   \Rightarrow^{-}  \GRANULEnt{t}  \ |\  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta\\
+ 2.\ Left\ Async: & \Gamma  ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  \ |\  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta\\
+ 3.\ Right\ Sync: & \Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow\   \Rightarrow^{-}  \GRANULEnt{t}  \ |\  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta\\
+ 4.\ Left\ Sync: & \Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  \ |\  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta\\
+ 5.\ Focus\ Right: & \Gamma  ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  \ |\  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta\\
+ 6.\ Focus\ Left: & \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{-}  \GRANULEnt{t}  \ |\  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+  \begin{enumerate}
+      \item Case 1. Right Async: \\
+      \begin{enumerate}
+        \item Case \subAbsName \\
+          In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+          \[
+          \fSubAbsRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instantiation of the \subAbsName synthesis rule in the non-focusing calculus:
+          \[
+          \inferrule*[right=\subAbsName]
+          {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \quad\; \GRANULEmv{x}  \not\in | \Delta |}{\Gamma  \GRANULEsym{,}  \Omega  \vdash   \GRANULEnt{A}  \multimap  \GRANULEnt{B}   \Rightarrow^-   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}  \ |\  \Delta}
+          \]
+    \item Case \fSubRAsyncTransitionName \\
+          In the case of the right asynchronous rule for transition to a left asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubRAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta
+          \]
+          from case 2 of the lemma.
+    \end{enumerate}
+    \item Case 2. Left Async: \\
+      \begin{enumerate}
+        \item Case \subPairElimName \\
+          In the case of the left asynchronous rule for pair elimination, the synthesis rule has the form:
+          \[
+          \fSubPairElimRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+            \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+            \]
+          from From which, we can construct the following instantiation of the \subPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+          \inferrule*[right=\subPairElimName]
+          {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \\ \GRANULEmv{x_{{\mathrm{1}}}}  \not\in | \Delta | \\ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta |}{\Gamma  \GRANULEsym{,}  \GRANULEsym{(}  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \GRANULEsym{)}  \vdash  \GRANULEnt{C}  \Rightarrow^-   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t}  \ |\  \Delta_{{\mathrm{2}}}}
+          \]
+        \item Case \subSumElimName \\
+          In the case of the left asynchronous rule for sum elimination, the synthesis rule has the form:
+          \[
+          \fSubSumElimRule
+          \]
+          By induction on the first and second premises, we have that:
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \tag{ih1}\\
+          \]
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} \tag{ih2}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \subSumElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=\subSumElimName]
+      {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \quad\,
+       \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} \quad\, \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | \quad \GRANULEmv{x_{{\mathrm{3}}}}  \not\in | \Delta_{{\mathrm{2}}} |}
+     {\Gamma  \GRANULEsym{,}  \GRANULEsym{(}  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \GRANULEsym{)} \vdash C \Rightarrow^{-}  \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} \Delta_{{\mathrm{1}}} \sqcap \Delta_{{\mathrm{2}}}}
+          \]
+        \item Case \subUnitElimName \\
+          In the case of the left asynchronous rule for unit elimination, the synthesis rule has the form:
+          \[
+          \fSubUnitElimRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \subUnitElimName\ synthesis rule in the non-focusing calculus matching the conclusion:
+          \[
+    \inferrule*[right=\subUnitElimName]
+    {\Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t} \ |\  \Delta}
+          \]
+        \item Case \subUnboxName \\
+          In the case of the left asynchronous rule for graded modality elimination, the synthesis rule has the form:
+          \[
+          \fSubUnboxRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}  \tag{ih}\\
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \subUnboxName synthesis rule in the non-focusing calculus:
+          \[
+  \inferrule*[right=\subUnboxName]
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}  \\ 0 \sqsubseteq \GRANULEnt{s}}{\Gamma  \GRANULEsym{,}  \GRANULEsym{(}  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \GRANULEsym{)}  \vdash  \GRANULEnt{B}  \Rightarrow^-   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}  \ |\  \Delta}
+          \]
+        \item Case \subDerName \\
+          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+          \[
+          \fSubDerRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}  \tag{ih}\\
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \subDerName synthesis rule in the non-focusing calculus:
+          \[
+      \inferrule*[right=\subDerName]
+{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A} \\
+\GRANULEmv{y}  \not\in | \Delta | \\
+\exists  \GRANULEnt{s}  .\,   \GRANULEnt{r}  \sqsupseteq  \GRANULEnt{s}  \GRANULEsym{+}   1
+}
+{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}  \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}}
+          \]
+
+        \item Case \fSubLAsyncTransitionName \\
+          In the case of the left asynchronous rule for transitioning an assumption from the focusing context $\Omega$ to the non-focusing context $\Gamma$, the synthesis rule has the form:
+          \[
+            \fSubLAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}    \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 3. Right Sync: \\
+      \begin{enumerate}
+        \item Case \subPairIntroName \\
+          In the case of the right synchronous rule for pair introduction, the synthesis rule has the form:
+          \[
+          \fSubPairIntroRuleNoLabel
+          \]
+          By induction on the first and second premises, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}}  \tag{ih1}
+          \]
+          \[
+            \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instatiation of the \subPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=\subPairIntroName]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \\ \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}}}{\Gamma  \vdash   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}   \Rightarrow^-   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )  \ |\  \Delta_{{\mathrm{2}}}}
+          \]
+        \item Case \subSumIntroLname\ and \subSumIntroRname\\
+          In the case of the right synchronous rules for sum introduction, the synthesis rules has the form:
+          \[
+          \fSubSumIntroRuleL
+          \]
+          \[
+          \fSubSumIntroRuleR
+          \]
+          By induction on the premises of these rules, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \tag{ih1}
+          \]
+          \[
+            \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instatiations of the \subSumIntroLname\ and \subSumIntroRname\ rule in the non-focusing calculus, respectively:
+          \[
+    \inferrule*[right=\subSumIntroLname]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^-  \GRANULEkw{inl} \, \GRANULEnt{t} \ |\  \Delta}
+          \]
+          \[
+    \inferrule*[right=\subSumIntroRname]
+    {\Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^-  \GRANULEkw{inr} \, \GRANULEnt{t} \ |\  \Delta}
+          \]
+        \item Case \subUnitIntroName \\
+          In the case of the right synchronous rule for unit introduction, the synthesis rule has the form:
+          \[
+          \fSubUnitIntroRule
+          \]
+          From which, we can construct the following instatiation of the \subUnitIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=\subUnitIntroName]
+    {\quad}
+    {\Gamma  \GRANULEsym{,}  \Omega  \vdash   \mathsf{1}   \Rightarrow^-  \GRANULEsym{()} \ |\  \Gamma}
+          \]
+        \item Case \subBoxName \\
+          In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
+          \[
+          \fSubBoxRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instatiation of the \subBoxName synthesis rule in the non-focusing calculus:
+          \[
+  \inferrule*[right=\subBoxName]
+  {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta}{\Gamma  \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^-  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]} \ |\  \Gamma  \GRANULEsym{-}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}}
+          \]
+      \item Case \fSubRSyncTransitionName \\
+          In the case of the right synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubRSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 1 of the lemma.
+      \end{enumerate}
+    \item Case 4. Left Sync \\
+      \begin{enumerate}
+          \item Case \subAppName \\
+          In the case of the left synchronous rule for application, the synthesis rule has the form:
+          \[
+          \fSubAppRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \tag{ih1}
+          \]
+          from case 4 of the lemma. By induction on the third premise, we have that:
+          \[
+            \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instatiation of the \subAppName synthesis rule in the non-focusing calculus:
+          \[
+  \inferrule*[right=\subAppName]
+  {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} \qquad \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | \qquad \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}}}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^-   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}  \ |\  \Delta_{{\mathrm{2}}}}
+          \]
+          \item Case \subLinVarName \\
+          In the case of the left synchronous rule for linear variable synthesis, the synthesis rule has the form:
+          \[
+          \fSubLinVarRule
+          \]
+          From which, we can construct the following instatiation of the \subLinVarName\  synthesis rule in the non-focusing calculus:
+          \[
+                             \inferrule*[right=\subLinVarName]
+                             {\quad}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEmv{x} \ |\  \Gamma}
+          \]
+          \item Case \subGrVarName \\
+          In the case of the left synchronous rule for graded variable synthesis, the synthesis rule has the form:
+          \[
+          \fSubGrVarRule
+          \]
+          From which, we can construct the following instatiation of the \subGrVarName\  synthesis rule in the non-focusing calculus:
+          \[
+      \inferrule*[right=\subGrVarName]
+  {\exists  \GRANULEnt{s}  .\,   \GRANULEnt{r}  \sqsubseteq   \GRANULEnt{s}  \GRANULEsym{+}   1}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEmv{x} \ |\  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}}
+          \]
+      \item Case \fSubLSyncTransitionName \\
+          In the case of the left synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubLSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+        \item Case 5. Focus Right: \fSubFocusRName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a right synchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubFocusRRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+        \item Case 6. Focus Left \fSubFocusLName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a left synchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubFocusLRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+  \end{enumerate}
+\end{proof}
+
+%\focusSoundAdd*
+\begin{restatable}[Soundness of focusing for additive synthesis]{lemma}{focusSoundAdd}
+  \label{lemma:fAddSynthSound}
+For all contexts $\Gamma$, $\Omega$ and types $\GRANULEnt{A}$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & \Gamma  ;  \Omega  \vdash   \GRANULEnt{A}  \Uparrow\   \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \,  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 2.\ Left\ Async: & \Gamma  ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \,  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 3.\ Right\ Sync: & \Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow\   \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 4.\ Left\ Sync: & \Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 5.\ Focus\ Right: & \Gamma  ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 6.\ Focus\ Left: & \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+  \begin{enumerate}
+      \item Case 1. Right Async: \\
+      \begin{enumerate}
+        \item Case \addAbsName \\
+          In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+          \[
+          \fAddAbsRuleNoLabel
+          \]
+          By induction on the premise, we have that:
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instatiation of the \addAbsName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$\multimap^{+}$]
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}}{\Gamma  \GRANULEsym{,}  \Omega  \vdash   \GRANULEnt{A}  \multimap  \GRANULEnt{B}   \Rightarrow^+   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   ;\,  \Delta}
+          \]
+          \item Case \fAddRAsyncTransitionName
+          In the case of the right asynchronous rule for transition to a left asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddRAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 2. Left Async: \\
+      \begin{enumerate}
+        \item Case \addPairElimName \\
+          In the case of the left asynchronous rule for pair elimination, the synthesis rule has the form:
+          \[
+          \fAddPairElimRuleNoLabel
+          \]
+          By induction on the premise, we have that:
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addPairElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\otimes^{+}$]
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}}
+    {\Gamma  \GRANULEsym{,}  \GRANULEsym{(}  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}    \GRANULEsym{)}  \vdash  \GRANULEnt{C}  \Rightarrow^+   \textbf{let} \, ( \GRANULEmv{x_{{\mathrm{1}}}} ,  \GRANULEmv{x_{{\mathrm{2}}}} ) =  \GRANULEmv{x_{{\mathrm{3}}}}  \, \textbf{in} \,  \GRANULEnt{t_{{\mathrm{2}}}}   ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}}
+          \]
+        \item Case \addSumElimName \\
+          In the case of the left asynchronous rule for sum elimination, the synthesis rule has the form:
+          \[
+          \fAddSumElimRule
+          \]
+          By induction on the premises, we have that:
+          \[
+           \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \tag{ih1}
+          \]
+          \[
+           \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \tag{ih2}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addSumElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\oplus^{+}$]
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A} \\ \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}}{\Gamma  \GRANULEsym{,}  \GRANULEsym{(}  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}    \GRANULEsym{)} \vdash C \Rightarrow^{+} \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2}\ |\  (\Delta_{{\mathrm{1}}} \sqcup \Delta_{{\mathrm{2}}}), \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}}
+          \]
+        \item Case \addUnitElimName \\
+          In the case of the left asynchronous rule for unit elimination, the synthesis rule has the form:
+          \[
+          \fAddUnitElimRule
+          \]
+          By induction on the premise, we have that:
+          \[
+           \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta   \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnitElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L1$^{+}$]
+    {\Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}}
+          \]
+        \item Case \addUnboxName \\
+          In the case of the left asynchronous rule for graded modality elimination, the synthesis rule has the form:
+          \[
+          \fAddUnboxRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnboxName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\square^{+}$]
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \\ \textit{if}\ \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A} \in
+      \Delta\ \textit{then}\ \GRANULEnt{s} \sqsubseteq \GRANULEnt{r}\ \textit{else}\ 0 \sqsubseteq \GRANULEnt{r}}{\Gamma  \GRANULEsym{,}  \GRANULEsym{(}  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \GRANULEsym{)}  \vdash  \GRANULEnt{B}  \Rightarrow^+   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   ;\,  \GRANULEsym{(}   \Delta \!\setminus\!  \GRANULEmv{x_{{\mathrm{2}}}}   \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+          \]
+        \item Case \addDerName \\
+          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+          \[
+          \fAddDerRule
+          \]
+          By induction on the premise, we have that:
+          \[
+           \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \addDerName\ synthesis rule in the non-focusing calculus:
+          \[
+\inferrule*[right=der$^{+}$]
+{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A} }
+{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+   [  \GRANULEmv{x}  /  \GRANULEmv{y}  ]  \GRANULEnt{t}   ;\,  \Delta  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A} }
+          \]
+        \item Case \fAddLAsyncTransitionName \\
+          In the case of the left asynchronous rule for transitioning an assumption from the focusing context $\Omega$ to the non-focusing context $\Gamma$, the synthesis rule has the form:
+          \[
+            \fAddLAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}    \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 3. Right Sync: \\
+      \begin{enumerate}
+        \item Case \addPairIntroName \\
+          In the case of the right synchronous rule for pair introduction, the synthesis rule has the form:
+          \[
+          \fAddPairIntroRuleNoLabel
+          \]
+          By induction on the premises, we have that:
+          \[
+           \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}   \tag{ih1}
+          \]
+          \[
+           \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}  \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$\otimes^{+}$]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}} \\ \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}   \Rightarrow^+   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}}
+          \]
+        \item Case \addSumIntroLName\ and \addSumIntroRName\\
+          In the case of the right synchronous rules for sum introduction, the synthesis rules have the form:
+          \[
+          \fAddSumIntroRuleL
+          \]
+          \[
+          \fAddSumIntroRuleR
+          \]
+          By induction on the premises of the rules, we have that:
+          \[
+           \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta   \tag{ih1}
+          \]
+          \[
+           \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiations of the \addSumIntroLName\ and \addSumIntroRName\ synthesis rules in the non-focusing calculus, respectively:
+          \[
+    \inferrule*[right=R$\oplus_{1}^{+}$]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^+  \GRANULEkw{inl} \, \GRANULEnt{t}  ;\,  \Delta}
+          \]
+          \[
+    \inferrule*[right=R$\oplus_{2}^{+}$]
+    {\Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \oplus \,  \GRANULEnt{B}   \Rightarrow^+  \GRANULEkw{inr} \, \GRANULEnt{t}  ;\,  \Delta}
+          \]
+        \item Case \addUnitIntroName \\
+          In the case of the right synchronous rule for unit introduction, the synthesis rule has the form:
+          \[
+          \fAddUnitIntroRule
+          \]
+          From which, we can construct the following instantiation of the \addUnitIntroName\  synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R1$^{+}$]
+    {\quad}
+    {\Gamma  \vdash   \mathsf{1}   \Rightarrow^+  \GRANULEsym{()}  ;\,   \emptyset}
+          \]
+        \item Case \addBoxName \\
+          In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
+          \[
+          \fAddBoxRule
+          \]
+          By induction on the premise, we have that:
+          \[
+           \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta   \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instantiation of the \addBoxName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$\square^{+}$]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta}{\Gamma  \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^+  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  ;\,   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta}
+          \]
+      \item Case \fAddRSyncTransitionName \\
+          In the case of the right synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddRSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \tag{ih}
+          \]
+          from case 1 of the lemma.
+      \end{enumerate}
+    \item Case 4. Left Sync \\
+      \begin{enumerate}
+          \item Case \addAppName \\
+          In the case of the left synchronous rule for application, the synthesis rule has the form:
+          \[
+          \fAddAppRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \tag{ih1}
+          \]
+          from case 4 of the lemma. By induction on the second premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}} \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addAppName synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\multimap^{+}$]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \\ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^+   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;\,  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} }
+          \]
+          \item Case \addLinVarName \\
+          In the case of the left synchronous rule for linear variable synthesis, the synthesis rule has the form:
+          \[
+          \fAddLinVarRule
+          \]
+          From which, we can construct the following instantiation of the \addLinVarName\ in the non-focusing calculus:
+          \[
+    \inferrule*[right=LinVar$^{+}$]
+    {\quad}
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEmv{x}  ;\,   \GRANULEmv{x}  :  \GRANULEnt{A}}
+          \]
+          \item Case \addGrVarName \\
+          In the case of the left synchronous rule for graded variable synthesis, the synthesis rule has the form:
+          \[
+          \fAddGrVarRule
+          \]
+          From which, we can construct the following instantiation of the \addGrVarName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=GrVar$^{+}$]
+    {\quad}
+      {\Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEmv{x}  ;\,   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A} }
+          \]
+      \item Case \fAddLSyncTransitionName \\
+          In the case of the left synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddLSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 5. Focus Right: \fAddFocusRName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a right synchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddFocusRRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+    \item Case 6. Focus Left: \fAddFocusLName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a left synchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddFocusLRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+
+  \end{enumerate}
+\end{proof}
+
+%\focusSoundAddPruning*
+\begin{restatable}[Soundness of focusing for additive pruning synthesis]{lemma}{focusSoundAddPruning}
+For all contexts $\Gamma$, $\Omega$ and types $\GRANULEnt{A}$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & \Gamma  ;  \Omega  \vdash   \GRANULEnt{A}  \Uparrow\   \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \,  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 2.\ Left\ Async: & \Gamma  ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \,  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 3.\ Right\ Sync: & \Gamma  ;   \emptyset   \vdash   \GRANULEnt{A}  \Downarrow\   \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 4.\ Left\ Sync: & \Gamma  ;     \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 5.\ Focus\ Right: & \Gamma  ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta\\
+ 6.\ Focus\ Left: & \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;   \Omega  \Uparrow\   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+  \begin{enumerate}
+      \item Case: 1. Right Async: The proofs for right asynchronous rules are equivalent to those of lemma  \eqref{lemma:fAddSynthSound}\\
+    \item Case 2. Left Async: The proofs for left asynchronous rules are equivalent to those of lemma \eqref{lemma:fAddSynthSound}\\
+    \item Case 3. Right Sync: The proofs for right synchronous rules are equivalent to those of lemma \eqref{lemma:fAddSynthSound}, except for the case of the \addPruningPairIntroName rule:\\
+      \begin{enumerate}
+        \item Case \addPruningPairIntroName \\
+          In the case of the right synchronous rule for pair introduction, the synthesis rule has the form:
+          \[
+          \fAddAltPairIntroRule
+          \]
+          By induction on the premises, we have that:
+          \[
+           \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}   \tag{ih1}
+          \]
+          \[
+           \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}   \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addPruningPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$^{\prime}{\otimes^{+}}$]
+    {\Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}} \\ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}
+    {\Gamma  \vdash   \GRANULEnt{A}  \, \otimes \,  \GRANULEnt{B}   \Rightarrow^+   ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} )   ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}}
+          \]
+      \end{enumerate}
+    \item Case 4. Left Sync: The proofs for left synchronous rules are equivalent to those of lemma  \eqref{lemma:fAddSynthSound}, except for the case of the \addPruningAppName\  rule:\\\\
+      \begin{enumerate}
+          \item Case \addPruningAppName \\
+          In the case of the left synchronous rule for application, the synthesis rule has the form:
+          \[
+          \fAddAltAppRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \tag{ih1}
+          \]
+          from case 4 of the lemma. By induction on the second premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}} \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addPruningAppName\ synthesis rule in the non-focusing calculus:
+          \[
+\inferrule*[right=L$^{\prime}\multimap^{+}$]
+    {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B} \\ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}}{\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow^+   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;\,  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A}  \multimap  \GRANULEnt{B} }
+          \]
+      \end{enumerate}
+    \item Case 5. Right Focus: \fAddFocusRName\ - The proof for right focusing rule is equivalent to that of lemma \eqref{lemma:fAddSynthSound}\\
+    \item Case 6. Left Focus: \fAddFocusLName\ - The proof for left focusing rule is equivalent to that of lemma \eqref{lemma:fAddSynthSound}\\
+  \end{enumerate}
+\end{proof}
+
+% \synthSound*
+\begin{proof}
+Induction on the synthesis rules
+\begin{enumerate}
+\item Case $\textsc{Var}$ \\
+        For synthesis of a variable term, we have the derivation:
+        \begin{align*}
+          \synVar
+        \end{align*}
+        from which we can construct the following typing derivation, matching the above conclusion:
+        \begin{align*}
+          \tyVar
+        \end{align*}
+\item Case $\multimap_{R}$\\
+        For synthesis of an abstraction term, we have the derivation:
+        \begin{align*}
+          \synAbs
+        \end{align*}
+        By induction on the premise, we have:
+        \begin{align*}
+          \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}
+        \end{align*}
+        and that:
+        \begin{align*}
+          \GRANULEnt{r}  \, \textcolor{coeffectColor}{\sqsubseteq} \,  \GRANULEnt{q}
+        \end{align*}
+        from which we can construct the following typing derivation, matching the conclusion:
+        \begin{align*}
+          \inferrule*[Right=Abs]
+            {\inferrule*[Right=Approx]{\Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B} \\ \GRANULEnt{r}  \, \textcolor{coeffectColor}{\sqsubseteq} \,  \GRANULEnt{q}}{\Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}}}
+            {\Delta  \vdash   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   :   \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}}
+        \end{align*}
+\item Case $\multimap_{L}$\\
+        For synthesising an application, we have the derivation:
+        \begin{align*}
+          \synApp
+        \end{align*}
+        By induction on the premises, we obtain the following typing judgements:
+        \begin{align*}
+          \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }   \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C} \\
+          \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{3}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A}
+        \end{align*}
+        from which we can construct the following derivation, making use of the admissibility of substitution:
+        \begin{align*}
+          \inferrule*[Right=Subst]{
+          {\inferrule*[Right=App]{\inferrule*[Right=Var]{\quad}{\GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{   1   } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}}  :   \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}} \\ \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{3}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \vdash  \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{A}}{ \textcolor{coeffectColor}{ \GRANULEnt{q}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{2}}}    \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{    1   \GRANULEsym{+}  \GRANULEsym{(}  \GRANULEnt{q}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s_{{\mathrm{3}}}}  \GRANULEsym{)}   } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \vdash  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  :  \GRANULEnt{B}}} \\ \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }   \GRANULEnt{B}   \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{C}}
+          {\GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}   \textcolor{coeffectColor}{ \GRANULEnt{s_{{\mathrm{2}}}}   \textcolor{coeffectColor}{\,\cdot\,} }    \textcolor{coeffectColor}{ \GRANULEnt{q}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{2}}}     \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{2}}}}  \GRANULEsym{+}   \GRANULEnt{s_{{\mathrm{1}}}}  \GRANULEsym{+}  \GRANULEsym{(}  \GRANULEnt{s_{{\mathrm{2}}}}  \textcolor{coeffectColor}{\,\cdot\,}   \GRANULEnt{q}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s_{{\mathrm{3}}}}   \GRANULEsym{)}    } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \vdash    [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}    :  \GRANULEnt{C}}
+        \end{align*}
+        making use of the distributivity property of semirings, along with unitality of $1$
+        and commutativity of $+$, such that
+        $\GRANULEnt{s_{{\mathrm{1}}}}  \GRANULEsym{+}  \GRANULEnt{s_{{\mathrm{2}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEsym{(}   1   \GRANULEsym{+}  \GRANULEsym{(}  \GRANULEnt{q}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s_{{\mathrm{3}}}}  \GRANULEsym{)}  \GRANULEsym{)} =  \GRANULEnt{s_{{\mathrm{1}}}}  \GRANULEsym{+}  \GRANULEsym{(}  \GRANULEnt{s_{{\mathrm{2}}}}  \textcolor{coeffectColor}{\,\cdot\,}   1   \GRANULEsym{)}  \GRANULEsym{+}  \GRANULEsym{(}  \GRANULEnt{s_{{\mathrm{2}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s_{{\mathrm{3}}}}  \GRANULEsym{)} = \GRANULEnt{s_{{\mathrm{2}}}}  \GRANULEsym{+}  \GRANULEnt{s_{{\mathrm{1}}}}  \GRANULEsym{+}  \GRANULEsym{(}  \GRANULEnt{s_{{\mathrm{2}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s_{{\mathrm{3}}}}  \GRANULEsym{)}$.
+
+\item Case $\textsc{Con}_{R}$\\
+        For synthesising a constructor introduction, we have the derivation:
+        \begin{align*}
+          \synCon
+        \end{align*}
+        By induction on the premises, we obtain the following typing judgements:
+        \begin{align*}
+          \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{B_{{\mathrm{1}}}} \quad , ..., \quad \Delta_{\GRANULEmv{n}}  \vdash  \GRANULEnt{t_{\GRANULEmv{n}}}  :  \GRANULEnt{B_{\GRANULEmv{n}}}
+        \end{align*}
+        from which we can construct the following derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[Right=App]{\inferrule*[Right=App]{\inferrule*[right=App, vdots=1em]{\inferrule*[Right=Con]{(  C  :  \GRANULEnt{B_{{\mathrm{1}}}} ^ \GRANULEnt{q_{{\mathrm{1}}}}  \rightarrow ... \rightarrow  \GRANULEnt{B_{\GRANULEmv{n}}} ^ \GRANULEnt{q_{\GRANULEmv{n}}}  \rightarrow     K  \, \GRANULEnt{A}   ) \in  D}{\textcolor{coeffectColor}{  0    \textcolor{coeffectColor}{\,\cdot\,} }  \Gamma   \vdash   C   :   \GRANULEnt{B_{{\mathrm{1}}}} ^{q_1}  \rightarrow \! ... \! \rightarrow   \GRANULEnt{B_{\GRANULEmv{n}}} ^{q_n}  \rightarrow     K  \, \GRANULEnt{A}} \\ \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{t_{{\mathrm{1}}}}  :  \GRANULEnt{B_{{\mathrm{1}}}}}{{\textcolor{coeffectColor}{  0    \textcolor{coeffectColor}{\,\cdot\,} }  \Gamma    \GRANULEsym{+}   \textcolor{coeffectColor}{ \GRANULEnt{q_{{\mathrm{1}}}}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{1}}}   \vdash  C \, \GRANULEnt{t_{{\mathrm{1}}}}  :    \GRANULEnt{B_{{\mathrm{2}}}} ^{q_1}  \rightarrow \! ... \! \rightarrow   \GRANULEnt{B_{\GRANULEmv{n}}} ^{q_n}  \rightarrow     K  \, \GRANULEnt{A}}}}{\textcolor{coeffectColor}{  0    \textcolor{coeffectColor}{\,\cdot\,} }  \Gamma    \GRANULEsym{+}   \textcolor{coeffectColor}{ \GRANULEnt{q_{{\mathrm{1}}}}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{1}}}   \GRANULEsym{+} \, ... \, \GRANULEsym{+}   \textcolor{coeffectColor}{ \GRANULEnt{q_{{\GRANULEmv{n}-1}}}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\GRANULEmv{n}-1}}   \vdash  C \, \GRANULEnt{t_{{\mathrm{1}}}} \, ... \, \GRANULEnt{t_{{\GRANULEmv{n}-1}}}  :   \GRANULEnt{B_{\GRANULEmv{n}}} ^ \GRANULEnt{q_{\GRANULEmv{n}}}  \rightarrow    K  \, \GRANULEnt{A}} \\ \Delta_{\GRANULEmv{n}}  \vdash  \GRANULEnt{t_{\GRANULEmv{n}}}  :  \GRANULEnt{B_{\GRANULEmv{n}}}}{{\textcolor{coeffectColor}{  0    \textcolor{coeffectColor}{\,\cdot\,} }  \Gamma    \GRANULEsym{+}   \textcolor{coeffectColor}{ \GRANULEnt{q_{{\mathrm{1}}}}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{1}}}+ ...+  \textcolor{coeffectColor}{ \GRANULEnt{q_{\GRANULEmv{n}}}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{\GRANULEmv{n}}   \vdash  C \, \GRANULEnt{t_{{\mathrm{1}}}} \, ... \, \GRANULEnt{t_{\GRANULEmv{n}}}  :   K  \, \GRANULEnt{A}}}
+        \end{align*}
+
+\item Case $\textsc{Con}_{L}$ \\
+        For synthesising a case statement, we have the derivation:
+        \begin{align*}
+          \synCaseAlt
+        \end{align*}
+        By induction on the premises we obtain the following typing judgements:
+        \begin{align*}
+          \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B}
+        \end{align*}
+        % By monotonicty of $\sqcup$ we have that $ \GRANULEnt{s} _  i     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n$
+        % and by $*_{1}$ that $\GRANULEnt{s} _  i     =      \GRANULEnt{s} ^  i  _  1     \sqcup ... \sqcup    \GRANULEnt{s} ^  i  _  n$. Therefore, by monotonicty of $\sqcup$
+        % we have that $\GRANULEnt{s} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n$
+        % from which we can construct the following
+        % derivation, matching the above conclusion:
+        We have by the definition of $\sqcup$:
+        %
+        \begin{enumerate}
+                \item $ \Delta_{\GRANULEmv{i}} \sqsubseteq \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{m}}   \GRANULEsym{)}$
+                \item $ \GRANULEnt{r} _  i     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  m$
+                % \item $\GRANULEnt{s} _  i     =      \GRANULEnt{s} ^  i  _  1     \sqcup ... \sqcup    \GRANULEnt{s} ^  i  _  n$
+                % \item $\GRANULEnt{s} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n$
+        \end{enumerate}
+
+        and from the premises of the synthesis rule:
+        \begin{enumerate}[resume]
+                \item $\GRANULEnt{s'} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m$
+                \item $ \GRANULEnt{s} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,    \GRANULEnt{s'} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  j$
+                \item $ |    K  \, \GRANULEnt{A}   | > 1 \Rightarrow 1 \sqsubseteq      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m $
+        \end{enumerate}
+
+        We then construct the following two derivations towards the goal:
+        %
+        \begin{equation}
+          \label{soundConLSub1}
+          \inferrule*[Right=PCon]{\inferrule*[Right=PVar]{\quad}{ \GRANULEnt{q} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       \vdash \,   \GRANULEmv{y} ^i_j   :  \GRANULEnt{B_{\GRANULEmv{j}}}  \, \rhd \,   {  \GRANULEmv{y} ^  i  _  j   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{\GRANULEmv{j}}} } \\  (e) }{\GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       \vdash \,   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    :   K  \, \GRANULEnt{A}  \, \rhd \,    {  \GRANULEmv{y} ^  i  _  j   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{\GRANULEmv{j}}}   , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{\GRANULEmv{n}}}}\\
+        \end{equation}
+        and
+        \begin{equation}
+          \label{soundConLSub2}
+          \hspace{-7em}\inferrule*[Right=Approx, rightskip=5em]{ \inferrule*[Right=Approx]{ \inferrule*[Right=induction]{\quad}{\Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B}} \qquad \\ (d) }{\inferrule*[Right=Approx]{ \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{    \GRANULEnt{r} _  i     } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{s'} ^  i  _  j     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{s'} ^  i  _  j     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (c)}{\inferrule*[Right=Approx]{ \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{    \GRANULEnt{r} _  i     } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (b)}{\Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  m      \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (a)} }}}{ \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{m}}   \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  m      \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} }
+        \end{equation}
+
+
+        \begin{align*}
+          \inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{\quad}{\GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }     K  \, \GRANULEnt{A}    \vdash  \GRANULEmv{x}  :    K  \, \GRANULEnt{A}} \quad \\ \eqref{soundConLSub1} \\ \eqref{soundConLSub2} }
+          { \inferrule*[Right=$\equiv$] {\GRANULEsym{(}  \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{m}}   \GRANULEsym{)}  \GRANULEsym{,}    \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  m      \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}     \GRANULEsym{)}  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       \textcolor{coeffectColor}{\,\cdot\,}   1   \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}    \vdash   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \   \overline{   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    \mapsto  \GRANULEnt{t_{\GRANULEmv{i}}} }    :  \GRANULEnt{B}} {\GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{m}}   \GRANULEsym{)}  \GRANULEsym{,}    \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  m      \GRANULEsym{)}   \GRANULEsym{+}   \GRANULEsym{(}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}     \vdash   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \   \overline{   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    \mapsto  \GRANULEnt{t_{\GRANULEmv{i}}} }    :  \GRANULEnt{B}}}
+        \end{align*}
+
+
+
+% \item Case $\textsc{Con}_{L}$ \\
+%         For synthesising a case statement, we have the derivation:
+%         \begin{align*}
+%           \synCaseAltAlt
+%         \end{align*}
+%         By induction on the premises we obtain the following typing judgements:
+%         \begin{align*}
+%           \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B}
+%         \end{align*}
+%         % By monotonicty of $\sqcup$ we have that $ \GRANULEnt{s} _  i     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n$
+%         % and by $*_{1}$ that $\GRANULEnt{s} _  i     =      \GRANULEnt{s} ^  i  _  1     \sqcup ... \sqcup    \GRANULEnt{s} ^  i  _  n$. Therefore, by monotonicty of $\sqcup$
+%         % we have that $\GRANULEnt{s} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n$
+%         % from which we can construct the following
+%         % derivation, matching the above conclusion:
+%         We have:
+
+%         \begin{enumerate}
+%                 \item $ \Delta_{\GRANULEmv{i}} \sqsubseteq \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{n}}   \GRANULEsym{)}$
+%                 \item $ \GRANULEnt{r} _  i     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  n$
+%                 % \item $\GRANULEnt{s} _  i     =      \GRANULEnt{s} ^  i  _  1     \sqcup ... \sqcup    \GRANULEnt{s} ^  i  _  n$
+%                 % \item $\GRANULEnt{s} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n$
+%                 \item $\GRANULEnt{s'} _  i     \, \textcolor{coeffectColor}{\sqsubseteq} \,      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n$
+%                 \item $ \GRANULEnt{s} _  i     \, \textcolor{coeffectColor}{\sqsubseteq} \,    \GRANULEnt{s'} _  i     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  j$
+%                 \item $\GRANULEnt{s} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,    \GRANULEnt{s} _  i$
+%         \end{enumerate}
+%         \begin{equation}
+%           \label{soundConLAltSub1}
+%           \inferrule*[Right=PCon]{\inferrule*[Right=PVar]{\quad}{ \GRANULEnt{q} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       \vdash \,   \GRANULEmv{y} ^i_j   :  \GRANULEnt{B_{\GRANULEmv{j}}}  \, \rhd \,   {  \GRANULEmv{y} ^  i  _  j   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{\GRANULEmv{j}}}  }}{\GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       \vdash \,   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    :   K  \, \GRANULEnt{A}  \, \rhd \,    {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{{\mathrm{1}}}}   , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{\GRANULEmv{n}}}}\\
+%         \end{equation}
+
+%         \begin{equation}
+%           \label{soundConLAltSub2}
+%           \inferrule*[Right=Approx, rightskip=5em]{ \inferrule*[Right=Approx]{ \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (e)}{\inferrule*[Right=Approx]{\Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} _  i     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (e)}{\inferrule*[Right=Approx]{\Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{    \GRANULEnt{r} _  i     } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} _  i     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} _  i     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B}  \\ (d)  }{\inferrule*[Right=Approx]{ \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{    \GRANULEnt{r} _  i     } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{s'} _  i     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{s'} _  i     } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (c)}{\inferrule*[Right=Approx]{ \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{    \GRANULEnt{r} _  i     } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n       } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (b)}{\Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  n      \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} \\ (a)} }}}}}{ \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{n}}   \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  n      \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  1     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{q} ^  i  _  n     \textcolor{coeffectColor}{\,\cdot\,}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{t_{\GRANULEmv{i}}}  :  \GRANULEnt{B} }
+%         \end{equation}
+
+
+%         \begin{align*}
+%           \inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{\quad}{\GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }     K  \, \GRANULEnt{A}    \vdash  \GRANULEmv{x}  :    K  \, \GRANULEnt{A}} \\ \eqref{soundConLAltSub1} \\ \eqref{soundConLAltSub2} }
+%           {\GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{n}}   \GRANULEsym{)}  \GRANULEsym{,}    \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  n      \GRANULEsym{)}   \GRANULEsym{+}   \GRANULEsym{(}      \GRANULEnt{s'} _  1     \sqcup ... \sqcup    \GRANULEnt{s'} _  n       \textcolor{coeffectColor}{\,\cdot\,}   1   \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}     \vdash   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \   \overline{   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    \mapsto  \GRANULEnt{t_{\GRANULEmv{i}}} }    :  \GRANULEnt{B}}
+        % \end{align*}
+
+\item Case $\Box_{R}$ \\
+        For synthesising a promotion, we have the derivation:
+        \begin{align*}
+          \synBox
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          \Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}
+        \end{align*}
+        From which we can construct the following derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[Right=Pr]{\Delta  \vdash  \GRANULEnt{t}  :  \GRANULEnt{A}}{ \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta   \vdash  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}}
+        \end{align*}
+  \item Case $\Box_{L}$ \\
+        For synthesising an unboxing, we have the derivation:
+        \begin{align*}
+          \synUnbox
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{1}}}}  } }   \GRANULEnt{A}    \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}
+        \end{align*}
+        and that:
+        \begin{align*}
+          \GRANULEnt{s_{{\mathrm{1}}}}  \, \textcolor{coeffectColor}{\sqsubseteq} \,   \GRANULEnt{s_{{\mathrm{3}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}
+        \end{align*}
+        From this we can construct the following derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[Right=Case]{\inferrule*[Right=Var, leftskip=5em]{\quad}{\GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}    \vdash  \GRANULEmv{x}  :   \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}} \\ \inferrule*[Right=PBox, leftskip=0em]{\inferrule*[Right=PVar]{\quad}{\GRANULEnt{s_{{\mathrm{3}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}  \vdash \,  \GRANULEmv{y}  :  \GRANULEnt{A}  \, \rhd \,   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{3}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}   } }   \GRANULEnt{A}}}{\GRANULEnt{s_{{\mathrm{3}}}}  \vdash \,  \GRANULEsym{[}  \GRANULEmv{y}  \GRANULEsym{]}  :   \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}   \, \rhd \,   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{3}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}   } }   \GRANULEnt{A}} \\ \inferrule*[Right=Approx, rightskip=4.5em] {\Delta  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{1}}}}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{t}  :  \GRANULEnt{B} \\ \GRANULEnt{s_{{\mathrm{1}}}}  \, \textcolor{coeffectColor}{\sqsubseteq} \,   \GRANULEnt{s_{{\mathrm{3}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}} { \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{3}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}   } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{t}  :  \GRANULEnt{B}} }{\Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{3}}}}  \GRANULEsym{+}  \GRANULEnt{s_{{\mathrm{2}}}}   } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}    \vdash   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \  \GRANULEsym{[}  \GRANULEmv{y}  \GRANULEsym{]}  \rightarrow  \GRANULEnt{t}   :  \GRANULEnt{B}}
+        \end{align*}
+
+\end{enumerate}
+
+\end{proof}
+
+% \focusSynthSound*
+% \begin{proof}
+
+% \end{proof}
+%
+
+\begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
+For all contexts $\Gamma$, $\Omega$ and types $\GRANULEnt{A}$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & \Gamma  ;  \Omega  \vdash  \GRANULEnt{A}  \Uparrow \Rightarrow  \GRANULEnt{t}  \mid  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \,  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{A}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta\\
+ 2.\ Left\ Async: & \Gamma  ;  \Omega  \Uparrow \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}  \,  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta\\
+ 3.\ Right\ Sync: & \Gamma ; \emptyset \vdash \GRANULEnt{A} \Downarrow\ \Rightarrow \GRANULEnt{t} \mid\  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta\\
+ 4.\ Left\ Sync: & \Gamma  ;    \GRANULEmv{x}  :  \GRANULEnt{A}    \Downarrow \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta \quad &\implies \quad \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta\\
+ 5.\ Focus\ Right: & \Gamma  ;  \Omega  \Uparrow \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta\\
+ 6.\ Focus\ Left: & \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   ;  \Omega  \Uparrow \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta \quad &\implies \quad \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+\begin{enumerate}
+\item Case: 1. Right Async: \\
+    \begin{enumerate}
+      \item Case $\multimap_{R}$\\
+          In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+          \[
+            \fsynAbs
+          \]
+          By induction on the premise, we have that:
+          \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instatiation of the $\multimap_{\textsc{R}}$ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=$\multimap_{R}$]
+    {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{q}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}    \quad\;\;   \GRANULEnt{r}  \, \textcolor{coeffectColor}{\sqsubseteq} \,  \GRANULEnt{q}}{\Gamma  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}  \Rightarrow   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   \mid  \Delta}
+          \]
+          \item Case \fsynRAsyncTransName\ \\
+          In the case of the right asynchronous rule for transition to a left asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fsynRAsyncTrans
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta
+          \]
+          from case 2 of the lemma.
+    \end{enumerate}
+\item Case 2. Left Async: \\
+    \begin{enumerate}
+      \item Case $\textsc{Con}_{L}$\\
+        In the case of the left asynchronous rule for constructor elimination, the synthesis rule has the form:
+            \[
+            \fsynCase
+            \]
+            By induction on the second premise, we have that:
+            \[
+\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}       \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r}   } }    K  \,   \vec{ \GRANULEnt{A} }      \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  1      } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  1      } }   \GRANULEnt{B_{\GRANULEmv{n}}}      \Uparrow\   \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t_{\GRANULEmv{i}}}  \mid     \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \,   \vec{ \GRANULEnt{A} }      \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}
+            \]
+            from case 2 of the lemma. From which we can construct the following instantiation of the $\textsc{Con}_{L}$ rule in the non-focusing calculus:
+            \begin{align*}
+            \inferrule*[right=$\textsc{Con}_{\textsc{L}}$]
+            {
+            (  C_{\GRANULEmv{i}}  :  \GRANULEnt{B_{{\mathrm{1}}}} ^{q_1^i} \rightarrow ... \rightarrow  \GRANULEnt{B_{\GRANULEmv{n}}} ^{q_n^i} \rightarrow     K  \,   \vec{ \GRANULEnt{A} }     ) \in  D\\\\
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r}   } }    K  \,   \vec{ \GRANULEnt{A} }      \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  1      } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  1      } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t_{\GRANULEmv{i}}}  \mid     \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \,   \vec{ \GRANULEnt{A} }      \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}\\\\
+            \exists    \GRANULEnt{s'} ^  i  _  j     .\,     \GRANULEnt{s} ^  i  _  j     \sqsubseteq    \GRANULEnt{s'} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  j     \sqsubseteq  \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  j\\\\
+            \GRANULEnt{s} _  i     =      \GRANULEnt{s'} ^  i  _  1     \sqcup ... \sqcup    \GRANULEnt{s'} ^  i  _  n\\\\
+            |    K  \,   \vec{ \GRANULEnt{A} }     | > 1 \Rightarrow 1 \sqsubseteq      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m
+            }
+            {\GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }     K  \,   \vec{ \GRANULEnt{A} }      \vdash  \GRANULEnt{B}  \Rightarrow   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \   \overline{   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    \mapsto  \GRANULEnt{t_{\GRANULEmv{i}}} }    \mid  \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{m}}   \GRANULEsym{)}  \GRANULEsym{,}    \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  m      \GRANULEsym{)}   \GRANULEsym{+}   \GRANULEsym{(}     \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m      \GRANULEsym{)}   } }     K  \,   \vec{ \GRANULEnt{A} }
+            }
+            \end{align*}
+
+
+      \item Case $\Box_{L}$ \\
+            In the case of the left asynchronous rule for graded modality elimination, the synthesis rule has the form:
+            \[
+            \fsynUnbox
+            \]
+            By induction on the first premise, we have that:
+            \[
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}   } }   \GRANULEnt{A}    \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}     \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{1}}}}   } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}
+            \]
+            from case 2 of the lemma. From which, we can construct the following instantiation of the $\Box_{L}$ synthesis rule in the non focusing calculus:
+            \[
+            \inferrule*[right=$\Box_{\textsc{L}}$]
+            {
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}   } }   \GRANULEnt{A}    \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}     \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{1}}}}   } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A} \\
+            \exists  \GRANULEnt{s_{{\mathrm{3}}}}  .\,   \GRANULEnt{s_{{\mathrm{1}}}}  \sqsubseteq   \GRANULEnt{s_{{\mathrm{3}}}}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}   \sqsubseteq   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{q}
+            }
+            {
+            \GRANULEsym{(}  \Gamma  \GRANULEsym{,}  \Omega  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}     \vdash  \GRANULEnt{B}  \Rightarrow   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \  \GRANULEsym{[}  \GRANULEmv{y}  \GRANULEsym{]}  \rightarrow  \GRANULEnt{t}   \mid   \Delta   \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{3}}}}  \GRANULEsym{+}  \GRANULEnt{s_{{\mathrm{2}}}}   } }    \Box_{  \GRANULEnt{q}  }  \GRANULEnt{A}
+            }
+            \]
+
+        \item Case \fsynLAsyncTransName \\
+          In the case of the left asynchronous rule for transitioning an assumption from the focusing context $\Omega$ to the non-focusing context $\Gamma$, the synthesis rule has the form:
+          \[
+            \fsynLAsyncTrans
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}    \GRANULEsym{,}  \Omega  \vdash  \GRANULEnt{C}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+    \end{enumerate}
+\item Case 3. Right Sync: \\
+    \begin{enumerate}
+      \item Case $\textsc{Con}_{\textsc{R}}$\\
+          In the case of the right synchronous rule for constructor introduction, the synthesis rule has the form:
+            \[
+            \inferrule*[Right=$\textsc{Con}_{\textsc{R}}$]
+            { (  C  :  \GRANULEnt{B_{{\mathrm{1}}}} ^1 \rightarrow ... \rightarrow  \GRANULEnt{B_{\GRANULEmv{n}}} ^1 \rightarrow     K  \,   \vec{ \GRANULEnt{A} }     ) \in  D \\
+             \Gamma ; \emptyset \vdash \GRANULEnt{B_{\GRANULEmv{i}}} \Downarrow\ \Rightarrow \GRANULEnt{t_{\GRANULEmv{i}}} \mid\ \Delta_{\GRANULEmv{i}}}
+            {\Gamma ; \emptyset \vdash K  \,   \vec{ \GRANULEnt{A} } \Downarrow\ \Rightarrow C \, \GRANULEnt{t_{{\mathrm{1}}}} \, ... \, \GRANULEnt{t_{\GRANULEmv{n}}} \mid\ \Delta_{{\mathrm{1}}}  \GRANULEsym{+} \, ... \, \GRANULEsym{+}  \Delta_{\GRANULEmv{n}}}
+            \]
+          By induction on the second premise, we have that:
+            \[
+            \Gamma  \vdash  \GRANULEnt{B_{\GRANULEmv{i}}}  \Rightarrow  \GRANULEnt{t_{\GRANULEmv{i}}}  \mid  \Delta_{\GRANULEmv{i}}
+            \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the $\textsc{Con}_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+            \[
+            \inferrule*[]
+            {
+            (  C  :  \GRANULEnt{B_{{\mathrm{1}}}} ^ \GRANULEnt{q_{{\mathrm{1}}}}  \rightarrow ... \rightarrow  \GRANULEnt{B_{\GRANULEmv{n}}} ^ \GRANULEnt{q_{\GRANULEmv{n}}}  \rightarrow     K  \,   \vec{ \GRANULEnt{A} }     ) \in  D \\
+            \Gamma  \vdash  \GRANULEnt{B_{\GRANULEmv{i}}}  \Rightarrow  \GRANULEnt{t_{\GRANULEmv{i}}}  \mid  \Delta_{\GRANULEmv{i}}
+            }
+            {\Gamma  \vdash   K  \,   \vec{ \GRANULEnt{A} }    \Rightarrow  C \, \GRANULEnt{t_{{\mathrm{1}}}} \, ... \, \GRANULEnt{t_{\GRANULEmv{n}}}  \mid    \textcolor{coeffectColor}{  0    \textcolor{coeffectColor}{\,\cdot\,} }  \Gamma    \GRANULEsym{+}   \GRANULEsym{(}   \textcolor{coeffectColor}{ \GRANULEnt{q_{{\mathrm{1}}}}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{1}}}   \GRANULEsym{)}  \GRANULEsym{+} \, ... \, \GRANULEsym{+}  \GRANULEsym{(}   \textcolor{coeffectColor}{ \GRANULEnt{q_{\GRANULEmv{n}}}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{\GRANULEmv{n}}   \GRANULEsym{)}}
+            \]
+      \item Case $\Box_{R}$ \\
+
+          In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
+            \[
+            \inferrule*[Right=$\Box_{\textsc{R}}$]
+            { \Gamma ; \emptyset \vdash \GRANULEnt{A} \Downarrow\ \Rightarrow \GRANULEnt{t} \mid\ \Delta}
+            { \Gamma ; \emptyset \vdash \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A} \Downarrow\ \Rightarrow \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]} \mid\ \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta}
+            \]
+          By induction on the premises, we have that:
+            \[
+            \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta
+            \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the $\Box_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+            \[
+            \synBox
+            \]
+    \end{enumerate}
+\item Case 4. Left Sync: \\
+    \begin{enumerate}
+      \item Case $\multimap_{L}$\\
+            In the case of the left synchronous rule for application, the synthesis rule has the form:
+            \[
+            \inferrule*[]{
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    ;    \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }   \GRANULEnt{B}    \Downarrow \vdash  \GRANULEnt{C}  \Rightarrow  \GRANULEnt{t_{{\mathrm{1}}}}  \mid  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }   \GRANULEnt{B} \\
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B} ; \emptyset \vdash \GRANULEnt{A} \Downarrow\ \Rightarrow \GRANULEnt{t_{{\mathrm{2}}}} \mid\ \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{3}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}
+            }
+            {
+            \Gamma  ;    \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}     \Downarrow \vdash  \GRANULEnt{C}  \Rightarrow    [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}    \mid  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}   \textcolor{coeffectColor}{ \GRANULEnt{s_{{\mathrm{2}}}}   \textcolor{coeffectColor}{\,\cdot\,} }    \textcolor{coeffectColor}{ \GRANULEnt{q}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{2}}}     \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{2}}}}  \GRANULEsym{+}   \GRANULEnt{s_{{\mathrm{1}}}}  \GRANULEsym{+}   \GRANULEsym{(}  \GRANULEnt{s_{{\mathrm{2}}}}  \textcolor{coeffectColor}{\,\cdot\,}   \GRANULEnt{q}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s_{{\mathrm{3}}}}   \GRANULEsym{)}     } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}
+            }
+            \]
+            By induction on the first premise, we have that:
+            \[
+\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \GRANULEsym{,}    \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }   \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow  \GRANULEnt{t_{{\mathrm{1}}}}  \mid  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }   \GRANULEnt{B}
+            \]
+            from case 4 of the lemma. By induction on the second premise, we have that:
+            \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B} \vdash \GRANULEnt{A} \Rightarrow \GRANULEnt{t_{{\mathrm{2}}}} \mid\ \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{3}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}
+            \]
+            from case 3 of the lemma. From which, we can construc the following instantiation of the $\multimap_{\textsc{L}}$ synthesis rule in the non-focusing calculus:
+            \[
+            \inferrule*[right=$\multimap_{\textsc{L}}$]
+            {
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }   \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow  \GRANULEnt{t_{{\mathrm{1}}}}  \mid  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{2}}}}  } }   \GRANULEnt{B}\\
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \vdash  \GRANULEnt{A}  \Rightarrow  \GRANULEnt{t_{{\mathrm{2}}}}  \mid  \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s_{{\mathrm{3}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}
+            }
+            {\Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r_{{\mathrm{1}}}}  } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}    \vdash  \GRANULEnt{C}  \Rightarrow    [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}    \mid  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}   \textcolor{coeffectColor}{ \GRANULEnt{s_{{\mathrm{2}}}}   \textcolor{coeffectColor}{\,\cdot\,} }    \textcolor{coeffectColor}{ \GRANULEnt{q}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta_{{\mathrm{2}}}     \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :_{\textcolor{coeffectColor}{   \GRANULEnt{s_{{\mathrm{2}}}}  \GRANULEsym{+}   \GRANULEnt{s_{{\mathrm{1}}}}  \GRANULEsym{+}   \GRANULEsym{(}  \GRANULEnt{s_{{\mathrm{2}}}}  \textcolor{coeffectColor}{\,\cdot\,}   \GRANULEnt{q}  \textcolor{coeffectColor}{\,\cdot\,}  \GRANULEnt{s_{{\mathrm{3}}}}   \GRANULEsym{)}     } }    \GRANULEnt{A} ^ \GRANULEnt{q}  \rightarrow  \GRANULEnt{B}}
+            \]
+
+      \item Case $\textsc{Var}$ \\
+        In the case of the left synchronous rule for variable synthesis, the synthesis rule has the form:
+          \[
+          \fsynVar
+          \]
+          From which, we can construct the following instantiation of the \textsc{Var}\ synthesis rule in the non-focusing calculus:
+          \[
+            \synVar
+          \]
+    \end{enumerate}
+\item Case 5. Right Focus: \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a right synchronous judgement, the synthesis rule has the form:
+          \[
+            \fsynFocusRNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+\item Case 6. Left Focus: \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a left synchronous judgement, the synthesis rule has the form:
+          \[
+            \fsynFocusL
+          \]
+          By induction on the first premise, we have that:
+          \[
+            \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta \tag{ih}
+          \]
+          from case 2 of the lemma.
+\end{enumerate}
+\end{proof}

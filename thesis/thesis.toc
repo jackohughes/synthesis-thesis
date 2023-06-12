@@ -57,3 +57,4 @@
 \contentsline {chapter}{\numberline {B}Benchmark problems}{47}{appendix.B}%
 \contentsline {section}{\numberline {B.1}List of linear-base synthesis benchmark problems}{47}{section.B.1}%
 \contentsline {chapter}{\numberline {C}Proofs}{48}{appendix.C}%
+\contentsline {section}{\numberline {C.1}Linear-base Proofs}{48}{section.C.1}%

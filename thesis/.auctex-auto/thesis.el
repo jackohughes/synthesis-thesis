@@ -8,7 +8,7 @@
    (TeX-run-style-hooks
     "latex2e"
     "granule-ott"
-    "names-ottput"
+    "preamble-ottput"
     "intro-ottput"
     "background-ottput"
     "core-ottput"

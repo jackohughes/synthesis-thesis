@@ -1,0 +1,2195 @@
+\section{Linear-base Proofs}
+\label{sec:linear-proofs}
+This section gives the proofs of Lemma~\ref{lemma:subSynthSound} and
+Lemma~\ref{lemma:addSynthSound}, along with soundness results for the
+variant systems: additive pruning and subtractive division.
+
+We first state and prove some intermediate results about context manipulations
+which are needed for the main lemmas.
+
+\begin{definition}[Context approximation]
+For contexts $[[ G1 ]]$, $[[ G2 ]]$ then:
+%
+\begin{align*}
+\begin{array}{c}
+\dfrac{}{[[ . <<= . ]]}
+\qquad
+\dfrac{[[ G1 ]] \sqsubseteq [[ G2 ]]}
+      {[[ G1, x : A ]] \sqsubseteq [[ G2, x : A ]]}
+\qquad \\[1.5em]
+\dfrac{[[ G1 ]] \sqsubseteq [[ G2 ]] \qquad [[ r ]] \sqsubseteq [[ s ]]}
+      {[[ G1, x : [A] r ]] \sqsubseteq [[ G2, x : [A] s ]]}
+\qquad
+\dfrac{ [[ G1 ]] \sqsubseteq [[ G2 ]] \qquad 0 \sqsubseteq [[ s ]]}
+      { [[ G1 ]] \sqsubseteq [[  {G2, x : [A] s} ]]}
+\end{array}
+\end{align*}
+%
+This is actioned in type checking by iterative application of $\textsc{Approx}$.
+\end{definition}
+
+\begin{restatable}[$[[G + (G' - G'')]] \sqsubseteq [[(G + G') - G'']]$]{lemma}{contextLemma1}
+  \label{lemma:contextLemma1}
+\end{restatable}
+
+\begin{proof}
+  Induction over the structure of both $[[G']]$ and $[[G'']]$. The possible forms of
+  $[[G']]$ and $[[G'']]$ are considered in turn:
+  \begin{enumerate}
+    \item $[[G']]$ = $\emptyset$ and $[[G'']]$ = $\emptyset$\\
+      We have:
+      \begin{align*}
+        ([[G]] + \emptyset) - \emptyset = [[G]] + (\emptyset - \emptyset)
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side:
+      \begin{align*}
+        ([[G]] + \emptyset) - \emptyset &= [[G]] + \emptyset \\
+                                &= [[G]]
+      \end{align*}
+      and on the right-hand side:
+      \begin{align*}
+        [[G]] + (\emptyset - \emptyset) &= [[G]] + \emptyset \\
+                                &= [[G]]
+      \end{align*}
+      making both the left and right hand sides equivalent:
+      \begin{align*}
+        [[G]] = [[G]]
+      \end{align*}
+    \item $[[G']]$ = $[[ G', x : A ]]$ and $[[G'']]$ = $\emptyset$\\
+      We have
+      \begin{align*}
+        ([[G]] + [[G', x : A]]) - \emptyset = [[G]] + ([[G, x : A]] - \emptyset)
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side we have:
+      \begin{align*}
+        ([[G]] + [[G', x : A]]) - \emptyset &= ([[G]], [[G']]), [[x : A]] - \emptyset \\
+                                        &= ([[G]], [[G']]), [[x : A]]
+      \end{align*}
+      and on the right hand side:
+      \begin{align*}
+        [[G]] + ([[G, x : A]] - \emptyset) &= [[G]] + [[G', x : A]]\\
+                                       &= ([[G]], [[G']], [[x : A]])
+      \end{align*}
+      making both the left and right hand sides equal:
+      \begin{align*}
+        ([[G]],[[G']]), [[x : A]] = ([[G]],[[G']]), [[x : A]]
+      \end{align*}
+
+
+    \item $[[G']]$ = $[[ G', x : A ]]$ and $[[G'']]$ = $[[G'', x : A]]$\\
+      We have
+      \begin{align*}
+        ([[G]] + [[G', x : A]]) - [[G'', x : A]] = [[G]] + ([[G', x : A]] -
+        [[G'', x : A]])
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side we have:
+      \begin{align*}
+        ([[G]] + [[G', x : A]]) - [[G'', x : A]] &= ([[G]],[[G']]), [[x : A]] -
+                                                   [[G'', x : A]] \\
+                                                 &= [[G]], [[G']] - [[G'']]
+      \end{align*}
+      and on the right hand side:
+      \begin{align*}
+        [[G]] + ([[G', x : A]] - [[G'', x : A]]) &= [[G]] + ([[G']] - [[G'']]) \\
+                                                &= [[G]], [[G']] - [[G'']]
+      \end{align*}
+      making both the left and right hand sides equivalent:
+      \begin{align*}
+        [[G]], [[G']] - [[G'']] = [[G]], [[G']] - [[G'']]
+      \end{align*}
+
+    \item $[[G']]$ = $[[ G', x : [A] r ]]$ and $[[G'']]$ = $\emptyset$\\
+      We have
+      \begin{align*}
+        ([[G]] + [[G', x : [A] r]]) - \emptyset = [[G]] + ([[x : [A] r]] - \emptyset)
+      \end{align*}
+      From definitions~\ref{def:contextAdd} and~\ref{def:contextSub}, we know that
+      on the left hand side we have:
+      \begin{align*}
+        ([[G]] + [[G', x : [A] r]]) - \emptyset &= ([[G]] + [[G', x : [A] r ]]) \\
+                                            &= ([[G]], [[G']]), [[x : [A] r]]
+      \end{align*}
+      and on the right hand side:
+      \begin{align*}
+        [[G]] + ([[G', x : [A] r]] - \emptyset) &= [[G]] + ([[G', x : [A] r]])
+                                            &= ([[G]],[[G']]),[[x : [A] r]]
+      \end{align*}
+      making both the left and right hand sides equivalent:
+      \begin{align*}
+        ([[G]],[[G']]),[[x : [A] r]] = ([[G]],[[G']]),[[x : [A] r]]
+      \end{align*}
+
+
+    \item $[[G']]$ = $[[ G', x : [A] r ]]$ and $[[G'']]$ = $[[G'', x :
+      [A] s]]$\\
+
+      Thus we have (for the LHS of the inequality term):
+      %
+       \begin{align*}
+        [[G]] + ([[G', x : [A] r]] - [[G'', x : [A] s]])
+      \end{align*}
+      %
+    which by context subtraction yields:
+      \begin{align*}
+       [[G]] + ([[G', x :[A] r]] - [[G'', x : [A] s]]) &= [[G]] + ([[G']] -
+                                                         [[G'']]), [[x : [A] q']]
+      \end{align*}
+      where:
+      \begin{align*}
+        \exists q' . [[r]] \sqsupseteq [[q']] + [[s]]
+\quad \maximal{q'}{\hat{q'}}{r}{\hat{q'}+s} \qquad (2)
+      \end{align*}
+       %
+       And for the LHS of the inequality, from
+       definitions~\ref{def:contextAdd} and~\ref{def:contextSub}
+       we have:
+      \begin{align*}
+        ([[G]] + [[G', x : [A] r]]) - [[G'', x : [A] s]] &
+= ([[G]] + [[G']]), [[x : [A] r]] - [[G'', x  : [A] s]] \\
+  &= (([[G]] + [[G']]) -  [[G'']]), [[ x : [A]  r ]] - [[ x : [A]  s ]] \\
+  &= (([[G]] + [[G']]) -  [[G'']]), [[x : [A] q]]
+      \end{align*}
+      where:
+      \begin{align*}
+        \exists q . [[r]] \sqsupseteq [[q]] + [[s]]
+\quad \maximal{q}{\hat{q}}{r}{\hat{q}+s} \qquad (1)
+      \end{align*}
+    %
+    %Applying maximality (1) to $q'$ yields that $[[q' <= q]]$
+    Applying $\exists q . [[r]] \sqsupseteq [[q]] + [[s]]$ to
+    maximality (2) (at $\hat{q'} = q$) then yields that $q \sqsubseteq q'$.
+
+    Therefore, applying induction, we derive:
+    %
+     \begin{align*}
+      \dfrac{[[(G + (G' - G''))]] \sqsubseteq [[((G + G') - G'') ]] \qquad [[ q ]] \sqsubseteq [[ q' ]]}
+             {[[ {(G + (G' - G'')), x : [A] q}]] \sqsubseteq [[{((G + G') - G''), x : [A] q'} ]]}
+     \end{align*}
+    %
+    satisfying the lemma statement.
+    %\dnote{if partial order then $[[ q ]] = [[ q' ]]$, but we can be weaker
+    %  and weaken Lemma 4 to be a context approximation.}
+    %  making both the left and right hand sides equivalent:
+
+  \end{enumerate}
+\end{proof}
+
+\begin{restatable}[$[[(G - G') + G']] \sqsubseteq [[G]]$]{lemma}{contextLemma2}
+  \label{lemma:contextLemma2}
+\end{restatable}
+\begin{proof}
+ The proof follows by induction over the structure of $[[G']]$. The possible
+ forms of $[[G']]$ are considered in turn:
+ \begin{enumerate}
+     \item $[[G']]$ = $\emptyset$\\
+     We have:
+     \begin{align*}
+       ([[G]] - \emptyset) + \emptyset = [[G]]
+     \end{align*}
+     From definition~\ref{def:contextSub}, we know that:
+     \begin{align*}
+       [[G]] - \emptyset = [[G]]
+     \end{align*}
+     and from definition~\ref{def:contextAdd}, we know:
+     \begin{align*}
+       [[G]] + \emptyset = [[G]]
+     \end{align*}
+     giving us:
+     \begin{align*}
+       [[G]] = [[G]]
+     \end{align*}
+
+
+     \item $[[G']]$ = $[[G'', x : A]]$\\
+     and let $[[ G ]] = [[ G', x : A ]]$.
+
+     \begin{align*}
+       ([[G', x : A]] - [[G'', x : A]]) + [[G'', x : A]] = [[G]]
+     \end{align*}
+     From definition~\ref{def:contextAdd}, we know that:
+     \begin{align*}
+       ([[G', x : A]] - [[G'', x : A]]) + [[G'', x : A]]
+       & =  (([[G' - G'']]) + [[G'']]), [[x : A]] \\
+ \textit{induction}  & = [[ G', x : A ]] \\
+                     & = [[ G ]]
+     \end{align*}
+     thus satisfying the lemma statement by equality.
+
+     \item $[[G']]$ = $[[G'', x : [A] r]]$\\
+       and let $[[ G ]] = [[ G', x : [A] s ]]$.
+
+     We have:
+     \begin{align*}
+       ([[G', x : [A] s]] - [[G'', x : [A] r]]) + [[G'', x : [A] r ]]
+     \end{align*}
+     From definition~\ref{def:contextSub}, we know that:
+     %
+
+       \begin{align*}
+      & ([[G', x : [A] s ]] - [[G'', x : [A] r ]]) + [[G'', x : [A] r]] \\
+    =\ & [[(G' - G''), x : [A] q ]] + [[G'', x : [A] r]] \\
+    =\ & [[((G' - G'') + G''), x : [A] {q + r} ]]
+       \end{align*}
+
+     %
+     where $[[ s >= q + r ]]$ and $\maximal{q}{q'}{s}{q' + r}$.
+
+     Then by induction we derive the ordering:
+     %
+     \begin{align*}
+       \dfrac{[[ ((G' - G'') + G'') ]] \sqsubseteq [[ G' ]] \qquad [[ q + r ]]  \sqsubseteq [[ s ]]}
+            {[[ {((G' - G'') + G''), x : [A] {q + r}} ]] \sqsubseteq [[ {G', x : [A]s} ]]}
+     \end{align*}
+     %
+     which satifies the lemma statement.
+ \end{enumerate}
+\end{proof}
+
+\begin{lemma}[Context negation]
+\label{lemma:context-neg}
+For all contexts $[[ G ]]$:
+\begin{align*}
+\emptyset \sqsubseteq [[ G - G ]]
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+By induction on the structure of $[[ G ]]$:
+%
+\begin{itemize}
+\item $[[ G ]] = \emptyset$ Trivial.
+
+\item $[[ G ]] = [[ G', x : A ]]$ then
+$[[ (G' , x : A) - (G', x : A) ]] = [[ G' - G' ]]$ so proceed by
+induction.
+
+\item $[[ G ]] = [[ G', x : [A] r ]]$ then
+$\exists q. $
+$[[ (G' , x : [A]r) - (G', x : [A]r) ]] = [[ (G - G'), x : [A]q ]]$
+
+such that $[[ r ]] \sqsupseteq [[ q + r ]]$ and
+$\maximal{q}{q'}{r}{q'+r}$.
+
+Instantiating maximality with $q' = 0$ and reflexivity then we have
+$0 \sqsubseteq [[ q ]]$. From this, and the inductive hypothesis, we can construct:
+%
+\begin{align*}
+\dfrac{ \emptyset \sqsubseteq [[ (G - G') ]] \quad 0 \sqsubseteq [[ q ]]}
+{ \emptyset \sqsubseteq [[{(G - G'), x : [A] q}  ]] }
+\end{align*}
+%
+\end{itemize}
+%
+\end{proof}
+
+\begin{lemma}
+\label{lemma:contexts-subsub}
+For all contexts $[[ G1 ]]$, $[[ G2 ]]$, where
+$[[ [ G2 ] ]]$ (i.e., $[[ G2 ]]$ is all graded)
+then:
+%
+\begin{align*}
+[[ G2 ]] \sqsubseteq [[ G1 - (G1 - G2) ]]
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+By induction on the structure of $[[ G2 ]]$.
+
+\begin{itemize}
+\item $[[ G2 ]] = \sqsubseteq$
+
+Then $[[ G1 - (G1 - .) ]] = [[ G1 - G1 ]]$.
+
+By Lemma~\ref{lemma:context-neg}, then $ \emptyset \sqsubseteq [[ (G1 - G1) ]]$
+satisfying this case.
+
+\item $[[ G2 ]] = [[ G2', x : [A] s ]]$
+
+By the premises $[[ G1 ]] \sqsubseteq [[ G2 ]]$ then we can
+assume $[[ x ]] \in [[ G1 ]]$ and thus (by context
+rearrangement) $[[ G1', x : [A] r]]$.
+
+Thus we consider $[[ (G1', x : [A] r) - ((G1', x : [A] r) - (G2', x : [A] s)) ]]$.
+
+\begin{align*}
+  \; & [[ (G1', x : [A] r) - ((G1', x : [A] r) - (G2', x : [A] s)) ]] \\
+= \; & [[ (G1', x : [A] r) - ((G1' - G2'), x : [A] q) ]] \\
+= \; & [[ (G1' - (G1' - G2')), x : [A] q' ]]
+\end{align*}
+%
+where (1) $[[ exists q . r >= q + s ]]$ with
+(2) $(\maximal{q}{\hat{q}}{r}{\hat{q}+s})$
+
+and (3) $[[ exists q' . r >= q' + q ]]$
+with (4) $(\maximal{q'}{\hat{q'}}{r}{\hat{q'}+s})$.
+
+Apply (1) to (4) by letting $\hat{q'} = {s}$
+and by commutativity of $+$ then we get that
+$[[q' >= s]]$.
+
+By induction we have that
+%
+\begin{align*}
+[[ G1' ]] \sqsubseteq [[  {G1' - (G1' - G2')} ]] \tag{ih}
+\end{align*}
+%
+%
+Thus we get that:
+%
+\begin{align*}
+\dfrac{[[ s ]] \sqsubseteq [[ q' ]] \quad
+[[ G1' ]] \sqsubseteq [[  {G1' - (G1' - G2')} ]]}
+{ [[ {G1', x : [A] s} ]] \sqsubseteq [[  {(G1' - (G1' - G2')), x : [A] q'} ]] }
+\end{align*}
+%
+\item $[[ G2 ]] = [[ G2', x : A]]$ Trivial as it violates the grading
+  condition of the premise.
+\end{itemize}
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subSynthSound*
+
+\begin{proof}
+Structural induction over the synthesis rules. Each of the possible synthesis
+rules are considered in turn.
+
+\begin{enumerate}[itemsep=1em]
+  \item Case \subLinVarName \\
+  In the case of linear variable synthesis, we have the derivation:
+  \[
+    \subLinVar{}
+  \]
+  %
+  By the definition of context subtraction,
+  $([[G, x : A]]) - [[ G ]] = [[ x : A]]$, thus we
+  can construct the following typing derivation, matching the
+  conclusion:
+  \[
+    \inferrule*[Right=\textsc{Var}]
+    {\quad}
+    {[[ x : A |- x : A ]]}
+  \]
+
+\item Case \subGrVarName{} \\
+    Matching the form of the lemma, we have the derivation:
+    \[
+    \subGrVar{}
+    \]
+    %
+    By the definition of context subtraction,
+    $ [[ (G, x : [A]r) - (G, x : [A]s) ]] = [[ x : [A] q ]]$
+    where (1) $[[ exists q . r >= q + s ]]$ and $\maximal{q}{q'}{r}{q' + s}$.
+
+    Applying maximality (1) with $q = 1$ then we have that $1 \sqsubseteq [[ q ]]$ (*)
+
+    Thus, from this we can construct the typing derivation, matching the conclusion:
+    %
+    \[
+    \inferrule*[Right=\textsc{Approx}]
+    {
+      \inferrule*[Right=\textsc{Der}]
+        {\inferrule*[Right=\textsc{Var}]
+          {\quad}
+          {[[ x : A |- x : A ]]}
+        }
+        {[[ x : [A] 1 |- x : A ]] \qquad 1 \sqsubseteq [[ q ]] \; (*)}
+    }{
+      [[ x : [A] q |- x : A ]]
+    }
+    \]
+
+  \item Case \subAbsName \\
+    We thus have the derivation:
+    %
+    \[
+    \subAbs{}
+    \]
+    %
+    By induction we then have that:
+    %
+    \[
+      [[ (G, x : A) - D |- t : B ]]
+    \]
+    %
+    Since $[[x notin D]]$ then by the definition of context
+    subtraction we have that $[[ (G, x : A) - D ]] = [[ (G - D), x : A ]]$.
+    From this, we can construct the following derivation, matching the
+    conclusion:
+    %
+    \[
+    \inferrule*[Right=Abs]
+    {[[ (G - D) , x : A |- t : B]]}{[[ G - D |- \x. t : A -o B ]]}
+    \]
+
+
+  \item Case \subAppName \\
+    %
+    Matching the form of the lemma, the application derivation is:
+    \[
+      \subApp{}
+    \]
+    %
+    By induction, we have that:
+    %
+      \begin{align*}
+        [[ (G, x2 : B) - D1 |- t1 : C ]] \tag{ih1} \\
+        [[ D1 - D2 |- t2 : A ]] \tag{ih2}
+      \end{align*}
+    %
+    By the definition of context subtraction and since $[[ x2 notin D1
+    ]]$ then (ih1) is equal to:
+    %
+      \begin{align*}
+        [[ (G - D1), x2 : B |- t1 : C ]] \tag{ih1'}
+      \end{align*}
+    %
+    We can thus construct the following typing derivation, making use of
+    of the admissibility of linear substitution
+    (Lemma~\ref{lemma:substitution}):
+    %
+    {\scriptsize{
+    \[
+    \hspace{-8em}
+    \inferrule*[Right=\textsc{app}]
+    {\inferrule*[right=\textsc{abs}, leftskip=5em]
+       {[[(G - D1), x2 : B -o C |- t1 : C]]}
+       {[[ G - D1 |- \x2. t1 : B -o C ]]} \\
+    \inferrule*[right=\textsc{app}, rightskip=15em]
+    {\inferrule*[right=\textsc{var}, leftskip=2em]
+    {\quad}
+    {[[x1 : A -o B |- x1 : A -o B ]]} \\ {[[  D1 - D2 |- t2 : A ]]}}  {[[(D1 -
+    D2)]], [[x1 : A -o B |- x1 t2 : B]]}}
+    {[[(G - D1) + (D1 - D2)]] ,[[x1 : A -o B |- [(x1 t2) / x2] t1 : C]]}
+    \]
+    }}
+
+    From Lemma~\ref{lemma:contextLemma1}, we have that
+    %
+    \begin{align*}
+      [[((G - D1) + (D1 - D2)), x1 : A -o B]] \sqsubseteq [[(((G - D1) + D1) - D2), x1 : A -o B]]
+    \end{align*}
+    %
+    and from Lemma~\ref{lemma:contextLemma2}, that:
+    %
+    \begin{align*}
+      [[(((G - D1) + D1) - D2), x1 : A -o B]] \sqsubseteq [[(G - D2), x1 : A -o B]]
+    \end{align*}
+    %
+    %% JACK: this arguments needs strengthening, but it is true.
+    %% easy to given a proof of output contexts being subsets of input
+    which, since $[[ x1 ]]$ is not in $[[ D2 ]]$ (as $[[ x1 ]]$ is not
+    in $[[ G ]]$)
+    %%
+    $[[(G - D2), x1 : A -o B]] = [[(G, x1 : A -o B) - D2]]$. Applying
+    these inequalities with \textsc{Approx} then yields the lemma's
+    conclusion $[[ {(G, x1 : A -o B) - D2} |- [(x1 t2) / x2] t1 : C ]]$.
+
+  \item Case \subBoxName{} \\
+    %
+    The synthesis rule for boxing can be constructed as:
+    %
+    \[
+      \subBox{}
+    \]
+    %
+    By induction on the premise we get:
+    %
+    \begin{align*}
+      [[ G - D |- t : A ]]
+    \end{align*}
+    %
+    Since we apply scalar multipication ih the conclusion of the rule
+    to $[[ G - D ]]$ then we know that all of $[[ G - D ]]$ must be
+    graded assumptions.
+
+    From this, we can construct the typing derivation:
+    %
+    \[
+    \inferrule*[Right=\textsc{Pr}]
+    {[[ [{G - D}] |- t : A]]}{[[r * [{G - D}] |- [t] : [] r A]]}
+    \]
+    Via Lemma~\ref{lemma:contexts-subsub}, we then have that
+    $[[ (r * {G - D})]] \sqsubseteq [[(G - (G - (r * (G - D)))) ]]$ thus, we can
+    derived:
+    %
+    \[
+    \inferrule*[Right=\textsc{Approx}]
+   {
+    \inferrule*[Right=\textsc{Pr}]
+    {[[ [{G - D}] |- t : A]]}{[[r * [{G - D}] |- [t] : [] r A]]
+    \quad \text{Lem.~\ref{lemma:contexts-subsub}}}
+   }{ [[ G - (G - (r * (G - D))) |- [t] : [] r A ]]}
+    \]
+    %
+    Satisfying the goal of the lemma.
+
+  \item Case \subUnboxName \\
+    The synthesis rule for unboxing has the form:
+    \[
+    \subUnbox{}
+    \]
+    %
+    By induction on the premise we have that:
+    %
+      \begin{align*}
+        [[ (G, x2 : [A]r) - (D, x2 : [A]s)  |- t : B ]]
+      \end{align*}
+   %
+   By the definition of context subtraction we get that $\exists q$ and:
+   %
+     \begin{align*}
+       [[ (G, x2 : [A]r) - (D, x2 : [A]s) ]]
+     = [[ (G - D), x2 : [A]q ]]
+       \end{align*}
+   %
+    such that $r = q + s$
+
+    We also have that $0 \sqsubseteq [[ s ]]$.
+
+    By monotonicity with $[[ q ]] \sqsubseteq [[ q ]]$ (reflexivity)
+    and $0 \sqsubseteq [[ s ]]$ then $[[ q ]] \sqsubseteq [[ q + s ]]$.
+
+    By context subtraction we have $r = q + s$ therefore
+    $[[ q ]] \sqsubseteq [[ r ]]$ (*).
+
+    From this, we can construct the typing derivation:
+    %
+    \[
+    \inferrule*[Right=\textsc{Let}]
+    {\inferrule*[right=\textsc{Var}]
+                    {\quad}{[[x1 : [] r A |- x1 : [] r A ]]}
+           \\
+      \inferrule*[right=\textsc{approx}]
+         {[[ (G - D), x2 : [A]q  |- t : B ]] \quad (*)}
+         {[[ (G - D), x2 : [A]r  |- t : B ]]}}
+     {[[(G - D), x1 : [] r A |- let [x2] = x1 in t : B]]}
+    \]
+    %
+    Which matches the goal.
+
+  \item Case \subPairIntroName \\
+
+    The synthesis rule for pair introduction has the form:
+    %
+    \[
+      \subPairIntro{}
+    \]
+    %
+    By induction we get:
+    %
+    \begin{align*}
+      [[ G - D1 |- t1 : A ]] \tag{ih1} \\
+      [[ D1 - D2 |- t2 : B ]] \tag{ih2}
+    \end{align*}
+    %
+    From this, we can construct the typing derivation:
+    %
+    \[
+    \inferrule*[Right=\textsc{Pair}]
+    {[[ G - D1 |- t1 : A ]] \\ [[ D1 - D2 |- t2 : B ]]}
+    {[[(G - D1) + (D1 - D2) |- pair t1 t2 : Tup A B ]]}
+    \]
+    %
+    From Lemma~\ref{lemma:contextLemma1}, we have that:
+    \begin{align*}
+      [[(G - D1) + (D1 - D2)]] \sqsubseteq [[((G - D1) + D1) - D2]]
+    \end{align*}
+    %
+    and from Lemma~\ref{lemma:contextLemma2}, that:
+    %
+    \begin{align*}
+      [[((G - D1) + D1) - D2]] \sqsubseteq [[G - D2]]
+    \end{align*}
+    %
+    From which we then apply \textsc{Approx} to the
+    above derivation,
+    yielding the goal $[[ G - D2 |- pair t1 t2 : Tup A B ]]$.
+
+  \item Case \subPairElimName \\
+    The synthesis rule for pair elimination has the form:
+    \[
+      \subPairElim
+    \]
+    %
+    By induction we get:
+    %
+    \begin{align*}
+      [[ (G, x1 : A, x2 : B) - D |- t2 : C ]]
+    \end{align*}
+    %
+    since $[[ x1 notin D ]] \wedge [[ x2 notin D ]]$ then
+    $[[ (G, x1 : A, x2 : B) - D ]] = [[ (G - D), x1 : A, x2 : B ]]$.
+
+    From this, we can construct the following typing derivation,
+    matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Case}]
+    {\inferrule*[right=\textsc{Var}] {\quad} {[[x3 : Tup A B |- x3
+    : Tup A B]]} \\ [[ (G - D), x1 : A, x2 : B |- t2 : C]]}
+    {[[(G - D), x3 : Tup A B |- letpair x1 x2 = x3 in t2 : C ]]}
+    \]
+    % JACK: tighten from context subset
+    which matches the conclusion since $[[ (G - D), x3 : Tup A B ]] = [[
+    (G, x3 : Tup A B) - D ]]$ since $[[ x3 notin D ]]$ by its
+    disjointness from $[[ G ]]$.
+
+  \item Case \subSumIntroLname and \subSumIntroRname \\
+    The synthesis rules for sum introduction are straightforward. For
+     \subSumIntroLname we have the rule:
+    \[
+       \subSumIntroL
+    \]
+    By induction we have:
+    %
+      \begin{align*}
+        [[ G - D |- t : A ]] \tag{ih1}
+       \end{align*}
+    %
+    from which we can construct the typing derivation, matching the
+    conclusion:
+    \[
+    \inferrule*[Right=\subSumIntroLname]
+    {[[G - D |- t : A]]}
+    {[[G - D |- inl t : Sum A B]]}
+    \]
+    Matching the goal. And likewise for \subSumIntroRname.
+
+  \item Case \subSumElimName
+      The synthesis rule for sum elimination has the form:
+      \[
+        \subSumElim
+      \]
+      %
+      By induction:
+        \begin{align*}
+          [[ (G, x2 : A) - D1 |- t1 : C ]] \tag{ih}
+\\        [[ (G, x3 : B) - D2 |- t2 : C ]] \tag{ih}
+        \end{align*}
+      %
+      From this we can construct the typing derivation, matching the conclusion:
+      \[
+      \inferrule*[Right=Case]
+      {\inferrule*[right=Var,leftskip=10em]{\quad}{[[x1 : Sum A B |- t1 : Sum A B]]} \\ [[(G - D1), x2 : A |- t2
+    : C]] \\ [[(G - D2), x3 : B |- t3 :
+      C]]}{[[(G, x1 : Sum A B)]] - ([[D1]] \sqcap [[D2]]) \vdash  \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} : C}
+      \]
+
+      \item Case \subUnitIntroName
+
+          \begin{align*}
+            \subUnitIntro{}
+           \end{align*}
+         %
+         By Lemma~\ref{lemma:context-neg} we have that $\emptyset \sqsubseteq [[{G - G} ]]$
+         then we have:
+         %
+           \begin{align*}
+             \inferrule*[right = \textsc{Approx}]
+             {\inferrule*[right = 1]
+             {\quad}{[[ . |- () : Unit ]]}}
+             {[[ G - G |- () : Unit ]]}
+           \end{align*}
+         %
+         Matching the goal
+
+     \item Case \subUnitElimName
+          \begin{align*}
+            \subUnitElim{}
+           \end{align*}
+         %
+         By induction we have:
+           \begin{align*}
+             [[ G - D |- t : C ]] \tag{ih}
+            \end{align*}
+         %
+         Then we make the derivation:
+         %
+           \begin{align*}
+             \inferrule*[right = Let$1$]
+             {\inferrule*[right = Var]{\quad}{[[ x : Unit |- x : Unit ]]}
+             \\ [[ G - D |- t : C ]]}
+             {[[ (G - D), x : Unit |- let () = x in t : C ]]}
+           \end{align*}
+         where the context is equal to $[[ (G, x : Unit) - D ]]$.
+
+  \item Case \subDerName
+
+      \begin{align*}
+        \subDer
+      \end{align*}
+     %
+     By induction:
+     %
+       \begin{align*}
+         [[ (G, x : [A] s, y : A) - (D, x : [A] s') |- t : B ]] \tag{ih}
+       \end{align*}
+     %
+     By the definition of context subtraction we have (since also $[[ y notin D ]]$)
+       \begin{align*}
+     &  [[ (G, x : [A] s, y : A) - (D, x : [A] s')  ]] \\
+   =\ &  [[ (G - D), x : [A] q, y : A ]]
+       \end{align*}
+     where $[[ exists q . s >= q + s' ]]$ (1) and
+     $\maximal{q}{\hat{q}}{s}{\hat{q} + s'}$ (2)
+
+       The goal context is computed by:
+       %
+       \begin{align*}
+      & [[ (G, x : [A]r) - (D, x : [A]s') ]] \\
+    =\ & [[ (G - D), x : [A] q' ]]
+       \end{align*}
+       where $[[ r >= {q' + s'} ]]$ (3)
+       and $\maximal{q'}{\hat{q'}}{r}{\hat{q'} + s'}$ (4)
+
+       From the premise of \subDerName we have
+       $[[ r >= (s + 1) ]]$.
+
+       \begin{align*}
+      \begin{array}{rll}
+        \text{congruence of + and (1)} & \implies [[ {s + 1} >= {{q +
+                                         s'} + 1} ]] & (5) \\
+        \text{transitivity with \subDerName premise and (5)} & \implies
+                 [[ r >= {{ q + s'} + 1} ]] & (6) \\
+        \text{+ assoc./comm. on (6)} & \implies [[ r >= {{q + 1} +s'}
+                                       ]] & (7) \\
+       \text{apply (8) to (4) with $\hat{q'} = q + 1$} & \implies
+                                                    [[ q' >= q + 1 ]]
+                                                     & (8)
+      \end{array}
+       \end{align*}
+       %
+       Using this last result we derive:
+       \begin{align*}
+         \inferrule*[right = approx]
+        {
+         \inferrule*[right = contraction]
+         {
+         \inferrule*[right = Der]
+         {[[ (G - D), x : [A] q, y : A |- t : B ]]}
+         {[[ (G - D) , x : [ A ] q, y : [ A ]1 |- t : B]]}
+         }
+         {[[ (G - D) , x : [ A ] {q + 1} |- [x/y] t : B]]}
+         \quad (8)}
+        {[[ (G - D), x : [A] q' |- [x/y] t : B]]}
+         \end{align*}
+       Which matches the goal.
+
+\end{enumerate}
+\end{proof}
+
+\addSynthSound*
+\begin{proof}
+
+  \begin{enumerate}
+    \item Case \addLinVarName \\
+  In the case of linear variable synthesis, we have the derivation:
+  \[
+    \addLinVar
+  \]
+  Therefore we can construct the following typing derivation, matching the conclusion:
+  \[
+    \inferrule*[Right=\textsc{var}]
+    {\quad}
+    {[[ x : A |- x : A ]]}
+  \]
+    \item Case \addGrVarName\\
+    Matching the form of the lemma, we have the derivation:
+    \[
+      \addGrVar
+    \]
+    From this we can construct the typing derivation, matching the conclusion:
+    \[
+      \inferrule*[Right=\textsc{Der}]
+        {\inferrule*[Right=\textsc{Var}]
+          {\quad}
+          {[[ x : A |- x : A ]]}
+        }
+        {[[ x : [A] 1 |- x : A ]]}
+    \]
+    \item Case \addAbsName\\
+    We thus have the derivation:
+    \[
+      \addAbs
+    \]
+    %
+    By induction on the premise we then have:
+    \[
+      [[ D, x : A |- t : B ]]
+    \]
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{abs}]
+    {[[ D, x : A |- t : B]]}{[[ D |- \x. t : A -o B ]]}
+    \]
+    \item Case \addAppName\\
+    Matching the form of the lemma, the application derivation can be
+    constructed as:
+    \[
+      \addApp
+    \]
+    %
+    By induction on the premises we then have the following typing
+    judgments:
+    %
+    \begin{align*}
+      [[ D1, x2 : B |- t1 : C ]] \\
+      [[ D2 |- t2 : A ]]
+    \end{align*}
+    %
+    We can thus construct the following typing derivation, making use
+    of the admissibility of linear substitution
+    (Lemma~\ref{lemma:substitution}):
+    \[
+    \inferrule*[Right=(L.~\ref{lemma:substitution})]
+    {\inferrule*[right=\textsc{app}, leftskip=2em]
+    {\inferrule*[right=\textsc{var}]
+    {\quad}
+    {[[x1 : A -o B |- x1 : A -o B ]]} \\ {[[  D2 |- t2 : A ]]}}
+  {[[D2, x1 : A -o B |- x1 t2 : B]]}
+    \\ [[ D1, x2 : B |- t1 : C]]}
+    {[[(D1 + D2), x1 : A -o B |- [(x1 t2) / x2] t1 : C]]}
+    \]
+    \item Case \addBoxName\\
+    The synthesis rule for boxing can be constructed as:
+    \[
+      \addBox
+    \]
+    By induction we then have:
+    %
+    \[
+      [[ D |- t : A ]]
+    \]
+    %
+    In the conclusion of the above derivation we know that $[[ r * D
+    ]]$ is defined, therefore it must be that all of $[[ D ]]$ are
+    graded assumptions, i.e., we have that $[[ [ D ] ]]$ holds.
+    We can thus construct the following typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Pr}]
+    {[[ [D] |- t : A]]}{[[ r * [D] |- [t] : [] r A]]}
+    \]
+    \item Case \addDerName\\
+    From the dereliction rule we have:
+    \[
+      \addDer
+    \]
+    %
+    By induction we get:
+    %
+      \begin{align*}
+        [[ D, y : A |- t : B ]] \tag{ih}
+      \end{align*}
+    %
+    Case on $x \in [[ D ]]$
+    \begin{itemize}
+      \item $x \in [[ D ]]$, i.e., $[[ D ]] = [[ D', x : [A] s' ]]$.
+
+        Then by admissibility of contraction we can derive:
+        %
+        \begin{align*}
+          \inferrule*{
+            \inferrule*[Right=\textsc{Der}]
+             {[[ D', x : [A] s', y : A |- t : B]]}{[[ D', x : [A] s', y : [A] 1 |- t : B ]]}
+            }
+            { [[ (D', x : [A] s') + x : [A] 1 |- [x/y] t : B ]] }
+        \end{align*}
+        %
+        Satisfying the lemma statment.
+
+     \item $x \not\in [[ D ]]$. Then
+      again from the admissiblity of contraction, we derive the
+      typing:
+      %
+        \begin{align*}
+          \inferrule*{
+            \inferrule*[Right=\textsc{Der}]
+             {[[ D, y : A |- t : B]]}{[[ D, y : [A] 1 |- t : B ]]}
+            }
+            { [[ D + x : [A] 1 |- [x/y] t : B ]] }
+        \end{align*}
+        %
+        which is well defined as $x \not\in [[ D ]]$ and gives the
+        lemma conclusion.
+        \end{itemize}
+
+    \item Case \addUnboxName\\
+    The synthesis rule for unboxing has the form:
+    \[
+      \addUnbox
+    \]
+    %
+    By induction we have that:
+    %
+    \[
+      [[ D |- t : B ]] \tag{ih}
+    \]
+    %
+    Case on $[[x2 : [A] s]] \in [[ D ]]$
+    \begin{itemize}
+        \item $[[x2 : [A] s ]] \in [[ D ]]$, i.e., $[[ s]] \sqsubseteq [[ r ]]$. \\
+        From this, we can construct the typing derivation, matching the conclusion:
+          \[
+            \inferrule*[Right=\textsc{let}$\square$]
+            {\inferrule*[right=\textsc{var}]{\quad}{[[x1 : [] r A |-
+                x1 : [] r A ]]} \\ [[D, x2 : [A] r |- t : B]]}{[[D, x1 : [] r A |-
+              let [x2] = x1 in t : B]]}
+          \]
+        \item $[[x2 : [A] s ]] \notin [[ D ]]$, i.e., $0 \sqsubseteq [[ r ]]$. \\
+        From this, we can construct the typing derivation, matching the conclusion:
+          \[
+            \inferrule*[right=\textsc{let}$\square$]
+            {\inferrule*[right=\textsc{var}]{\quad}{[[x1 : [] r A |-
+                x1 : [] r A ]]} \\ \inferrule*[right=\textsc{Approx}, rightskip=5em]{\inferrule*[right=Weak]{[[D |- t : B]]}{[[ D, x2 : [A] 0 |- t : B ]]} \\ 0 \sqsubseteq [[ r ]]}{[[D, x2 : [A] r |- t : B]]}}{[[D, x1 : [] r A |-
+              let [x2] = x1 in t : B]]}
+          \]
+    \end{itemize}
+  \item Case \addPairIntroName\\
+
+    The synthesis rule for pair introduction has the form:
+
+    \[
+      \addPairIntro
+    \]
+    %
+    By induction on the premises we have that:
+    %
+    \begin{align*}
+      [[ D1 |- t1 : A ]] \tag{ih1}\\
+      [[ D2 |- t2 : B ]] \tag{ih2}
+    \end{align*}
+    %
+    From this, we can construct the typing derivation, matching the conclusion:
+    %
+    \[
+    \inferrule*[Right=\textsc{pair}]
+    {[[ D1 |- t1 : A ]] \\ [[ D2 |- t2 : B ]]}
+    {[[ D1 + D2 |- pair t1 t2 : Tup A B ]]}
+    \]
+
+  \item Case \addPairElimName\\
+    The synthesis rule for pair elimination has the form:
+    \[
+      \addPairElim
+    \]
+      By induction on the premises we have that:
+    \begin{align*}
+      [[ D1 |- t1 : A ]] \tag{ih1} \\
+      [[ D2 |- t2 : B ]] \tag{ih2}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{LetPair}]
+    {\inferrule*[right=\textsc{Var}] {\quad} {[[x3 : Tup A B |- x3
+    : Tup A B]]} \\ [[D, x1 : A, x2 : B |- t2 : C]]}
+    {[[D, x3 : Tup A B |- letpair x1 x2 = x3 in t2 : C ]]}
+    \]
+
+  \item Case \addSumIntroLName and \addSumIntroRName\\
+    The synthesis rules for sum introduction are straightforward. For
+    \addSumIntroLName we have the rule:
+    \[
+      \addSumIntroL
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      [[ D |- t : A ]] \tag{ih}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Inl}]
+    {[[D |- t : A]]}
+    {[[D |- inl t : Sum A B]]}
+    \]
+    Likewise, for the \addSumIntroRName we have the
+    synthesis rule:
+    \[
+      \addSumIntroR
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      [[ D |- t : B ]] \tag{ih}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{Inr}]
+    {[[D |- t : B]]}
+    {[[D |- inl t : Sum A B]]}
+    \]
+
+    \item Case \addSumElimName\\
+      The synthesis rule for sum elimination has the form:
+      \[
+      \addSumElim
+      \]
+    By induction on the premises we have that:
+    \begin{align*}
+      [[ D1, x2 : A |- t1 : C ]] \tag{ih1}\\
+      [[ D2, x3 : B |- t2 : C ]] \tag{ih2}
+    \end{align*}
+      From this, we can construct the typing derivation, matching the
+      conclusion:
+      \[
+      \inferrule*[Right=\textsc{Case}]
+      {\inferrule*[right=\textsc{Var}, leftskip=5em]{\quad}{[[x1 : Sum A B |- x1 : Sum A B]]} \\ [[D1, x2 : A |- t1 : C]] \\ [[D2, x3 : B |- t2 :
+      C]]}{([[ D1]] \sqcup [[ D2]] ), [[ x1 : Sum A B ]] \vdash \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} : C}
+      \]
+
+  \item Case \addUnitIntroName\\
+    The synthesis rule for unit introduction has the form:
+    \[
+      \addUnitIntro
+    \]
+    From this, we can construct the typing derivation, matching the conclusion:
+    \[
+    \inferrule*[Right=\textsc{1}]
+    {\quad}
+    {[[ . |- () : Unit ]]}
+    \]
+
+  \item Case \addUnitElimName\\
+    The synthesis rule for unit elimination has the form:
+    \[
+      \addUnitElim
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      [[ D |- t : C ]] \tag{ih}
+    \end{align*}
+    From this, we can construct the typing derivation, matching the
+    conclusion:
+    \[
+    \inferrule*[Right=\textsc{Let1}]
+    { \inferrule*[Right=\textsc{Var}]{\quad}{[[ x : Unit |- x : Unit ]]} \\ [[D |- t : C]]}
+    {[[D, x : Unit |- let () = x in t : C ]]}
+    \]
+    %
+
+  \end{enumerate}
+\end{proof}
+\addPruningSynthSound*
+\begin{proof}
+  The cases for the rules in the additive pruning synthesis calculus are equivalent to lemma \eqref{lemma:addSynthSound}, except for the cases of the \addPruningAppName and \addPruningPairIntroName rules which we consider here:
+  \begin{enumerate}
+    \item Case \addPruningAppName\\
+    Matching the form of the lemma, the application derivation can be
+    constructed as:
+    \[
+      \addPruneApp
+    \]
+    %
+    By induction on the premises we then have the following typing
+    judgments:
+    %
+    \begin{align*}
+      [[ D1, x2 : B |- t1 : C ]] \\
+      [[ D2 |- t2 : A ]]
+    \end{align*}
+    %
+    We can thus construct the following typing derivation, making use
+    of the admissibility of linear substitution
+    (Lemma~\ref{lemma:substitution}):
+    \[
+    \inferrule*[Right=(L.~\ref{lemma:substitution})]
+    {\inferrule*[right=\textsc{app}, leftskip=2em]
+    {\inferrule*[right=\textsc{var}]
+    {\quad}
+    {[[x1 : A -o B |- x1 : A -o B ]]} \\ {[[  D2 |- t2 : A ]]}}
+  {[[D2, x1 : A -o B |- x1 t2 : B]]}
+    \\ [[ D1, x2 : B |- t1 : C]]}
+    {[[(D1 + D2), x1 : A -o B |- [(x1 t2) / x2] t1 : C]]}
+    \]
+
+  \item Case \addPruningPairIntroName\\
+
+    The synthesis rule for the pruning alternative for pair introduction has the form:
+
+    \[
+      \addPrunePairIntro
+    \]
+    By induction on the premises we have that:
+    \begin{align*}
+      [[ D1 |- t1 : A ]] \tag{ih1} \\
+      [[ D2 |- t2 : B ]] \tag{ih2}
+    \end{align*}
+
+    From this, we can construct the typing derivation, matching the conclusion:
+
+    \[
+    \inferrule*[Right=\textsc{pair}]
+    {[[ D1 |- t1 : A ]] \\ [[ D2 |- t2 : B ]]}
+    {[[ D1 + D2 |- pair t1 t2 : Tup A B ]]}
+    \]
+
+
+  \end{enumerate}
+\end{proof}
+
+%\focusSoundSub*
+\begin{restatable}[Soundness of focusing for subtractive synthesis]{lemma}{focusSoundSub}
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & [[ G ; O |- A async =>- t ; D ]] \quad &\implies \quad [[ G , O |- A =>- t ; D ]]\\
+ 2.\ Left\ Async: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G , O |- C =>- t ; D ]]\\
+ 3.\ Right\ Sync: & [[ G ; . |- A sync =>- t ; D ]] \quad &\implies \quad [[ G |- A =>- t ; D ]]\\
+ 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>- t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>- t ; D ]]\\
+ 5.\ Focus\ Right: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]\\
+ 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+  \begin{enumerate}
+      \item Case 1. Right Async: \\
+      \begin{enumerate}
+        \item Case \subAbsName \\
+          In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+          \[
+          \fSubAbsRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ (G , O), x : A |- A =>- t ; D ]] \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instantiation of the \subAbsName synthesis rule in the non-focusing calculus:
+          \[
+          \inferrule*[right=\subAbsName]
+          {[[(G , O), x : A |- B =>- t ; D]] \quad\; [[ x notin D ]]}{[[ G , O |- A -o B =>- \x. t ; D ]]}
+          \]
+    \item Case \fSubRAsyncTransitionName \\
+          In the case of the right asynchronous rule for transition to a left asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubRAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G , O |- C =>- t ; D ]]
+          \]
+          from case 2 of the lemma.
+    \end{enumerate}
+    \item Case 2. Left Async: \\
+      \begin{enumerate}
+        \item Case \subPairElimName \\
+          In the case of the left asynchronous rule for pair elimination, the synthesis rule has the form:
+          \[
+          \fSubPairElimRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+            \[
+            [[(G , O), x1 : A, x2 : B |- C =>- t ; D]] \tag{ih}
+            \]
+          from From which, we can construct the following instantiation of the \subPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+          \inferrule*[right=\subPairElimName]
+          {[[(G , O), x1 : A, x2 : B |- C =>- t ; D]] \\ [[ x1 notin D ]] \\ [[x2 notin D]]}{[[G , (O, x3 : Tup A B) |- C =>- letpair x1 x2 = x3 in t ; D2]]}
+          \]
+        \item Case \subSumElimName \\
+          In the case of the left asynchronous rule for sum elimination, the synthesis rule has the form:
+          \[
+          \fSubSumElimRule
+          \]
+          By induction on the first and second premises, we have that:
+          \[
+            [[(G , O), x2 : A |- C =>- t1 ; D1]] \tag{ih1}\\
+          \]
+          \[
+            [[(G , O), x3 : B |- C =>- t2 ; D2]] \tag{ih2}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \subSumElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=\subSumElimName]
+      {[[(G , O), x2 : A |- C =>- t1 ; D1]] \quad\,
+       [[(G , O), x3 : B |- C =>- t2 ; D2]] \quad\, [[ x2 notin D1 ]] \quad [[ x3 notin D2 ]]}
+     {[[G , (O, x1 : Sum A B) ]] \vdash C \Rightarrow^{-}  \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2} [[ D1 ]] \sqcap [[ D2 ]]}
+          \]
+        \item Case \subUnitElimName \\
+          In the case of the left asynchronous rule for unit elimination, the synthesis rule has the form:
+          \[
+          \fSubUnitElimRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[G |- C =>- t ; D]] \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \subUnitElimName\ synthesis rule in the non-focusing calculus matching the conclusion:
+          \[
+    \inferrule*[right=\subUnitElimName]
+    {[[G |- C =>- t ; D]]}
+    {[[G, x : Unit |- C =>- let () = x in t ; D]]}
+          \]
+        \item Case \subUnboxName \\
+          In the case of the left asynchronous rule for graded modality elimination, the synthesis rule has the form:
+          \[
+          \fSubUnboxRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ (G , O), x2 : [A] r |- B =>- t ; D, x2 : [A] s]]  \tag{ih}\\
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \subUnboxName synthesis rule in the non-focusing calculus:
+          \[
+  \inferrule*[right=\subUnboxName]
+    {[[ (G , O), x2 : [A] r |- B =>- t ; D, x2 : [A] s]]  \\ 0 \sqsubseteq [[s]]}{[[G , (O, x1 : [] r A) |- B =>- let [x2] = x1 in t ; D ]]}
+          \]
+        \item Case \subDerName \\
+          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+          \[
+          \fSubDerRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]]  \tag{ih}\\
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \subDerName synthesis rule in the non-focusing calculus:
+          \[
+      \inferrule*[right=\subDerName]
+{[[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]] \\
+[[ y notin D ]] \\
+[[ exists s . r >= s + 1]]
+}
+{[[ G, x : [A] r |- B =>- [x/y] t ; D, x : [A] s' ]]}
+          \]
+
+        \item Case \fSubLAsyncTransitionName \\
+          In the case of the left asynchronous rule for transitioning an assumption from the focusing context $[[ O ]]$ to the non-focusing context $[[G]]$, the synthesis rule has the form:
+          \[
+            \fSubLAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ {G, x : A}, O |- C =>- t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 3. Right Sync: \\
+      \begin{enumerate}
+        \item Case \subPairIntroName \\
+          In the case of the right synchronous rule for pair introduction, the synthesis rule has the form:
+          \[
+          \fSubPairIntroRuleNoLabel
+          \]
+          By induction on the first and second premises, we have that:
+          \[
+            [[G |- A =>- t1 ; D1]]  \tag{ih1}
+          \]
+          \[
+            [[ D1 |- B =>- t2 ; D2 ]] \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instatiation of the \subPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=\subPairIntroName]
+    {[[G |- A =>- t1 ; D1]] \\ [[ D1 |- B =>- t2 ; D2 ]]}{[[G |- Tup A B =>- pair t1 t2 ; D2]]}
+          \]
+        \item Case \subSumIntroLname\ and \subSumIntroRname\\
+          In the case of the right synchronous rules for sum introduction, the synthesis rules has the form:
+          \[
+          \fSubSumIntroRuleL
+          \]
+          \[
+          \fSubSumIntroRuleR
+          \]
+          By induction on the premises of these rules, we have that:
+          \[
+            [[G |- A =>- t ; D]]  \tag{ih1}
+          \]
+          \[
+            [[G |- B =>- t ; D]] \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instatiations of the \subSumIntroLname\ and \subSumIntroRname\ rule in the non-focusing calculus, respectively:
+          \[
+    \inferrule*[right=\subSumIntroLname]
+    {[[G |- A =>- t ; D]]}
+    {[[G |- Sum A B =>- inl t ; D]]}
+          \]
+          \[
+    \inferrule*[right=\subSumIntroRname]
+    {[[G |- B =>- t ; D]]}
+    {[[G |- Sum A B =>- inr t ; D]]}
+          \]
+        \item Case \subUnitIntroName \\
+          In the case of the right synchronous rule for unit introduction, the synthesis rule has the form:
+          \[
+          \fSubUnitIntroRule
+          \]
+          From which, we can construct the following instatiation of the \subUnitIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=\subUnitIntroName]
+    {\quad}
+    {[[G , O |- Unit =>- () ; G]]}
+          \]
+        \item Case \subBoxName \\
+          In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
+          \[
+          \fSubBoxRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[G |- A =>- t ; D]] \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instatiation of the \subBoxName synthesis rule in the non-focusing calculus:
+          \[
+  \inferrule*[right=\subBoxName]
+  {[[G |- A =>- t ; D]]}{[[G |- [] r A =>- [t] ; G - r * (G - D)]]}
+          \]
+      \item Case \fSubRSyncTransitionName \\
+          In the case of the right synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubRSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[ G |- A =>- t ; D ]] \tag{ih}
+          \]
+          from case 1 of the lemma.
+      \end{enumerate}
+    \item Case 4. Left Sync \\
+      \begin{enumerate}
+          \item Case \subAppName \\
+          In the case of the left synchronous rule for application, the synthesis rule has the form:
+          \[
+          \fSubAppRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[G, x2 : B |- C =>- t1 ; D1]] \tag{ih1}
+          \]
+          from case 4 of the lemma. By induction on the third premise, we have that:
+          \[
+            [[D1 |- A =>- t2 ; D2]] \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instatiation of the \subAppName synthesis rule in the non-focusing calculus:
+          \[
+  \inferrule*[right=\subAppName]
+  {[[G, x2 : B |- C =>- t1 ; D1]] \qquad [[ x2 notin D1 ]] \qquad [[D1 |- A =>- t2 ; D2]]}{[[G, x1 : A -o B
+      |- C =>- [(x1 t2) / x2] t1 ; D2 ]]}
+          \]
+          \item Case \subLinVarName \\
+          In the case of the left synchronous rule for linear variable synthesis, the synthesis rule has the form:
+          \[
+          \fSubLinVarRule
+          \]
+          From which, we can construct the following instatiation of the \subLinVarName\  synthesis rule in the non-focusing calculus:
+          \[
+                             \inferrule*[right=\subLinVarName]
+                             {\quad}{[[G, x : A |- A =>- x ; G]]}
+          \]
+          \item Case \subGrVarName \\
+          In the case of the left synchronous rule for graded variable synthesis, the synthesis rule has the form:
+          \[
+          \fSubGrVarRule
+          \]
+          From which, we can construct the following instatiation of the \subGrVarName\  synthesis rule in the non-focusing calculus:
+          \[
+      \inferrule*[right=\subGrVarName]
+  {[[ exists s . r <= {s + 1} ]]}{[[G, x : [A] r |- A =>- x ; G , x : [A] s]]}
+          \]
+      \item Case \fSubLSyncTransitionName \\
+          In the case of the left synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubLSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[ G, x : A |- C =>- t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+        \item Case 5. Focus Right: \fSubFocusRName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a right synchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubFocusRRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G |- C =>- t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+        \item Case 6. Focus Left \fSubFocusLName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a left synchronous judgement, the synthesis rule has the form:
+          \[
+            \fSubFocusLRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G, x : A |- C =>- t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+  \end{enumerate}
+\end{proof}
+
+%\focusSoundAdd*
+\begin{restatable}[Soundness of focusing for additive synthesis]{lemma}{focusSoundAdd}
+  \label{lemma:fAddSynthSound}
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- A =>+ t ; D ]]\\
+ 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- C =>+ t ; D ]]\\
+ 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
+ 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
+ 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
+ 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+  \begin{enumerate}
+      \item Case 1. Right Async: \\
+      \begin{enumerate}
+        \item Case \addAbsName \\
+          In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+          \[
+          \fAddAbsRuleNoLabel
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[(G , O), x : A |- B =>+ t ; D, x : A]]   \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instatiation of the \addAbsName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$\multimap^{+}$]
+    {[[(G , O), x : A |- B =>+ t ; D, x : A]]}{[[G , O |- A -o B =>+ \x . t ; D]]}
+          \]
+          \item Case \fAddRAsyncTransitionName
+          In the case of the right asynchronous rule for transition to a left asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddRAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G , O |- C =>+ t ; D ]]
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 2. Left Async: \\
+      \begin{enumerate}
+        \item Case \addPairElimName \\
+          In the case of the left asynchronous rule for pair elimination, the synthesis rule has the form:
+          \[
+          \fAddPairElimRuleNoLabel
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[ (G , O), x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B]]   \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addPairElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\otimes^{+}$]
+    {[[ (G , O), x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B]]}
+    {[[ G , (O, x3 : Tup A B) |- C =>+ letpair x1 x2 = x3 in t2 ; D, x3 : Tup A B ]]}
+          \]
+        \item Case \addSumElimName \\
+          In the case of the left asynchronous rule for sum elimination, the synthesis rule has the form:
+          \[
+          \fAddSumElimRule
+          \]
+          By induction on the premises, we have that:
+          \[
+           [[(G , O), x2 : A |- C =>+ t1 ; D1, x2 : A]]   \tag{ih1}
+          \]
+          \[
+           [[(G , O), x3 : B |- C =>+ t2 ; D2, x3 : B ]]   \tag{ih2}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addSumElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\oplus^{+}$]
+    {[[(G , O), x2 : A |- C =>+ t1 ; D1, x2 : A]] \\ [[(G , O), x3 : B |- C =>+ t2 ; D2,
+      x3 : B ]]}{[[G , (O, x1 : Sum A B) ]] \vdash C \Rightarrow^{+} \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2}\ |\  ([[D1]] \sqcup [[D2]]), [[x1 : Sum A B]]}
+          \]
+        \item Case \addUnitElimName \\
+          In the case of the left asynchronous rule for unit elimination, the synthesis rule has the form:
+          \[
+          \fAddUnitElimRule
+          \]
+          By induction on the premise, we have that:
+          \[
+           [[G |- C =>+ t ; D]]   \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnitElimName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L1$^{+}$]
+    {[[G |- C =>+ t ; D]]}
+    {[[G, x : Unit |- C =>+ let () = x in t ; D, x : Unit]]}
+          \]
+        \item Case \addUnboxName \\
+          In the case of the left asynchronous rule for graded modality elimination, the synthesis rule has the form:
+          \[
+          \fAddUnboxRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ (G , O), x2 : [A] r |- B =>+ t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnboxName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\square^{+}$]
+    {[[ (G , O), x2 : [A] r |- B =>+ t ; D ]] \\ \textit{if}\ [[x2 : [A] s]] \in
+      [[D]]\ \textit{then}\ [[s]] \sqsubseteq [[ r ]]\ \textit{else}\ 0 \sqsubseteq [[ r ]]}{[[G , (O, x1 : [] r A) |- B =>+
+      let [x2] = x1 in t ; (D \ x2 ), x1 : [] r A ]]}
+          \]
+        \item Case \addDerName \\
+          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+          \[
+          \fAddDerRule
+          \]
+          By induction on the premise, we have that:
+          \[
+           [[ G, x : [A] s, y : A |- B =>+ t ; D, y : A ]]   \tag{ih}
+          \]
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \addDerName\ synthesis rule in the non-focusing calculus:
+          \[
+\inferrule*[right=der$^{+}$]
+{ [[ G, x : [A]s, y : A |- B =>+ t ; D, y : A ]] }
+{ [[ G, x : [A]s |- B =>+ [x / y] t ; D + x : [A]1 ]] }
+          \]
+        \item Case \fAddLAsyncTransitionName \\
+          In the case of the left asynchronous rule for transitioning an assumption from the focusing context $[[ O ]]$ to the non-focusing context $[[G]]$, the synthesis rule has the form:
+          \[
+            \fAddLAsyncTransitionRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ {G, x : A}, O |- C =>+ t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 3. Right Sync: \\
+      \begin{enumerate}
+        \item Case \addPairIntroName \\
+          In the case of the right synchronous rule for pair introduction, the synthesis rule has the form:
+          \[
+          \fAddPairIntroRuleNoLabel
+          \]
+          By induction on the premises, we have that:
+          \[
+           [[G |- A =>+ t1 ; D1]]   \tag{ih1}
+          \]
+          \[
+           [[G |- B =>+ t2 ; D2]]  \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$\otimes^{+}$]
+    {[[G |- A =>+ t1 ; D1]] \\ [[G |- B =>+ t2 ; D2]]}
+    {[[G |- Tup A B =>+ pair t1 t2 ; D1 + D2]]}
+          \]
+        \item Case \addSumIntroLName\ and \addSumIntroRName\\
+          In the case of the right synchronous rules for sum introduction, the synthesis rules have the form:
+          \[
+          \fAddSumIntroRuleL
+          \]
+          \[
+          \fAddSumIntroRuleR
+          \]
+          By induction on the premises of the rules, we have that:
+          \[
+           [[G |- A =>+ t ; D]]   \tag{ih1}
+          \]
+          \[
+           [[G |- B =>+ t ; D]]  \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiations of the \addSumIntroLName\ and \addSumIntroRName\ synthesis rules in the non-focusing calculus, respectively:
+          \[
+    \inferrule*[right=R$\oplus_{1}^{+}$]
+    {[[G |- A =>+ t ; D]]}
+    {[[G |- Sum A B =>+ inl t ; D]]}
+          \]
+          \[
+    \inferrule*[right=R$\oplus_{2}^{+}$]
+    {[[G |- B =>+ t ; D]]}
+    {[[G |- Sum A B =>+ inr t ; D]]}
+          \]
+        \item Case \addUnitIntroName \\
+          In the case of the right synchronous rule for unit introduction, the synthesis rule has the form:
+          \[
+          \fAddUnitIntroRule
+          \]
+          From which, we can construct the following instantiation of the \addUnitIntroName\  synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R1$^{+}$]
+    {\quad}
+    {[[G |- Unit =>+ () ; .]]}
+          \]
+        \item Case \addBoxName \\
+          In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
+          \[
+          \fAddBoxRule
+          \]
+          By induction on the premise, we have that:
+          \[
+           [[G |- A =>+ t ; D]]   \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instantiation of the \addBoxName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$\square^{+}$]
+    {[[G |- A =>+ t ; D]]}{[[G |- [] r A =>+ [t] ; r * D ]]}
+          \]
+      \item Case \fAddRSyncTransitionName \\
+          In the case of the right synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddRSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[ G |- A =>+ t ; D ]] \tag{ih}
+          \]
+          from case 1 of the lemma.
+      \end{enumerate}
+    \item Case 4. Left Sync \\
+      \begin{enumerate}
+          \item Case \addAppName \\
+          In the case of the left synchronous rule for application, the synthesis rule has the form:
+          \[
+          \fAddAppRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \tag{ih1}
+          \]
+          from case 4 of the lemma. By induction on the second premise, we have that:
+          \[
+            [[G |- A =>+ t2 ; D2 ]] \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addAppName synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=L$\multimap^{+}$]
+    {[[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G |- A =>+ t2 ; D2 ]]}{[[G, x1 : A -o B |- C =>+
+    [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
+          \]
+          \item Case \addLinVarName \\
+          In the case of the left synchronous rule for linear variable synthesis, the synthesis rule has the form:
+          \[
+          \fAddLinVarRule
+          \]
+          From which, we can construct the following instantiation of the \addLinVarName\ in the non-focusing calculus:
+          \[
+    \inferrule*[right=LinVar$^{+}$]
+    {\quad}
+    {[[G, x : A |- A =>+ x ; x : A]]}
+          \]
+          \item Case \addGrVarName \\
+          In the case of the left synchronous rule for graded variable synthesis, the synthesis rule has the form:
+          \[
+          \fAddGrVarRule
+          \]
+          From which, we can construct the following instantiation of the \addGrVarName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=GrVar$^{+}$]
+    {\quad}
+      {[[ G, x : [A] r |- A =>+ x ; x :[A] 1 ]] }
+          \]
+      \item Case \fAddLSyncTransitionName \\
+          In the case of the left synchronous rule for transitioning back to an asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddLSyncTransitionRule
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[ G, x : A |- C =>+ t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+      \end{enumerate}
+    \item Case 5. Focus Right: \fAddFocusRName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a right synchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddFocusRRuleNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G |- C =>+ t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+    \item Case 6. Focus Left: \fAddFocusLName \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a left synchronous judgement, the synthesis rule has the form:
+          \[
+            \fAddFocusLRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G, x : A |- C =>+ t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+
+  \end{enumerate}
+\end{proof}
+
+%\focusSoundAddPruning*
+\begin{restatable}[Soundness of focusing for additive pruning synthesis]{lemma}{focusSoundAddPruning}
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- A =>+ t ; D ]]\\
+ 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- C =>+ t ; D ]]\\
+ 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
+ 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
+ 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
+ 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+  \begin{enumerate}
+      \item Case: 1. Right Async: The proofs for right asynchronous rules are equivalent to those of lemma  \eqref{lemma:fAddSynthSound}\\
+    \item Case 2. Left Async: The proofs for left asynchronous rules are equivalent to those of lemma \eqref{lemma:fAddSynthSound}\\
+    \item Case 3. Right Sync: The proofs for right synchronous rules are equivalent to those of lemma \eqref{lemma:fAddSynthSound}, except for the case of the \addPruningPairIntroName rule:\\
+      \begin{enumerate}
+        \item Case \addPruningPairIntroName \\
+          In the case of the right synchronous rule for pair introduction, the synthesis rule has the form:
+          \[
+          \fAddAltPairIntroRule
+          \]
+          By induction on the premises, we have that:
+          \[
+           [[G |- A =>+ t1 ; D1]]   \tag{ih1}
+          \]
+          \[
+           [[G - D1 |- B =>+ t2 ; D2]]   \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addPruningPairIntroName\ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=R$^{\prime}{\otimes^{+}}$]
+    {[[G |- A =>+ t1 ; D1]] \\ [[G - D1 |- B =>+ t2 ; D2]]}
+    {[[G |- Tup A B =>+ pair t1 t2 ; D1 + D2]]}
+          \]
+      \end{enumerate}
+    \item Case 4. Left Sync: The proofs for left synchronous rules are equivalent to those of lemma  \eqref{lemma:fAddSynthSound}, except for the case of the \addPruningAppName\  rule:\\\\
+      \begin{enumerate}
+          \item Case \addPruningAppName \\
+          In the case of the left synchronous rule for application, the synthesis rule has the form:
+          \[
+          \fAddAltAppRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \tag{ih1}
+          \]
+          from case 4 of the lemma. By induction on the second premise, we have that:
+          \[
+            [[G |- A =>+ t2 ; D2 ]] \tag{ih2}
+          \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \addPruningAppName\ synthesis rule in the non-focusing calculus:
+          \[
+\inferrule*[right=L$^{\prime}\multimap^{+}$]
+    {[[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G - D1 |- A =>+ t2 ; D2 ]]}{[[G, x1 : A -o B |- C =>+
+    [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
+          \]
+      \end{enumerate}
+    \item Case 5. Right Focus: \fAddFocusRName\ - The proof for right focusing rule is equivalent to that of lemma \eqref{lemma:fAddSynthSound}\\
+    \item Case 6. Left Focus: \fAddFocusLName\ - The proof for left focusing rule is equivalent to that of lemma \eqref{lemma:fAddSynthSound}\\
+  \end{enumerate}
+\end{proof}
+
+% \synthSound*
+\begin{proof}
+Induction on the synthesis rules
+\begin{enumerate}
+\item Case $\textsc{Var}$ \\
+        For synthesis of a variable term, we have the derivation:
+        \begin{align*}
+          \synVar
+        \end{align*}
+        from which we can construct the following typing derivation, matching the above conclusion:
+        \begin{align*}
+          \tyVar
+        \end{align*}
+\item Case $\multimap_{R}$\\
+        For synthesis of an abstraction term, we have the derivation:
+        \begin{align*}
+          \synAbs
+        \end{align*}
+        By induction on the premise, we have:
+        \begin{align*}
+          [[ D, x : [ A ] r |- t : B ]]
+        \end{align*}
+        and that:
+        \begin{align*}
+          [[ r <<= q ]]
+        \end{align*}
+        from which we can construct the following typing derivation, matching the conclusion:
+        \begin{align*}
+          \inferrule*[Right=Abs]
+            {\inferrule*[Right=Approx]{[[ D, x : [A] r |- t : B ]] \\ [[ r <<= q ]]}{[[ D, x : [ A ] q |- t : B ]]}}
+            {[[ D |- \ x ^ q . t  : A ^ q -> B ]]}
+        \end{align*}
+\item Case $\multimap_{L}$\\
+        For synthesising an application, we have the derivation:
+        \begin{align*}
+          \synApp
+        \end{align*}
+        By induction on the premises, we obtain the following typing judgements:
+        \begin{align*}
+          [[ D1, x1 : [ A ^ q -> B ] s1, x2 : [ B ] s2 |- t1 : C  ]] \\
+          [[ D2, x1 : [ A ^ q -> B ] s3 |- t2 : A  ]]
+        \end{align*}
+        from which we can construct the following derivation, making use of the admissibility of substitution:
+        \begin{align*}
+          \inferrule*[Right=Subst]{
+          {\inferrule*[Right=App]{\inferrule*[Right=Var]{\quad}{[[ x1 : [ A ^ q -> B ] 1 |- x1 : A ^ q -> B ]]} \\ [[ D2, x1 : [A ^ q -> B] s3 |- t2 : A]]}{ [[ {q * D2}, x1 : [ A ^ q -> B ] {1 + (q * s3)} |-  x1 t2 : B ]]}} \\ [[ D1, x1 : [ A ^ q -> B ] s1, x2 : [ B ] s2 |- t1 : C ]]}
+          {[[ (D1 + s2 * {q * D2}), x1 : [ A ^ q -> B ] {s2 + {s1 + (s2 * {q * s3})}} |- {[ ( x1 t2 ) / x2 ] t1} : C  ]]}
+        \end{align*}
+        making use of the distributivity property of semirings, along with unitality of $1$
+        and commutativity of $+$, such that
+        $[[ s1 + s2 * (1 + (q * s3)) ]] =  [[ s1 + (s2 * 1) + (s2 * q * s3) ]] = [[  s2 + s1 + (s2 * q * s3) ]]$.
+
+\item Case $\textsc{Con}_{R}$\\
+        For synthesising a constructor introduction, we have the derivation:
+        \begin{align*}
+          \synCon
+        \end{align*}
+        By induction on the premises, we obtain the following typing judgements:
+        \begin{align*}
+          [[ D1 |- t1 : B1 ]] \quad , ..., \quad [[ Dn |- tn : Bn ]]
+        \end{align*}
+        from which we can construct the following derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[Right=App]{\inferrule*[Right=App]{\inferrule*[right=App, vdots=1em]{\inferrule*[Right=Con]{[[ ( Con : B1 - q1 .*. Bn - qn -> {K A} ) elem Defines ]]}{[[ 0 * G |- Con . : B1 - q1 .*. Bn - qn -> {K A}  ]]} \\ [[ D1 |- t1 : B1 ]]}{{[[ {0 * G} + q1 * D1 |- Con t1 : {B2 - q2 .*. Bn - qn -> {K A}} ]]}}}{[[ {0 * G} + q1 * D1 + ... + qn-1 * Dn-1 |-  Con t1 ... tn-1 : Bn ^ qn -> {K A} ]]} \\ [[ Dn |- tn : Bn ]]}{{[[ {0 * G} + q1 * D1 ]]+ ...+  [[ qn * Dn |- Con t1 ... tn : K A ]]}}
+        \end{align*}
+
+\item Case $\textsc{Con}_{L}$ \\
+        For synthesising a case statement, we have the derivation:
+        \begin{align*}
+          \synCaseAlt
+        \end{align*}
+        By induction on the premises we obtain the following typing judgements:
+        \begin{align*}
+          [[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]]
+        \end{align*}
+        % By monotonicty of $\sqcup$ we have that $ [[ {Vari s} <<= {{Var1 s} \*/ {Varn s}}  ]]$
+        % and by $*_{1}$ that $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$. Therefore, by monotonicty of $\sqcup$
+        % we have that $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+        % from which we can construct the following
+        % derivation, matching the above conclusion:
+        We have by the definition of $\sqcup$:
+        %
+        \begin{enumerate}
+                \item $ [[ Di]] \sqsubseteq [[(D1 ++*+ Dm) ]]$
+                \item $ [[ {Vari r} <<= {{Var1 r} \*/ {Varm r}}  ]]$
+                % \item $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$
+                % \item $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+        \end{enumerate}
+
+        and from the premises of the synthesis rule:
+        \begin{enumerate}[resume]
+                \item $[[ {s' Vari Varj} <<= {{Var1 s} \*/ {Varm s}} ]]$
+                \item $ [[ {s Vari Varj} <<= {s' Vari Varj } * {q Vari Varj} ]]$
+                \item $ [[ {PolyConSimple {K A} {{Var1 s} \*/ {Varm s}}} ]] $
+        \end{enumerate}
+
+        We then construct the following two derivations towards the goal:
+        %
+        \begin{equation}
+          \label{soundConLSub1}
+          \inferrule*[Right=PCon]{\inferrule*[Right=PVar]{\quad}{ [[  {q Vari Varj} * {{Var1 s} \*/ {Varm s}} |- Special y : Bj |> {y Vari Varj} : [Bj] {q Vari Varj} * {{Var1 s} \*/ {Varm s}} ]] } \\  (e) }{[[ {{Var1 s} \*/ {Varm s}} |- Coni Var1 Varn Vari y y   : K A |> {y Vari Varj} : [ Bj ] {q Vari Varj} * {{Var1 s} \*/ {Varm s}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}}  ]]}\\
+        \end{equation}
+        and
+        \begin{equation}
+          \label{soundConLSub2}
+          \hspace{-7em}\inferrule*[Right=Approx, rightskip=5em]{ \inferrule*[Right=Approx]{ \inferrule*[Right=induction]{\quad}{[[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]]} \qquad \\ (d) }{\inferrule*[Right=Approx]{ [[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {s' Vari Varj}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {s' Vari Varj} |- ti : B  ]] \\ (c)}{\inferrule*[Right=Approx]{ [[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varm s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}} |- ti : B  ]] \\ (b)}{[[ { Di, x : [ {K A} ] {({Var1 r} \*/ {Varm r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varm s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}} |- ti : B  ]] \\ (a)} }}}{ [[ { (D1 ++*+ Dm), x : [ {K A} ] {({Var1 r} \*/ {Varm r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varm s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}} |- ti : B  ]] }
+        \end{equation}
+
+
+        \begin{align*}
+          \inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{\quad}{[[ x : [ {K A} ] 1 |- x : {K A} ]]} \quad \\ \eqref{soundConLSub1} \\ \eqref{soundConLSub2} }
+          { \inferrule*[Right=$\equiv$] {[[ ((D1 ++*+ Dm), {x : [ {K A} ] {({Var1 r} \*/ {Varm r})}}) + x : [{K A}] {({{Var1 s} \*/ {Varm s}} * 1)} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]} {[[ (D1 ++*+ Dm), {x : [ {K A} ] {({Var1 r} \*/ {Varm r})} + {({{Var1 s} \*/ {Varm s}})}} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]}}
+        \end{align*}
+
+
+
+% \item Case $\textsc{Con}_{L}$ \\
+%         For synthesising a case statement, we have the derivation:
+%         \begin{align*}
+%           \synCaseAltAlt
+%         \end{align*}
+%         By induction on the premises we obtain the following typing judgements:
+%         \begin{align*}
+%           [[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]]
+%         \end{align*}
+%         % By monotonicty of $\sqcup$ we have that $ [[ {Vari s} <<= {{Var1 s} \*/ {Varn s}}  ]]$
+%         % and by $*_{1}$ that $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$. Therefore, by monotonicty of $\sqcup$
+%         % we have that $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+%         % from which we can construct the following
+%         % derivation, matching the above conclusion:
+%         We have:
+
+%         \begin{enumerate}
+%                 \item $ [[ Di]] \sqsubseteq [[(D1 ++*+ Dn) ]]$
+%                 \item $ [[ {Vari r} <<= {{Var1 r} \*/ {Varn r}}  ]]$
+%                 % \item $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$
+%                 % \item $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+%                 \item $[[ {Vari s'} <<= {{Var1 s'} \*/ {Varn s'}} ]]$
+%                 \item $ [[ {Vari s} <<= {Vari s'} * {q Vari Varj} ]]$
+%                 \item $[[ {s Vari Varj} <<= {Vari s} ]]$
+%         \end{enumerate}
+%         \begin{equation}
+%           \label{soundConLAltSub1}
+%           \inferrule*[Right=PCon]{\inferrule*[Right=PVar]{\quad}{ [[  {q Vari Varj} * {{Var1 s'} \*/ {Varn s'}} |- Special y : Bj |> {y Vari Varj} : [Bj] {q Vari Varj} * {{Var1 s'} \*/ {Varn s'}} ]]  }}{[[ {{Var1 s'} \*/ {Varn s'}} |- Coni Var1 Varn Vari y y   : K A |> {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s'} \*/ {Varn s'}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}}  ]]}\\
+%         \end{equation}
+
+%         \begin{equation}
+%           \label{soundConLAltSub2}
+%           \inferrule*[Right=Approx, rightskip=5em]{ \inferrule*[Right=Approx]{ [[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]] \\ (e)}{\inferrule*[Right=Approx]{[[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {Vari s} |- ti : B ]] \\ (e)}{\inferrule*[Right=Approx]{[[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {Vari s}} , .M. , {y Vari Varn} : [ Bn ]  {Vari s } |- ti : B  ]]  \\ (d)  }{\inferrule*[Right=Approx]{ [[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {Vari s'}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {Vari s' } |- ti : B  ]] \\ (c)}{\inferrule*[Right=Approx]{ [[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varn s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}} |- ti : B  ]] \\ (b)}{[[ { Di, x : [ {K A} ] {({Var1 r} \*/ {Varn r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s'} \*/ {Varn s'}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}} |- ti : B  ]] \\ (a)} }}}}}{ [[ { (D1 ++*+ Dn), x : [ {K A} ] {({Var1 r} \*/ {Varn r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s'} \*/ {Varn s'}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}} |- ti : B  ]] }
+%         \end{equation}
+
+
+%         \begin{align*}
+%           \inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{\quad}{[[ x : [ {K A} ] 1 |- x : {K A} ]]} \\ \eqref{soundConLAltSub1} \\ \eqref{soundConLAltSub2} }
+%           {[[ (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({{Var1 s'} \*/ {Varn s'}} * 1)}} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]}
+        % \end{align*}
+
+\item Case $\Box_{R}$ \\
+        For synthesising a promotion, we have the derivation:
+        \begin{align*}
+          \synBox
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          [[ D |- t : A ]]
+        \end{align*}
+        From which we can construct the following derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[Right=Pr]{[[ D |- t : A ]]}{ [[ r * D |- [ t ] : [] r  A ]]}
+        \end{align*}
+  \item Case $\Box_{L}$ \\
+        For synthesising an unboxing, we have the derivation:
+        \begin{align*}
+          \synUnbox
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          [[ {D, y : [A] s1}, x : [ [] q A ] s2 |- t : B ]]
+        \end{align*}
+        and that:
+        \begin{align*}
+          [[ s1 <<= {s3 * q} ]]
+        \end{align*}
+        From this we can construct the following derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[Right=Case]{\inferrule*[Right=Var, leftskip=5em]{\quad}{[[ x : [ [] q A ] 1 |- x : [] q A ]]} \\ \inferrule*[Right=PBox, leftskip=0em]{\inferrule*[Right=PVar]{\quad}{[[ s3 * q |- y : A |> y : [A] {s3 * q} ]]}}{[[ s3 |- [ y ] : [] q A |> y : [A] {s3 * q}  ]]} \\ \inferrule*[Right=Approx, rightskip=4.5em] {[[ D, y : [A ] s1, x : [ [] q A ] s2 |- t : B ]] \\ [[ s1 <<= {s3 * q} ]]} { [[ D, y : [A ] {s3 * q}, x : [ [] q A ] s2 |- t : B ]]} }{[[ D, x : [ [] q A ] {s3 + s2} |- case x of [ y ] -> t : B  ]]}
+        \end{align*}
+
+\end{enumerate}
+
+\end{proof}
+
+% \focusSynthSound*
+% \begin{proof}
+
+% \end{proof}
+%
+
+\begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+then:
+\begin{align*}
+\begin{array}{lll}
+ 1.\ Right\ Async: & [[ G ; O |- A async => t ; D ]] \quad &\implies \quad [[ G ,, O |- A => t ; D ]]\\
+ 2.\ Left\ Async: & [[ G ; O async |- B => t ; D ]] \quad &\implies \quad [[ G ,, O |- B => t ; D ]]\\
+ 3.\ Right\ Sync: & [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ G |- A => t ; D ]]\\
+ 4.\ Left\ Sync: & [[ G ; {x : A }sync |- B => t ; D ]] \quad &\implies \quad [[ G, x : A |- B => t ; D ]]\\
+ 5.\ Focus\ Right: & [[ G ; O async |- B => t ; D ]] \quad &\implies \quad [[ G |- B => t ; D ]]\\
+ 6.\ Focus\ Left: & [[ G, x : A ; O async |- B => t ; D ]] \quad &\implies \quad [[ G |- B => t ; D ]]
+\end{array}
+\end{align*}
+\end{restatable}
+\begin{proof}
+\begin{enumerate}
+\item Case: 1. Right Async: \\
+    \begin{enumerate}
+      \item Case $\multimap_{R}$\\
+          In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+          \[
+            \fsynAbs
+          \]
+          By induction on the premise, we have that:
+          \[
+            [[(G , O), x : [ A] q |- B => t ; D, x : [A ] r]]   \tag{ih}
+          \]
+          from case 1 of the lemma. From which, we can construct the following instatiation of the $\multimap_{\textsc{R}}$ synthesis rule in the non-focusing calculus:
+          \[
+    \inferrule*[right=$\multimap_{R}$]
+    {[[(G , O), x : [ A ] q |- B => t ; D, x : [A] r && r <<= q ]]}{[[G , O |- A -> B => \x ^ q . t ; D]]}
+          \]
+          \item Case \fsynRAsyncTransName\ \\
+          In the case of the right asynchronous rule for transition to a left asynchronous judgement, the synthesis rule has the form:
+          \[
+            \fsynRAsyncTrans
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G , O |- B =>+ t ; D ]]
+          \]
+          from case 2 of the lemma.
+    \end{enumerate}
+\item Case 2. Left Async: \\
+    \begin{enumerate}
+      \item Case $\textsc{Con}_{L}$\\
+        In the case of the left asynchronous rule for constructor elimination, the synthesis rule has the form:
+            \[
+            \fsynCase
+            \]
+            By induction on the second premise, we have that:
+            \[
+[[ {(G, O) , {{{x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}}}} async |- B => ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} ]]
+            \]
+            from case 2 of the lemma. From which we can construct the following instantiation of the $\textsc{Con}_{L}$ rule in the non-focusing calculus:
+            \begin{align*}
+            \inferrule*[right=$\textsc{Con}_{\textsc{L}}$]
+            {
+            [[ ( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines ]]\\\\
+            [[{ {(G, O), x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B => ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}]]\\\\
+            [[ exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj} ]]\\\\
+            [[ assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}} ]]\\\\
+            [[ {PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}} ]]
+            }
+            {[[ (G, O), x : [ {K {A Many}} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}]]
+            }
+            \end{align*}
+
+
+      \item Case $\Box_{L}$ \\
+            In the case of the left asynchronous rule for graded modality elimination, the synthesis rule has the form:
+            \[
+            \fsynUnbox
+            \]
+            By induction on the first premise, we have that:
+            \[
+            [[ {{(G, O), y : [ A ] { r * q }}, x : [ [] q A ] r} |- B => t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2 ]]
+            \]
+            from case 2 of the lemma. From which, we can construct the following instantiation of the $\Box_{L}$ synthesis rule in the non focusing calculus:
+            \[
+            \inferrule*[right=$\Box_{\textsc{L}}$]
+            {
+            [[ {{(G, O), y : [ A ] { r * q }}, x : [ [] q A ] r} |- B => t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2 ]] \\
+            [[ exists s3 . s1 <= {s3 * q} <= {r * q} ]]
+            }
+            {
+            [[ {(G, O), x : [ [] q A ] r} |- B => case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2} ]]
+            }
+            \]
+
+        \item Case \fsynLAsyncTransName \\
+          In the case of the left asynchronous rule for transitioning an assumption from the focusing context $[[ O ]]$ to the non-focusing context $[[G]]$, the synthesis rule has the form:
+          \[
+            \fsynLAsyncTrans
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ {G, x : A}, O |- C => t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+    \end{enumerate}
+\item Case 3. Right Sync: \\
+    \begin{enumerate}
+      \item Case $\textsc{Con}_{\textsc{R}}$\\
+          In the case of the right synchronous rule for constructor introduction, the synthesis rule has the form:
+            \[
+            \inferrule*[Right=$\textsc{Con}_{\textsc{R}}$]
+            { [[ ( Con : B1 .*. Bn -> {K {A Many}} ) elem Defines ]] \\
+             [[ G ]] ; \emptyset \vdash [[ Bi ]] \Downarrow\ \Rightarrow [[ ti ]] \mid\ [[ Di ]]}
+            {[[  G ]] ; \emptyset \vdash [[{K {A Many}}]] \Downarrow\ \Rightarrow [[Con t1 ... tn]] \mid\ [[  {D1 + ... + Dn} ]]}
+            \]
+          By induction on the second premise, we have that:
+            \[
+            [[G |- Bi => ti ; Di]]
+            \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the $\textsc{Con}_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+            \[
+            \inferrule*[]
+            {
+            [[ ( Con : B1 - q1 .*. Bn - qn -> {K {A Many}} ) elem Defines ]] \\
+            [[G |- Bi => ti ; Di]]
+            }
+            {[[ G |- K {A Many} => Con t1 ... tn ; {0 * G} + {(q1 * D1) + ... + (qn * Dn)} ]]}
+            \]
+      \item Case $\Box_{R}$ \\
+
+          In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
+            \[
+            \inferrule*[Right=$\Box_{\textsc{R}}$]
+            { [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \Rightarrow [[ t ]] \mid\ [[D]]}
+            { [[ G ]] ; \emptyset \vdash [[ {[] r A} ]] \Downarrow\ \Rightarrow [[ [t] ]] \mid\ [[ r * D ]]}
+            \]
+          By induction on the premises, we have that:
+            \[
+            [[G |- A => t ; D]]
+            \]
+          from case 3 of the lemma. From which, we can construct the following instantiation of the $\Box_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+            \[
+            \synBox
+            \]
+    \end{enumerate}
+\item Case 4. Left Sync: \\
+    \begin{enumerate}
+      \item Case $\multimap_{L}$\\
+            In the case of the left synchronous rule for application, the synthesis rule has the form:
+            \[
+            \inferrule*[]{
+            [[ G, x1 : [ A ^ q -> B ] r1 ; {x2 : [B] r1} sync |- C => t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2 ]] \\
+            [[ G, x1 : [ A ^ q -> B ] r1]] ; \emptyset \vdash [[A]] \Downarrow\ \Rightarrow [[t2]] \mid\ [[D2, x1 : [ A ^ q -> B ] s3 ]]
+            }
+            {
+            [[ G ; {x1 : [ A ^ q -> B ] r1} sync |- C => {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -> B] {s2 + {s1 + {(s2 * {q * s3})}}}
+            ]]
+            }
+            \]
+            By induction on the first premise, we have that:
+            \[
+[[ G, x1 : [ A ^ q -> B ] r1, {x2 : [B] r1} |- C => t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2 ]]
+            \]
+            from case 4 of the lemma. By induction on the second premise, we have that:
+            \[
+            [[ G, x1 : [ A ^ q -> B ] r1]] \vdash [[ A ]] \Rightarrow [[ t2 ]] \mid\ [[ D2, x1 : [ A ^ q -> B ] s3 ]]
+            \]
+            from case 3 of the lemma. From which, we can construc the following instantiation of the $\multimap_{\textsc{L}}$ synthesis rule in the non-focusing calculus:
+            \[
+            \inferrule*[right=$\multimap_{\textsc{L}}$]
+            {
+            [[ G, x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 |- C => t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
+            ]]\\
+            [[ G, x1 : [ A ^ q -> B ] r1 |- A => t2 ; D2, x1 : [ A ^ q -> B ] s3
+            ]]
+            }
+            {[[G, x1 : [ A ^ q -> B ] r1 |- C => {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -> B] {s2 + {s1 + {(s2 * {q * s3})}}}
+            ]]}
+            \]
+
+      \item Case $\textsc{Var}$ \\
+        In the case of the left synchronous rule for variable synthesis, the synthesis rule has the form:
+          \[
+          \fsynVar
+          \]
+          From which, we can construct the following instantiation of the \textsc{Var}\ synthesis rule in the non-focusing calculus:
+          \[
+            \synVar
+          \]
+    \end{enumerate}
+\item Case 5. Right Focus: \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a right synchronous judgement, the synthesis rule has the form:
+          \[
+            \fsynFocusRNoLabel
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G |- C => t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+\item Case 6. Left Focus: \\
+          In the case of the focusing rule for transitioning from a left asynchronous judgement to a left synchronous judgement, the synthesis rule has the form:
+          \[
+            \fsynFocusL
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G, x : A |- C => t ; D ]] \tag{ih}
+          \]
+          from case 2 of the lemma.
+\end{enumerate}
+\end{proof}

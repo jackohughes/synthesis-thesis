@@ -7,7 +7,7 @@ default: quick
 
 quick : quick_aux
 
-FILES := names-ottput.tex \
+FILES := preamble-ottput.tex \
 		 thesis.tex \
 		 intro-ottput.tex \
 		 background-ottput.tex \
@@ -24,10 +24,10 @@ thesis-ottput.tex : thesis.tex $(FILES) $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
 		-tex_filter thesis.tex thesis-ottput.tex
 
-names-ottput.tex : names.tex $(FILES) $(GRANULE_OTT)
+preamble-ottput.tex : preamble.tex $(FILES) $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -tex_name_prefix GRANULE $(FILTER)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter names.tex names-ottput.tex
+		-tex_filter preamble.tex preamble-ottput.tex
 
 intro-ottput.tex : intro.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
