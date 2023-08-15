@@ -1,0 +1,63 @@
+We have now laid out the foundations for a full program synthesis tool for Granule, exploring in
+particular the challenges presented by the treatment of data as resources with usage 
+constraints, and how the synhtesis tool must manage these resources. Two schemes were proposed as 
+a solution to this problem: additive and subtractive, with additive generally outperforming subtractive.
+
+Going forward, we focus on the additive resource management scheme as the basis for synthesis with
+resources. 
+
+
+While the tool presented in this chapter allows users to synthesise a considerable subset of Granule programs, 
+it is still quite limited in its expressivity. Data types comprise only product, sum, and unit types, while 
+synthesis of recursive function defintions or functions which make use of other in-scope values such as top-level 
+definitions are not permitted. 
+
+The features desrcibed above would all make theoretically feasible additions to the current calculi. However, 
+there are limitations for which a solution would require significant alterations to the structure of the calculi. 
+For example, synthesis of programs which perform nested pattern matching over graded values 
+
+
+
+In chapter ... a full synthesis tool for Granule with all these features is described.
+
+
+However, the most notable limitation of our tool is the inability to synthesise programs which 
+distribute a grade over a data type. Consider the archetypal distributive program \textit{push}:
+\begin{align*}
+  push: \Box_r(A \otimes B) \multimap \Box_r A \otimes \Box_r B
+\end{align*}
+which takes a data type graded by $r$ (in this case the product type $A \otimes B$), and \textit{distributes} 
+$r$ over the constituent elements of the product $A$, and $B$. 
+Given this goal type, how would we go about synthesising a program in our tool? 
+
+To demonstrate the issue, we instatiate the \addAbsName\ rule at this type, building a partial synthesis 
+tree. Note that although we use the additive scheme for this example, the same situation arises in the subtractive.
+\begin{align*}
+    \inferrule*[right=\addUnboxName]
+      { x_2 :_r A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ |\ ? }
+      {\inferrule*[right=\addAbsName] {x_1 : \Box_r (A \otimes B) \vdash \Box_r A \otimes \Box_r B \Rightarrow\ \textbf{let}\ [x_2] = x_1\ \textbf{in}\ ?  \ |\ ?} 
+        {\emptyset \vdash \Box_r(A \otimes B) \multimap \Box_r A \otimes \Box_r B \Rightarrow \lambda x_1 . ? \ |\ ? }}
+\end{align*}
+
+After applying \addAbsName\ followed by \addUnboxName, we now have the graded assumption $x_2 :_r A \otimes B$
+in our context which we must use to construct a term of type $\Box_r A \otimes \Box_r B$. We might expect that 
+the path synthesis should take now would be to break $x_2$ down into two graded assumptions with types $A$ and $B$, 
+promote these graded assumptions using the \addBoxName\ rule, before finally peforming a pair introduction to yield 
+$\Box_r A \otimes \Box_r B$. However, in order to apply the pair elimination rule \addPairElimName\  
+and break our graded assumption into two, we must perform a dereliction on $x_2$, to yield a linear copy: 
+\begin{align*}
+  \inferrule*[right=\addDerName]
+      {x_2 :_r A \otimes B, x_3 : A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ }
+      { x_2 :_r A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ |\ ? }
+\end{align*}
+Clearly, this is not going to lead us to the goal: the \addBoxName\ rule cannot promote terms using linear assumptions. 
+Therefore, \textit{push} and other types which exhibit this distributive behaviour are not synthesiseable in our calculus.
+
+One possible solution to this is to extend our calculi with additional rules 
+
+
+In the following chapter, we will present an alternative approach to generating programs which 
+exhibit this distributive behaviour using a generic programming methodology. While this technique is much less
+expressive in general than our synthesis calculi here, it does address some of the areas in which our tool 
+struggles. In particular, both synthesis and the deriving mechanism may be used in conjunction. 
+

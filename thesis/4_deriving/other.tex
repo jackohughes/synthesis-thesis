@@ -1,0 +1,166 @@
+So far we have motivated the use of distributive laws, and
+demonstrated that they are useful in practice when programming in
+languages with linear and graded modal types.
+The same methodology we have been discussing can also be used to
+derive other useful generic combinators for programming with linear
+and graded modal types. In this section, we consider two structural
+combinators, \granin{drop} and \granin{copyShape}, in Granule as well
+as related type classes for dropping, copying, and moving resources in Linear Haskell.
+
+\subsection{A Combinator for Weakening (``drop'')}
+\label{subsec:drop}
+
+%First, we consider a combinator for ``dropping,'' or consuming, values in
+%Granule.
+%
+The built-in type constants of Granule can be split into those
+which permit structural weakening $C^{\mathsf{w}}$ such as
+\granin{Int}, \granin{Char}, \granin{String}, and those which do not
+$C^{\mathsf{l}}$ such as \granin{Handle} (file handles) and
+\granin{Chan} (concurrent channels). Those that
+permit weakening contain non-abstract values that
+can in theory be systematically inspected in order to consume them.
+Granule provides a built-in implementation of \granin{drop}
+for $C^{\mathsf{w}}$ types, which is then used by the following derivation
+procedure to derive weakening on compound types:
+
+\begin{align*}
+    \deriv{drop}{C^w}^\Sigma z & = \text{\granin{drop} $z$} \\
+    \deriv{drop}{1}^\Sigma z & = [[ case z of unit . -> unit . ]] \\
+    \deriv{drop}{X}^\Sigma z & = \Sigma(X) z \\
+    \deriv{drop}{A \oplus B}^\Sigma z & =
+    \synCaseTwoShort{z}{\mathsf{inl}\ x}{\deriv{drop}{A}(x)}{\mathsf{inr}\ y}
+                                {\deriv{drop}{B}(y)}\\
+    \deriv{drop}{A \otimes B}^\Sigma z & =
+    \synCaseOne{z}{(x, y)}
+       {\synCaseOne{\deriv{drop}{A}(x)}{[[ unit . ]]}
+         {\synCaseOne{\deriv{drop}{B}(y)}{[[ unit . ]]}{[[ unit . ]]}}}
+    \\
+    \deriv{drop}{\mu X . A}^\Sigma & z =
+                                     \synLetRec{f}{\deriv{drop}{A}^{\Sigma,
+                                     X \mapsto f : A \multimap 1}}{f\ z}
+    \end{align*}
+
+Note we cannot use this procedure in a polymorphic context (over type
+variables $\alpha$) since type polymorphism ranges over all types,
+including those which cannot be dropped like $C^{\mathsf{l}}$.
+
+%\dnote{An interesting thing is that a function $[[ A -o B ]]$ is
+%  droppable if you can 'pick' an element $x \in [[ A ]]$ (i.e., you
+%  have a canonical way of generating one) and then that $[[ B ]]$ is
+%  droppable. Not sure whether we can/should get into this here though?}
+
+\subsection{A Combinator for Copying ``shape''}
+
+The ``shape'' of values for a parametric data types $\tcF$ can be determined
+by a function $\mathit{shape} : \tcF A \rightarrow \tcF 1$, usually
+derived when $\tcF$ is a functor by mapping with $A \rightarrow 1$
+(dropping elements)~\cite{jay1994shapely}. This provides a way of
+capturing the size, shape, and form of a data structure.
+Often when programming with data structures which must be
+used linearly, we may wish to reason about properties of the data structure
+(such as the length or ``shape'' of the structure) but we may not
+be able to drop the contained values. Instead, we wish to extract
+the shape but without consuming the original data structure itself.
+
+This can be accomplished with a function which copies
+the data structure exactly, returning this duplicate along with a data
+structure of the same shape, but with the
+terminal nodes replaced with values of the unit type $1$  (the `spine'). For example, consider a
+pair of integers: \granin{(1, 2)}. Then applying \granin{copyShape} to this pair
+would yield \granin{(((), ()), (1, 2))}. The original input pair is duplicated
+and returned on the right of the pair, while the left value contains
+a pair with the same structure as the input, but with values replaced with
+\granin{()}. This is useful, as it allows us to use the left value of the
+resulting pair to reason about the structure of the input (e.g., its
+depth / size), while preserving the original input. This is
+particularly useful for deriving size and length combinators for
+collection-like data structures.
+\noindent
+As with ``drop'', we can derive such a
+function automatically:
+\begin{align*}
+\deriv{copyShape}{\tcF \alpha} : \tcF \alpha \multimap \tcF 1 \otimes \tcF \alpha
+\end{align*}
+defined by
+$\deriv{copyShape}{A} = \lambda z . \deriv{copyShape}{A}^\emptyset z$
+by an intermediate derivation $\deriv{copyShape}{A}^\Sigma$:
+%
+\begin{align*}
+\deriv{copyShape}{C^w}^\Sigma z & = ([[unit .]],\ z) \\
+\deriv{copyShape}{1}^\Sigma z & = \synCaseOne{z}{[[unit]]}{[[ ( unit
+                                . , unit . ) ]]}\\
+\deriv{copyShape}{\alpha}^\Sigma z & = ([[ unit . ]], z) \\
+\deriv{copyShape}{X}^\Sigma z & = \Sigma(X) z \\
+\deriv{copyShape}{A \oplus B}^\Sigma z & =
+                                         \synCaseTwo{z}{\mathsf{inl}\ x}{
+             \synCaseOne{[[copyShape Sigma { A } (x)]]}{ ( [[ s ]],\ [[x']] )}{[[ ( {inl s} , {inl x'} ) ]]}} {\mathsf{inr}\ y}
+                            {
+             \synCaseOne{[[copyShape Sigma { B } (y)]]}{ ( [[ s ]],\ [[y']] )}{[[ ( {inr s} , {inr y'} ) ]]}}\\
+% \deriv{copyShape}{A \otimes B}^\Sigma z & =
+% \synCaseOne{z}{(x, y)}
+%    {
+                                        %   \synCaseOne{[[copyShape Sigma { A } (x)]]}{ ( [[ s ]],\ [[x']] )}{
+                                        %   \\ & \qquad  \synCaseOne{[[copyShape Sigma { B } (y)]]}{ ( [[ s' ]],\ [[y']] )}{
+                                        %   (([[s]],\ [[s']]),\ ([[x']],\ [[y']]))}
+                                        %   }}
+% \\
+\deriv{copyShape}{\mu X . A}^\Sigma & z =
+                                 \synLetRec{f}{\deriv{copyShape}{A}^{\Sigma,
+                                 X \mapsto f : A \multimap 1 \otimes A}}{f\ z}
+\end{align*}
+%
+The implementation recursively follows the structure of the type,
+replicating the constructors, reaching the crucial case where a
+polymorphically type $z : \alpha$ is mapped to $[[ (unit ., z) ]]$ in
+the third equation.
+
+Granule implements both these derived combinators in a similar
+way to \emph{push}/\emph{pull} providing \granin{copyShape}
+and \granin{drop} which can be derived for a type \granin{T} via type
+application, e.g. \granin{drop @T : T -> ()} if it can be derived.
+Otherwise, the type checker produces an error,
+explaining why \granin{drop} is not derivable at type \granin{T}.
+
+\subsection{Other Combinators in Linear Haskell}
+
+As previously covered in Section~\ref{sec:linhaskell}, we demonstrated that the
+\emph{push} and \emph{pull} combinators derived from distributed laws are useful
+in Haskell with its linear types extension, and we demonstrated that they can be
+automatically derived using compile-time meta-programming with Template Haskell.
+
+To the best of our knowledge, nothing comparable to the \granin{Pushable} and
+\granin{Pullable} type classes proposed here has been previously discussed in
+the literature on Linear Haskell. However, several other type classes have been
+proposed for inclusion in the standard library to deal with common use cases
+when programming with linear function types.\footnote{See the
+\texttt{linear-base} library: \url{https://github.com/tweag/linear-base}.} One
+of these classes, \haskin{Consumable}, roughly corresponds to the
+\granin{drop} combinator above, while the other two, \haskin{Dupable} and
+\haskin{Movable}, are for when a programmer wants to allow a data type to be
+duplicated or moved in linear code.
+
+\begin{lstlisting}[language=Haskell]
+    class Consumable a where
+      consume :: a %1-> ()
+    
+    class Consumable a => Dupable a where
+      dup2 :: a %1-> (a, a)
+    
+    class Dupable a => Movable a where
+      move :: a %1-> Ur a
+    \end{lstlisting}
+
+    The \haskin{consume} function is a linear function from a value to unit,
+    whereas \haskin{dup} is a linear function from a value to a pair of that
+    same value. The \haskin{move} linear function maps \haskin{a} to
+    \haskin{Ur a}, where \haskin{Ur} is the ``unrestricted'' modality.
+    Thus, \granin{move} can be used to implement both \granin{consume} and \granin{dup2}:
+    \begin{lstlisting}[language=Haskell]
+        case move x of {Ur _ -> ()}     -- consume x
+        case move x of {Ur x -> x}      -- x
+        case move x of {Ur x -> (x, x)} -- dup2 x
+        \end{lstlisting}
+        %
+        A `copy shape' class may also be a useful addition to Linear
+        Haskell in the future.

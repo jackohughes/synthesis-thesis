@@ -1,0 +1,39 @@
+
+\begin{align*}
+   \hspace{-0.9em}
+   [[ t ]] ::= & \;
+   [[ x ]]
+   \mid \hspace{0.2em}[[ t1 t2 ]]
+   \hspace{0.2em}\mid \hspace{0.2em}[[ \ x . t ]]
+   \hspace{0.2em}\mid \hspace{0.2em}[[ [ t ] ]]
+   \hspace{0.2em}\mid \hspace{0.2em}[[ Con t0 ... tn ]]
+   \hspace{0.2em}\mid \hspace{0.2em}[[ case t of p1 -> t1 ; * ; pn -> tn  ]]
+   \hspace{0.2em}\mid \hspace{0.2em}[[ letrec x = t1 in t2]]
+ {\small{\tag{terms}}}
+ \\
+   \hspace{-0.9em}
+   [[ p ]] ::= & \;
+   \hspace{0.2em} [[ x ]]
+   \hspace{0.2em} \mid \hspace{0.2em} \_
+   \hspace{0.2em }\mid \hspace{0.2em} [[ [ p ] ]]
+   \hspace{0.2em} \mid \hspace{0.2em} [[ Con p0 ... pn ]]
+{\small{\tag{patterns}}}
+\\
+   \hspace{-0.9em}
+   [[ A ]], [[ B ]] ::= & \;
+   \hspace{0.2em}[[ A -o B ]]
+   \hspace{0.2em}\mid \hspace{0.2em} \alpha
+   \hspace{0.2em}\mid \hspace{0.2em} [[ Tup A B ]]
+   \hspace{0.2em}\mid \hspace{0.2em} [[ Sum A B ]]
+   \hspace{0.2em}\mid \hspace{0.2em} [[ Unit ]]
+   \hspace{0.2em} \mid \hspace{0.2em} [[ [] r A ]]
+ %  \hspace{0.2em} \mid \hspace{0.2em} [[ A B ]]
+ %  \hspace{0.2em} \mid \hspace{0.2em} D
+   \hspace{0.2em}\mid \hspace{0.2em} [[ mu X . A ]]
+   \hspace{0.2em}\mid \hspace{0.2em} [[ X ]]
+ {\small{\tag{types}}} \\
+ \hspace{-0.9em}
+   [[ C ]] ::= & \; () \mid \mathsf{inl} \mid \mathsf{inr}
+                 \mid (,)
+ {\small{\tag{data constructors}}}
+ \end{align*}

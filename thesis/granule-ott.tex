@@ -72,7 +72,17 @@
 \GRANULEprodline{|}{ ( \GRANULEnt{t_{{\mathrm{1}}}} ,  \GRANULEnt{t_{{\mathrm{2}}}} ) }{}{}{}{\GRANULEcom{A pair of terms}}\GRANULEprodnewline
 \GRANULEprodline{|}{ - }{}{}{}{\GRANULEcom{Hole}}\GRANULEprodnewline
 \GRANULEprodline{|}{\GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEnt{t_{{\mathrm{1}}}} \, \GRANULEkw{in} \, \GRANULEnt{t_{{\mathrm{2}}}}}{}{}{}{\GRANULEcom{UnitElim}}\GRANULEprodnewline
-\GRANULEprodline{|}{\GRANULEsym{()}}{}{}{}{\GRANULEcom{Unit}}}
+\GRANULEprodline{|}{\GRANULEsym{()}}{}{}{}{\GRANULEcom{Unit}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{pull} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{Pull}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{push} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{Push}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{pull} }^{ \Gamma } }{}{}{}{\GRANULEcom{PullPartial}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{push} }^{ \Gamma } }{}{}{}{\GRANULEcom{PushPartial}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{fmap} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{Fmap}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{fmap} }^{ \Gamma } }{}{}{}{\GRANULEcom{FmapPartial}}\GRANULEprodnewline
+\GRANULEprodline{|}{ {} }{}{}{}{\GRANULEcom{Nothing}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \textbf{letrec}\  \GRANULEnt{t_{{\mathrm{1}}}} \ =\  \GRANULEnt{t_{{\mathrm{2}}}} \ \textbf{in}\  \GRANULEnt{t_{{\mathrm{3}}}} }{}{}{}{\GRANULEcom{LetRec}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{copyShape} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{CopyShape}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{drop} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{Drop}}}
 
 \newcommand{\GRANULECon}{
 \GRANULErulehead{C}{::=}{\GRANULEcom{Constructors}}\GRANULEprodnewline
@@ -165,7 +175,9 @@
 \GRANULEprodline{|}{ \GRANULEnt{B_{{\mathrm{1}}}} ^1  \rightarrow \! ... \! \rightarrow   \GRANULEnt{B_{\GRANULEmv{n}}} ^1  \rightarrow   \GRANULEnt{A} } {\textsf{S}}{}{}{\GRANULEcom{n-Ary Function}}\GRANULEprodnewline
 \GRANULEprodline{|}{ \GRANULEnt{B_{{\mathrm{1}}}} ^{q_1}  \rightarrow \! ... \! \rightarrow   \GRANULEnt{B_{\GRANULEmv{n}}} ^{q_n}  \rightarrow   \GRANULEnt{A} } {\textsf{S}}{}{}{\GRANULEcom{n-Ary Function w grades}}\GRANULEprodnewline
 \GRANULEprodline{|}{ \GRANULEnt{A}  \Uparrow\ }{}{}{}{\GRANULEcom{AsyncTy}}\GRANULEprodnewline
-\GRANULEprodline{|}{ \GRANULEnt{A}  \Downarrow\ }{}{}{}{\GRANULEcom{SyncTy}}}
+\GRANULEprodline{|}{ \GRANULEnt{A}  \Downarrow\ }{}{}{}{\GRANULEcom{SyncTy}}\GRANULEprodnewline
+\GRANULEprodline{|}{ {X} }{}{}{}{\GRANULEcom{Recursion Variables}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \mu {X} .  \GRANULEnt{A} }{}{}{}{\GRANULEcom{Recursive Type}}}
 
 \newcommand{\GRANULEop}{
 \GRANULErulehead{\textsf{op}}{::=}{\GRANULEcom{Type operators}}\GRANULEprodnewline
@@ -533,25 +545,13 @@
 \newcommand{\GRANULEdruleCaseName}[0]{\GRANULEdrulename{Case}}
 \newcommand{\GRANULEdruleCase}[1]{\GRANULEdrule[#1]{%
 \GRANULEpremise{ (  C_{\GRANULEmv{i}}  :  \GRANULEnt{B_{{\mathrm{1}}}} ^{q_1^i} \rightarrow ... \rightarrow  \GRANULEnt{B_{\GRANULEmv{n}}} ^{q_n^i} \rightarrow     K  \,   \vec{ \GRANULEnt{A} }     ) \in  D }%
-\GRANULEpremise{    \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r}   } }    K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{     \GRANULEnt{q} ^  i  _  1      } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{     \GRANULEnt{q} ^  i  _  n      } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{\GRANULEmv{i}}}  ;\,     \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \, \GRANULEnt{A}    \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}   }%
-\GRANULEpremise{   \GRANULEnt{s} ^  i  _  j     \, \textcolor{coeffectColor}{\sqsubseteq} \,    \GRANULEnt{q} ^  i  _  j    }%
-\GRANULEpremise{   \GRANULEnt{s} _  i     =      \GRANULEnt{s} ^  i  _  1     \sqcup ... \sqcup    \GRANULEnt{s} ^  i  _  n      }%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }     K  \, \GRANULEnt{A}    \vdash  \GRANULEnt{B}  \Rightarrow   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \   \overline{   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    \mapsto  \GRANULEnt{t_{\GRANULEmv{i}}} }    \mid  \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{n}}   \GRANULEsym{)}  \GRANULEsym{,}    \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  n      \GRANULEsym{)}   \GRANULEsym{+}   \GRANULEsym{(}     \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  n      \GRANULEsym{)}   } }     K  \, \GRANULEnt{A}    }{%
-{\GRANULEdruleCaseName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleCaseAltName}[0]{\GRANULEdrulename{CaseAlt}}
-\newcommand{\GRANULEdruleCaseAlt}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ (  C_{\GRANULEmv{i}}  :  \GRANULEnt{B_{{\mathrm{1}}}} ^{q_1^i} \rightarrow ... \rightarrow  \GRANULEnt{B_{\GRANULEmv{n}}} ^{q_n^i} \rightarrow     K  \,   \vec{ \GRANULEnt{A} }     ) \in  D }%
 \GRANULEpremise{    \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r}   } }    K  \,   \vec{ \GRANULEnt{A} }      \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  1      } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{   \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  1      } }   \GRANULEnt{B_{\GRANULEmv{n}}}    \vdash  \GRANULEnt{B}  \Rightarrow  \GRANULEnt{t_{\GRANULEmv{i}}}  \mid     \Delta_{\GRANULEmv{i}}  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEnt{r_{\GRANULEmv{i}}}   } }    K  \,   \vec{ \GRANULEnt{A} }      \GRANULEsym{,}   {  \GRANULEmv{y} ^  i  _  1   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  1     } }   \GRANULEnt{B_{{\mathrm{1}}}}    , ... ,   {  \GRANULEmv{y} ^  i  _  n   }:_{\textcolor{coeffectColor}{    \GRANULEnt{s} ^  i  _  n     } }   \GRANULEnt{B_{\GRANULEmv{n}}}   }%
 \GRANULEpremise{ \exists    \GRANULEnt{s'} ^  i  _  j     .\,     \GRANULEnt{s} ^  i  _  j     \sqsubseteq    \GRANULEnt{s'} ^  i  _  j     \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  j     \sqsubseteq  \GRANULEnt{r}  \textcolor{coeffectColor}{\,\cdot\,}    \GRANULEnt{q} ^  i  _  j     }%
 \GRANULEpremise{   \GRANULEnt{s} _  i     =      \GRANULEnt{s'} ^  i  _  1     \sqcup ... \sqcup    \GRANULEnt{s'} ^  i  _  n      }%
 \GRANULEpremise{  |    K  \,   \vec{ \GRANULEnt{A} }     | > 1 \Rightarrow 1 \sqsubseteq      \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m       }%
 }{
  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }     K  \,   \vec{ \GRANULEnt{A} }      \vdash  \GRANULEnt{B}  \Rightarrow   \textbf{case} \  \GRANULEmv{x}  \ \textbf{of} \   \overline{   C_{\GRANULEmv{i}}  \  \GRANULEmv{y} ^  i  _  1   ...  \GRANULEmv{y} ^  i  _  n    \mapsto  \GRANULEnt{t_{\GRANULEmv{i}}} }    \mid  \GRANULEsym{(}   \Delta_{{\mathrm{1}}}  \sqcup ...  \sqcup  \Delta_{\GRANULEmv{m}}   \GRANULEsym{)}  \GRANULEsym{,}    \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   \GRANULEsym{(}     \GRANULEnt{r} _  1     \sqcup ... \sqcup    \GRANULEnt{r} _  m      \GRANULEsym{)}   \GRANULEsym{+}   \GRANULEsym{(}     \GRANULEnt{s} _  1     \sqcup ... \sqcup    \GRANULEnt{s} _  m      \GRANULEsym{)}   } }     K  \,   \vec{ \GRANULEnt{A} }      }{%
-{\GRANULEdruleCaseAltName}{}%
+{\GRANULEdruleCaseName}{}%
 }}
 
 
@@ -596,7 +596,6 @@
 \GRANULEusedrule{\GRANULEdruleCon{}}
 \GRANULEusedrule{\GRANULEdruleConAlt{}}
 \GRANULEusedrule{\GRANULEdruleCase{}}
-\GRANULEusedrule{\GRANULEdruleCaseAlt{}}
 \GRANULEusedrule{\GRANULEdruleCaseAltAlt{}}
 \GRANULEusedrule{\GRANULEdruleUnbox{}}
 \GRANULEusedrule{\GRANULEdruleCaseSub{}}
@@ -644,26 +643,16 @@
 \end{GRANULEdefnblock}}
 
 %% defn RSSynFocus
-\newcommand{\GRANULEdruleBoxFName}[0]{\GRANULEdrulename{BoxF}}
-\newcommand{\GRANULEdruleBoxF}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 19): G ; . \mbox{$\mid$}- A sync => ***t ; D >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 26): G ; . \mbox{$\mid$}- \{[] r A\} sync => ***[ t ] ; r * D >>}}}{%
-{\GRANULEdruleBoxFName}{}%
-}}
-
-
 \newcommand{\GRANULEdruleConFName}[0]{\GRANULEdrulename{ConF}}
 \newcommand{\GRANULEdruleConF}[1]{\GRANULEdrule[#1]{%
 \GRANULEpremise{ (  C  :  \GRANULEnt{B_{{\mathrm{1}}}} ^1 \rightarrow ... \rightarrow  \GRANULEnt{B_{\GRANULEmv{n}}} ^1 \rightarrow     K  \,   \vec{ \GRANULEnt{A} }     ) \in  D }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 22): G ; . \mbox{$\mid$}- \{Bi sync\} => ***ti ; Di >>}}}%
+\GRANULEpremise{ \Gamma  \vdash    \GRANULEnt{B_{\GRANULEmv{i}}}  \Downarrow\    \Rightarrow  \GRANULEnt{t_{\GRANULEmv{i}}}  \mid  \Delta_{\GRANULEmv{i}} }%
 }{
-\texttt{\textcolor{red}{<<no parses (char 23): G ; . \mbox{$\mid$}- \{K A\} sync => ***Con t1 ... tn ; \{D1 + ... + Dn\} >>}}}{%
+ \Gamma  \vdash    K  \, \GRANULEnt{A}   \Downarrow  C \, \GRANULEnt{t_{{\mathrm{1}}}} \, ... \, \GRANULEnt{t_{\GRANULEmv{n}}}  \mid   \Delta_{{\mathrm{1}}}  \GRANULEsym{+} \, ... \, \GRANULEsym{+}  \Delta_{\GRANULEmv{n}}  }{%
 {\GRANULEdruleConFName}{}%
 }}
 
 \newcommand{\GRANULEdefnRSSynFocus}[1]{\begin{GRANULEdefnblock}[#1]{$ \Gamma  \vdash  \GRANULEnt{A}  \Downarrow  \GRANULEnt{t}  \mid  \Delta $}{}
-\GRANULEusedrule{\GRANULEdruleBoxF{}}
 \GRANULEusedrule{\GRANULEdruleConF{}}
 \end{GRANULEdefnblock}}
 
@@ -698,556 +687,18 @@
 {\GRANULEdruleSynXXsubXXlinXXvarName}{}%
 }}
 
-
-\newcommand{\GRANULEdruleSynXXsubXXgrXXvarName}[0]{\GRANULEdrulename{Syn\_sub\_gr\_var}}
-\newcommand{\GRANULEdruleSynXXsubXXgrXXvar}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 8): exists e***x >>}}}%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEmv{x} \ |\  \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}  }{%
-{\GRANULEdruleSynXXsubXXgrXXvarName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXderName}[0]{\GRANULEdrulename{Syn\_sub\_der}}
-\newcommand{\GRANULEdruleSynXXsubXXder}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}  }%
-\GRANULEpremise{ \GRANULEmv{y}  \not\in | \Delta | }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 22): exists s' . s = s' + 1*** >>}}}%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-   [  \GRANULEmv{y}  /  \GRANULEmv{x}  ]  \GRANULEnt{t}  \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s'}  } }   \GRANULEnt{A}  }{%
-{\GRANULEdruleSynXXsubXXderName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXabsName}[0]{\GRANULEdrulename{Syn\_sub\_abs}}
-\newcommand{\GRANULEdruleSynXXsubXXabs}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x}  \not\in | \Delta | }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta }%
-}{
- \Gamma  \vdash  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}  \Rightarrow^-   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}  \ |\  \Delta }{%
-{\GRANULEdruleSynXXsubXXabsName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXappName}[0]{\GRANULEdrulename{Syn\_sub\_app}}
-\newcommand{\GRANULEdruleSynXXsubXXapp}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} }%
-\GRANULEpremise{ \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} }%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}  \ |\  \Delta_{{\mathrm{2}}} }{%
-{\GRANULEdruleSynXXsubXXappName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXboxName}[0]{\GRANULEdrulename{Syn\_sub\_box}}
-\newcommand{\GRANULEdruleSynXXsubXXbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta }%
-}{
- \Gamma  \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^-  \GRANULEnt{t} \ |\  \Gamma  \GRANULEsym{-}   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \GRANULEsym{(}  \Gamma  \GRANULEsym{-}  \Delta  \GRANULEsym{)}  }{%
-{\GRANULEdruleSynXXsubXXboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXunboxName}[0]{\GRANULEdrulename{Syn\_sub\_unbox}}
-\newcommand{\GRANULEdruleSynXXsubXXunbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}    \quad\;\;    0   \, {\leq} \,  \GRANULEnt{s}  }%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{B}  \Rightarrow^-   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}  \ |\  \Delta }{%
-{\GRANULEdruleSynXXsubXXunboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXpairXXintroName}[0]{\GRANULEdrulename{Syn\_sub\_pair\_intro}}
-\newcommand{\GRANULEdruleSynXXsubXXpairXXintro}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} }%
-\GRANULEpremise{ \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 8): G \mbox{$\mid$}- A **** B =>- t1, t2 ; D2 >>}}}{%
-{\GRANULEdruleSynXXsubXXpairXXintroName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXpairXXelimName}[0]{\GRANULEdrulename{Syn\_sub\_pair\_elim}}
-\newcommand{\GRANULEdruleSynXXsubXXpairXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{1}}}}  \not\in | \Delta | }%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta | }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 11): G, x3 : A **** B \mbox{$\mid$}- C =>- let x1, x2 = x3 in t2 ; D >>}}}{%
-{\GRANULEdruleSynXXsubXXpairXXelimName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXsumXXintroXXleftName}[0]{\GRANULEdrulename{Syn\_sub\_sum\_intro\_left}}
-\newcommand{\GRANULEdruleSynXXsubXXsumXXintroXXleft}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 8): G \mbox{$\mid$}- A +*** B =>- inl t ; D >>}}}{%
-{\GRANULEdruleSynXXsubXXsumXXintroXXleftName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXsumXXintroXXrightName}[0]{\GRANULEdrulename{Syn\_sub\_sum\_intro\_right}}
-\newcommand{\GRANULEdruleSynXXsubXXsumXXintroXXright}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 8): G \mbox{$\mid$}- A +*** B =>- inr t ; D >>}}}{%
-{\GRANULEdruleSynXXsubXXsumXXintroXXrightName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXsumXXelimName}[0]{\GRANULEdrulename{Syn\_sub\_sum\_elim}}
-\newcommand{\GRANULEdruleSynXXsubXXsumXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | }%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{3}}}}  \not\in | \Delta_{{\mathrm{2}}} | }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{1}}}} \ |\  \Delta_{{\mathrm{1}}} }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t_{{\mathrm{2}}}} \ |\  \Delta_{{\mathrm{2}}} }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 14): G, x1 : A + B ***\mbox{$\mid$}- C =>- case x1 of inl x2 -> t1 \mbox{$\mid$} inr x3 -> t2 ; D1 ++- D2 >>}}}{%
-{\GRANULEdruleSynXXsubXXsumXXelimName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXunitXXintroName}[0]{\GRANULEdrulename{Syn\_sub\_unit\_intro}}
-\newcommand{\GRANULEdruleSynXXsubXXunitXXintro}[1]{\GRANULEdrule[#1]{%
-}{
- \Gamma  \vdash   \mathsf{1}   \Rightarrow^-  \GRANULEsym{()} \ |\  \Gamma }{%
-{\GRANULEdruleSynXXsubXXunitXXintroName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXsubXXunitXXelimName}[0]{\GRANULEdrulename{Syn\_sub\_unit\_elim}}
-\newcommand{\GRANULEdruleSynXXsubXXunitXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta }%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :   \mathsf{1}    \vdash  \GRANULEnt{C}  \Rightarrow^-  \GRANULEkw{let} \, \GRANULEsym{()}  \GRANULEsym{=}  \GRANULEmv{x} \, \GRANULEkw{in} \, \GRANULEnt{t} \ |\  \Delta }{%
-{\GRANULEdruleSynXXsubXXunitXXelimName}{}%
-}}
-
 \newcommand{\GRANULEdefnSynthesisSub}[1]{\begin{GRANULEdefnblock}[#1]{$ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^-  \GRANULEnt{t} \ |\  \Delta $}{}
 \GRANULEusedrule{\GRANULEdruleSynXXsubXXlinXXvar{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXgrXXvar{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXder{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXabs{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXapp{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXbox{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXunbox{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXpairXXintro{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXpairXXelim{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXsumXXintroXXleft{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXsumXXintroXXright{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXsumXXelim{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXunitXXintro{}}
-\GRANULEusedrule{\GRANULEdruleSynXXsubXXunitXXelim{}}
 \end{GRANULEdefnblock}}
 
 %% defn SynthesisAdd
-\newcommand{\GRANULEdruleSynXXaddXXlinXXvarName}[0]{\GRANULEdrulename{Syn\_add\_lin\_var}}
-\newcommand{\GRANULEdruleSynXXaddXXlinXXvar}[1]{\GRANULEdrule[#1]{%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEmv{x}  ;\,   \GRANULEmv{x}  :  \GRANULEnt{A}  }{%
-{\GRANULEdruleSynXXaddXXlinXXvarName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXgrXXvarName}[0]{\GRANULEdrulename{Syn\_add\_gr\_var}}
-\newcommand{\GRANULEdruleSynXXaddXXgrXXvar}[1]{\GRANULEdrule[#1]{%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEmv{x}  ;\,   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}  }{%
-{\GRANULEdruleSynXXaddXXgrXXvarName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXderName}[0]{\GRANULEdrulename{Syn\_add\_der}}
-\newcommand{\GRANULEdruleSynXXaddXXder}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}  }%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+   [  \GRANULEmv{y}  /  \GRANULEmv{x}  ]  \GRANULEnt{t}   ;\,  \Delta  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}  }{%
-{\GRANULEdruleSynXXaddXXderName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXabsName}[0]{\GRANULEdrulename{Syn\_add\_abs}}
-\newcommand{\GRANULEdruleSynXXaddXXabs}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}  }%
-}{
- \Gamma  \vdash  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}  \Rightarrow^+   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   ;\,  \Delta }{%
-{\GRANULEdruleSynXXaddXXabsName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXappName}[0]{\GRANULEdrulename{Syn\_add\_app}}
-\newcommand{\GRANULEdruleSynXXaddXXapp}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}  }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{-}  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \GRANULEsym{)}  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}} }%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   ;\,  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}  }{%
-{\GRANULEdruleSynXXaddXXappName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXboxName}[0]{\GRANULEdrulename{Syn\_add\_box}}
-\newcommand{\GRANULEdruleSynXXaddXXbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta }%
-}{
- \Gamma  \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^+  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  ;\,   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta  }{%
-{\GRANULEdruleSynXXaddXXboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXunboxName}[0]{\GRANULEdrulename{Syn\_add\_unbox}}
-\newcommand{\GRANULEdruleSynXXaddXXunbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{  \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}    \quad\;\;   \GRANULEnt{s}  \, {\leq} \,  \GRANULEnt{r}  }%
-}{
- \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{B}  \Rightarrow^+   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   }{%
-{\GRANULEdruleSynXXaddXXunboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXpairXXintroName}[0]{\GRANULEdrulename{Syn\_add\_pair\_intro}}
-\newcommand{\GRANULEdruleSynXXaddXXpairXXintro}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}} }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}} }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 8): G \mbox{$\mid$}- A **** B =>+ t1, t2 ; D1 + D2 >>}}}{%
-{\GRANULEdruleSynXXaddXXpairXXintroName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXpairXXelimName}[0]{\GRANULEdrulename{Syn\_add\_pair\_elim}}
-\newcommand{\GRANULEdruleSynXXaddXXpairXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}  }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 11): G, x3 : A **** B \mbox{$\mid$}- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B >>}}}{%
-{\GRANULEdruleSynXXaddXXpairXXelimName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXsumXXintroXXleftName}[0]{\GRANULEdrulename{Syn\_add\_sum\_intro\_left}}
-\newcommand{\GRANULEdruleSynXXaddXXsumXXintroXXleft}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 8): G \mbox{$\mid$}- A +*** B =>+ inl t ; D >>}}}{%
-{\GRANULEdruleSynXXaddXXsumXXintroXXleftName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXsumXXintroXXrightName}[0]{\GRANULEdrulename{Syn\_add\_sum\_intro\_right}}
-\newcommand{\GRANULEdruleSynXXaddXXsumXXintroXXright}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{B}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 8): G \mbox{$\mid$}- A +*** B =>+ inr t ; D >>}}}{%
-{\GRANULEdruleSynXXaddXXsumXXintroXXrightName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXunitXXintroName}[0]{\GRANULEdrulename{Syn\_add\_unit\_intro}}
-\newcommand{\GRANULEdruleSynXXaddXXunitXXintro}[1]{\GRANULEdrule[#1]{%
-}{
- \Gamma  \vdash   \mathsf{1}   \Rightarrow^+  \GRANULEsym{()}  ;\,   \emptyset  }{%
-{\GRANULEdruleSynXXaddXXunitXXintroName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXunitXXelimName}[0]{\GRANULEdrulename{Syn\_add\_unit\_elim}}
-\newcommand{\GRANULEdruleSynXXaddXXunitXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \vdash  \GRANULEnt{C}  \Rightarrow  \GRANULEnt{t}  \mid  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 49): G, x : Unit \mbox{$\mid$}- C => let () = x in t ; D, x : Unit*** >>}}}{%
-{\GRANULEdruleSynXXaddXXunitXXelimName}{}%
-}}
-
-
-\newcommand{\GRANULEdruleSynXXaddXXsumXXelimName}[0]{\GRANULEdrulename{Syn\_add\_sum\_elim}}
-\newcommand{\GRANULEdruleSynXXaddXXsumXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{1}}}}  ;\,  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}  }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^+  \GRANULEnt{t_{{\mathrm{2}}}}  ;\,  \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}  }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 14): G, x1 : A + B ***\mbox{$\mid$}- C =>+ case x1 of inl x2 -> t1 \mbox{$\mid$} inr x3 -> t2 ; (D1 +++ D2), x1 : A + B >>}}}{%
-{\GRANULEdruleSynXXaddXXsumXXelimName}{}%
-}}
 
 \newcommand{\GRANULEdefnSynthesisAdd}[1]{\begin{GRANULEdefnblock}[#1]{$ \Gamma  \vdash  \GRANULEnt{A}  \Rightarrow^+  \GRANULEnt{t}  ;\,  \Delta $}{}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXlinXXvar{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXgrXXvar{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXder{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXabs{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXapp{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXbox{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXunbox{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXpairXXintro{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXpairXXelim{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXsumXXintroXXleft{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXsumXXintroXXright{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXunitXXintro{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXunitXXelim{}}
-\GRANULEusedrule{\GRANULEdruleSynXXaddXXsumXXelim{}}
-\end{GRANULEdefnblock}}
-
-%% defn FocusSynthesisSub
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXlinXXvarName}[0]{\GRANULEdrulename{focus\_syn\_sub\_lin\_var}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXlinXXvar}[1]{\GRANULEdrule[#1]{%
-}{
-\texttt{\textcolor{red}{<<no parses (char 18): G ; x : A \mbox{$\mid$}- A => ***x ; G >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXlinXXvarName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXgrXXvarName}[0]{\GRANULEdrulename{focus\_syn\_sub\_gr\_var}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXgrXXvar}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{  1   \, {\leq} \,  \GRANULEnt{r} }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 8): exists e***x >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 22): G ; x : [A] r \mbox{$\mid$}- A => ***x ; G, x : [A] s >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXgrXXvarName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXderName}[0]{\GRANULEdrulename{focus\_syn\_sub\_der}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXder}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 29): G ; x : [A] r, y : A \mbox{$\mid$}- B => ***t; D, x : [A] s >>}}}%
-\GRANULEpremise{ \GRANULEmv{y}  \not\in | \Delta | }%
-\GRANULEpremise{ \exists  \GRANULEnt{s}  .\,   \GRANULEnt{r}  \sqsupseteq  \GRANULEnt{s}  \GRANULEsym{+}   1   }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 22): G ; x : [A] r \mbox{$\mid$}- B => ***[y/x] t; D, x : [A] s' >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXderName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXabsName}[0]{\GRANULEdrulename{focus\_syn\_sub\_abs}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXabs}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x}  \not\in | \Delta | }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 21): G ; O, x : A \mbox{$\mid$}- B => ***t ; D >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 19): G ; O \mbox{$\mid$}- A -> B => ***\mbox{$\backslash{}$}x . t ; D >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXabsName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXappName}[0]{\GRANULEdrulename{focus\_syn\_sub\_app}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXapp}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 19): G ; x2 : B \mbox{$\mid$}- C => ***t1 ; D1 >>}}}%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 15): D1 ; . \mbox{$\mid$}- A => ***t2 ; D2 >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 24): G ; x1 : A -> B \mbox{$\mid$}- C => ***[(x1 t2) / x2] t1 ; D2 >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXappName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXboxName}[0]{\GRANULEdrulename{focus\_syn\_sub\_box}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 14): G ; . \mbox{$\mid$}- A => ***t ; D >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 19): G ; . \mbox{$\mid$}- [] r A => ***t ; G - r * (G - D) >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXunboxName}[0]{\GRANULEdrulename{focus\_syn\_sub\_unbox}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXunbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 26): G ; O, x2 : [A] r \mbox{$\mid$}- B => ***t ; D, x2 : [A] s \&\& 0 <= s >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 27): G ; O, x1 : [] r A \mbox{$\mid$}- B => ***let [x2] = x1 in t ; D >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXunboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXpairXXintroName}[0]{\GRANULEdrulename{focus\_syn\_sub\_pair\_intro}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXpairXXintro}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 14): G ; . \mbox{$\mid$}- A => ***t1 ; D1 >>}}}%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 15): D1 ; . \mbox{$\mid$}- B => ***t2 ; D2 >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 12): G ; . \mbox{$\mid$}- A **** B => t1, t2 ; D2 >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXpairXXintroName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXpairXXelimName}[0]{\GRANULEdrulename{focus\_syn\_sub\_pair\_elim}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXpairXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{1}}}}  \not\in | \Delta | }%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta | }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 30): G ; O, x1 : A, x2 : B \mbox{$\mid$}- C => ***t2 ; D >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 15): G ; O, x3 : A **** B \mbox{$\mid$}- C => let x1, x2 = x3 in t2 ; D >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXpairXXelimName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXleftName}[0]{\GRANULEdrulename{focus\_syn\_sub\_sum\_intro\_left}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXleft}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 14): G ; . \mbox{$\mid$}- A => ***t ; D >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 12): G ; . \mbox{$\mid$}- A +*** B => inl t ; D >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXleftName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXrightName}[0]{\GRANULEdrulename{focus\_syn\_sub\_sum\_intro\_right}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXright}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 14): G ; . \mbox{$\mid$}- B => ***t ; D >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 12): G ; . \mbox{$\mid$}- A +*** B => inr t ; D >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXrightName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXsumXXelimName}[0]{\GRANULEdrulename{focus\_syn\_sub\_sum\_elim}}
-\newcommand{\GRANULEdrulefocusXXsynXXsubXXsumXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{2}}}}  \not\in | \Delta_{{\mathrm{1}}} | }%
-\GRANULEpremise{ \GRANULEmv{x_{{\mathrm{3}}}}  \not\in | \Delta_{{\mathrm{2}}} | }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 22): G ; O, x2 : A \mbox{$\mid$}- C => ***t1 ; D1 >>}}}%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 22): G ; O, x3 : B \mbox{$\mid$}- C => ***t2 ; D2 >>}}}%
-}{
-\texttt{\textcolor{red}{<<no parses (char 18): G ; O, x1 : A + B ***\mbox{$\mid$}- C => case x1 of inl x2 -> t1 \mbox{$\mid$} inr x3 -> t2 ; D1 ++- D2 >>}}}{%
-{\GRANULEdrulefocusXXsynXXsubXXsumXXelimName}{}%
-}}
-
-\newcommand{\GRANULEdefnFocusSynthesisSub}[1]{\begin{GRANULEdefnblock}[#1]{$ \Gamma  ;  \Omega  \vdash  \GRANULEnt{A}  \Rightarrow^{-}  \GRANULEnt{t}  \ |\  \Delta $}{}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXlinXXvar{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXgrXXvar{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXder{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXabs{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXapp{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXbox{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXunbox{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXpairXXintro{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXpairXXelim{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXleft{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXsumXXintroXXright{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXsubXXsumXXelim{}}
-\end{GRANULEdefnblock}}
-
-%% defn FocusSynthesisAdd
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXlinXXvarName}[0]{\GRANULEdrulename{focus\_syn\_add\_lin\_var}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXlinXXvar}[1]{\GRANULEdrule[#1]{%
-}{
- \Gamma  ;   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEmv{x}  \ | \   \GRANULEmv{x}  :  \GRANULEnt{A}  }{%
-{\GRANULEdrulefocusXXsynXXaddXXlinXXvarName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXgrXXvarName}[0]{\GRANULEdrulename{focus\_syn\_add\_gr\_var}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXgrXXvar}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{  1   \, {\leq} \,  \GRANULEnt{r} }%
-\GRANULEpremise{\texttt{\textcolor{red}{<<no parses (char 8): exists e***x >>}}}%
-}{
- \Gamma  ;   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEmv{x}  \ | \   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}  }{%
-{\GRANULEdrulefocusXXsynXXaddXXgrXXvarName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXderName}[0]{\GRANULEdrulename{focus\_syn\_add\_der}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXder}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta  \GRANULEsym{,}   \GRANULEmv{y}  :  \GRANULEnt{A}  }%
-}{
- \Gamma  ;   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^{+}   [  \GRANULEmv{y}  /  \GRANULEmv{x}  ]  \GRANULEnt{t}   \ | \  \Delta  \GRANULEsym{+}   \GRANULEmv{x}  :_{\textcolor{coeffectColor}{   1   } }   \GRANULEnt{A}  }{%
-{\GRANULEdrulefocusXXsynXXaddXXderName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXabsName}[0]{\GRANULEdrulename{focus\_syn\_add\_abs}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXabs}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta  \GRANULEsym{,}   \GRANULEmv{x}  :  \GRANULEnt{A}  }%
-}{
- \Gamma  ;  \Omega  \vdash  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}  \Rightarrow^{+}   \lambda  \GRANULEmv{x}  .  \GRANULEnt{t}   \ | \  \Delta }{%
-{\GRANULEdrulefocusXXsynXXaddXXabsName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXappName}[0]{\GRANULEdrulename{focus\_syn\_add\_app}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXapp}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  \ | \  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}  }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{-}  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \GRANULEsym{)}  ;   \emptyset   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  \ | \  \Delta_{{\mathrm{2}}} }%
-}{
- \Gamma  ;   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}   [  \GRANULEsym{(}  \GRANULEmv{x_{{\mathrm{1}}}} \, \GRANULEnt{t_{{\mathrm{2}}}}  \GRANULEsym{)}  /  \GRANULEmv{x_{{\mathrm{2}}}}  ]  \GRANULEnt{t_{{\mathrm{1}}}}   \ | \  \GRANULEsym{(}  \Delta_{{\mathrm{1}}}  \GRANULEsym{+}  \Delta_{{\mathrm{2}}}  \GRANULEsym{)}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}  \rightarrow  \GRANULEnt{B}  }{%
-{\GRANULEdrulefocusXXsynXXaddXXappName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXboxName}[0]{\GRANULEdrulename{focus\_syn\_add\_box}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;   \emptyset   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta }%
-}{
- \Gamma  ;   \emptyset   \vdash   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   \Rightarrow^{+}  \GRANULEsym{[}  \GRANULEnt{t}  \GRANULEsym{]}  \ | \   \textcolor{coeffectColor}{ \GRANULEnt{r}   \textcolor{coeffectColor}{\,\cdot\,} }  \Delta  }{%
-{\GRANULEdrulefocusXXsynXXaddXXboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXunboxName}[0]{\GRANULEdrulename{focus\_syn\_add\_unbox}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXunbox}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{  \Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{r}  } }   \GRANULEnt{A}   \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :_{\textcolor{coeffectColor}{  \GRANULEnt{s}  } }   \GRANULEnt{A}    \quad\;\;   \GRANULEnt{s}  \, {\leq} \,  \GRANULEnt{r}  }%
-}{
- \Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}    \vdash  \GRANULEnt{B}  \Rightarrow^{+}   \textbf{let} \, [  \GRANULEmv{x_{{\mathrm{2}}}}  ] =  \GRANULEmv{x_{{\mathrm{1}}}}  \, \textbf{in} \,  \GRANULEnt{t}   \ | \  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :   \Box_{  \GRANULEnt{r}  }  \GRANULEnt{A}   }{%
-{\GRANULEdrulefocusXXsynXXaddXXunboxName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXpairXXintroName}[0]{\GRANULEdrulename{focus\_syn\_add\_pair\_intro}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXpairXXintro}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;   \emptyset   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  \ | \  \Delta_{{\mathrm{1}}} }%
-\GRANULEpremise{ \Gamma  \GRANULEsym{-}  \Delta_{{\mathrm{1}}}  ;   \emptyset   \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  \ | \  \Delta_{{\mathrm{2}}} }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 12): G ; . \mbox{$\mid$}- A **** B =>+ t1, t2 ; D1 + D2 >>}}}{%
-{\GRANULEdrulefocusXXsynXXaddXXpairXXintroName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXpairXXelimName}[0]{\GRANULEdrulename{focus\_syn\_add\_pair\_elim}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXpairXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  \ | \  \Delta  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{1}}}}  :  \GRANULEnt{A}   \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{B}  }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 15): G ; O, x3 : A **** B \mbox{$\mid$}- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B >>}}}{%
-{\GRANULEdrulefocusXXsynXXaddXXpairXXelimName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXleftName}[0]{\GRANULEdrulename{focus\_syn\_add\_sum\_intro\_left}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXleft}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;   \emptyset   \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 12): G ; . \mbox{$\mid$}- A +*** B =>+ inl t ; D >>}}}{%
-{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXleftName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXrightName}[0]{\GRANULEdrulename{focus\_syn\_add\_sum\_intro\_right}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXright}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;   \emptyset   \vdash  \GRANULEnt{B}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 12): G ; . \mbox{$\mid$}- A +*** B =>+ inr t ; D >>}}}{%
-{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXrightName}{}%
-}}
-
-
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXsumXXelimName}[0]{\GRANULEdrulename{focus\_syn\_add\_sum\_elim}}
-\newcommand{\GRANULEdrulefocusXXsynXXaddXXsumXXelim}[1]{\GRANULEdrule[#1]{%
-\GRANULEpremise{ \Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{1}}}}  \ | \  \Delta_{{\mathrm{1}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{2}}}}  :  \GRANULEnt{A}  }%
-\GRANULEpremise{ \Gamma  ;  \Omega  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}   \vdash  \GRANULEnt{C}  \Rightarrow^{+}  \GRANULEnt{t_{{\mathrm{2}}}}  \ | \  \Delta_{{\mathrm{2}}}  \GRANULEsym{,}   \GRANULEmv{x_{{\mathrm{3}}}}  :  \GRANULEnt{B}  }%
-}{
-\texttt{\textcolor{red}{<<no parses (char 18): G ; O, x1 : A + B ***\mbox{$\mid$}- C =>+ case x1 of inl x2 -> t1 \mbox{$\mid$} inr x3 -> t2 ; (D1 +++ D2), x1 : A + B >>}}}{%
-{\GRANULEdrulefocusXXsynXXaddXXsumXXelimName}{}%
-}}
-
-\newcommand{\GRANULEdefnFocusSynthesisAdd}[1]{\begin{GRANULEdefnblock}[#1]{$ \Gamma  ;  \Omega  \vdash  \GRANULEnt{A}  \Rightarrow^{+}  \GRANULEnt{t}  \ | \  \Delta $}{}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXlinXXvar{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXgrXXvar{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXder{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXabs{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXapp{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXbox{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXunbox{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXpairXXintro{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXpairXXelim{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXleft{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXsumXXintroXXright{}}
-\GRANULEusedrule{\GRANULEdrulefocusXXsynXXaddXXsumXXelim{}}
 \end{GRANULEdefnblock}}
 
 
 \newcommand{\GRANULEdefnsJudgements}{
-\GRANULEdefncheckMiniDecl{}\GRANULEdefnpatternTyping{}\GRANULEdefnsynthesiseSub{}\GRANULEdefnSynthesiseAdd{}\GRANULEdefnRASynFocus{}\GRANULEdefnLASynFocus{}\GRANULEdefnRSSynFocus{}\GRANULEdefnLSSynFocus{}\GRANULEdefnSynthesisSub{}\GRANULEdefnSynthesisAdd{}\GRANULEdefnFocusSynthesisSub{}\GRANULEdefnFocusSynthesisAdd{}}
+\GRANULEdefncheckMiniDecl{}\GRANULEdefnpatternTyping{}\GRANULEdefnsynthesiseSub{}\GRANULEdefnSynthesiseAdd{}\GRANULEdefnRASynFocus{}\GRANULEdefnLASynFocus{}\GRANULEdefnRSSynFocus{}\GRANULEdefnLSSynFocus{}\GRANULEdefnSynthesisSub{}\GRANULEdefnSynthesisAdd{}}
 
 \newcommand{\GRANULEdefnss}{
 \GRANULEdefnsJudgements

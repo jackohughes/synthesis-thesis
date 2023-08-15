@@ -1,0 +1,27 @@
+We begin our journey into synthesis by designing a synthesis tool for a simple
+resourceful type system. The target language of our synthesis tool in this chapter, 
+is derived from the linear-base type system we introduced in chapter~\ref{chapter:background}, 
+extending this linear $\lambda$-calculus core to a full functional 
+programming language.
+
+We then introd
+
+To do this we must overcome the problem of \textit{resource management}. This
+issue was touched on in~\ref{chapter:intro}. In
+section~\ref{sec:resource-management}, we expand on the problem and provide an
+overview of its history. We identify two feasible approaches to resource
+management named \textit{additive} and \textit{subtractive}, and implement a
+synthesis calculus for both in section~\ref{sec:core-synth-calculi}. Both
+approaches follow a similar structure; inverting the typing rules to derive a
+a set of synthesis rules, yet they differ significantly in how resources are
+managed.
+
+These differences carry implications with regard to performance and
+implementation. Both calculi are implemented as part of a synthesis tool for Granule~\cite{}. 
+Having outlined these two solutions to the resource-management problem, we then
+evaluate the performance of our implementations against a set of benchmarks.
+
+By the end of this chapter, we will outlined the design and implementation of 
+fully usable program-synthesis tool in Granule~\footnote{}. While the expressivity of this 
+tool is limited, it lays the theoretical groundwork for a more complete synthesis tool which 
+we discuss in subsequent chapters. 

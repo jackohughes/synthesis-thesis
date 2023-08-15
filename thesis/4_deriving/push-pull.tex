@@ -1,0 +1,90 @@
+Now that we have established the core theory, we describe the
+algorithmic calculation of distributive laws in \grminip{}.
+Note that whilst \grminip{} is simply typed (monomorphic), it includes
+type variables (ranged over by $\alpha$) to enable
+the distributive laws to be derived on parametric types. In the implementation,
+these will really be polymorphic type variables, but the derivation
+procedure need only treat them as some additional syntactic type construct.
+
+%We will be concerned with $n$-ary type constructors,
+%of kind $\tcF : \mathsf{Type}^n \rightarrow \mathsf{Type}$,
+%where we write $\tcF (\overline{A_i})$ to represent
+%the application of $\tcF$ to a family of
+%argument types $A_i$ for all $1 \leq i \leq n$.
+%%DAO: don't think we need this now
+%%We represent an indexed set of $n$-types as $\{A_i\}^n_i$.
+
+%
+\paragraph{Notation}
+Let $\tcF : \mathsf{Type}^n \rightarrow \mathsf{Type}$
+be an $n$-ary type constructor (i.e. a constructor which takes $n$ type arguments), whose free type variables
+provide the $n$ parameter types. We write $\tcF \overline{\alpha_i}$ for
+the application of $\tcF$ to
+type variables $\alpha_i$ for all $1 \leq i \leq n$.
+
+%\dnote{Split and do one at time? Might be better.}
+%\paragrapho{Pull}
+%
+\paragraph{Push}
+We automatically
+calculate \emph{push} for $\mathsf{F}$
+applied to $n$ type variables
+% $\{\alpha_i\}^n_i$
+$\overline{\alpha_i}$
+as the operation:
+%
+\begin{align*}
+\deriv{push}{\tcF \overline{\alpha_i}} : \Box_{r} \tcF \overline{\alpha_i}
+  \multimap  \tcF  (\overline{\Box_{r} \alpha_i})
+ \end{align*}
+where we require $[[ 1 <<= r ]]\ \textit{if}\ |\tcF \overline{\alpha_i}| > 1$
+due to the $[\textsc{Pcon}]$ rule (e.g., if $\tcF$ contains a sum).
+
+For types $A$ closed with respect to recursion variables, let $\deriv{push}{A} = \lambda z
+. \deriv{push}{A}^\emptyset\ z$ given by an intermediate
+interpretation $\deriv{push}{A}^\Sigma$ where $\Sigma$ is a context of \textit{push} combinators for the
+recursive type variables:
+%and $\deriv{pull}{A} = \lambda z. \deriv{pull}{A}^\emptyset z$
+%
+%\dnote{put very short descriptions like comments on the right hand side?}
+\begin{align*}
+\deriv{push}{[[ Unit ]]}^\Sigma \ z & = [[ case z of [ unit . ] -> unit . ]]
+\\
+\deriv{push}{\alpha}^\Sigma       \ z & = z
+  \\
+  \deriv{push}{X}^\Sigma     \ z & = \Sigma(X)\ z
+\\
+\deriv{push}{A \oplus B}^\Sigma \ z & =
+\synCaseTwoShort{z}{[\mathsf{inl}\ x]}{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}[x]}{[\mathsf{inr}\ y]}
+                            {\mathsf{inr}\
+                                      \deriv{push}{B}^{\Sigma}[y]}
+\\
+\deriv{push}{A \otimes B}^\Sigma \ z & =
+\synCaseOne{z}{[(x, y)]}
+   {(\deriv{push}{A}^{\Sigma}[x], \deriv{push}{B}^{\Sigma}[y])}
+\\
+  \deriv{push}{A \multimap B} \ z & =
+                                \lambda y .
+                                \synCaseOne{z}{[f]}{\synCaseOne{\deriv{pull}{A}^{\Sigma}\
+                                    y}{[u]}{\deriv{push}{B}^{\Sigma}[(f
+                                \ u)]}}
+\\
+%%%%%
+\deriv{push}{\mu X . A}^\Sigma \ z & =
+ \synLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}{f\ z}
+\end{align*}
+%
+In the case of \emph{push} on a value of type $[[ Unit ]]$, we pattern match on the value, eliminating the graded modality via the unboxing pattern match and returning the unit value. For type variables, \emph{push} is simply the identity of the value, while for recursion variables we lookup the $X$'s binding in $\Sigma$ and apply it to the value. For sum and product types, \emph{push} works by pattern matching on the type's constructor(s) and then inductively applying \emph{push} to the boxed arguments, re-applying them to the constructor(s).
+Unlike \emph{pull} below, the \emph{push} operation can be derived for function
+types, with a contravariant use of \emph{pull}.
+For recursive types, we inductively apply \emph{push} to the value
+with a fresh recursion variable bound in $\Sigma$, representing a
+recursive application of push.
+
+There is no derivation of a distributive law for types which are themselves graded
+modalities (see further work discussion in Section~\ref{sec:conclusion}).
+
+The appendix~\cite{appendix} proves that
+$\deriv{push}{A}$ is type sound, i.e., its derivations are well-typed.
+

@@ -1,4 +1,4 @@
-\documentclass[11pt]{UoKthesis}
+\documentclass[12pt]{UoKthesis}
 
 % Note: The UoKextentions package includes the xcolor package with the [usenames]
 % options. If you need to add further options, these can be given to UoKextentions
@@ -63,8 +63,8 @@
 
 
 \input{granule-ott}
-% \input{names-ottput}
-\input{preamble-ottput}
+\input{0_preamble/names.tex}
+\input{0_preamble/preamble-ottput}
 
 
 \begin{document}
@@ -85,42 +85,39 @@ specification information, a synthesise tool will synthesise a target program
 (if one exists) more quickly when given a type specification which includes
 resourceful types than when given an equivalent non-resourceful type.
 
-
 \section{Acknowledgements}
 \end{preface}
 
-%main content
-
 \chapter{Introduction}
 \label{chapter:intro}
-\input{intro-ottput}
+\input{1_introduction/intro-ottput}
 
-% Name tbd?
 \chapter{Background}
 \label{chapter:background}
-\input{background-ottput}
+\input{2_background/background-ottput}
 
 \chapter{A core synthesis calculus}
 \label{chapter:core}
-\input{core-ottput}
+\input{3_linear-base/linear-base-ottput}
 
 \chapter{Deriving graded combinators}
 \label{chapter:deriving}
-\input{deriving-ottput}
+\input{4_deriving/deriving-ottput}
 
 \chapter{An extended synthesis calculus}
 \label{chapter:extended}
-\input{extended-ottput}
+\input{5_graded-base/extended-ottput}
 
 \chapter{Conclusion}
 \label{chapter:conclusion}
-\input{conclusion-ottput}
+\input{6_conclusion/conclusion-ottput}
 
 \bibliography{references}{}
 
+% \iffalse
 \newpage
 \appendix
-\input{appendix-ottput}
-% \chapter{Long Proof}
-% \lipsum[15-24]
+\input{7_appendix/appendix-ottput}
+\input{8_proofs/proofs-ottput}
+% \fi
 \end{document}

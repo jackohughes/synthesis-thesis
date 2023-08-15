@@ -1,0 +1,38 @@
+\tikzset{
+->, % makes the edges directed
+node distance=5cm, % specifies the minimum distance between two nodes. Change if necessary.
+every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+initial text=$ $, % sets the text that appears on the start arrow
+}
+
+\begin{figure}[h] % ’ht’ tells LaTeX to place the figure ’here’ or at the top of the page
+\centering % centers the figure
+
+\scalebox{1}{
+\begin{tikzpicture}[every text node part/.style={align=center}]
+\node[state, initial, draw] (RA) {\textsc{Right Async} \\ $ \Gamma ; \Omega \vdash A \Uparrow \Rightarrow t | \Delta $};
+\node[state] at (10,  0) (LA) { \textsc{Left Async} \\ $\Gamma ; \Omega \Uparrow \vdash t \Rightarrow A | \Delta $};
+\node[state] at (5, -1) (F) { \textsc{Focus} \\ $\Gamma ; \emptyset \Uparrow \vdash t \Rightarrow A | \Delta $};
+\node[state] at (1, -6) (RS) { \textsc{Right Sync} \\ $\Gamma ; \emptyset \vdash t \Rightarrow A \Downarrow | \Delta $};
+\node[state] at (9, -6) (LS) { \textsc{Left Sync} \\ $\Gamma ; [[ x : [ B ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
+\node[state, accepting] at (5, -10) (V) { \textsc{Var} \\ $\Gamma ; [[ x : [ A ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
+\draw (RA) edge[loop above] node{$\rightarrow{\textsc{R}}$} (RA)
+(RA) edge[above, bend left] node{$\Uparrow_{\textsc{R}}$} (LA)
+(LA) edge[loop above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Box_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{R}$} (LA)
+% (LA) edge[loop right] node{$\Uparrow_{L}$} (LA)
+(LA) edge[above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{L}$} (F)
+% (LA) edge[right, bend left] node{$\Uparrow_{L}$} (F)
+(F) edge[left] node{$\textsc{F}_{\textsc{R}}$} (RS)
+(RS) edge[left] node{$\Downarrow_{\textsc{L}}$} (RA)
+(F) edge[right] node{$\textsc{F}_{\textsc{L}}$} (LS)
+(LS) edge[right] node{$\Downarrow_{\textsc{L}}$} (LA)
+(LS) edge[below] node{$\rightarrow{\textsc{L}}$} (RS)
+(LS) edge[loop below] node{$\rightarrow{\textsc{L}}$} (LS)
+(RS) edge[loop below] node{$\textsc{C}_{\textsc{R}}$ \\ $\Box_{\textsc{R}}$ \\ $\mu_\textsc{R}$} (RS)
+(LS) edge[left] node{$\textsc{Var}$} (V)
+;
+\end{tikzpicture}
+}
+\caption{Focusing State Machine}
+\label{fig:focusingFSM}
+\end{figure}

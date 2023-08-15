@@ -1,0 +1,1057 @@
+\section{Extending the graded-base calculus}
+
+We now define a core language with graded types. This system will be familiar to
+those who have encountered graded types before, drawing from the coeffect calculus of \citet{petricek2014coeffects}, Quantitative Type Theory (QTT) by \citet{McBride2016} and refined further by \citet{quantitative-type-theory} (although we omit dependent types from our language), the calculus of \citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type theories~\cite{quantitative-type-theory,DBLP:conf/esop/MoonEO21}. Similar
+systems also form the basis of the core of the linear types extension to Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}.
+This calculus shares much in common with languages based on linear types, such
+as the graded monadic-comonadic calculus of~\cite{combining2016}, generalisations of Bounded
+Linear Logic~\cite{DBLP:conf/esop/BrunelGMZ14,DBLP:conf/esop/GhicaS14}, and Granule~\cite{DBLP:journals/pacmpl/OrchardLE19} in the original `linear base' form.
+
+Our target language comprises the $\lambda$-calculus extended with a graded necessity
+modality as well as arbitrary user-defined algebraic data types (ADTs).
+The syntax of types is given by:
+%
+\begin{align*}
+\hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+       [[ A ^ r -> B ]]
+  \mid [[ K ]]
+  \mid [[ A B ]]
+  \mid [[ [] r A ]]
+  \mid \mu X . [[ A ]]
+  \mid X
+{\small{\tag{\textit{types}}}}
+\\
+\hspace{-0.9em}[[ K ]] & ::=
+       [[ Unit ]]
+  \mid [[ Prod ]]
+{\small{\tag{\textit{type constructors}}}}
+\end{align*}
+%
+where the function space $[[ A ^ r -> B ]]$ annotates the input type with a \emph{grade} $[[ r ]]$
+drawn from a pre-ordered semiring $(\mathcal{R}, {\ast}, {1}, {+}, {0}, \sqsubseteq)$ parameterising
+the calculus (where the pre-ordering also requires that $+$ and $\ast$ are monotonic with respect to $\sqsubseteq$). Type constructors $K$ include the unit and multiplicative linear product type here but they are extended by user-defined ADTs in the implementation which can be formed by products, coproducts, and recursive types (though we do not given an explicit syntax to coproducts here).
+The graded necessity modality $[[ [] r A ]]$ is similarly annotated by the grade $[[ r ]]$ being
+an element of the semiring. Recursive
+types are $\mu X . A$, which are equi-recursive in the core calculus,
+with type recursion variables $X$.
+%The syntax $[[ a ]]$ denotes a type variable
+%TODO: decide whether we really need to put type variables into the syntax here
+
+The syntax of terms is given as:
+%
+\begin{align*}
+\hspace{-0.8em} [[ t ]] ::= \;
+       & [[ x ]]
+  \mid [[ \x ^ c . t ]]
+  \mid [[ t1 t2 ]]
+  \mid [[ [t] ]]
+  \mid [[ Con t1 ... tn ]]
+  \mid [[ case t of p1 -> t1 ; * ; pn -> tn  ]]
+{\small{\tag{\textit{terms} }}}
+         \\
+\hspace{-0.8em} [[ p ]] ::= \;
+       & [[ x ]]
+  \mid [[ _ ]]
+  \mid [[ [p] ]]
+  \mid [[ Con p1 ... pn ]]
+{\small{\tag{\textit{patterns}}}}
+\end{align*}
+%
+Terms consist of a graded $\lambda$-calculus, a \textit{promotion} construct [t] which introduces a graded modality explicitly, as well as data constructor introduction ($[[ Con t1 ... tn ]]$) and elimination via
+ $\textbf{case}$ expressions which are defined via the syntax of patterns $[[ p ]]$.
+
+Typing judgements have the form
+$[[ G |- t : A ]]$ assigning a type $[[ A ]]$ to a term $ [[ t ]]$ under
+$ [[ G ]]$, where $[[ G ]]$ and $[[ D ]]$ range over contexts, given by:
+%
+\begin{equation*}
+  [[ D ]], [[ G ]] ::= \emptyset
+  \mid [[ G , x : [ A ] r ]]
+\tag{\textit{contexts}}
+\end{equation*}
+%
+That is, a context may be empty $\emptyset$ or extended with a \textit{graded}
+assumption $ [[ x : [A] r ]]$. Graded assumptions must be used in a term in a
+way which adheres to the
+constraints provided by the grade $[[ r ]]$. Structural exchange is permitted,
+allowing a context to be arbitrarily reordered.
+
+Given a typing judgment $[[ G |- t : A ]]$ we say that $t$ is both \emph{well typed}
+and \emph{well resourced} to highlight the role of grading in accounting for resource
+use via the semiring information.
+
+\begin{figure}[t]
+\hspace{-0.5em}
+\begin{align*}
+\hspace{-0.5em}
+\begin{array}{c}
+\GRANULEdruleTyVar{}
+\;\;\;
+\GRANULEdruleTyAbs{}
+\;\;\;
+\GRANULEdruleTyApp{}
+\\\\
+\GRANULEdruleTyPr{}
+\;\;\;
+\GRANULEdruleTyApprox{}
+\\\\
+\GRANULEdruleTyCon{}
+\;\;\;
+\GRANULEdruleTyCase{}
+\end{array}
+\end{align*}
+\vspace{-0.5em}
+\caption{Typing rules for \textsc{GrLang}}
+\label{fig:typing}
+\vspace{-0.5em}
+ \end{figure}
+
+Figure~\ref{fig:typing} gives the full typing rules, which helps explain the meaning of
+the syntax with reference to their static semantics.
+
+Variables (rule \textsc{Var}) are
+typed in a context where the variable $x$ has grade $1$ denoting its
+single usage here. All other variable assumptions are given the grade
+of the $0$ semiring element (providing \emph{weakening}),
+using \textit{scalar multiplication} of contexts by a grade, defined
+as:
+%
+\begin{definition}[Scalar context multiplication]
+  \label{def:scalar}
+\begin{align*}
+   [[ r * . ]] = \emptyset
+    \qquad\qquad
+    [[ r * (G , x : [ A ] s) ]] = [[ (r * G), x : [ A ] {r * s} ]]
+\end{align*}
+%
+i.e. for a non-empty context $[[G]]$, each assumption in $[[G]]$ has its associated grade scaled by $[[r]]$.
+\end{definition}
+%
+Abstraction (\textsc{Abs}) captures the assumption's grade
+$[[ r ]]$ onto the function arrow in the conclusion, that is, abstraction binds a variable $[[x]]$ which may be used in the body $[[t]]$ according to grade $[[ r ]]$. Application (\textsc{App}) makes use of context addition to combine the
+contexts used to type the two subterms in the premises of the application rule (providing \emph{contraction}):
+
+\begin{definition}[Context addition]\label{def:contextAdd}
+  For all $[[ G1 ]], [[ G2 ]]$
+  \emph{context addition} is defined
+as follows by ordered cases matching inductively on the structure of
+$[[ G2 ]]$:
+\begin{align*}
+[[G1 + G2]] = \left\{\begin{matrix}
+    \begin{array}{ll}
+    [[G1]] &
+    [[G2]] = \emptyset
+             \\
+      (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
+[[ G2]] = [[ G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']] \\
+ [[ (G1 + G2'), x : [A] s ]] & [[ G2 ]] = [[ G2' , x : [A] s ]] \wedge [[ x ]] \not\in \mathsf{dom}([[ G1 ]])
+\end{array}
+  \end{matrix}\right.
+\end{align*}
+\end{definition}
+For example, $[[ (x : [A] 1, y : [A] 0) ]] + [[ x : [A] 1 ]] = [[ x : [A] (1 + 1), y : [A] 0 ]]$. Thus, we can see $+$ on contexts as pointwise addition of the contexts via
+semiring $+$, taking the union of any disjoint parts.
+
+Returning to (\textsc{App}), we see that the context $[[ G2 ]]$ for the argument term
+is scaled by the grade of the function arrow $[[ r ]]$, as $[[ t2 ]]$ is used according to $[[ r ]]$ the resulting term $[[ t1 t2 ]]$.
+
+Explicit introduction of graded modalities is achieved via the rule for promotion
+(\textsc{Pr}). The grade $[[ r ]]$ is propagated to the assumptions in
+$[[ G ]]$ through the scaling of $[[G]]$ by $[[r]]$.
+Approximation (\textsc{Approx}) allows a grade $[[ r ]]$ to be converted to another grade $[[ s ]]$, provided that $[[ r ]]$ \textit{approximates} $[[ s ]]$.
+Here, $\sqsubseteq$ is an approximation relation defined as the pre-order relation
+of $[[ r ]]$ and $[[ s ]]$'s semiring. This relation is occasionally lifted
+pointwise to contexts: we write $[[ G <<= G' ]]$ to mean that $[[ G' ]]$
+overapproximates $[[ G ]]$ meaning that for all $[[ (x : [A] r') ]] \in [[ G' ]]$
+then $[[ (x : [A] r) ]] \in [[ G ]]$ and $[[ r <<= r' ]]$.
+
+
+Introduction and elimination of data constructors is given by
+the \textsc{Con} and \textsc{Case} rules respectively,
+with \textsc{Case} also handling graded modality elimination via
+pattern matching. For \textsc{Con}, we may type a data constructor
+$[[C]]$ of some data type $[[ K {A Many }]]$ (with zero or more type
+parameters represented by $[[ A Many ]]$) if it is present in a global
+context of data constructors $D$. Data constructors are closed
+requiring our context $[[ G ]]$ to have zero-use grades, thus we scale
+$[[G]]$ by $0$. Elimination of data constructors take place via
+pattern matching over a constructor. Patterns $[[p]]$ are typed by the
+judgement $[[ r |- p : A |> D ]]$ which states that a pattern $[[p]]$
+has type $[[A]]$ and produces a context of typed binders $[[D]]$. The
+grade $[[r]]$ to the left of the turnstile represents the grade
+information arising from usage in the context generated by this
+pattern match. The pattern typing rules are given by
+Figure~\ref{fig:pat-typing}.
+
+
+\begin{figure}[t]
+\begin{align*}
+\begin{array}{c}
+\GRANULEdrulePatVar{}
+\qquad
+\GRANULEdrulePatWild{}
+\\[1.5em]
+\GRANULEdrulePatBox{}
+\;\;\;
+\GRANULEdrulePatCon{}
+\end{array}
+\vspace{-0.5em}
+\end{align*}
+  \caption{Pattern typing rules of the graded calculus}
+\label{fig:pat-typing}
+ \end{figure}
+
+
+Variable patterns are typed by \textsc{PVar}, which simply produces a singleton
+context containing an assumption $[[ x : [A] r]]$ from the variable pattern with any
+grade $[[ r ]]$. A wildcard pattern \_, typed by the \textsc{PWild} rule, is only permissible with grades that
+allow for weakening, i.e., where $[[ 0 <<= r ]]$.
+Pattern matching over data constructors is handled by the \textsc{PCon} rule. A data constructor may have up to zero or more sub-patterns
+($[[ p1 ]] ... [[ pn ]]$), each of which is typed under the grade
+$[[ qi ]] \cdot [[ r ]]$ (where $[[ qi ]]$ is the grade of corresponding
+argument type for the constructor, as defined in $D$). Additionally, we have the constraint
+$[[{PolyConSimple {K {A Many}} r}]]$ which witnesses the fact that if there is more than
+one data constructor for the data type (written $|[[ K {A Many} ]]| > 1$), then
+$[[ r ]]$ must approximate 1 because pattern matching on a data constructor incurs
+some usage since it reveals information about that constructor.\footnote{A discussion
+of this additional constraint on grades for a case expression is given
+by \citet{DBLP:journals/corr/abs-2112-14966}, including
+a comparison with how this manifests in various approaches.} By contrast,
+pattern matching on a type with only
+one constructor cannot convey any information by itself and so no usage
+requirement is imposed. Finally, elimination of a graded modality
+(often called \textit{unboxing}) takes place via the \textsc{PBox} rule, with syntax $[[ [p] ]]$.
+Like \textsc{PCon}, this rule propogates the grade information of the box pattern's type $[[s]]$ to
+the enclosed sub-pattern $[[ p ]]$, yielding a context with the grades
+$[[r * s]]$. One may observe that \textsc{PBox} (and by extension \textsc{Pr})
+could be considered as special cases of \textsc{PCon} (and \textsc{Con}
+respectively), if we were to treat our promotion construct as a data constructor
+with the type $[[ A ^ r -> {[] r A} ]]$. We find it helpful to keep explicit
+modality introduction and elimination distinct from constructors, however,
+particularly with regard to synthesis.
+
+We conclude with two examples of graded modalities indexed respectively
+by the semiring of intervals over natural numbers and the \{$0$,$1$,$\omega$\} semiring for expressing
+intuitionistic linear logic.
+\begin{example}
+  We have already seen examples of the natural numbers semiring with discrete
+  ordering $({\mathbb{N}}, {*}, {1}, {+}, {0}, {\equiv})$, which counts exactly
+  how many times variables are used. We denote this semiring as $\mathbb{N}_\equiv$ going forwards.
+  This semiring is less useful in the
+  presence of control-flow, e.g., when considering multiple branches in a case
+  expression, where each branch uses a variable differently. A semiring of natural
+  number intervals~\cite{DBLP:journals/pacmpl/OrchardLE19} is more helpful in expressing this behaviour. An
+  interval is given by a pair of natural numbers
+  $\mathbb{N} \times \mathbb{N}$ written $ [[ r ]] ... [[ s ]] $. The lower
+  bound of the interval is given by $ [[ r ]] \in \mathbb{N}$ and the upper
+  bound by $[[ s ]] \in \mathbb{N} $, with $0 = 0 ... 0$ and
+  $1 = 1 ... 1$. Addition is defined pointwise and multiplication defined
+  as in interval arithmetic, with
+  ordering defined as
+  $ [[r]] ... [[ s ]]  \sqsubseteq  [[r']] ... [[s']]  = [[ r']] \leq [[ r ]] \wedge [[ s ]] \leq [[ s' ]]$.
+  This semiring allows us to write a function which performs an elimination on a
+  coproduct (assuming $\oplus \in D$) as:
+  \begin{align*}
+    \begin{array}{ll}
+    \oplus_{elim} : (A^{1} \rightarrow C)^{0...1} \rightarrow (B^{1} \rightarrow C)^{0...1} \rightarrow (A \oplus B)^{1} \rightarrow C &
+    \\
+    \oplus_{elim} = \lambda f. \lambda g . \lambda x. \textbf{case } x \textbf{ of } \text{inl}\ y \mapsto f\ y\ |\ \text{inr}\ z \mapsto g\ z&
+    \end{array}
+  \end{align*}
+%   Intervals over $\mathbb{N} \cup \{\infty \}$ allow us to express unrestriced
+%   use of variables as $[ 0 \dots \infty ] $ with $\infty$ absorbing in
+%   call cases except multiplication by $0$. Note, however, that this form of
+%   unrestricted usage is equivalent to Linear Logic's $!$ modality~\cite{hughes:lirmm-03271465}.
+% \
+\end{example}
+
+
+\begin{example}
+
+\label{example:01omega}
+  The $!$ modality can be (almost) recovered via the \{$0$,$1$,$\omega$\} semiring. For this semiring, we define $+$ as $r + s = r$ if $s = 0$, $r + s = s$ if $r = 0$, otherwise $\omega$. Multiplication is $r \cdot 0 = 0 \cdot r = 0$, $r \cdot \omega = \omega \cdot r = \omega$ (where $r \neq 0$), and $r \cdot 1 = 1 \cdot r = r$. Ordering is defined as $0 \sqsubseteq \omega$ and $1 \sqsubseteq \omega$. This semiring allows us to express both linear and non-linear usage of values, with a $1$ grade indicating linear use, $0$ requires the value be discarded, and $\omega$ acting as linear logic's ! and permitting unrestrained use. This is similar to Linear Haskell's multiplicity annotations (although Linear Haskell has no equivalent of a $0$ grade, only having \granin{One} and \granin{Many} annotations)~\cite{DBLP:journals/pacmpl/BernardyBNJS18}. Using this semiring, we can write the $k$-combinator from the SKI calculus as:
+  \begin{align*}
+    \begin{array}{ll}
+    k : A^{1} \rightarrow B ^{0} \rightarrow A &
+    \\
+    k = \lambda x. \lambda y . x &
+    \end{array}
+    \end{align*}
+Note however that some additional restrictions are required on pattern typing to get exactly the behaviour of $!$ with respect to products~\cite{hughes:lirmm-03271465}.
+This is an orthogonal discussion and not relevant in the rest of this paper.
+\end{example}
+
+Lastly we note that the calculus enjoys admissibility of
+substitution~\cite{DBLP:journals/pacmpl/AbelB20}
+which is critical in type preservation proofs,
+and is needed in our proof of soundness for synthesis:
+%
+\begin{restatable}[Admissibility of substitution]{lemma}{subst}
+\label{lemma:substitution}
+Let $[[ D |- t' : A]]$, then:
+If $[[ {G, x : [A] r} , G' |- t : B]]$
+then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
+\end{restatable}
+
+
+
+\section{Synthesis}
+
+Having defined the target language, we define the core
+synthesis calculus, which uses the \emph{additive} approach
+to resource management (discussed in the Section~\ref{sec:overview}),
+with judgements of the form:
+%
+\begin{align*}
+[[ G |- A =>+ t ; D ]]
+\end{align*}
+%
+That is, given an input context $[[ G ]]$, for goal type $[[ A ]]$
+we can synthesis the term $[[ t ]]$ with the output context $[[ D ]]$
+describing how variables were used in $[[ t ]]$. The graded
+context $[[ D ]]$ need not necessarily use all the variables in $[[ G ]]$,
+nor with exactly the same grades. Instead, the relationship between
+synthesis and typing is given by the following soundness result
+(the appendix provides the proof):
+%(Appendix~\ref{sec:soundness-proofs} provides the proof):
+
+\begin{restatable}[Soundness of synthesis]{theorem}{synthSound}
+\label{lemma:synthSound}
+For all graded typing contexts $[[ G ]]$ and $[[ D ]]$, types $[[ A ]]$, terms $[[ t ]]$,
+and fixing some pre-ordered semiring $\mathcal{R}$ parameterising the calculi,
+then:
+\begin{align*}
+[[ G |- A =>+ t ; D ]] \quad \implies \quad [[ D |- t : A ]]
+\end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$,
+which contains variables with grades reflecting their use in $[[ t ]]$.
+\end{restatable}
+%
+The soundness result on its own does not guarantee that the synthesised program $t$
+is \emph{well resourced}: i.e., the grades in $[[ D ]]$ may not
+be approximated by the grades in $[[ G ]]$. For example, a valid judgement
+(whose more general rule is seen shortly) under semiring $\mathbb{N}_\equiv$ is:
+%
+\begin{align*}
+[[ x : [A] 2 |- A =>+ x ; x : [A] 1 ]]
+\end{align*}
+%
+i.e., for goal $A$, if $x$ has type $A$ in the context then we synthesis $x$ as the result
+program, regardless of the grades. A synthesis
+judgement such as this may be part of a larger derivation in which the grades eventually
+match, i.e., this judgement forms part of a larger derivation which has a further
+subderivation in which $x$ is used again and thus the total usage for $x$ is
+eventually $2$ as prescribed by the input context. However,
+at the level of an individual judgement we do not guarantee
+that the synthesised term is well-resourced. A reasonable \emph{pruning condition} that could be used to
+assess whether any synthesis judgement is \emph{potentially} well-resourced
+is $\exists [[ D' ]] . [[ (D + D') <<= G ]]$,
+i.e., there is some additional usage $[[ D' ]]$ (that might come from further on
+in the synthesis process) that `fills the gap' in resource use to produce $[[ D + D' ]]$ which
+is overapproximated by $[[ G ]]$. In this example,
+$[[ D' ]] = [[ x : [A] 1 ]]$ would satisfy this constraint, explaining that there is some further possible
+single usage which will satisfy the incoming grade. However, previous work on graded linear
+types showed that excessive pruning at every step becomes
+too costly in a general setting~\cite{DBLP:conf/lopstr/HughesO20}. Instead,
+we apply such pruning more judiciously, only requiring that variable use is
+well-resourced at the point of synthesising binders. Therefore synthesised
+closed terms are always well-resourced.
+
+For open terms, the implementation
+checks that from a user-given top-level goal $A$ for which $[[ G |- A =>+ t ; D ]]$ is
+derivable then $t$ is only provided as a valid
+(well-typed and well-resourced) synthesis result if $[[ D <<= G ]]$.
+
+We present the synthesis calculus in stages.
+Each type former of the core calculus (with the exception of type
+variables) has two corresponding synthesis rules: a right rule for
+introduction (labelled $\textsc{R}$) and a left rule for elimination
+(labelled $\textsc{L}$).
+We frequently apply the algorithmic reading of the judgements, where meta-level terms to the left of $\Rightarrow$ are inputs (i.e., context $[[ G ]]$ and goal type $[[ A ]]$) and terms to the right of $\Rightarrow$
+are outputs (i.e., the synthesised term $[[ t ]]$ and the usage context $[[ D ]]$).
+
+Section~\ref{subsection:rules} focuses primarily on a
+simply-typed core of synthesis, explaining how each synthesis
+rule addresses the issue of resource management, and how usage
+information is conveyed from a rule's input to its output.
+Section~\ref{sec:recursion} explains
+the approach to synthesising recursive programs (and handling recursive data types).
+Section~\ref{sec:polymorphism} briefly explains the handling of polymorphism.
+
+The synthesis calculus is non-deterministic, i.e., for any $[[ G ]]$
+and $[[ A ]]$ there may be many possible $[[ t ]]$ and $[[ D ]]$ such
+that $[[ G |- A =>+ t ; D ]]$. Section~\ref{sec:focusing} explains how
+the core rules are `reorganised' into a deterministic system via the
+approach of focusing proof search.  Lastly,
+Section~\ref{sec:refactoring} briefly explains post-synthesis
+refactoring to produce shorter, easier to read programs.
+
+Whilst we largely present the approach here in abstract terms, via the synthesis judgements,
+we highlight some implementation choices (e.g., heuristics
+applied in the algorithmic version of the rules) as given in our implementation into Granule.
+
+\subsection{Core synthesis rules}
+\label{subsection:rules}
+
+\paragraph{Variables}
+For any goal type $A$, if there is a variable in the context matching this type
+then it can be synthesised for the goal, given by the terminal rule:
+%
+\begin{align*}
+  \synVar
+\end{align*}
+%
+Said another way, to synthesise the use of a variable $[[ x ]]$, we require that $[[ x ]]$ be
+present in the input context $[[ G ]]$. The output context here then explains
+that only variable $x$ is used: it consists of the
+entirety of the input context $[[ G ]]$ scaled by grade $0$ (using
+definition~\ref{def:scalar}), extended with $[[x : [A] 1]]$, i.e. a single usage
+of $[[ x ]]$ as denoted by the $1$ element of the semiring.
+Maintaining this zeroed $[[ G ]]$ in the output context simplifies
+subsequent rules by avoiding excessive context membership checks.
+
+The $\textsc{Var}$ rule permits the synthesis of terms which may not
+be well-resourced, e.g., if $r = 0$, the rule still synthesises a use of
+$x$. This is locally ill-resourced, but is acceptable at the global
+level as we check that an assumption has been used correctly in the rule where the assumption is bound. This does leads us to consider some branches of synthesis
+that are guaranteed to fail: at the point of synthesising a usage of a
+variable in the additive scheme, isolated from information about how
+else the variable is used, there is no way of knowing if such a usage
+will be permissible in the final synthesised program. However, it also
+reduces the amount of intermediate theorems that need solving, which
+can significantly effect performance as shown
+by~\citet{DBLP:conf/lopstr/HughesO20}, especially since the variable
+rule is applied very frequently.
+
+\paragraph{Functions}
+
+Synthesis of programs from function types is handled by the \GRANULEdruleAbsName and
+\GRANULEdruleAppName rules, which synthesise abstraction and application terms,
+respectively. An abstraction is synthesised like so:
+\begin{align*}
+    \synAbs
+\end{align*}
+%
+Reading the rule bottom up, to synthesise a term of type
+$[[ A ^ q -> B ]]$ in context $[[ G ]]$ we first
+extend the context
+with a fresh variable assumption $[[ x : [A] q ]]$ and synthesise a term of type $[[ B ]]$ that will ultimately become the body
+of the function. The type $[[ A ^ q -> B ]]$ conveys that $[[ A ]]$ must be
+used according to $[[ q ]]$ in our term for $[[ B ]]$. The fresh variable
+$[[ x ]]$  is passed to the premise of the rule using
+the grade of the binder: $[[ q ]]$. The $[[ x ]]$ must then be used to synthesise a term
+$[[ t ]]$ with $[[ q ]]$ usage. In the premise, after synthesising $[[ t ]]$ we obtain an output context
+$[[ D, x : [A] r ]]$. As mentioned, the $\textsc{Var}$ rule ensures
+that $[[ x ]]$ is present in this context, even if it was not used in the
+synthesis of $[[ t ]]$ (for example if $[[ q ]] = 0$).
+The rule ensures the usage of bound term ($r$) in $[[t]]$ does not violate the
+input grade $q$ via the requirement that $[[ r ]] \sqsubseteq [[ q ]]$ i.e. that $[[ r ]]$
+\textit{approximates} $[[ q ]]$. If met, $[[ D ]]$ becomes the output context of the rule's conclusion.
+
+The counterpart to abstraction synthesises an
+application from the occurrence of a function in the context (a left rule):
+\begin{align*}
+    \synApp
+\end{align*}
+%
+Reading bottom up again, the input context contains an assumption with a function type
+$[[ x1 : [A ^ q -> B] r1 ]]$. We may attempt to use this assumption in the synthesis of a
+term with the goal type $[[ C ]]$, by applying some argument to it. We do this
+by synthesising the argument from the input type of the function $[[ A ]]$, and
+then binding the result of this application as an assumption of type $[[ B ]]$ in the
+synthesis of $[[ C ]]$. This is decomposed into two steps corresponding to the two
+premises (though in the implementation the first premise is considered first):
+\begin{enumerate}
+        \item The first premise synthesises a term $[[ t1 ]]$ from the goal type
+        $[[ C ]]$ under the assumption that the function $[[ x1 ]]$ has been
+        applied and its result is bound to
+        $[[ x2 ]]$. This placeholder assumption is bound with the same grade as
+        $[[ x1 ]]$.
+        \item The second premise synthesises an argument $[[ t2 ]]$
+        of type $[[ A ]]$ for the function $[[ x1 ]]$.
+        In the implementation, this synthesis step occurs only after
+        a term $[[ t1 ]]$ is found for the goal $[[ C ]]$ as a heuristic
+        to avoid possibly unnecessary work if no term can be synthesised for
+        $[[ C ]]$ anyway.
+\end{enumerate}
+%
+In the conclusion of the rule, a term is synthesised
+which substitutes in $[[ t1 ]]$ the result placeholder variable $[[ x2 ]]$ for the application
+$[[ x1 t2 ]]$.
+
+The first premise yields an output context
+$[[ D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2 ]]$.
+The output context of the conclusion is obtained by taking the context addition of
+$[[ D1 ]]$ and $[[ s2 * {q * D2} ]]$. The output context $[[ D2 ]]$ is first scaled by
+$[[ q ]]$ since $[[ t2 ]]$ is used according to $[[ q ]]$ when applied to
+$[[ x1 ]]$ (as per the type of $[[ x1 ]]$). We then scale this again by $[[ s2 ]]$
+which represents the usage of the entire application $[[ x1 t2 ]]$ inside
+$[[ t1 ]]$.
+
+The output grade of $[[ x1 ]]$ follows a similar pattern
+since this rule permits the re-use of
+$[[ x1 ]]$ inside both premises of the application (which
+differs from Hughes and Orchard's treatment of synthesis in a linear setting).
+As $[[ x1 ]]$'s input grade $[[ r1 ]]$ may permit multiple uses both inside the
+synthesis of the application argument $[[ t2 ]]$ and in $[[ t1 ]]$ itself, the
+total usage of $[[ t1 ]]$ across both premises must be calculated. In the first
+premise $[[ x1 ]]$ is used according to $[[ s1 ]]$, and in the second according
+to $[[ s3 ]]$. As with $[[ D2 ]]$, we take the semiring multiplication of $[[ s3 ]]$ and $[[ q ]]$ and then
+multiply this by $[[ s2 ]]$ to yield the final usage of $[[ x1 ]]$ in $[[ t2 ]]$.
+We then add this to $[[ s2 + s1 ]]$ to yield the total usage of $[[ x1 ]]$ in
+$[[ t1 ]]$.
+
+\paragraph{Data types}
+
+The synthesis of introduction forms for data types is handled by the \GRANULEdruleConName rule:
+\begin{align*}
+    \synCon
+\end{align*}
+where $D$ is the set of data constructors in global scope, e.g., coming from
+ADT definitions, but including here products with $(,) : A^1 \rightarrow B^1 \rightarrow A \otimes B$
+and $Unit : [[ Unit ]]$.
+
+For a goal type $[[ K {A Many} ]]$ where $[[ K ]]$ is a data type
+with zero or more type arguments (denoted by the vector $[[ A Many ]]$), then
+a constructor term $[[ Con t1 .. tn ]]$ for $[[ K {A Many} ]]$ is synthesised,
+This requires a sub-term to
+be synthesised for each of the constructor's arguments $[[ ti ]]$ in
+the second premise (which is repeated for each argument type $[[ Bi ]]$), yielding
+output contexts $[[ Di ]]$.
+The output context for the rule's conclusion is obtained by performing a context
+addition across all the output contexts generated from the premises, where each
+context $[[ Di ]]$ is scaled by the corresponding grade $[[ qi ]]$ from the data
+constructor in $D$ capturing the fact that each argument $[[ ti ]]$ is used
+according to $[[ qi ]]$.
+
+The dual of the above, constructor elimination, synthesises \textbf{case} statements with branches pattern matching on each data constructor of the target data type $[[K {A Many}]]$, with various associated constraints on grades which require some careful explanation:
+%
+\begin{align*}
+    \synCase
+\end{align*}
+%
+where $1 \leq i \leq m$ is used to index the data constructors of which there
+are $m$ (i.e., $m = |[[ K {A Many} ]]|$) and
+$1 \leq j \leq n$ is used to index the arguments of the $i^{th}$ data constructor
+; for brevity, the rule focuses on the case of $n$-ary data constructors where $n > 0$.
+
+As with constructor introduction, the relevant data
+constructors are retrieved from the global context $D$ in the first premise.
+A data constructor type
+is a function type from the constructor's arguments $[[ B1 ]] \ldots [[ Bn ]]$ to
+a type constructor applied to zero or more type parameters $[[ K {A Many} ]]$.
+However, in the case of nullary
+data constructors (e.g., for the unit type), the data constructor type is simply the type
+constructor's type with no arguments. For each data constructor $C_{i}$,
+we synthesise a term $[[ ti ]]$ from the result type of the data constructor's
+type in $D$, binding the data constructor's argument types as fresh assumptions
+to be used in the synthesis of $[[ ti ]]$.
+
+To synthesise the body for each branch $i$, the arguments of the
+data constructor are bound to fresh variables in the premise,
+with the grades from their respective argument types in $D$ multiplied by the
+$[[ r ]]$. This follows the pattern typing rule for constructors; a pattern
+match under some grade $[[ r ]]$ must bind assumptions that have the capability
+to be used according to $[[ r ]]$.
+
+The assumption being eliminated
+$[[ x : [K {A Many}] r ]]$ is also included in the premise's context (as in \GRANULEdruleAppName) as we may perform
+additional eliminations on the current assumption subsequently if the grade
+$[[ r ]]$ allows us. If successful,
+this will yield both a term $t_{i}$ and an output context for the
+pattern match branch.
+The output context can be broken down into three parts:
+\begin{enumerate}
+\item $[[ Di ]]$ contains any
+assumptions from $[[ G ]]$ were used to construct $[[ ti ]]$
+\item  $[[ x : [K A] ri ]]$ describes how the assumption $[[ x ]]$ was
+used
+\item $[[ {{y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} ]]$ describes how each assumption  $[[ y Vari Varj ]]$ bound in the pattern
+match was used in $[[ ti ]]$.
+\end{enumerate}
+%
+This leaves the question of how we calculate the final grade to
+attribute to $ [[ x ]]$  in the output context of the rule's conclusion.
+For each bound assumption, we generate a fresh grade variable
+$[[ s' Vari Varj  ]]$ which represents how that variable was used in $[[ ti ]]$
+after factoring out the multiplication by $[[ r ]]$. This is done via the
+constraint in the third premise that $ [[
+exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj} ]]$.
+The join of each $[[ s' Vari Varj ]]$ (for each assumption) is then taken to
+form a grade variable $[[ Vari s ]]$ which represents the total usage of
+$[[ x ]]$ for this branch that arises from the use of assumptions which were
+bound via the pattern match (i.e. not usage that arises from reusing $[[x]]$
+explicitly inside $[[ ti ]]$). For the output context of the conclusion, we then
+take the join of output context from the constructors used. This is extended
+with the original $[[ x ]]$ assumption with the output grade consisting of the
+join of each $[[ ri ]]$ (the usages of $[[ x ]]$ directly in each branch) plus
+the join of each $[[ si ]]$ (the usages of the assumptions that were bound from
+matching on a constructor of $[[ x ]]$).
+
+\begin{example}[Example of \textbf{case} synthesis]
+%
+Consider two possible synthesis results as:
+%
+\begin{align}
+\label{eq:case-ex-branchOne}
+& [[  x : [Sum Unit A] s, y : [ A ] r , z : [A] r |- A =>+ z ; x : [Sum Unit A] 0, y : [A] 0 , z : [A] 1 ]] \\
+\label{eq:case-ex-branchTwo}
+& [[  x : [Sum Unit A] s, y : [ A ] r  |- A =>+ y ; x : [Sum Unit A] 0 , y : [A] 1 ]]
+\end{align}
+%
+We will plug these into the rule for generating case expressions as follows where in the following instead of using the above concrete grades we have used the abstract form
+of the rule (the two will be linked by equations after):
+%
+\begin{gather*}
+\inferrule*[right=Case]
+{\mathsf{Just} : [[ A ^ 1 -> Sum A Unit ]] \in [[ Defines ]] \\ \\
+ \mathsf{Nothing} : [[ Unit ^ 1 -o Sum A Unit ]] \in [[ Defines ]] \\ \\
+ \eqref{eq:case-ex-branchOne} \qquad [[  x : [Sum Unit A] s, y : [ A ] r , z : [A] {r * q1} |- A =>+ z ; x : [Sum Unit A] 0, y : [A] 0 , z : [A] s1 ]] \\ \\ \\
+ \eqref{eq:case-ex-branchTwo} \qquad [[  x : [Sum Unit A] s, y : [ A ] r  |- A =>+ y ; x : [Sum Unit A] 0 , y : [A] 1 ]] \\ \\
+ [[ exists s1' . s1 <= s1' * q1 <= r * q1 ]] \\ \\
+ [[ assn s s1 ]]
+}
+{
+[[ y : [ A ] 1 , x : [Sum Unit A] r |- A =>+ (case x of {Just z} -> z  ; {Nothing .} -> y) ; {x : [ {Sum Unit A} ] {(0 \/ 0)} + {s}} , y : [A] {0 \/ 1} ]]
+}
+\end{gather*}
+%
+Thus, to unify \eqref{eq:case-ex-branchOne}
+and \eqref{eq:case-ex-branchTwo} with the rule format we
+have that  $[[ s1 ]] = 1$ and $[[ q1 ]] = 1$.  Applying these
+two equalities as rewrites to the remaining constraint, we have that:
+%
+\begin{align*}
+& [[ exists s1' . 1 <= s1' * 1 <= r * 1 ]] \quad \implies \quad [[ exists s1' . 1 <= s1' <= r ]]
+\end{align*}
+%
+These constraints can be satisfied with the natural-number intervals semiring where $[[ y : [A] {IntervalSyn 0 1} ]]$
+\end{example}
+
+Deep pattern matching, over nested data constructors, is handled via
+inductively applying the \GRANULEdruleCaseName rule but with a
+post-synthesis refactoring procedure substituting the pattern match of
+the inner case statement into the outer pattern match
+(Section~\ref{sec:refactoring}). For example,
+\begin{align*}
+  [[ case x of Pair y1 y2 -> case y1 of Pair z1 z2 -> z2 ]]
+\end{align*}
+becomes a single $\textbf{case}$ with nested pattern matching, simplifying the synthesised program:
+\begin{align*}
+  [[ case x of Pair {Pair z1 z2} y2 -> z2 ]]
+\end{align*}
+
+\paragraph{Graded modalities}
+
+Graded modalities are introduced and eliminated explicitly through the \GRANULEdruleBoxName and \GRANULEdruleUnboxName rules, respectively. In \GRANULEdruleBoxName, we synthesise a promotion $[[ [ t ] ]]$ for some graded modal goal type $[[ [] r A ]]$:
+\begin{align*}
+  \synBox
+\end{align*}
+In the premise, we synthesise from $[[ A ]]$, yielding the subterm $[[ t ]]$ and an output context $[[ D ]]$. In the conclusion, $[[ D ]]$ is scaled by the grade of the goal type $[[ r ]]$: as $[[ [t] ]]$ must use $[[ t ]]$ as $[[ r ]]$ requires.
+
+As with data constructors, grade elimination (\textit{unboxing}) takes place via pattern matching in \textbf{case}:
+\begin{align*}
+  \synUnbox
+\end{align*}
+To eliminate the assumption $[[ x ]]$, which has the graded modal type $[[ [] q A ]]$, we bind a fresh assumption in the synthesis of the premise: $[[ y : [A] {r1 * q} ]]$. This assumption is graded with $[[ {r1 * q} ]]$: the grade from the assumption's type multiplied by the grade of the assumption itself. As with previous elimination rules, $[[ x ]]$ is rebound in the rule's premise. Some term $[[ t ]]$ is then synthesised resulting in the output context $[[ {D, y : [A] s1}, x : [ [] q A ] {s2} ]]$, where $[[ s1 ]]$ and $[[ s2 ]]$ describe how $[[ y ]]$ and $[[ x ]]$ were used in $[[ t ]]$. The second premise ensures that the usage of $[[ y ]]$ does not exceed the binding grade $[[ r1 * q ]]$. For the output context of the conclusion, we simply remove the bound $[[y]]$ from $[[ D ]]$ and add $[[ x ]]$, with the grade $[[ s2 + s3 ]]$: representing the total usage of $[[ x ]]$ in $[[ t ]]$.
+
+% \subsection{Generalised Algebraic Data Types}\dnote{I think we are cutting?}
+
+
+% \begin{align*}
+%     \inferrule*[right=$\textsc{C}_{\textsc{Intro}}$]{C : (\forall \{ \overline{\alpha : \kappa} \} . B_{1}^{[[ Var1 q ]]} \rightarrow ... \rightarrow B_{n}^{[[ Varn q ]]} \rightarrow K\ A_{2}, \theta_{k} ) \in D \\\\ \theta, \Sigma, \theta'_{k} = \text{instantiate}(\overline{\alpha : \kappa}, \theta_{k}) \\\\
+%     \Sigma \vdash \theta(K\ A_{2}) \sim K\ A_{1} \rhd \theta' \\\\
+%     D ; \Sigma ; \Gamma \vdash (\theta'_{k} \uplus \theta' \uplus \theta)B_{i} \ \Rightarrow t_{i}\ |\ \Delta_{i}
+%     }{D ; \Gamma \vdash K\ A_{1} \ \Rightarrow C t_{1}...t_{n}\ |\ (q_{1} \cdot \Delta_{1}) + ... + (q_{n} \cdot \Delta_{n})}
+%   \end{align*}
+%   {\footnotesize{
+%   \begin{align*}
+%     \inferrule*[right=$\textsc{C}_{\textsc{Elim}}$]{
+%     C^{i} : (\forall \{ \overline{\alpha : \kappa} \} . B_{1}^{[[ Var1 q ]]} \rightarrow ... \rightarrow B_{n}^{[[ Varn q ]]} \rightarrow K\ A_{2}, \theta_{k} ) \in D \\\\ \theta_{i}, \Sigma, \theta'_{k} = \text{instantiate}(\overline{\alpha : \kappa}, \theta_{k}) \\\\
+%     \Sigma \vdash \theta_{i}(K\ A_{2}) \sim K\ A_{1} \rhd \theta_{i}'
+%     \\\\  D ; \Gamma, x :_{r} K\ A_{1},  y^{i}_{1} :_{r \cdot q_{1}^{i}} (\theta'_{k} \uplus \theta_{i}' \uplus \theta_{i})B_{1}, ... , y^{i}_{n} :_{r \cdot q_{n}^{i}} (\theta'_{k} \uplus \theta_{i}' \uplus \theta_{i})B_{n}\ \vdash B \Rightarrow t_{i}\ |\ \Delta_{i}, x :_{r_{i}}, y^{i}_{1} :_{s_{1}^{i}} (\theta'_{k} \uplus \theta_{i}' \uplus \theta_{i})B_{1}, ... , y^{i}_{n} :_{s_{n}^{i}} (\theta'_{k} \uplus \theta_{i}' \uplus \theta_{i})B_{m} \\\\
+% [[ exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj}]]  \\\\
+% [[assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}}]] }{D ; \Gamma, x :_{r} K\ A_{1}\ \vdash B \Rightarrow \textbf{case}\ x \ \textbf{of}\ \overline{C_{i}\ y^{i}_{1} ... y^{i}_{n}} \mapsto t_{i}\ |\ (\Delta_{0} \sqcup ... \sqcup \Delta_{n}), x :_{(r_{1} \sqcup ... \sqcup r_{n}) + (s_{1} \sqcup ... \sqcup s_{n})} K\ A_{1} } \\\\
+% \end{align*}
+% }
+% }
+
+\subsection{Recursion}
+\label{sec:recursion}
+
+Synthesis permits recursive definitions, as well as programs
+which may make use of calls to functions from a user-supplied context of
+function definitions in scope (see \ref{sec:examples}).
+
+Synthesis of non-recursive function applications may take place arbitrarily,
+however, synthesising a recursive function definition application requires more
+care. In order to ensure that a synthesised programs terminates, we only permit synthesis of
+terms which are \textit{structurally recursive}, i.e., those which apply the recursive
+definition to a subterm of the function's inputs~\cite{oserathesis}.
+
+\newcommand*{\synMuR}{ \inferrule*[right=$\mu_\textsc{R}$]
+  {\Gamma \vdash [[ A ]] [ \mu X . A / X] \Rightarrow t \mid\ \Delta} {\Gamma \vdash \mu X . A \Rightarrow t \mid\ \Delta}}
+\newcommand*{\synMuL}{ \inferrule*[right=$\mu_\textsc{L}$]
+  { [[G]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]} {[[ G ]], x :_r \mu X . [[ A ]] \vdash [[ B ]] \Rightarrow [[ t]] \mid\ [[D]]}}
+
+\newcommand*{\fsynMuR}{ \inferrule*[right=$\mu_\textsc{R}$]
+  {\Gamma ; \emptyset \vdash [[ A ]] [ \mu X . A / X] \Downarrow\ \Rightarrow t \mid\ \Delta} {\Gamma ; \emptyset \vdash \mu X . A \Downarrow\ \Rightarrow t \mid\ \Delta}}
+\newcommand*{\fsynMuL}{ \inferrule*[right=$\mu_\textsc{L}$]
+  { [[G]] ; [[ O ]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \Uparrow\ \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]} {[[ G ]]; [[O]], x :_r \mu X . [[ A ]] \Uparrow\ \vdash [[ B ]] \Rightarrow [[ t]] \mid\ [[D]]}}
+
+Synthesis rules for recursive data structures ($\mu$-types) are fairly straightforward:\footnote{Though $\mu$ types are equi-recursive, we make explicit the synthesis rules here which maps more closely to the implementation where iterative deepening information needs to be tracked at the points of using  $\mu_\textsc{L}$ and  $\mu_\textsc{R}$.}
+\begin{align*}
+  \begin{array}{cc}
+  \synMuR & \synMuL
+  \end{array}
+\end{align*}
+This $\mu_\textsc{R}$ rule states that to synthesise a recursive data structure of type $\mu X . [[ A ]]$, we must be able to synthesise $[[ A ]]$ with $\mu X . [[ A ]]$ substituted
+for the recursion variables $X$ in $[[ A ]]$. For example, if we wish to synthesise a list
+data type \granin{List a} with constructors \granin{Nil} and \granin{Cons a (List a)}, then
+when choosing the \granin{Cons} constructor in the $\mu_\textsc{R}$ rule, the type of this constructor requires us to re-apply the
+ $\mu_\textsc{R}$ rule, to synthesise the recursive part of \granin{Cons}.
+ Elimination of a recursive data structure may be synthesised using the $\mu_\textsc{L}$ rule.
+In this rule, we have some recursive data type $\mu X . [[ A ]]$ in our context which we may wish to pattern match on via
+the $\textsc{C}_\textsc{L}$ rule. To do this, the assumption is bound in the premise with the type $[[ A ]]$, substituting $\mu X. [[ A]]$ for
+the recursion variables $X$ in $[[ A ]]$.
+
+Recursive data structures present a challenge in the implementation. For our list data type,
+how do we prevent our synthesis tool from simply applying the $\mu_\textsc{L}$ rule, followed by the $\textsc{C}_\textsc{L}$
+rule on the \granin{Cons} constructor ad infinitum? We resolve this issue using an
+\textit{iterative deepening} approach to synthesis similar to the approach used
+by \textsc{Myth}~\cite{oserathesis}. Programs are synthesised with
+elimination (and introduction) forms of constructors restricted up to a
+given depth. If no program is synthesised within these bounds, then the depth
+limits are incremented. Combined with focusing (see section~\ref{sec:focusing}),
+this provides the basis for an efficient implementation of the above rules.
+
+\subsection{Polymorphism}
+\label{sec:polymorphism}
+Granule features rank-0 polymorphism à la ML, i.e., via
+\emph{type schemes} which have universal quantification of type variables
+only at the top-level of a type (though for brevity we elided
+polymorphism from the core calculus here). Programs in our approach can be synthesised from a
+polymorphic type scheme, treating universal type variables quantified
+at the top-level of our goal type as logical atoms which cannot be unified with
+and are only equal to themselves.
+
+When a synthesising an introduction/elimination form of a polymorphic
+constructor or an application involving a polymorphic top-level function definition, the constructor/definition
+is instantiated with fresh unification variables which are then used as the
+basis for further synthesis. Substitution and unification are
+treated in a standard way. For example, in the following we have a polymorphic
+function we want to use to synthesise a monomorphic function:
+%
+\begin{granule}
+flip : forall c d  . (c, d) %1 -> (d, c)
+flip (x, y) = (y, x)
+f : (Int, Int) %1 -> (Int, Int)
+f x = ? -- synthesis to flip x trivially
+\end{granule}
+%
+To synthesis the application \granin{flip x} here, the type scheme for \granin{flip} is
+instantiated with fresh unification variables $c'$, $d'$, yielding \granin{(c', d') \%1 -> (d', c')}
+from which $c'$ and $d'$ are then unified with \granin{Int} in an application of a
+\textsc{Var} rule.
+
+%The benchmarks in Section~\ref{sec:evaluation} make heavy use of polymorphism.
+
+\subsection{Input-output examples}
+
+\label{sec:examples}
+
+When specifying the synthesis context of top-level definitions, the user may also supply a series of
+input-output examples showcasing desired behaviour. Our approach to examples is
+deliberately na\"{i}ve; we evaluate a fully synthesised candidate program against
+the inputs and check that the results match the corresponding outputs. Unlike many
+sophisticated example-driven synthesis tools, the examples here do not themselves
+influence the search procedure, and are used solely to allow the user to clarify their intent. This lets us consider the effectiveness of
+basing the search primarily around the use of grade information. An approach to
+synthesis of resourceful programs with examples closely integrated into the search
+as well is further work.
+
+We augmented the Granule language with first-class syntax for specifying
+input-output examples, both as a feature for aiding synthesis
+but also for aiding documentation
+that is type checked (and therefore more likely to stay consistent with
+a code base as it evolves). Synthesis specifications
+are written in Granule directly above a program hole
+(written using \granin{?}) using the \granin{spec} keyword. The input-output
+examples are then listed per-line.
+\begin{granule}
+tail : forall a . List a %0..1 -> List a
+spec
+  tail (Cons 1 Nil) = Nil;
+  tail (Cons 1 (Cons 2 Nil)) = Cons 2 Nil;
+tail = ?
+\end{granule}
+Any synthesised term must then behave according to the supplied examples. This
+\granin{spec} structure can also be used to describe additional synthesis
+components that the user wishes the tool to make use of. These components comprise a
+list of in-scope definitions separated by commas. The user can choose to
+annotate each component with a grade, describing the required usage in the
+synthesised term. This defaults to a $1$ grade if not specified.
+For example, the specification for a function which returns the length of a list would look
+something like:
+\begin{granule}
+length : forall a . List a %0..$\infty$. -> N
+spec
+    length Nil = Z;
+    length (Cons 1 Nil) = S Z;
+    length (Cons 1 (Cons 1 Nil)) = S (S Z);
+    length %0..$\infty$.
+length = ?
+\end{granule}
+with the following resulting program produced by our synthesis algorithm (on average
+in about 400ms on a standard laptop, see Section~\ref{sec:evaluation} where this is one of the benchmarks for evaluation):
+\begin{granule}
+length Nil = Z;
+length (Cons y z) = S (length z)
+\end{granule}
+
+\subsection{Focusing proof search}
+\label{sec:focusing}
+The calculus presented above serves as a starting point for implementing a
+synthesis algorithm in Granule. However, at the moment the rules are highly
+non-deterministic with regards the order in which they may be applied. For
+example, after applying a $\rightarrow{R}$ rule, we may choose to apply any of
+the elimination rules before applying an introduction rule for the
+goal type. This leads to us exploring a large number of redundant search branches which can
+be avoided through the application of a technique known as
+\textit{focusing}~\cite{focusing}. Focusing is a tool from linear logic proof
+theory based on the idea that some rules are invertible, i.e., whenever the
+conclusion of the rule is derivable, then so are the premises. In other words, the order in which we apply invertible rules doesn't
+matter. By fixing a particular ordering on the application of invertible rules, we eliminate much of the
+non-determinism that arises from trying branches which differ only in the order in
+which invertible rules are applied. We briefly outline focusing and how we
+apply it.
+
+We begin by augmenting our previous synthesis judgement with an additional
+context:
+\begin{align*}
+\Gamma ; \Omega \vdash [[ A ]] \Rightarrow [[t ]]\ |\ \Delta
+\end{align*}
+Unlike $\Gamma$ and $\Delta$, $\Omega$ is an \textit{ordered} context. Using the terminology of Pfenning, we refer to rules that are
+invertible as \textit{asynchronous} and rules that are not as
+\textit{synchronous}~\cite{pfenninglecture}. The intuition here is that asynchronous rules can
+be applied eagerly, while the non-invertible synchronous rules require us to \textit{focus} on
+a particular part of the judgement: either on the assumption (if we are in an
+elimination rule) or on the goal (for an introduction rule). When
+focusing we apply a chain of synchronous rules, until we either reach a position where
+no rules may be applied (at which point the branch terminates), we have
+synthesised a term for our goal, or we have exposed an asynchronous connective
+at which point we switch back to applying asynchronous rules.
+
+We divide our synthesis rules into four categories,
+each with their own judgement form, refining the focusing judgement above with an
+arrow indicating which part of the judgement is currently in focus. An $\Uparrow$
+indicates an asynchronous phase, and $\Downarrow$ a synchronous (focused) phase. The
+location of the arrow in the judgement indicates whether we are in an introduction or
+elimination phase:
+\begin{enumerate}
+  \item Right Async: $\rightarrow{\textsc{R}}$ rule with the judgement $\Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow t\ |\ \Delta $
+        \item Left Async:  $\textsc{C}_{\textsc{L}}$, $\Box_{\textsc{L}}$ rules with the judgement
+        $\Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta $
+        \item Right Sync:  $\textsc{C}_{\textsc{R}}$, $\Box_{\textsc{R}}$ rules with the judgement
+        $\Gamma ; \Omega \vdash A \Downarrow\ \Rightarrow t\ |\ \Delta $
+        \item Left Sync:   $\rightarrow{\textsc{L}}$ rule with the judgement $\Gamma ; \Omega \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta $
+\end{enumerate}
+We find it helpful to view focusing in terms of a finite state machine, as given in
+figure~\ref{fig:focusingFSM}. States comprise the four phases of focusing, plus
+two additional states, \textsc{Focus}, and \textsc{Var}. Edges are then the
+synthesis rules that direct the transition between focusing phases. The transitions between these focusing phases are handled by dedicated focusing
+rules for each transition. For the asynchronous phases, the $\Uparrow_{R}$/$\Uparrow_{L}$ handle the transition between right to left phases,
+and left to focusing phases, respectively. Conversely, the $\Downarrow{R}$ rule deals with the transition from a right synchronous phase back to a right asynchronous phase,
+with the $\Downarrow{L}$ rule likewise transitioning to a left asynchronous phase. Depending on the current phase of focusing, these
+rules consider the goal type, the assumption currently being focused on's type,
+the size of $\Omega$, and the current
+level of iterative deepening to decide whether to transition between focusing
+phases. For brevity, we elide the full details here.
+
+% We begin in an \textsc{Intro Async} phase, which breaks down the
+% goal type by applying the $\multimap_{\textsc{Right}}$ rule. In the
+% focused form of $\multimap_{\textsc{Right}}$, the assumption bound in the premise is added to
+% our focused context $\Omega$ rather than $\Gamma$. When $\multimap_{\textsc{Right}}$ can no longer be
+% applied, we transition to an Elim Async phase via the $\Uparrow_{\textsc{R}}$ rule:
+% The full calculus of focused synthesis rules can be found in appendeix~\ref{sec:focusing-calculus}.
+
+\tikzset{
+->, % makes the edges directed
+node distance=5cm, % specifies the minimum distance between two nodes. Change if necessary.
+every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+initial text=$ $, % sets the text that appears on the start arrow
+}
+
+\begin{figure}[h] % ’ht’ tells LaTeX to place the figure ’here’ or at the top of the page
+\centering % centers the figure
+
+\scalebox{1}{
+\begin{tikzpicture}[every text node part/.style={align=center}]
+\node[state, initial, draw] (RA) {\textsc{Right Async} \\ $ \Gamma ; \Omega \vdash A \Uparrow \Rightarrow t | \Delta $};
+\node[state] at (10,  0) (LA) { \textsc{Left Async} \\ $\Gamma ; \Omega \Uparrow \vdash t \Rightarrow A | \Delta $};
+\node[state] at (5, -1) (F) { \textsc{Focus} \\ $\Gamma ; \emptyset \Uparrow \vdash t \Rightarrow A | \Delta $};
+\node[state] at (1, -6) (RS) { \textsc{Right Sync} \\ $\Gamma ; \emptyset \vdash t \Rightarrow A \Downarrow | \Delta $};
+\node[state] at (9, -6) (LS) { \textsc{Left Sync} \\ $\Gamma ; [[ x : [ B ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
+\node[state, accepting] at (5, -10) (V) { \textsc{Var} \\ $\Gamma ; [[ x : [ A ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
+\draw (RA) edge[loop above] node{$\rightarrow{\textsc{R}}$} (RA)
+(RA) edge[above, bend left] node{$\Uparrow_{\textsc{R}}$} (LA)
+(LA) edge[loop above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Box_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{R}$} (LA)
+% (LA) edge[loop right] node{$\Uparrow_{L}$} (LA)
+(LA) edge[above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{L}$} (F)
+% (LA) edge[right, bend left] node{$\Uparrow_{L}$} (F)
+(F) edge[left] node{$\textsc{F}_{\textsc{R}}$} (RS)
+(RS) edge[left] node{$\Downarrow_{\textsc{L}}$} (RA)
+(F) edge[right] node{$\textsc{F}_{\textsc{L}}$} (LS)
+(LS) edge[right] node{$\Downarrow_{\textsc{L}}$} (LA)
+(LS) edge[below] node{$\rightarrow{\textsc{L}}$} (RS)
+(LS) edge[loop below] node{$\rightarrow{\textsc{L}}$} (LS)
+(RS) edge[loop below] node{$\textsc{C}_{\textsc{R}}$ \\ $\Box_{\textsc{R}}$ \\ $\mu_\textsc{R}$} (RS)
+(LS) edge[left] node{$\textsc{Var}$} (V)
+;
+\end{tikzpicture}
+}
+\caption{Focusing State Machine}
+\label{fig:focusingFSM}
+\end{figure}
+
+\begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
+  For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$:
+  \begin{align*}
+  \begin{array}{lll}
+   1.\ Right\ Async: & [[ G ; O |- A async => t ; D ]] \quad &\implies \quad [[ G ,, O |- A =>+ t ; D ]]\\
+   2.\ Left\ Async: & [[ G ; O async |- B => t ; D ]] \quad &\implies \quad [[ G ,, O |- B =>+ t ; D ]]\\
+   3.\ Right\ Sync: & [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
+   4.\ Left\ Sync: & [[ G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ G, x : [ A] r |- B =>+ t ; D ]]\\
+   5.\ Focus\ Right: & [[ G ]] ; \emptyset \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ G |- B =>+ t ; D ]]\\
+   6.\ Focus\ Left: & [[ G, x : [A] r ]] ; \emptyset \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ G, x : [A ] r |- B =>+ t ; D ]]
+  \end{array}
+  \end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$,
+which contains variables with grades reflecting their use in $[[ t ]]$.
+The appendix provides the proof.
+%Appendix~\ref{sec:soundness-proofs} provides the proof.
+  \end{restatable}
+
+
+
+
+\subsection{Post-synthesis refactoring}
+\label{sec:refactoring}
+
+A synthesised term often contains some artefacts of the fact that it was
+constructed automatically. The structure of our synthesis rules means aspects of
+our synthesised programs are unrepresentative in some stylistic ways of the kind
+of programs functional programmers typically write. We consider three examples
+of these below, and show how we apply a refactoring procedure to any synthesised
+term to rewrite them in a more idiomatic style.
+\paragraph{Abstractions}
+ A function definition synthesised from a function type will take the form of a sequence of nested abstractions which bind the function's arguments, with the sub-term of the innermost abstraction containing the function body, e.g.
+\begin{granule}
+  k : forall {a b : Type} . a %1 -> b %0 -> a
+  k = \x -> \y -> x
+\end{granule}
+  In most cases, a programmer would write a function definition as a series of equations with the function arguments given as patterns. Our refactoring procedure collects the outermost abstractions of a synthesised term and transforms them into equation-level patterns with the innermost abstraction body forming the equation body:
+\begin{granule}
+  k : forall {a b : Type} . a %1 -> b %0 -> a
+  k x y = x
+\end{granule}
+\paragraph{Case statements}
+
+Recall that the $\textsc{C}_{L}$ binds a data constructor's patterns as a series of variables. Synthesising a pattern match over a nested data structure therefore yields a term such as:
+\begin{granule}
+  case x of
+    C_1 y ->
+      case y of
+        D_1 z -> ...
+        D_2 z -> ...
+    C_2 y ->
+      case y of
+        D_1 z -> ...
+        D_2 z -> ...
+\end{granule}
+which would be rather unnatural for a programmer to write. Nested case statements are therefore folded together to yield a single case statement which pattern matches over all combination of patterns from each statement. The above cases are then transformed into the much more compact and readable single case:
+\begin{granule}
+  case x of
+    C_1 (D_1 z) -> ...
+    C_1 (D_2 z) -> ...
+    C_2 (D_1 z) -> ...
+    C_2 (D_2 z) -> ...
+\end{granule}
+        Furthermore, pattern matches over a function's arguments in the form of case statements are refactored such that a new function equation is created for each unique combination of pattern match. In this way, a refactored program should only contain case statements that arise from pattern matching over the result of an application.
+\begin{granule}
+neg : Bool %1 -> Bool %1
+neg x = case x of
+          True -> False;
+          False -> True
+\end{granule}
+is refactored into:
+\begin{granule}
+neg : Bool %1 -> Bool %1
+neg True True  = False;
+neg False True = True;
+\end{granule}
+The exception to this is where the scrutinee of a case statement is re-used
+inside one of the case branches, in which case refactoring would cause us to throw
+away the binding of the scrutinee's name and so it cannot be folded into the head pattern match, for example:
+\begin{granule}
+last : forall a . (List a) %0..$\infty$ -> Maybe a
+spec
+    last Nil = Nothing;
+    last (Cons 1 Nil) = Just 1;
+    last (Cons 1 (Cons 2 Nil)) = Just 2;
+    last %0..$\infty$
+last Nil = Nothing;
+last (Cons y z) =
+    (case z of
+      Nil -> Just y;
+      Cons u v -> last z)
+\end{granule}
+
+\paragraph{Unboxing}
+An unboxing term is synthesised via the $\Box_{L}$ rule as a case statement which pattern matches over a box pattern, yielding an assumption with the grade's usage. Such terms can also be refactored both into function equations and to avoid nested case statements. For example, we may write the $k$ combinator example above using an explicit graded modality:
+\begin{granule}
+k : forall {a b : Type} . a %1 -> b [0] -> a
+k x y = case y of [z] -> x
+\end{granule}
+which we can then refactor into
+\begin{granule}
+k : forall {a b : Type} . a %1 -> b [0] -> a
+k x [z] = z
+\end{granule}
+
+
+
+
+
+
+
+% \begin{align% *} \begin{array}{c}
+%     \inferrule*[right=Base]{ \quad }{ \Gamma ; \Delta \vdash M \Rightarrow \Delta ; M}
+%     \\\\
+%     \inferrule*[right=$\lambda$]{\Gamma; \Delta, p \vdash M \Rightarrow \Delta' ; N }{ \Gamma ; \Delta \vdash \lambda p . M \Rightarrow \Delta' ; N }
+%     \\\\
+%     \inferrule*[right=case]{ \Delta_{1} ; x ; p \vdash \Delta_{2} \\ \Gamma, y ; \Delta_{2} \vdash M \Rightarrow \Delta_{3} ; N }{ \Gamma ; \Delta_{1} \vdash (\textbf{case } x \textbf{ of } p_{1} \mapsto t_{1} ; ... ; p_{n} \mapsto t_{n}  )\ x \Rightarrow \Delta_{3} ; }
+%     \\\\
+%     \inferrule*[right=$\beta$-redex]{ \Delta_{1} ; x ; p \vdash \Delta_{2} \\ \Gamma, y ; \Delta_{2} \vdash M \Rightarrow \Delta_{3} ; N }{ \Gamma ; \Delta_{1} \vdash (\lambda  y . M)\ x \Rightarrow \Delta_{3} ; N }
+%     \\\\
+%     \inferrule*[right=Skip-$\beta$-redex]{\Gamma ; \Delta \vdash M \Rightarrow \Delta' ; N \\ x \in \Gamma }{ \Gamma ; \Delta \vdash (\lambda p . M) \ x \Rightarrow \Delta' ; (\lambda p . N) \ x }
+%     \end{array}
+%  \end{align*}
+%  \subsection*{Replace Patterns}
+% \begin{align*}
+%   \begin{array}{c}
+%     \inferrule*[right=PEmpty]{\quad}{\emptyset, x ; id ; p \vdash \emptyset}
+%     \\\\
+%     \inferrule*[right=PVar]{\Delta ; id ; p \vdash \Delta' \\ id = x}{\Delta, x ; id ; p \vdash \Delta', p}
+%     \\\\
+%     \inferrule*[right=PWild]{\Delta ; id ; p \vdash \Delta'}{\Delta, \_ ; id ; p \vdash \Delta', \_}
+%     \\\\
+%     \inferrule*[right=PBox$_{1}$]{\Delta, p ; id ; p_{s} \vdash \Delta', p'}{\Delta, [p] ; id ; [p_{s}] \vdash \Delta', [p']}
+%     \\\\
+%     \inferrule*[right=PBox$_{2}$]{\Delta, p ; id ; p_{s} \vdash \Delta', p' }{\Delta, [p] ; id ; p_{s} \vdash \Delta', [p']}
+%     \\\\
+%     \inferrule*[right=PCon]{\Delta, p_{1},..,p_{n} ; id ; p_{s} \vdash \Delta', p'_{1},..,p'_{n}  }{\Delta, C\ p_{1},..,p_{n} ; id ; p_{s} \vdash \Delta', C\ p'_{1},..,p'_{n}}
+%     \end{array}
+%  \end{align*}

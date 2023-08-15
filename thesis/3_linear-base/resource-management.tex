@@ -1,0 +1,132 @@
+Chapter~\ref{chapter:introduction} discussed a rule for synthesising pairs and
+highlighted how graded types could be use to control the number of times
+assumptions are used in the synthesising term. In a linear or graded
+context, synthesis needs to handle the problem of \emph{resource management}~\cite{harlandpym,CERVESATO2000133}: how do we give a resourceful accounting to the context during synthesis
+so that we respect its constraints. Before explicating our synthesis approach,
+we give an overview of the resource management problem here.
+
+Chapter~\ref{chapter:introduction} considered (Cartesian) product types
+$\times$, but in our target language we switch to the \emph{multiplicative product} of
+linear types, given in figure~\ref{fig:typing-prod-sum-unit}%
+Each subterm is typed by a different context $[[ G1 ]]$ and $[[ G2 ]]$ which are then combined via \emph{disjoint} union: the pair cannot be formed if variables are shared between $[[ G1 ]]$ and $[[ G2 ]]$. This prevents the structural behaviour of \emph{contraction} (where a variable appears in multiple subterms). Na\"{i}vely inverting this typing rule into a synthesis rule yields:
+%
+\begin{align*}
+  \inferrule*[Right=$\otimes_{\textsc{Intro}}$]{ \Gamma_1 \vdash [[ A ]] \Rightarrow [[ t1 ]] \\ \Gamma_2 \vdash [[ B ]] \Rightarrow [[ t2 ]]}{ \Gamma_1, \Gamma_2 \vdash [[ A ]] \otimes [[ B ]] \Rightarrow ([[ t1 ]], [[ t2 ]] )}
+\end{align*}
+%
+As a declarative specification, the $\otimes_{\textsc{Intro}}$ synthesis rule is sufficient.
+However, this rule embeds a considerable amount of non-determinism
+when considered from an algorithmic perspective. Reading `clockwise'
+starting from the bottom-left, given some context $[[ G ]]$ and a goal
+$A \otimes B$, we have to split the context into disjoint subparts $[[ G1 ]]$ and $[[ G2
+]]$ such that $[[ G ]] = [[ G1 , G2 ]]$ in order to pass the $[[ G1
+]]$ and $[[ G2 ]]$ to the subgoals for $A$ and $B$. For a context of
+size $n$ there are $2^n$ possible such partitions! This quickly
+becomes intractable. Instead, Hodas and
+Miller developed a technique for linear logic
+programming~\cite{HODAS1994327}, refined by Cervasto et
+al.~\cite{CERVESATO2000133}, where proof search for linear logic has
+both an \emph{input context} of available resources and
+an \emph{output context} of the remaining resources, which we
+write as judgements of the form $[[ G |- A =>- t | G' ]]$ for input
+context $[[ G ]]$ and output context $[[ G' ]]$. Synthesis for multiplicative
+products then becomes:
+%
+\begin{align*}
+  \inferrule*[right=$\otimes_{\textsc{Intro}}^{-}$]{\Gamma_1 \vdash [[ A ]] \Rightarrow^- [[t1]] \ |\ \Gamma_{2} \\ \Gamma_{2} \vdash [[ B ]] \Rightarrow^- [[ t2 ]] \ | \ \Gamma_{3} }{ \Gamma_1 \vdash [[ A Prod B ]] \Rightarrow^- [[ pair t1 t2 ]] \ | \ \Gamma_{3}}
+\end{align*}
+%
+where the remaining resources after synthesising for $A$ the first term $[[ t1 ]]$ are
+$[[ G2 ]]$ which are then passed as the resources for synthesising the second term $B$.
+There is an ordering implicit here in `threading through' the contexts between
+the premises. For example, starting with a context $[[ x : A, y : B ]]$, then this
+rule can be instantiated as:
+%
+\begin{align}
+\tag{\footnotesize{example}}
+  \inferrule*[right=$\otimes_{\textsc{Intro}}^{-}$]{x : A, y : B \vdash [[ A ]] \Rightarrow^- [[x]] \ |\ y : B \\ y : B \vdash [[ B ]] \Rightarrow^- [[ y ]] \ | \ \emptyset }{ x : A, y : B \vdash [[ A Prod B ]] \Rightarrow^- [[ pair x y ]] \ | \ \emptyset}
+\end{align}
+%
+Thus this approach neatly avoids the problem of having to split the input context,
+and facilitates efficient proof search for linear types.
+This idea was adapted by Hughes and Orchard to graded types to facilitate
+the synthesis of programs in Granule~\cite{DBLP:journals/pacmpl/OrchardLE19}. Hughes and Orchard termed the
+above approach \textit{subtractive} resource management (in a style similar to
+\textit{left-over} type-checking for linear type systems~\cite{allais2018typing,zalakain2020pi}). In a graded setting however, this approach was shown to be costly.
+
+Graded type systems, as we consider them here, have typing contexts
+in which free-variables are assigned a type, and a grade (usually
+drawn from some semiring structure parameterising the calculus). A
+useful example is the semiring of natural numbers which is used to
+describe exactly how many times an assumption can be used (in contrast
+to linear assumptions which must be used exactly once). For example,
+the context $[[ x : [A] 2, y : [B] 0 ]]$ explains that $x$ must be
+used twice but $y$ must be used not at all. The literature contains
+many other examples of semirings for tracking other properties in this way, such
+as security
+labels~\cite{DBLP:journals/pacmpl/OrchardLE19,DBLP:conf/icfp/GaboardiKOBU16,DBLP:journals/pacmpl/AbelB20},
+intervals of usage~\cite{DBLP:journals/pacmpl/OrchardLE19}, or
+hardware schedules~\cite{DBLP:conf/esop/GhicaS14}. In a graded
+setting, the subtractive approach is problematic as there is not
+necessarily a notion of actual subtraction for grades. Consider a
+version of the above example for subtractively synthesising a pair,
+but now for a context with some grades $r$ and
+$s$ on the input variables. Using a variable to synthesise a subterm
+now does not result in that variable being left out of the output
+context. Instead a new grade must be assigned in the output context
+that relates to the first by means of an additional constraint describing
+that some usage took place:
+%
+\begin{align}
+\tag{\footnotesize{example}}
+\!\!\!\!\!\inferrule*[right=$\otimes_{\textsc{Intro}}^{-}$]{
+\exists r' . r' + 1 = r \\ \!\!\!\! \exists s' . s' + 1 = s \\
+[[ x : [A] r, y : [B] s ]] \vdash [[ A ]] \Rightarrow^-\! [[x]] \ |\ [[ x : [A] r', y : [B] s ]] \\ \!\!\!\! [[ x : [A] r', y : [B] s ]] \vdash [[ B ]] \Rightarrow^-\! [[ y ]] \ | \ [[ x : [A] r', y : [B] s' ]]  }{ [[ x : [A] r, y : [B] s ]]  \vdash [[ A Prod B ]] \Rightarrow^- \![[ pair x y ]] \ | \ [[ x : [A] r', y : [B] s' ]]}\!\!\!
+\end{align}
+%
+In the first synthesis premise, $x$ has grade $r$ in the input context,
+$x$ is synthesised for the goal, and thus the output context has some grade $r'$
+where $r' + 1 = r$, denoting that some usage of $x$ occurred (which is
+represented by the $1$ element of the semiring in graded systems).
+
+For the natural numbers semiring, with $r = 1$ and $s = 1$ then the
+constraints above are satisfied with $r' = 0$ and $s' = 0$. In a general setting, this
+subtractive approach to synthesis for graded types requires solving many such
+existential equations over semirings, which also introduces a new
+source of non-determinism is there is more than one solution.
+
+% Hughes and Orchard implemented this approach,
+% leveraging off-the-shelf SMT solving in the context of the Granule language, but
+% show that a dual \emph{additive} approach has much better performance.
+% In the additive approach, output contexts describe
+% what was \emph{used} not what was is \emph{left}.
+% In the case of synthesising a term with multiple subterms
+% (like pairs), the output context from each premise is then added together using
+% the semiring addition operation applied pointwise on contexts to produce
+% the final output in the conclusion. For pairs this looks like:
+% %
+% \begin{align*}
+%   \inferrule*[right=$\otimes_{\textsc{Intro}}^{+}$]{\Gamma \vdash [[ A ]] \Rightarrow^+ [[t1]] \ |\ \Delta_{1} \\ \Gamma \vdash [[ B ]] \Rightarrow^+ [[ t2 ]] \ |\ \Delta_{2} }{ \Gamma \vdash [[ A Prod B ]] \Rightarrow^+ [[ pair t1 t2 ]] \ |\ \Delta_{1} + \Delta_{2}}
+% \end{align*}
+% %
+% The entirety of $[[G]]$ is used to synthesise both premises. For example,
+% for a goal of $[[ A Prod A ]]$:
+% %
+% \begin{align}
+% \tag{\footnotesize{example}}
+%   \inferrule*[right=$\otimes_{\textsc{Intro}}^{+}$]{
+% [[ x : [A] r, y : [B] s ]] \vdash [[ A ]] \Rightarrow^+ [[x]] \ |\ [[ x : [A] 1, y : [B] 0 ]] \\ [[ x : [A] r, y : [B] s ]] \vdash [[ A ]] \Rightarrow^+ [[ x ]] \ | \ [[ x : [A] 1, y : [B] 0 ]]  }{ [[ x : [A] r, y : [B] s ]]  \vdash [[ A Prod A ]] \Rightarrow^+ [[ pair x x ]] \ | \ [[ x : [A] {1 + 1} , y : [B] 0 ]]}
+% \end{align}
+% %
+% Later checks in synthesis then determine whether the output context
+% describes usage that is within the grades given by $[[ G ]]$, i.e.,
+% that the synthesised terms are \emph{well-resourced}.
+
+% Both the subtractive and additive approaches avoid having to split the incoming
+% context $[[ G ]]$ into two prior to
+% synthesising subterms. We evaluate both resource
+% management strategies on a synthesis tool for Granule, finding that in most
+% cases, the additive strategy was more efficient for use in program synthesis
+% with grades as it involves less complex predicates to be solved as part of
+% synthesis; the subtractice approach typically incurs higher overhead due
+% to the existentially-derived notion of subtraction seen above.

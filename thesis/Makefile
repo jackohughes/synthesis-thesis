@@ -7,16 +7,32 @@ default: quick
 
 quick : quick_aux
 
-FILES := preamble-ottput.tex \
-		 thesis.tex \
-		 intro-ottput.tex \
-		 background-ottput.tex \
-		 core-ottput.tex \
-		 deriving-ottput.tex \
-		 extended-ottput.tex \
-		 conclusion-ottput.tex \
-		 appendix-ottput.tex \
-		 proofs-ottput.tex
+FILES := 0_preamble/names.tex \
+		 0_preamble/preamble-ottput.tex \
+		 1_introduction/intro-ottput.tex \
+		 2_background/background-ottput.tex \
+		 3_linear-base/linear-base-ottput.tex \
+		 3_linear-base/intro-ottput.tex \
+		 3_linear-base/calculus-ottput.tex \
+		 3_linear-base/resource-management-ottput.tex \
+		 3_linear-base/synthesis-ottput.tex \
+		 3_linear-base/focusing-ottput.tex \
+		 3_linear-base/evaluation-ottput.tex \
+		 3_linear-base/conclusion-ottput.tex \
+		 4_deriving/deriving-ottput.tex \
+		 4_deriving/intro-ottput.tex \
+		 4_deriving/calculus-ottput.tex \
+		 4_deriving/push-pull-ottput.tex \
+		 4_deriving/implementation-ottput.tex \
+		 4_deriving/linear-haskell-ottput.tex \
+		 4_deriving/consumption-ottput.tex \
+		 4_deriving/other-ottput.tex \
+		 4_deriving/conclusion-ottput.tex \
+		 5_graded-base/extended-ottput.tex \
+		 6_conclusion/conclusion-ottput.tex \
+		 7_appendix/appendix-ottput.tex \
+		 8_proofs/proofs-ottput.tex \
+		 thesis.tex 
 
 
 thesis-ottput.tex : thesis.tex $(FILES) $(GRANULE_OTT)
@@ -24,42 +40,98 @@ thesis-ottput.tex : thesis.tex $(FILES) $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
 		-tex_filter thesis.tex thesis-ottput.tex
 
-preamble-ottput.tex : preamble.tex $(FILES) $(GRANULE_OTT)
-	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -tex_name_prefix GRANULE $(FILTER)
+0_preamble/preamble-ottput.tex : 0_preamble/preamble.tex $(FILES) $(GRANULE_OTT)
+	# $(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -tex_name_prefix GRANULE $(FILTER)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter preamble.tex preamble-ottput.tex
+		-tex_filter 0_preamble/preamble.tex 0_preamble/preamble-ottput.tex
 
-intro-ottput.tex : intro.tex $(GRANULE_OTT)
+1_introduction/intro-ottput.tex : 1_introduction/intro.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter intro.tex intro-ottput.tex
+		-tex_filter 1_introduction/intro.tex 1_introduction/intro-ottput.tex
 
-background-ottput.tex : background.tex $(GRANULE_OTT)
+2_background/background-ottput.tex : 2_background/background.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter background.tex background-ottput.tex
+		-tex_filter 2_background/background.tex 2_background/background-ottput.tex
 
-core-ottput.tex : core.tex $(GRANULE_OTT)
+3_linear-base/linear-base-ottput.tex : 3_linear-base/linear-base.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter core.tex core-ottput.tex
+		-tex_filter 3_linear-base/linear-base.tex 3_linear-base/linear-base-ottput.tex
 
-deriving-ottput.tex : deriving.tex $(GRANULE_OTT)
+3_linear-base/calculus-ottput.tex : 3_linear-base/calculus.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter deriving.tex deriving-ottput.tex
+		-tex_filter 3_linear-base/calculus.tex 3_linear-base/calculus-ottput.tex
 
-extended-ottput.tex : extended.tex $(GRANULE_OTT)
+3_linear-base/resource-management-ottput.tex : 3_linear-base/resource-management.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter extended.tex extended-ottput.tex
+		-tex_filter 3_linear-base/resource-management.tex 3_linear-base/resource-management-ottput.tex
 
-conclusion-ottput.tex : conclusion.tex $(GRANULE_OTT)
+3_linear-base/synthesis-ottput.tex : 3_linear-base/synthesis.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter conclusion.tex conclusion-ottput.tex
+		-tex_filter 3_linear-base/synthesis.tex 3_linear-base/synthesis-ottput.tex
 
-appendix-ottput.tex : appendix.tex $(GRANULE_OTT)
+3_linear-base/focusing-ottput.tex : 3_linear-base/focusing.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter appendix.tex appendix-ottput.tex
+		-tex_filter 3_linear-base/focusing.tex 3_linear-base/focusing-ottput.tex
 
-proofs-ottput.tex : proofs.tex $(GRANULE_OTT)
+3_linear-base/evaluation-ottput.tex : 3_linear-base/evaluation.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
-		-tex_filter proofs.tex proofs-ottput.tex
+		-tex_filter 3_linear-base/evaluation.tex 3_linear-base/evaluation-ottput.tex
+
+3_linear-base/conclusion-ottput.tex : 3_linear-base/conclusion.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 3_linear-base/conclusion.tex 3_linear-base/conclusion-ottput.tex
+
+4_deriving/deriving-ottput.tex : 4_deriving/deriving.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/deriving.tex 4_deriving/deriving-ottput.tex
+
+4_deriving/intro-ottput.tex : 4_deriving/intro.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/intro.tex 4_deriving/intro-ottput.tex
+
+4_deriving/calculus-ottput.tex : 4_deriving/calculus.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/calculus.tex 4_deriving/calculus-ottput.tex
+
+4_deriving/push-pull-ottput.tex : 4_deriving/push-pull.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/push-pull.tex 4_deriving/push-pull-ottput.tex
+
+4_deriving/implementation-ottput.tex : 4_deriving/implementation.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/implementation.tex 4_deriving/implementation-ottput.tex
+
+4_deriving/linear-haskell-ottput.tex : 4_deriving/linear-haskell.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/linear-haskell.tex 4_deriving/linear-haskell-ottput.tex
+
+4_deriving/consumption-ottput.tex : 4_deriving/consumption.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/consumption.tex 4_deriving/consumption-ottput.tex
+
+4_deriving/other-ottput.tex : 4_deriving/other.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/other.tex 4_deriving/other-ottput.tex
+
+4_deriving/conclusion-ottput.tex : 4_deriving/conclusion.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 4_deriving/conclusion.tex 4_deriving/conclusion-ottput.tex
+
+5_graded-base/extended-ottput.tex : 5_graded-base/extended.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 5_graded-base/extended.tex 5_graded-base/extended-ottput.tex
+
+6_conclusion/conclusion-ottput.tex : 6_conclusion/conclusion.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 6_conclusion/conclusion.tex 6_conclusion/conclusion-ottput.tex
+
+7_appendix/appendix-ottput.tex : 7_appendix/appendix.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 7_appendix/appendix.tex 7_appendix/appendix-ottput.tex
+
+8_proofs/proofs-ottput.tex : 8_proofs/proofs.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 8_proofs/proofs.tex 8_proofs/proofs-ottput.tex
 
 quick_aux: $(FILES) Makefile
 	pdflatex -shell-escape -synctex=1 -file-line-error -interaction=nonstopmode -halt-on-error thesis.tex

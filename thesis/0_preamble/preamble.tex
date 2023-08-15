@@ -1,82 +1,309 @@
+\usepackage{listings}
+\lstdefinelanguage{Granule}{%
+  mathescape=true,
+  morecomment=[l]{--},
+%  backgroundcolor = \color{white},
+  % morestring=[s]{"}{"},
+  % stringstyle=\itshape, %\color{OliveGreen!90!Black},%\color{orange!60!black},
+  moredelim=[s][\itshape]{`}{`},
+  % moredelim=[s][\color{coeffectColor}]{[}{]},
+  showspaces=false,
+  xleftmargin=2.5em,
+  commentstyle=\itshape\color{black!60},
+  % identifierstyle=\color{violet!80!black},
+  basicstyle=\ttfamily\small,%\sffamily\small,%
+  flexiblecolumns=true,
+  columns=[l]flexible,
+  columns=fullflexible,
+  keepspaces=true,
+  % basewidth={0.55em,0.9em},
+  literate=%
+  % {[0]}{[{\textcolor{coeffectColor}{0}}]}1
+  % {[1]}{[{\textcolor{coeffectColor}{1}}]}1
+  % {[2]}{[{\textcolor{coeffectColor}{2}}]}1
+  % {[3]}{[{\textcolor{coeffectColor}{3}}]}1
+  % {[4]}{[{\textcolor{coeffectColor}{4}}]}1
+  % {[5]}{[{\textcolor{coeffectColor}{5}}]}1
+  % {[6]}{[{\textcolor{coeffectColor}{6}}]}1
+  % {[r]}{[{\textcolor{coeffectColor}{r}}]}1
+  % {[s]}{[{\textcolor{coeffectColor}{s}}]}1
+  {<}{\textcolor{effectColor}{<}}1
+  {>}{\textcolor{effectColor}{>}}1
+  {[}{\textcolor{coeffectColor}{[}}1
+  {]}{\textcolor{coeffectColor}{]}}1
+  {[r' : R']}{[{\textcolor{coeffectColor}{r' : R'}}]}1
+  {[([}{\textcolor{coeffectColor}{[[}}2  % I don't think this is valid, consider [([x],[y])] % but need this as a hack for OTT.
+  {])]}{\textcolor{coeffectColor}{]]}}2
+  {forall}{$\forall$}1
+  {Inf}{$\infty$}1
+  {->}{$\rightarrow$}1
+  {-o}{$\multimap$}1
+  {=>}{$\Rightarrow$}1
+  {<-}{\textcolor{effectColor}{$\leftarrow$}}1
+  {/\\}{$\sqcap$}1
+  {\\/}{$\sqcup$}1
+  {<=}{$\leqslant$}1
+  {>=}{$\geqslant$}1
+  {\\}{$\lambda$}1
+  {_1}{$\mathtt{_1}$}1
+  {_2}{$\mathtt{_2}$}1
+  {_3}{$\mathtt{_3}$}1
+  {_4}{$\mathtt{_4}$}1
+  {_L}{$\mathtt{_{L}}$}1
+  {_LH}{$\mathtt{_{LH}}$}1
+  {_Gr}{$\mathtt{_{Gr}}$}1
+  {_p}{$\mathtt{_{p}}$}1
+  {_q}{$\mathtt{_{q}}$}1
+  {-o}{$\multimap$}1
+  {\\times}{$\times$}1
+  {--BLANK}{}1,
+  % % Main keywords
+  keywordstyle = \color{blue!40!black},%\color{WildStrawberry!90!Black},
+  keywords = {data, type, let, in, case, of, if, then, else, where, import, Type, Semiring, Protocol},
+  % % morekeywords = {∀,|,:,=,\{,\},->,←,.,\,,(,),;},
+  % % % Type Constructors
+  % % keywordstyle = [2]\color{red!40!black},%\color{YellowOrange!80!Maroon},
+  % % keywords = [2]{Int, Bool, Vec, Type, Coeffect, Effect, Char, String, Maybe, List, N, Handle, Nat, Level},
+  % % % morekeywords = [2]{()},
+  % % % Data Constructors
+  % % keywordstyle = [7]\color{purple!40!black},%Mahogany!70!WildStrawberry},
+  % % keywords = [7]{Some, None, Nil, NilL, Cons, ConsL, ReadMode, S, Z},
+  % % % Coeffects
+  % keywordstyle = [3]\color{coeffectColor},
+  % keywords     = [3]{Private, Public},
+  % morekeywords = [3]{..,+,*,Inf},
+  % % % Effects
+  keywordstyle = [4]\bfseries\color{effectColor},
+  keywords     = [4]{pure},%{IO,
+                          %Open,Read,IOExcept,Close,Write,ReadWrite},
+  numbers=left,
+  numberstyle=\tiny\color{gray}
+  % morekeywords = [4]{<,>},
+  % % % universals
+  % % keywords = [6]{a,b,t,s},
+  % % keywordstyle = [6]\color{black}\textit,
+}
 
-%%% LINEAR BASE NAMES AND RULES %%%
-% Subtractive Rule Names
-\newcommand{\subLinVarName}{\textsc{LinVar$^{-}$}}
-\newcommand{\subGrVarName}{\textsc{GrVar$^{-}$}}
-\newcommand{\subAbsName}{$\multimap^{-}_{R}$}
-\newcommand{\subAppName}{$\multimap^{-}_{L}$}
-\newcommand{\subBoxName}{$\square^{-}_{R}$}
-\newcommand{\subUnboxName}{$\square^{-}_{L}$}
-\newcommand{\subPairIntroName}{$\otimes^{-}_{R}$}
-\newcommand{\subPairElimName}{$\otimes^{-}_{L}$}
-\newcommand{\subSumIntroLname}{$\oplus1^{-}_{R}$}
-\newcommand{\subSumIntroRname}{$\oplus2^{-}_{R}$}
-\newcommand{\subSumElimName}{$\oplus^{-}_{L}$}
-\newcommand{\subUnitIntroName}{1$^{-}_{R}$}
-\newcommand{\subUnitElimName}{1$^{-}_{L}$}
-\newcommand{\subDerName}{\textsc{der$^{-}$}}
+\lstnewenvironment{granule}
+{\lstset{language=Granule}}{}
+%% $
 
-% Additive Rule Names
-\newcommand{\addLinVarName}{\textsc{LinVar$^{+}$}}
-\newcommand{\addGrVarName}{\textsc{GrVar$^{+}$}}
-\newcommand{\addDerName}{\textsc{der$^{+}$}}
-\newcommand{\addAbsName}{$\multimap^{+}_{R}$}
-\newcommand{\addAppName}{$\multimap^{+}_{L}$}
-\newcommand{\addPruningAppName}{$\multimap'^{+}_{L}$}
-\newcommand{\addBoxName}{$\square^{+}_{R}$}
-\newcommand{\addUnboxName}{$\square^{+}_{L}$}
-\newcommand{\addPairIntroName}{$\otimes^{+}_{R}$}
-\newcommand{\addPruningPairIntroName}{$\otimes'^{+}_{R}$}
-\newcommand{\addPairElimName}{$\otimes^{+}_{L}$}
-\newcommand{\addSumIntroLName}{$\oplus1_{R}^{+}$}
-\newcommand{\addSumIntroRName}{$\oplus2_{R}^{+}$}
-\newcommand{\addSumElimName}{$\oplus^{+}_{L}$}
-\newcommand{\addUnitIntroName}{1$^{+}_{R}$}
-\newcommand{\addUnitElimName}{1$^{+}_{L}$}
+\lstnewenvironment{granuleInterface}
+{\lstset{language=Granule,numbers=none}}{}
 
-% Focusing Subtractive Rule Names
-\newcommand*{\fSubAbsName}{$\multimap^{-}_{R}$}
-\newcommand*{\fSubRAsyncTransitionName}{$\Uparrow^{-}_{R}$}
-\newcommand*{\fSubPairElimName}{$\otimes^{-}_{L}$}
-\newcommand*{\fSubSumElimName}{$\oplus^{-}_{L}$}
-\newcommand*{\fSubUnboxName}{$\square^{-}_{L}$}
-\newcommand*{\fSubUnitElimName}{1$^{-}_{L}$}
-\newcommand*{\fSubDerName}{der$^{-}$}
-\newcommand*{\fSubLAsyncTransitionName}{$\Uparrow^{-}_{L}$}
-\newcommand*{\fSubFocusRName}{focus$^{-}_{R}$}
-\newcommand*{\fSubFocusLName}{focus$^{-}_{L}$}
-\newcommand*{\fSubPairIntroName}{$\otimes^{-}_{R}$}
-\newcommand*{\fSubSumIntroNameL}{$\oplus1_{R}^{-}$}
-\newcommand*{\fSubSumIntroNameR}{$\oplus2_{R}^{-}$}
-\newcommand*{\fSubBoxName}{$\square^{-}_{R}$}
-\newcommand*{\fSubUnitIntroName}{1$^{-}_{R}$}
-\newcommand*{\fSubRSyncTransitionName}{$\Downarrow^{-}_{R}$}
-\newcommand*{\fSubAppName}{$\multimap^{-}_{L}$}
-\newcommand*{\fSubLinVarName}{LinVar$^{-}$}
-\newcommand*{\fSubGrVarName}{GrVar$^{-}$}
-\newcommand*{\fSubLSyncTransitionName}{$\Downarrow^{-}_{L}$}
+% inline Granule
+\newcommand{\granin}[1]{\lstinline[language=Granule]{#1}}
 
-% Focusing Additive Rule Names
-\newcommand*{\fAddAbsName}{$\multimap^{+}_{R}$}
-\newcommand*{\fAddRAsyncTransitionName}{$\Uparrow^{+}_{R}$}
-\newcommand*{\fAddPairElimName}{$\otimes^{+}_{L}$}
-\newcommand*{\fAddSumElimName}{$\oplus^{+}_{L}$}
-\newcommand*{\fAddUnboxName}{$\square^{+}_{L}$}
-\newcommand*{\fAddUnitElimName}{1$^{+}_{L}$}
-\newcommand*{\fAddDerName}{der$^{+}$}
-\newcommand*{\fAddLAsyncTransitionName}{$\Uparrow^{+}_{L}$}
-\newcommand*{\fAddFocusRName}{focus$^{+}_{R}$}
-\newcommand*{\fAddFocusLName}{focus$^{+}_{L}$}
-\newcommand*{\fAddPairIntroName}{$\otimes^{+}_{R}$}
-\newcommand*{\fAddSumIntroNameL}{$\oplus1_{L}^{+}$}
-\newcommand*{\fAddSumIntroNameR}{$\oplus2_{L}^{+}$}
-\newcommand*{\fAddBoxName}{$\square^{+}_{R}$}
-\newcommand*{\fAddUnitIntroName}{1$^{+}_{R}$}
-\newcommand*{\fAddRSyncTransitionName}{$\Downarrow^{+}_{R}$}
-\newcommand*{\fAddAppName}{$\multimap^{+}_{L}$}
-\newcommand*{\fAddLinVarName}{LinVar$^{+}$}
-\newcommand*{\fAddGrVarName}{GrVar$^{+}$}
-\newcommand*{\fAddLSyncTransitionName}{$\Downarrow^{+}_{L}$}
+%%%%%% HASKELL
+\definecolor{multiplicity}{rgb}{0,0.3,0.08}
+
+\lstdefinelanguage{Haskell}{%
+  mathescape=true,
+%  backgroundcolor = \color{white},
+  morecomment=[l]{--},
+  comment=[l]{\{-},
+  moredelim=[s][\itshape]{`}{`},
+  showspaces=false,
+  commentstyle=\itshape\color{black!60},
+  basicstyle=\ttfamily\footnotesize,%\sffamily\small,%
+  flexiblecolumns=true,
+  columns=[l]flexible,
+  columns=fullflexible,
+  keepspaces=true,
+  xleftmargin=2.5em,
+  literate=%
+   {\%r}{\textcolor{multiplicity}{\%r}}1
+   {\%'Many}{\textcolor{multiplicity}{\%'Many}}1
+   {\%1}{\textcolor{multiplicity}{\%1}}1,
+  % % Main keywords
+  keywordstyle = \color{blue!40!black},%\color{WildStrawberry!90!Black},
+  keywords = {data, type, let, in, case, of, if, then, else, where,
+  import, class, instance},
+  % % morekeywords = {∀,|,:,=,\{,\},->,←,.,\,,(,),;},
+  % % % Type Constructors
+  % % keywordstyle = [2]\color{red!40!black},%\color{YellowOrange!80!Maroon},
+  % % % Data Constructors
+  % % keywordstyle = [7]\color{purple!40!black},%Mahogany!70!WildStrawberry},
+  % % keywords = [7]{Some, None, Nil, NilL, Cons, ConsL, ReadMode, S, Z},
+  numbers=left,
+  numberstyle=\tiny\color{gray}
+  % morekeywords = [4]{<,>},
+  % % % universals
+  % % keywords = [6]{a,b,t,s},
+  % % keywordstyle = [6]\color{black}\textit,
+}
+
+\lstnewenvironment{haskell}
+{\lstset{language=Haskell}}{}
+%% $
+
+% inline Haskell
+\newcommand{\haskin}[1]{\lstinline[language=Haskell]{#1}}
+
+%%%%%% IDRIS (but I just copied haskell and changed the name, fix later!!)
+
+\lstdefinelanguage{Idris}{%
+%  backgroundcolor = \color{white},
+  mathescape=true,
+  morecomment=[l]{--},
+  comment=[l]{\{-},
+  moredelim=[s][\itshape]{`}{`},
+  showspaces=false,
+  commentstyle=\itshape\color{black!60},
+  basicstyle=\ttfamily\footnotesize,%\sffamily\small,%
+  flexiblecolumns=true,
+  columns=[l]flexible,
+  columns=fullflexible,
+  keepspaces=true,
+  xleftmargin=2.5em,
+  literate=%
+   {\%r}{\textcolor{multiplicity}{\%r}}1
+   {\%'Many}{\textcolor{multiplicity}{\%'Many}}1
+   {\%1}{\textcolor{multiplicity}{\%1}}1,
+  % % Main keywords
+  keywordstyle = \color{blue!40!black},%\color{WildStrawberry!90!Black},
+  keywords = {data, type, let, in, case, of, if, then, else, where,
+  import, class, instance},
+  % % morekeywords = {∀,|,:,=,\{,\},->,←,.,\,,(,),;},
+  % % % Type Constructors
+  % % keywordstyle = [2]\color{red!40!black},%\color{YellowOrange!80!Maroon},
+  % % % Data Constructors
+  % % keywordstyle = [7]\color{purple!40!black},%Mahogany!70!WildStrawberry},
+  % % keywords = [7]{Some, None, Nil, NilL, Cons, ConsL, ReadMode, S, Z},
+  numbers=left,
+  numberstyle=\tiny\color{gray}
+  % morekeywords = [4]{<,>},
+  % % % universals
+  % % keywords = [6]{a,b,t,s},
+  % % keywordstyle = [6]\color{black}\textit,
+}
+
+\lstnewenvironment{idris}
+{\lstset{language=Idris}}{}
+%% $
+
+% inline Idris
+\newcommand{\idrin}[1]{\lstinline[language=Idris]{#1}}
+
+\usepackage[most]{tcolorbox}
+
+\makeatletter
+\newtcblisting[auto counter]{haskellp}[1][]{%
+  enhanced jigsaw,
+  colframe=black!30,
+  boxrule=0.5pt,
+  toprule=0.5pt,
+  top=-0.5em,
+  left=0em,
+  bottom=-0.5em,
+  bottomrule=0.5pt,
+  boxsep=0em,
+  after skip=1em,
+  before skip=1em,
+  listing options={language={haskell}},
+  listing only,
+  colback=white,
+  sharp corners,
+  overlay={\node[inner sep=4pt,xshift=-2cm,fill=white] (A) at (frame.south east) {Haskell};
+           %\node[inner sep=2pt,xshift=+2cm,fill=white] (B) at (frame.north west) {#2};
+  },
+  #1,
+}
+\makeatother
+
+\makeatletter
+\newtcblisting[auto counter]{haskellf}[1][]{%
+  top=0em,
+  left=0em,
+  bottom-0.5em,
+  bottomrule=0.5pt,
+  boxsep=0em,
+  after skip=1em,
+  before skip=0.5em,
+  listing options={language={haskell}},
+  listing only,
+  colback=white,
+  #1,
+}
+\makeatother
+
+\makeatletter
+\newtcblisting[auto counter]{granulep}[1][]{%
+  enhanced jigsaw,
+  colframe=black!30,
+  boxrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  top=-0.5em,
+  left=-0.5em,
+  bottom=-0.5em,
+  boxsep=0em,
+  after skip=1em,
+  before skip=0.5em,
+  listing options={language={granule}},
+  listing only,
+  colback=white,
+  sharp corners,
+  overlay={%\node[inner sep=4pt,xshift=-2cm,fill=white] (A) at (frame.south east) {Granule};
+           \node[inner sep=2pt,xshift=-1cm,fill=white] (B) at (frame.south east) {Granule};
+  },
+  #1,
+}
+\makeatother
+
+
+\makeatletter
+\newtcblisting[auto counter]{granulepill}[1][]{%
+  enhanced jigsaw,
+  colframe=black!30,
+  boxrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  top=-0.5em,
+  left=0em,
+  bottom=-0.5em,
+  boxsep=0em,
+  after skip=1em,
+  before skip=0.5em,
+  listing options={language={granule}},
+  listing only,
+  colback=white,
+  sharp corners,
+  overlay={%\node[inner sep=4pt,xshift=-2cm,fill=white] (A) at (frame.south east) {Granule};
+           \node[inner sep=2pt,xshift=-2cm,fill=white] (B) at
+           (frame.south east) {Ill-typed Granule};
+  },
+  #1,
+}
+\makeatother
+
+
+\makeatletter
+\newtcblisting[auto counter]{idrisp}[1][]{%
+  enhanced jigsaw,
+  colframe=black!30,
+  boxrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  top=-0.5em,
+  left=0em,
+  bottom=0em,
+  boxsep=0em,
+  after skip=1em,
+  before skip=1em,
+  listing options={language={idris}},
+  listing only,
+  colback=white,
+  sharp corners,
+  overlay={%\node[inner sep=4pt,xshift=-2cm,fill=white] (A) at (frame.south east) {Granule};
+           \node[inner sep=2pt,xshift=-2cm,fill=white] (B) at (frame.south east) {Idris 2};
+  },
+  #1,
+}
+\makeatother
+
+
+
 
 % SUBTRACTIVE RULES
 \newcommand*{\subLinVar}{
@@ -493,9 +720,6 @@
 
 % ADDITIVE PRUNING FOCUS RULES
 
-\newcommand*{\fAddAltAppName}{$\multimap'^{+}_{L}$}
-\newcommand*{\fAddAltPairIntroName}{$\otimes'^{+}_{R}$}
-
 \newcommand*{\fAddAltAppRule}{
     \inferrule*[right=\fAddAltAppName]
     {[[G ; x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G - D1 ; . |- A =>+ t2 ; D2
@@ -509,47 +733,6 @@
 }
 
 
-
-
-
-
-%%% GRADED BASE NAMES AND RULES %%%
-
-% Typing renames
-\renewcommand{\GRANULEdruleTyVarName}{$\textsc{Var}$}
-\renewcommand{\GRANULEdruleTyAbsName}{$\textsc{Abs}$}
-\renewcommand{\GRANULEdruleTyAppName}{$\textsc{App}$}
-\renewcommand{\GRANULEdruleTyConName}{$\textsc{Con}$}
-\renewcommand{\GRANULEdruleTyCaseName}{$\textsc{Case}$}
-\renewcommand{\GRANULEdruleTyPrName}{$\textsc{Pr}$}
-\renewcommand{\GRANULEdruleTyApproxName}{$\textsc{Approx}$}
-
-% Pattern typing renames
-\renewcommand{\GRANULEdrulePatWildName}{$\textsc{PWild}$}
-\renewcommand{\GRANULEdrulePatVarName}{$\textsc{PVar}$}
-\renewcommand{\GRANULEdrulePatBoxName}{$\textsc{PBox}$}
-\renewcommand{\GRANULEdrulePatConName}{$\textsc{PCon}$}
-
-% Synthesis rule names
-
-% Focusing synhtesis rule names
-\newcommand*{\fsynRAsyncTransName}{$\Uparrow_{\textsc{R}}$}
-\newcommand*{\fsynLAsyncTransName}{$\Uparrow_{\textsc{L}}$}
-\newcommand*{\fsynFocusRName}{$\textsc{Foc}_{\textsc{R}}$}
-\newcommand*{\fsynFocusLName}{$\textsc{Foc}_{\textsc{L}}$}
-\newcommand*{\fsynRSyncTransName}{$\Downarrow_{\textsc{R}}$}
-\newcommand*{\fsynLSyncTransName}{$\Downarrow_{\textsc{L}}$}
-
-% GRADED BASE TYPING RULES
-\newcommand*{\tyVar}{\GRANULEdruleTyVar{}}
-\newcommand*{\tyAbs}{\GRANULEdruleTyAbs{}}
-\newcommand*{\tyApp}{\GRANULEdruleTyApp{}}
-\newcommand*{\tyApprox}{\GRANULEdruleTyApprox{}}
-\newcommand*{\tyPr}{\GRANULEdruleTyPr{}}
-\newcommand*{\tyCon}{\GRANULEdruleTyCon{}}
-\newcommand*{\tyCase}{\GRANULEdruleTyCase{}}
-
-
 % GRADED BASE SYNTHESIS RULES
 \newcommand*{\synVar}{\GRANULEdruleVar{}}
 \newcommand*{\synAbs}{\GRANULEdruleAbs{}}
@@ -557,8 +740,6 @@
 \newcommand*{\synCon}{\GRANULEdruleCon{}}
 \newcommand*{\synConAlt}{\GRANULEdruleConAlt{}}
 \newcommand*{\synCase}{\GRANULEdruleCase{}}
-\newcommand*{\synCaseAlt}{\GRANULEdruleCaseAlt{}}
-\newcommand*{\synCaseAltAlt}{\GRANULEdruleCaseAltAlt{}}
 \newcommand*{\synBox}{\GRANULEdruleBox{}}
 \newcommand*{\synUnbox}{\GRANULEdruleUnbox{}}
 \newcommand*{\synCaseSub}{\GRANULEdruleCaseSub{}}
@@ -615,3 +796,48 @@
 % \newcommand*{\fsynCaseSub}{\GRANULEdruleCaseSub{}}
 % \newcommand*{\fsynCase}{\GRANULEdruleCase{}}
 % \newcommand*{\synCaseAltAlt}{\GRANULEdruleCaseAltAlt{}}
+% SYNTAX AND TYPES
+\newcommand{\synLet}[3]{\textbf{let}\ #1 \leftarrow #2\ \textbf{in}\ #3}
+% \newcommand{\synCase}[2]{\mathbf{case}\ #1\ \mathbf{of}\ #2}
+\newcommand{\synCaseBranch}[2]{#1 \rightarrow #2}
+
+\newcommand{\synCaseOne}[3]
+  {\synCase{#1}{\synCaseBranch{#2}{#3}}}
+
+\newcommand{\synCaseTwo}[5]
+  {\synCase{#1}{\begin{array}[t]{l}\synCaseBranch{#2}{#3};\\ \synCaseBranch{#4}{#5}\end{array}}}
+
+
+\newcommand{\synCaseTwoMultiLine}[5]
+  {\begin{array}[t]{l}
+   \synCase{#1}{\\ \begin{array}[t]{l}\synCaseBranch{#2}{#3};\\
+                     \synCaseBranch{#4}{#5}\end{array}}
+  \end{array}}
+
+
+\newcommand{\synCaseTwoShort}[5]
+  {\synCase{#1}{\begin{array}[t]{l}\synCaseBranch{#2}{#3};\;\; \synCaseBranch{#4}{#5}\end{array}}}
+
+\newcommand{\synLetRec}[3]
+ {\mathbf{letrec}\ #1 = #2\ \mathbf{in}\ #3}
+
+% \newcommand{\synUnbox}[3]
+%  {\mathbf{let}\ [#1] = #2\ \mathbf{in}\ #3}
+
+% \definecolor{coeffectColor}{HTML}{0a40a1}
+% \newcommand{\coeff}[1]{\textcolor{coeffectColor}{#1}}
+
+\newcommand{\tcF}{\mathsf{F}}
+
+% DERIVING
+
+\newcommand{\deriv}[2]{\llbracket{#2}\rrbracket_{\mathsf{#1}}}
+
+% STRUCTURAL for the paper / work
+
+\newcommand{\paragrapho}[1]{\medskip\noindent \textbf{#1}$\;\;$}
+\newcommand{\grminip}{\textsc{GrMini}$^P$}
+
+% PROOFS
+
+\newcommand{\pr}[1]{\{\textit{#1}\}}

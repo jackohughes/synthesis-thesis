@@ -1,60 +1,96 @@
 \contentsline {chapter}{Abstract}{ii}{chapter*.1}%
 \contentsline {chapter}{Acknowledgements}{iii}{chapter*.2}%
 \contentsline {chapter}{Contents}{iv}{section*.3}%
-\contentsline {chapter}{List of Tables}{vi}{section*.5}%
-\contentsline {chapter}{List of Figures}{vii}{section*.7}%
-\contentsline {chapter}{List of Algorithms}{viii}{section*.9}%
+\contentsline {chapter}{List of Tables}{vii}{section*.5}%
+\contentsline {chapter}{List of Figures}{viii}{section*.7}%
+\contentsline {chapter}{List of Algorithms}{ix}{section*.9}%
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
 \contentsline {chapter}{\numberline {2}Background}{2}{chapter.2}%
 \contentsline {paragraph}{Terminology}{2}{section*.12}%
 \contentsline {section}{\numberline {2.1}Linear and substructural logics}{4}{section.2.1}%
-\contentsline {subsection}{\numberline {2.1.1}A graded linear typing calculus}{5}{subsection.2.1.1}%
-\contentsline {paragraph}{Metatheory}{8}{section*.15}%
+\contentsline {subsection}{\numberline {2.1.1}A graded linear typing calculus}{6}{subsection.2.1.1}%
+\contentsline {paragraph}{Metatheory}{9}{section*.15}%
 \contentsline {section}{\numberline {2.2}Graded types: An alternative history}{9}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Graded-base}{9}{subsection.2.2.1}%
-\contentsline {section}{\numberline {2.3}Two typed calculi}{10}{section.2.3}%
-\contentsline {chapter}{\numberline {3}A core synthesis calculus}{12}{chapter.3}%
-\contentsline {section}{\numberline {3.1}A practical target language}{12}{section.3.1}%
-\contentsline {section}{\numberline {3.2}The resource management problem}{15}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Synthesis calculi}{18}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Subtractive Resource Management}{18}{subsection.3.3.1}%
-\contentsline {paragraph}{Variables}{18}{section*.18}%
-\contentsline {paragraph}{Functions}{19}{section*.19}%
-\contentsline {paragraph}{Dereliction}{20}{section*.20}%
-\contentsline {paragraph}{Graded modalities}{20}{section*.21}%
-\contentsline {paragraph}{Products}{22}{section*.22}%
-\contentsline {paragraph}{Sums}{22}{section*.23}%
-\contentsline {paragraph}{Unit}{23}{section*.24}%
-\contentsline {subsection}{\numberline {3.3.2}Additive Resource Management}{24}{subsection.3.3.2}%
-\contentsline {paragraph}{Variables}{24}{section*.25}%
-\contentsline {paragraph}{Graded modalities}{24}{section*.26}%
-\contentsline {paragraph}{Functions}{25}{section*.27}%
-\contentsline {paragraph}{Dereliction}{26}{section*.28}%
-\contentsline {paragraph}{Products}{26}{section*.29}%
-\contentsline {paragraph}{Sums}{26}{section*.30}%
-\contentsline {paragraph}{Unit}{27}{section*.31}%
-\contentsline {subsubsection}{Additive pruning}{27}{section*.32}%
-\contentsline {section}{\numberline {3.4}Focusing}{28}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Evaluation}{28}{section.3.5}%
-\contentsline {subsubsection}{Methodology}{29}{section*.33}%
-\contentsline {subsubsection}{Results and analysis}{30}{section*.34}%
-\contentsline {paragraph}{Additive versus subtractive}{30}{section*.36}%
-\contentsline {paragraph}{Additive pruning}{32}{section*.37}%
-\contentsline {section}{\numberline {3.6}Conclusion}{32}{section.3.6}%
-\contentsline {chapter}{\numberline {4}Deriving graded combinators}{33}{chapter.4}%
-\contentsline {chapter}{\numberline {5}An extended synthesis calculus}{34}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Conclusion}{35}{chapter.6}%
-\contentsline {chapter}{Bibliography}{36}{section*.38}%
-\contentsline {chapter}{\numberline {A}Collected synthesis rules}{38}{appendix.A}%
-\contentsline {section}{\numberline {A.1}Collected rules of the linear-base synthesis calculi}{39}{section.A.1}%
-\contentsline {subsection}{\numberline {A.1.1}Collected rules of the subtractive calculus}{39}{subsection.A.1.1}%
-\contentsline {subsection}{\numberline {A.1.2}Collected rules of the additive calculus}{40}{subsection.A.1.2}%
-\contentsline {subsubsection}{Alternative additive pruning rules for pair introduction and application}{41}{section*.40}%
-\contentsline {section}{\numberline {A.2}Focusing forms of the linear-base synthesis calculi}{43}{section.A.2}%
-\contentsline {subsection}{\numberline {A.2.1}Collected rules of the subtractive focusing calculus}{43}{subsection.A.2.1}%
-\contentsline {subsection}{\numberline {A.2.2}Collected rules of the additive focusing calculus}{45}{subsection.A.2.2}%
-\contentsline {subsubsection}{Alternative additive focusing pruning rules for pair introduction and application}{46}{section*.41}%
-\contentsline {chapter}{\numberline {B}Benchmark problems}{47}{appendix.B}%
-\contentsline {section}{\numberline {B.1}List of linear-base synthesis benchmark problems}{47}{section.B.1}%
-\contentsline {chapter}{\numberline {C}Proofs}{48}{appendix.C}%
-\contentsline {section}{\numberline {C.1}Linear-base Proofs}{48}{section.C.1}%
+\contentsline {subsection}{\numberline {2.2.1}Graded-base}{10}{subsection.2.2.1}%
+\contentsline {section}{\numberline {2.3}Two typed calculi}{11}{section.2.3}%
+\contentsline {chapter}{\numberline {3}A core synthesis calculus}{13}{chapter.3}%
+\contentsline {section}{\numberline {3.1}A Practical Target Language}{13}{section.3.1}%
+\contentsline {section}{\numberline {3.2}The Resource Management Problem}{16}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Synthesis calculi}{19}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Subtractive Resource Management}{19}{subsection.3.3.1}%
+\contentsline {paragraph}{Variables}{21}{section*.19}%
+\contentsline {paragraph}{Functions}{22}{section*.20}%
+\contentsline {paragraph}{Dereliction}{22}{section*.21}%
+\contentsline {paragraph}{Graded modalities}{23}{section*.22}%
+\contentsline {paragraph}{Products}{25}{section*.23}%
+\contentsline {paragraph}{Sums}{25}{section*.24}%
+\contentsline {paragraph}{Unit}{26}{section*.25}%
+\contentsline {subsection}{\numberline {3.3.2}Additive Resource Management}{27}{subsection.3.3.2}%
+\contentsline {paragraph}{Variables}{27}{section*.26}%
+\contentsline {paragraph}{Graded modalities}{27}{section*.27}%
+\contentsline {paragraph}{Functions}{28}{section*.28}%
+\contentsline {paragraph}{Dereliction}{29}{section*.29}%
+\contentsline {paragraph}{Products}{29}{section*.30}%
+\contentsline {paragraph}{Sums}{30}{section*.31}%
+\contentsline {paragraph}{Unit}{30}{section*.32}%
+\contentsline {subsubsection}{Additive pruning}{31}{section*.33}%
+\contentsline {section}{\numberline {3.4}Focusing}{32}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Evaluation}{32}{section.3.5}%
+\contentsline {subsubsection}{Methodology}{32}{section*.35}%
+\contentsline {subsubsection}{Results and analysis}{34}{section*.36}%
+\contentsline {paragraph}{Additive versus subtractive}{34}{section*.38}%
+\contentsline {paragraph}{Additive pruning}{36}{section*.39}%
+\contentsline {section}{\numberline {3.6}Conclusion}{36}{section.3.6}%
+\contentsline {chapter}{\numberline {4}Deriving graded combinators}{40}{chapter.4}%
+\contentsline {subsection}{\numberline {4.0.1}Motivating Example}{42}{subsection.4.0.1}%
+\contentsline {section}{\numberline {4.1}Extending the Linear-base Calculus}{45}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Automatically Deriving \emph {push} and \emph {pull}}{45}{section.4.2}%
+\contentsline {paragraph}{Notation}{46}{section*.40}%
+\contentsline {paragraph}{Push}{46}{section*.41}%
+\contentsline {section}{\numberline {4.3}Implementation in Granule}{48}{section.4.3}%
+\contentsline {paragraph}{Examples}{49}{section*.42}%
+\contentsline {section}{\numberline {4.4}Application to Linear Haskell}{51}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Typed-analysis of Consumption in Pattern Matching}{56}{section.4.5}%
+\contentsline {paragraph}{Granule}{56}{section*.43}%
+\contentsline {paragraph}{The $\Lambda ^p${} calculus}{57}{section*.44}%
+\contentsline {paragraph}{\textsc {GraD}{}}{57}{section*.45}%
+\contentsline {paragraph}{Linear Haskell}{58}{section*.46}%
+\contentsline {section}{\numberline {4.6}Deriving Other Useful Structura Combinators}{59}{section.4.6}%
+\contentsline {subsection}{\numberline {4.6.1}A Combinator for Weakening (``drop'')}{59}{subsection.4.6.1}%
+\contentsline {subsection}{\numberline {4.6.2}A Combinator for Copying ``shape''}{60}{subsection.4.6.2}%
+\contentsline {subsection}{\numberline {4.6.3}Other Combinators in Linear Haskell}{63}{subsection.4.6.3}%
+\contentsline {section}{\numberline {4.7}Discussion and Conclusion}{64}{section.4.7}%
+\contentsline {paragraph}{Generic Programming Methodology}{64}{section*.47}%
+\contentsline {paragraph}{Non-graded Distributive Laws}{65}{section*.48}%
+\contentsline {paragraph}{Graded Distributive Laws}{65}{section*.49}%
+\contentsline {paragraph}{Conclusions}{66}{section*.50}%
+\contentsline {chapter}{\numberline {5}An extended synthesis calculus}{67}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Extending the graded-base calculus}{67}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Synthesis}{73}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Core synthesis rules}{76}{subsection.5.2.1}%
+\contentsline {paragraph}{Variables}{76}{section*.53}%
+\contentsline {paragraph}{Functions}{76}{section*.54}%
+\contentsline {paragraph}{Data types}{79}{section*.55}%
+\contentsline {paragraph}{Graded modalities}{82}{section*.56}%
+\contentsline {subsection}{\numberline {5.2.2}Recursion}{83}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Polymorphism}{85}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Input-output examples}{85}{subsection.5.2.4}%
+\contentsline {subsection}{\numberline {5.2.5}Focusing proof search}{87}{subsection.5.2.5}%
+\contentsline {subsection}{\numberline {5.2.6}Post-synthesis refactoring}{89}{subsection.5.2.6}%
+\contentsline {paragraph}{Abstractions}{89}{section*.58}%
+\contentsline {paragraph}{Case statements}{90}{section*.59}%
+\contentsline {paragraph}{Unboxing}{92}{section*.60}%
+\contentsline {chapter}{\numberline {6}Conclusion}{94}{chapter.6}%
+\contentsline {chapter}{Bibliography}{95}{section*.61}%
+\contentsline {chapter}{\numberline {A}Collected synthesis rules}{95}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Collected rules of the linear-base synthesis calculi}{96}{section.A.1}%
+\contentsline {subsection}{\numberline {A.1.1}Collected rules of the subtractive calculus}{96}{subsection.A.1.1}%
+\contentsline {subsection}{\numberline {A.1.2}Collected rules of the additive calculus}{98}{subsection.A.1.2}%
+\contentsline {subsubsection}{Alternative additive pruning rules for pair introduction and application}{99}{section*.62}%
+\contentsline {section}{\numberline {A.2}Focusing forms of the linear-base synthesis calculi}{101}{section.A.2}%
+\contentsline {subsection}{\numberline {A.2.1}Collected rules of the subtractive focusing calculus}{101}{subsection.A.2.1}%
+\contentsline {subsection}{\numberline {A.2.2}Collected rules of the additive focusing calculus}{103}{subsection.A.2.2}%
+\contentsline {subsubsection}{Alternative additive focusing pruning rules for pair introduction and application}{104}{section*.63}%
+\contentsline {chapter}{\numberline {B}Benchmark problems}{105}{appendix.B}%
+\contentsline {section}{\numberline {B.1}List of linear-base synthesis benchmark problems}{105}{section.B.1}%
+\contentsline {section}{\numberline {B.2}Linear-base Proofs}{105}{section.B.2}%
