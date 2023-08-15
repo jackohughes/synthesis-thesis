@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.4.25)  4 JUN 2023 19:53
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.4.25)  13 AUG 2023 20:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -259,20 +259,20 @@ File: l3backend-pdftex.def 2023-01-16 L3 backend support: PDF output (pdfTeX)
 No file granule-ott.aux.
 \openout1 = `granule-ott.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 1003.
-LaTeX Font Info:    ... okay on input line 1003.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 1003.
-LaTeX Font Info:    ... okay on input line 1003.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 1003.
-LaTeX Font Info:    ... okay on input line 1003.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 1003.
-LaTeX Font Info:    ... okay on input line 1003.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 1003.
-LaTeX Font Info:    ... okay on input line 1003.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 1003.
-LaTeX Font Info:    ... okay on input line 1003.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 1003.
-LaTeX Font Info:    ... okay on input line 1003.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 714.
+LaTeX Font Info:    ... okay on input line 714.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 714.
+LaTeX Font Info:    ... okay on input line 714.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 714.
+LaTeX Font Info:    ... okay on input line 714.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 714.
+LaTeX Font Info:    ... okay on input line 714.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 714.
+LaTeX Font Info:    ... okay on input line 714.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 714.
+LaTeX Font Info:    ... okay on input line 714.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 714.
+LaTeX Font Info:    ... okay on input line 714.
 *geometry* detected driver: dvips
 *geometry* verbose mode - [ preamble ] result:
 * driver: dvips
@@ -333,27 +333,27 @@ Package graphics Info: Driver file: pdftex.def on input line 107.
 \Gin@req@height=\dimen188
 \Gin@req@width=\dimen189
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 100
-4.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 715
+.
 
 (/usr/local/texlive/2023/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 100
-4.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 715
+.
 
 (/usr/local/texlive/2023/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Trying to load font information for U+stmry on input line 1
-004.
+LaTeX Font Info:    Trying to load font information for U+stmry on input line 7
+15.
 
 (/usr/local/texlive/2023/texmf-dist/tex/latex/stmaryrd/Ustmry.fd) [1
 Non-PDF special ignored!
 <special> papersize=597.50787pt,845.04684pt
 
 {/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-[2] [3] [4] [5]
+[2] [3] [4] [5] [6]
 
 ! LaTeX Error: Something's wrong--perhaps a missing \item.
 
@@ -361,8 +361,8 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1004 \ottall
-              
+l.715 \ottall
+             
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
@@ -373,16 +373,16 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1004 \ottall
-              
+l.715 \ottall
+             
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 ! Missing } inserted.
 <inserted text> 
                 }
-l.1004 \ottall
-              
+l.715 \ottall
+             
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
 With luck, this will get me unwedged. But if you
@@ -392,8 +392,8 @@ my insertion and my current dilemma will both disappear.
 ! Extra }, or forgotten \endgroup.
 \mbox  #1->\leavevmode \hbox {#1}
                                  
-l.1004 \ottall
-              
+l.715 \ottall
+             
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
 you forgot something else, as in `\hbox{$x}'. In such cases
@@ -407,132 +407,98 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1004 \ottall
-              
+l.715 \ottall
+             
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-[6]
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
+
+Underfull \hbox (badness 10000) in paragraph at lines 715--715
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
+Underfull \hbox (badness 10000) in paragraph at lines 715--715
 
  []
 
 [7]
-Overfull \hbox (18.17569pt too wide) detected at line 1004
+Overfull \hbox (39.04015pt too wide) detected at line 715
 []
  []
 
 
-Overfull \hbox (39.04015pt too wide) detected at line 1004
+Overfull \hbox (2.45149pt too wide) detected at line 715
 []
  []
 
 
-Overfull \hbox (2.45149pt too wide) detected at line 1004
+Underfull \hbox (badness 10000) in paragraph at lines 715--715
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 715--715
+
+ []
+
+
+Overfull \hbox (25.16858pt too wide) detected at line 715
 []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
-
- []
-
-
-Overfull \hbox (19.08525pt too wide) detected at line 1004
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
-
  []
 
 [8]
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
+Underfull \hbox (badness 10000) in paragraph at lines 715--715
 
  []
 
 
-Overfull \hbox (91.8072pt too wide) detected at line 1004
-[]
- []
-
-
-Overfull \hbox (230.72475pt too wide) detected at line 1004
-[]
- []
-
-[9]
-Underfull \hbox (badness 10000) in paragraph at lines 1004--1004
+Underfull \hbox (badness 10000) in paragraph at lines 715--715
 
  []
 
 
-Overfull \hbox (168.85182pt too wide) detected at line 1004
-[]
+Underfull \hbox (badness 10000) in paragraph at lines 715--715
+
  []
 
-
-Overfull \hbox (106.83293pt too wide) detected at line 1004
-[]
- []
-
-
-Overfull \hbox (319.26674pt too wide) detected at line 1004
-[]
- []
-
-[10] (./granule-ott.aux) ) 
+[9] (./granule-ott.aux) ) 
 Here is how much of TeX's memory you used:
- 5306 strings out of 476025
- 81811 string characters out of 5790017
- 1884388 words of memory out of 5000000
- 25687 multiletter control sequences out of 15000+600000
- 524247 words of font info for 77 fonts, out of 8000000 for 9000
+ 5233 strings out of 476025
+ 80056 string characters out of 5790017
+ 1886388 words of memory out of 5000000
+ 25619 multiletter control sequences out of 15000+600000
+ 522104 words of font info for 68 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,20n,62p,996b,233s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2023/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmcsc10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmex10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmmi10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmmi6.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsf
-onts/cm/cmmi8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmr10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmr6.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmr8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-ss10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cms
-y10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy
-6.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.
-pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.p
-fb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmti7.pfb
-></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb><
-/usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></
-usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pf
-b></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm1
-0.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/stmaryrd/stmary10.
-pfb>
-Output written on granule-ott.pdf (10 pages, 247848 bytes).
+ 57i,20n,62p,996b,214s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2023/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmbx12.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmcsc10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmex10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmmi10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi6.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmmi8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmr6.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmr8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cms
+s10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmss
+8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10
+.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.p
+fb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb
+></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
+</usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmti7.pfb></
+usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></us
+r/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr
+/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb><
+/usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.p
+fb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/stmaryrd/stmary10.pfb
+>
+Output written on granule-ott.pdf (9 pages, 249099 bytes).
 PDF statistics:
- 142 PDF objects out of 1000 (max. 8388607)
- 87 compressed objects within 1 object stream
+ 144 PDF objects out of 1000 (max. 8388607)
+ 88 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -62,6 +62,16 @@ t , v :: 'Term_' ::= {{ com Terms }}
   | hole :: :: Hole {{ com Hole }} {{ tex - }}
   | let () = t1 in t2 :: :: UnitElim {{ com UnitElim }}
   | ()       :: :: Unit {{ com Unit }}
+  | pull G A t :: :: pull {{ com Pull }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{pull} }^{[[ G ]]} [[ t ]] }}
+  | push G A t :: :: push {{ com Push }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{push} }^{[[ G ]]} [[ t ]] }}
+  | pullP G A :: :: pullPartial {{ com PullPartial }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{pull} }^{[[ G ]]}  }}
+  | pushP G A :: :: pushPartial {{ com PushPartial }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{push} }^{[[ G ]]}  }}
+  | fmap G A t :: :: fmap {{ com Fmap }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{fmap} }^{[[ G ]]} [[ t ]] }}
+  | fmapP G A :: :: fmapPartial {{ com FmapPartial }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{fmap} }^{[[ G ]]} }}
+  | nothing :: :: Nothing {{ com Nothing }} {{ tex {} }}
+  | letrec t1 = t2 in t3 :: :: LetRec {{ com LetRec }} {{ tex \textbf{letrec}\ [[ t1 ]]\ =\ [[ t2 ]]\ \textbf{in}\ [[ t3 ]] }}
+  | copyShape G A t :: :: copyShape {{ com CopyShape }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{copyShape} }^{[[ G ]]} [[ t ]] }}
+  | drop G A t :: :: drop {{ com Drop }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{drop} }^{[[ G ]]} [[ t ]] }}
 
 
 % Meta-level operations and syntax for the operational semantics
@@ -192,6 +202,8 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
      {{ tex [[ B1 ]]^{q_1} [[ -> ]]\! ... \![[ -> ]] [[ Bn ]]^{q_n} [[ -> ]] [[ A ]] }}
   | A async :: :: AsyncType {{ com AsyncTy }} {{ tex [[ A ]] \Uparrow\ }}
   | A sync :: :: SyncType {{ com SyncTy }} {{ tex [[ A ]] \Downarrow\ }}
+  | X :: :: RecVar {{ com Recursion Variables }} {{ tex {X} }}
+  | mu X . A :: :: RecType {{ com Recursive Type }} {{ tex \mu {X} . [[ A ]] }}
 
 op {{ tex \textsf{op} }} :: 'Operator_' ::= {{com Type operators}}
  | OPlus :: :: PlusOp {{ tex + }}
@@ -788,12 +800,12 @@ G, x :  [B1 - r1 .*. Bn - r1 -> {K A} ] 1 |- A1 => t ; D, x : [B1 - r1 .*. Bn - 
 G |- A1 => t ; D
 
 
-( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
-{ {G, x : [K A] {r}}, {y Vari Var1} : [B1] {{q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {{q Vari Varn}} |- B =>+ ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
-{s Vari Varj} <<= {q Vari Varj}
-assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
---------------------------------- :: Case
-G, x : [ {K A} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s} \*/ {Varn s})}}
+%( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
+%{ {G, x : [K A] {r}}, {y Vari Var1} : [B1] {{q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {{q Vari Varn}} |- B =>+ ti ; {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+%{s Vari Varj} <<= {q Vari Varj}
+%assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}}
+%--------------------------------- :: Case
+%G, x : [ {K A} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({Var1 s} \*/ {Varn s})}}
 
 
 ( Coni : B1 -* q1 .*. Bn -* qn -> {K {A Many}} ) elem Defines
@@ -801,7 +813,7 @@ G, x : [ {K A} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ D
 exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj}
 assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}}
 {PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}}
---------------------------------- :: CaseAlt
+--------------------------------- :: Case
 G, x : [ {K {A Many}} ] r |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}
 
 
@@ -875,15 +887,15 @@ G |- A sync => t ; D :: :: RSSynFocus :: ''
 by
 
 
-G ; . |- A sync => t ; D
---------------------------------- :: BoxF
-G ; . |- {[] r A} sync => [ t ] ; r * D
+%G |- A sync => t ; D
+%--------------------------------- :: BoxF
+%G |- {[] r A} sync => [ t ] ; r * D
 
 
 ( Con : B1 .*. Bn -> {K {A Many}} ) elem Defines
-G ; . |- {Bi sync} => ti ; Di
+G |- {Bi sync} => ti ; Di
 --------------------------------- :: ConF
-G ; . |- {K A} sync => Con t1 ... tn ; {D1 + ... + Dn}
+G |- {K A} sync => Con t1 ... tn ; {D1 + ... + Dn}
 
 
 
@@ -1106,80 +1118,80 @@ by
 G, x : A |- A =>- x ; G
 
 
-exists ex
------------------------- :: gr_var
-G, x : [A] r |- A =>- x ; G, x : [A] s
+%exists ex
+%------------------------ :: gr_var
+%G, x : [A] r |- A =>- x ; G, x : [A] s
 
 
-G, x : [A] r, y : A |- B =>- t ; D, x : [A] s
-y notin D
-exists s' . s = s' + 1
--------------------------------------------------- :: der
-G, x : [A] r |- B =>- [y/x] t ; D, x : [A] s'
+%G, x : [A] r, y : A |- B =>- t ; D, x : [A] s
+%y notin D
+%exists s' . s = s' + 1
+%-------------------------------------------------- :: der
+%G, x : [A] r |- B =>- [y/x] t ; D, x : [A] s'
 
-x notin D
-G, x : A |- B =>- t ; D
------------------------- :: abs
-G |- A -> B =>- \x . t ; D
-
-
-x2 notin D1
-G, x2 : B |- C =>- t1 ; D1
-D1 |- A =>- t2 ; D2
------------------------- :: app
-G, x1 : A -> B |- C =>- [(x1 t2) / x2] t1 ; D2
+%x notin D
+%G, x : A |- B =>- t ; D
+%------------------------ :: abs
+%G |- A -> B =>- \x . t ; D
 
 
-
-G |- A =>- t ; D
------------------------- :: box
-G |- [] r A =>- t ; G - r * (G - D)
-
-
-G, x2 : [A] r |- B =>- t ; D, x2 : [A] s && 0 <= s
--------------------------------------------------- :: unbox
-G, x1 : [] r A |- B =>- let [x2] = x1 in t ; D
-
-
-G |- A =>- t1 ; D1
-D1 |- B =>- t2 ; D2
------------------------- :: pair_intro
-G |- A * B =>- t1, t2 ; D2
-
-
-x1 notin D
-x2 notin D
-G, x1 : A, x2 : B |- C =>- t2 ; D
------------------------- :: pair_elim
-G, x3 : A * B |- C =>- let x1, x2 = x3 in t2 ; D
+%x2 notin D1
+%G, x2 : B |- C =>- t1 ; D1
+%D1 |- A =>- t2 ; D2
+%------------------------ :: app
+%G, x1 : A -> B |- C =>- [(x1 t2) / x2] t1 ; D2
 
 
 
-G |- A =>- t ; D
------------------------- :: sum_intro_left
-G |- A + B =>- inl t ; D
+%G |- A =>- t ; D
+%------------------------ :: box
+%G |- [] r A =>- t ; G - r * (G - D)
 
 
-G |- B =>- t ; D
------------------------- :: sum_intro_right
-G |- A + B =>- inr t ; D
+%G, x2 : [A] r |- B =>- t ; D, x2 : [A] s && 0 <= s
+%-------------------------------------------------- :: unbox
+%G, x1 : [] r A |- B =>- let [x2] = x1 in t ; D
 
 
-x2 notin D1
-x3 notin D2
-G, x2 : A |- C =>- t1 ; D1
-G, x3 : B |- C =>- t2 ; D2
------------------------- :: sum_elim
-G, x1 : A + B |- C =>- case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
+%G |- A =>- t1 ; D1
+%D1 |- B =>- t2 ; D2
+%------------------------ :: pair_intro
+%G |- A * B =>- t1, t2 ; D2
 
 
------------------------- :: unit_intro
-G |- Unit =>- () ; G
+%x1 notin D
+%x2 notin D
+%G, x1 : A, x2 : B |- C =>- t2 ; D
+%------------------------ :: pair_elim
+%G, x3 : A * B |- C =>- let x1, x2 = x3 in t2 ; D
 
 
-G |- C =>- t ; D
------------------------- :: unit_elim
-G, x : Unit |- C =>- let () = x in t ; D
+
+%G |- A =>- t ; D
+%------------------------ :: sum_intro_left
+%G |- A + B =>- inl t ; D
+
+
+%G |- B =>- t ; D
+%------------------------ :: sum_intro_right
+%G |- A + B =>- inr t ; D
+
+
+%x2 notin D1
+%x3 notin D2
+%G, x2 : A |- C =>- t1 ; D1
+%G, x3 : B |- C =>- t2 ; D2
+%------------------------ :: sum_elim
+%G, x1 : A + B |- C =>- case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
+
+
+%------------------------ :: unit_intro
+%G |- Unit =>- () ; G
+
+
+%G |- C =>- t ; D
+%------------------------ :: unit_elim
+%G, x : Unit |- C =>- let () = x in t ; D
 
 
 defn
@@ -1187,212 +1199,212 @@ G |- A =>+ t ; D :: :: SynthesisAdd :: 'Syn_add_'
 {{tex [[ G ]] \vdash [[ A ]] \Rightarrow^+ [[ t ]] ;\, [[ D ]] }}
 by
 
------------------------- :: lin_var
-G, x : A |- A =>+ x ; x : A
+%------------------------ :: lin_var
+%G, x : A |- A =>+ x ; x : A
 
 
------------------------- :: gr_var
-G, x : [A] r |- A =>+ x ; x : [A] 1
+%------------------------ :: gr_var
+%G, x : [A] r |- A =>+ x ; x : [A] 1
 
 
-G, x : [A]s, y : A |- B =>+ t ; D, y : A
------------------------------------------- :: der
-G, x : [A]s |- B =>+ [y / x] t ; D + x : [A]1
+%G, x : [A]s, y : A |- B =>+ t ; D, y : A
+%------------------------------------------ :: der
+%G, x : [A]s |- B =>+ [y / x] t ; D + x : [A]1
 
 
-G, x : A |- B =>+ t ; D, x : A
------------------------- :: abs
-G |- A -> B =>+ \x . t ; D
+%G, x : A |- B =>+ t ; D, x : A
+%------------------------ :: abs
+%G |- A -> B =>+ \x . t ; D
 
 
-G, x2 : B |- C =>+ t1 ; D1, x2 : B
-G - (D1, x2 : B) |- A =>+ t2 ; D2
------------------------- :: app
-G, x1 : A -> B |- C =>+ [(x1 t2) / x2] t1 ; (D1 + D2), x1: A -> B
+%G, x2 : B |- C =>+ t1 ; D1, x2 : B
+%G - (D1, x2 : B) |- A =>+ t2 ; D2
+%------------------------ :: app
+%G, x1 : A -> B |- C =>+ [(x1 t2) / x2] t1 ; (D1 + D2), x1: A -> B
 
 
-G |- A =>+ t ; D
----------------------------- :: box
-G |- [] r A =>+ [t] ; r * D
+%G |- A =>+ t ; D
+%---------------------------- :: box
+%G |- [] r A =>+ [t] ; r * D
 
 
-G, x2 : [A] r |- B =>+ t ; D, x2 : [A] s    && s <= r
---------------------------------------------------------- :: unbox
-G, x1 : [] r A |- B =>+ let [x2] = x1 in t ; D, x1 : [] r A
+%G, x2 : [A] r |- B =>+ t ; D, x2 : [A] s    && s <= r
+%--------------------------------------------------------- :: unbox
+%G, x1 : [] r A |- B =>+ let [x2] = x1 in t ; D, x1 : [] r A
 
 
-G |- A =>+ t1 ; D1
-G - D1 |- B =>+ t2 ; D2
------------------------- :: pair_intro
-G |- A * B =>+ t1, t2 ; D1 + D2
+%G |- A =>+ t1 ; D1
+%G - D1 |- B =>+ t2 ; D2
+%------------------------ :: pair_intro
+%G |- A * B =>+ t1, t2 ; D1 + D2
 
 
-G, x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B
------------------------- :: pair_elim
-G, x3 : A * B |- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B
+%G, x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B
+%------------------------ :: pair_elim
+%G, x3 : A * B |- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B
 
 
-G |- A =>+ t ; D
------------------------- :: sum_intro_left
-G |- A + B =>+ inl t ; D
+%G |- A =>+ t ; D
+%------------------------ :: sum_intro_left
+%G |- A + B =>+ inl t ; D
 
 
-G |- B =>+ t ; D
------------------------- :: sum_intro_right
-G |- A + B =>+ inr t ; D
+%G |- B =>+ t ; D
+%------------------------ :: sum_intro_right
+%G |- A + B =>+ inr t ; D
 
 
------------------------- :: unit_intro
-G |- Unit =>+ () ; .
+%------------------------ :: unit_intro
+%G |- Unit =>+ () ; .
 
 
-G |- C => t ; D
------------------------- :: unit_elim
-G, x : Unit |- C => let () = x in t ; D, x : Unit
+%G |- C => t ; D
+%------------------------ :: unit_elim
+%G, x : Unit |- C => let () = x in t ; D, x : Unit
 
-G, x2 : A |- C =>+ t1 ; D1, x2 : A
-G, x3 : B |- C =>+ t2 ; D2, x3 : B
------------------------- :: sum_elim
-G, x1 : A + B |- C =>+ case x1 of inl x2 -> t1 | inr x3 -> t2 ; (D1 +++ D2), x1 : A + B
+%G, x2 : A |- C =>+ t1 ; D1, x2 : A
+%G, x3 : B |- C =>+ t2 ; D2, x3 : B
+%------------------------ :: sum_elim
+%G, x1 : A + B |- C =>+ case x1 of inl x2 -> t1 | inr x3 -> t2 ; (D1 +++ D2), x1 : A + B
 
 
-defn
-G ; O |- A =>- t ; D :: :: FocusSynthesisSub :: 'focus_syn_sub_'
-{{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{-} [[ t ]] \ |\ [[ D ]] }}
-by
+%defn
+%G ; O |- A =>- t ; D :: :: FocusSynthesisSub :: 'focus_syn_sub_'
+%{{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{-} [[ t ]] \ |\ [[ D ]] }}
+%by
 
------------------------- :: lin_var
-G ; x : A |- A => x ; G
+%------------------------ :: lin_var
+%G ; x : A |- A => x ; G
 
 
-1 <= r
-exists ex
------------------------- :: gr_var
-G ; x : [A] r |- A => x ; G, x : [A] s
+%1 <= r
+%exists ex
+%------------------------ :: gr_var
+%G ; x : [A] r |- A => x ; G, x : [A] s
 
-G ; x : [A] r, y : A |- B => t; D, x : [A] s
-y notin D
-exists s . r >= s + 1
----------------------------------------------- :: der
-G ; x : [A] r |- B => [y/x] t; D, x : [A] s'
+%G ; x : [A] r, y : A |- B => t; D, x : [A] s
+%y notin D
+%exists s . r >= s + 1
+%---------------------------------------------- :: der
+%G ; x : [A] r |- B => [y/x] t; D, x : [A] s'
 
 
-x notin D
-G ; O, x : A |- B => t ; D
------------------------- :: abs
-G ; O |- A -> B => \x . t ; D
+%x notin D
+%G ; O, x : A |- B => t ; D
+%------------------------ :: abs
+%G ; O |- A -> B => \x . t ; D
 
 
-x2 notin D1
-G ; x2 : B |- C => t1 ; D1
-D1 ; . |- A => t2 ; D2
------------------------- :: app
-G ; x1 : A -> B |- C => [(x1 t2) / x2] t1 ; D2
+%x2 notin D1
+%G ; x2 : B |- C => t1 ; D1
+%D1 ; . |- A => t2 ; D2
+%------------------------ :: app
+%G ; x1 : A -> B |- C => [(x1 t2) / x2] t1 ; D2
 
 
-G ; . |- A => t ; D
------------------------- :: box
-G ; . |- [] r A => t ; G - r * (G - D)
+%G ; . |- A => t ; D
+%------------------------ :: box
+%G ; . |- [] r A => t ; G - r * (G - D)
 
 
-G ; O, x2 : [A] r |- B => t ; D, x2 : [A] s && 0 <= s
--------------------------------------------------- :: unbox
-G ; O, x1 : [] r A |- B => let [x2] = x1 in t ; D
+%G ; O, x2 : [A] r |- B => t ; D, x2 : [A] s && 0 <= s
+%-------------------------------------------------- :: unbox
+%G ; O, x1 : [] r A |- B => let [x2] = x1 in t ; D
 
 
-G ; . |- A => t1 ; D1
-D1 ; . |- B => t2 ; D2
------------------------- :: pair_intro
-G ; . |- A * B => t1, t2 ; D2
+%G ; . |- A => t1 ; D1
+%D1 ; . |- B => t2 ; D2
+%------------------------ :: pair_intro
+%G ; . |- A * B => t1, t2 ; D2
 
 
-x1 notin D
-x2 notin D
-G ; O, x1 : A, x2 : B |- C => t2 ; D
------------------------- :: pair_elim
-G ; O, x3 : A * B |- C => let x1, x2 = x3 in t2 ; D
+%x1 notin D
+%x2 notin D
+%G ; O, x1 : A, x2 : B |- C => t2 ; D
+%------------------------ :: pair_elim
+%G ; O, x3 : A * B |- C => let x1, x2 = x3 in t2 ; D
 
 
 
-G ; . |- A => t ; D
------------------------- :: sum_intro_left
-G ; . |- A + B => inl t ; D
+%G ; . |- A => t ; D
+%------------------------ :: sum_intro_left
+%G ; . |- A + B => inl t ; D
 
 
-G ; . |- B => t ; D
------------------------- :: sum_intro_right
-G ; . |- A + B => inr t ; D
+%G ; . |- B => t ; D
+%------------------------ :: sum_intro_right
+%G ; . |- A + B => inr t ; D
 
-x2 notin D1
-x3 notin D2
-G ; O, x2 : A |- C => t1 ; D1
-G ; O, x3 : B |- C => t2 ; D2
------------------------- :: sum_elim
-G ; O, x1 : A + B |- C => case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
+%x2 notin D1
+%x3 notin D2
+%G ; O, x2 : A |- C => t1 ; D1
+%G ; O, x3 : B |- C => t2 ; D2
+%------------------------ :: sum_elim
+%G ; O, x1 : A + B |- C => case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
 
 
-defn
-G ; O |- A =>+ t ; D :: :: FocusSynthesisAdd :: 'focus_syn_add_'
-{{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{+} [[ t ]] \ | \ [[ D ]] }}
-by
+%defn
+%G ; O |- A =>+ t ; D :: :: FocusSynthesisAdd :: 'focus_syn_add_'
+%{{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{+} [[ t ]] \ | \ [[ D ]] }}
+%by
 
------------------------- :: lin_var
-G ; x : A |- A =>+ x ; x : A
+%------------------------ :: lin_var
+%G ; x : A |- A =>+ x ; x : A
 
 
-1 <= r
-exists ex
------------------------- :: gr_var
-G ; x : [A] r |- A =>+ x ; x : [A] 1
+%1 <= r
+%exists ex
+%------------------------ :: gr_var
+%G ; x : [A] r |- A =>+ x ; x : [A] 1
 
 
-G ; x : [A] s, y : A |- B =>+ t ; D, y : A
----------------------------------------------------- :: der
-G ; x : [A] s |- B =>+ [y / x] t ; D + x : [A] 1
+%G ; x : [A] s, y : A |- B =>+ t ; D, y : A
+%---------------------------------------------------- :: der
+%G ; x : [A] s |- B =>+ [y / x] t ; D + x : [A] 1
 
-G ; O, x : A |- B =>+ t ; D, x : A
------------------------- :: abs
-G ; O |- A -> B =>+ \x . t ; D
+%G ; O, x : A |- B =>+ t ; D, x : A
+%------------------------ :: abs
+%G ; O |- A -> B =>+ \x . t ; D
 
 
-G ; x2 : B |- C =>+ t1 ; D1, x2 : B
-G - (D1, x2 : B) ; . |- A =>+ t2 ; D2
------------------------- :: app
-G ; x1 : A -> B |- C =>+ [(x1 t2) / x2] t1 ; (D1 + D2), x1: A -> B
+%G ; x2 : B |- C =>+ t1 ; D1, x2 : B
+%G - (D1, x2 : B) ; . |- A =>+ t2 ; D2
+%------------------------ :: app
+%G ; x1 : A -> B |- C =>+ [(x1 t2) / x2] t1 ; (D1 + D2), x1: A -> B
 
 
-G ; . |- A =>+ t ; D
----------------------------- :: box
-G ; . |- [] r A =>+ [t] ; r * D
+%G ; . |- A =>+ t ; D
+%---------------------------- :: box
+%G ; . |- [] r A =>+ [t] ; r * D
 
 
-G ; O, x2 : [A] r |- B =>+ t ; D, x2 : [A] s    && s <= r
---------------------------------------------------------- :: unbox
-G ; O, x1 : [] r A |- B =>+ let [x2] = x1 in t ; D, x1 : [] r A
+%G ; O, x2 : [A] r |- B =>+ t ; D, x2 : [A] s    && s <= r
+%--------------------------------------------------------- :: unbox
+%G ; O, x1 : [] r A |- B =>+ let [x2] = x1 in t ; D, x1 : [] r A
 
 
-G ; . |- A =>+ t1 ; D1
-G - D1 ; . |- B =>+ t2 ; D2
------------------------- :: pair_intro
-G ; . |- A * B =>+ t1, t2 ; D1 + D2
+%G ; . |- A =>+ t1 ; D1
+%G - D1 ; . |- B =>+ t2 ; D2
+%------------------------ :: pair_intro
+%G ; . |- A * B =>+ t1, t2 ; D1 + D2
 
 
-G ; O, x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B
------------------------- :: pair_elim
-G ; O, x3 : A * B |- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B
+%G ; O, x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B
+%------------------------ :: pair_elim
+%G ; O, x3 : A * B |- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B
 
 
-G ; . |- A =>+ t ; D
------------------------- :: sum_intro_left
-G ; . |- A + B =>+ inl t ; D
+%G ; . |- A =>+ t ; D
+%------------------------ :: sum_intro_left
+%G ; . |- A + B =>+ inl t ; D
 
 
-G ; . |- B =>+ t ; D
------------------------- :: sum_intro_right
-G ; . |- A + B =>+ inr t ; D
+%G ; . |- B =>+ t ; D
+%------------------------ :: sum_intro_right
+%G ; . |- A + B =>+ inr t ; D
 
 
-G ; O, x2 : A |- C =>+ t1 ; D1, x2 : A
-G ; O, x3 : B |- C =>+ t2 ; D2, x3 : B
------------------------- :: sum_elim
-G ; O, x1 : A + B |- C =>+ case x1 of inl x2 -> t1 | inr x3 -> t2 ; (D1 +++ D2), x1 : A + B
+%G ; O, x2 : A |- C =>+ t1 ; D1, x2 : A
+%G ; O, x3 : B |- C =>+ t2 ; D2, x3 : B
+%------------------------ :: sum_elim
+%G ; O, x1 : A + B |- C =>+ case x1 of inl x2 -> t1 | inr x3 -> t2 ; (D1 +++ D2), x1 : A + B
