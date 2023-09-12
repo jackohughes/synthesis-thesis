@@ -26,18 +26,18 @@ procedure to derive weakening on compound types:
 
 \begin{align*}
     \deriv{drop}{C^w}^\Sigma z & = \text{\granin{drop} $z$} \\
-    \deriv{drop}{1}^\Sigma z & = [[ case z of unit . -> unit . ]] \\
+    \deriv{drop}{1}^\Sigma z & = [[ case z of () -> () ]] \\
     \deriv{drop}{X}^\Sigma z & = \Sigma(X) z \\
     \deriv{drop}{A \oplus B}^\Sigma z & =
-    \synCaseTwoShort{z}{\mathsf{inl}\ x}{\deriv{drop}{A}(x)}{\mathsf{inr}\ y}
+    \derCaseTwoShort{z}{\mathsf{inl}\ x}{\deriv{drop}{A}(x)}{\mathsf{inr}\ y}
                                 {\deriv{drop}{B}(y)}\\
     \deriv{drop}{A \otimes B}^\Sigma z & =
-    \synCaseOne{z}{(x, y)}
-       {\synCaseOne{\deriv{drop}{A}(x)}{[[ unit . ]]}
-         {\synCaseOne{\deriv{drop}{B}(y)}{[[ unit . ]]}{[[ unit . ]]}}}
+    \derCaseOne{z}{(x, y)}
+       {\derCaseOne{\deriv{drop}{A}(x)}{()}
+         {\derCaseOne{\deriv{drop}{B}(y)}{()}{()}}}
     \\
     \deriv{drop}{\mu X . A}^\Sigma & z =
-                                     \synLetRec{f}{\deriv{drop}{A}^{\Sigma,
+                                     \derLetRec{f}{\deriv{drop}{A}^{\Sigma,
                                      X \mapsto f : A \multimap 1}}{f\ z}
     \end{align*}
 
@@ -87,32 +87,32 @@ $\deriv{copyShape}{A} = \lambda z . \deriv{copyShape}{A}^\emptyset z$
 by an intermediate derivation $\deriv{copyShape}{A}^\Sigma$:
 %
 \begin{align*}
-\deriv{copyShape}{C^w}^\Sigma z & = ([[unit .]],\ z) \\
-\deriv{copyShape}{1}^\Sigma z & = \synCaseOne{z}{[[unit]]}{[[ ( unit
-                                . , unit . ) ]]}\\
-\deriv{copyShape}{\alpha}^\Sigma z & = ([[ unit . ]], z) \\
+\deriv{copyShape}{C^w}^\Sigma z & = ((),\ z) \\
+\deriv{copyShape}{1}^\Sigma z & = \derCaseOne{z}{()}{((),\ ())}\\
+\deriv{copyShape}{\alpha}^\Sigma z & = ((), z) \\
 \deriv{copyShape}{X}^\Sigma z & = \Sigma(X) z \\
 \deriv{copyShape}{A \oplus B}^\Sigma z & =
-                                         \synCaseTwo{z}{\mathsf{inl}\ x}{
-             \synCaseOne{[[copyShape Sigma { A } (x)]]}{ ( [[ s ]],\ [[x']] )}{[[ ( {inl s} , {inl x'} ) ]]}} {\mathsf{inr}\ y}
-                            {
-             \synCaseOne{[[copyShape Sigma { B } (y)]]}{ ( [[ s ]],\ [[y']] )}{[[ ( {inr s} , {inr y'} ) ]]}}\\
-% \deriv{copyShape}{A \otimes B}^\Sigma z & =
-% \synCaseOne{z}{(x, y)}
-%    {
-                                        %   \synCaseOne{[[copyShape Sigma { A } (x)]]}{ ( [[ s ]],\ [[x']] )}{
-                                        %   \\ & \qquad  \synCaseOne{[[copyShape Sigma { B } (y)]]}{ ( [[ s' ]],\ [[y']] )}{
-                                        %   (([[s]],\ [[s']]),\ ([[x']],\ [[y']]))}
-                                        %   }}
-% \\
+                                         \derCaseTwo{z}
+             {\mathsf{inl}\ x}
+                {\textbf{case}\ {\llbracket A \rrbracket}^\Sigma_\mathsf{copyShape}(x)\ \textbf{of}\ (s,\ x') \rightarrow (\mathsf{inl}\ s,\ \mathsf{inr}\ x')} 
+             {\mathsf{inr}\ y}
+                {\textbf{case}\ {\llbracket B \rrbracket}^\Sigma_\mathsf{copyShape}(y)\ \textbf{of}\ (s,\ y') \rightarrow (\mathsf{inl}\ s,\ \mathsf{inr}\ y')} \\
+\deriv{copyShape}{A \otimes B}^\Sigma z & =
+\derCaseOne{z}{(x, y)}
+   {
+                                          \derCaseOne{\llbracket A \rrbracket^\Sigma_\mathsf{copyShape}(x)}{ ( [[ s ]],\ [[x']] )}{
+                                          \\ & \qquad  \derCaseOne{\llbracket B \rrbracket^\Sigma_\mathsf{copyShape}(y)}{ ( [[ s' ]],\ [[y']] )}{
+                                          (([[s]],\ [[s']]),\ ([[x']],\ [[y']]))}
+                                          }}
+\\
 \deriv{copyShape}{\mu X . A}^\Sigma & z =
-                                 \synLetRec{f}{\deriv{copyShape}{A}^{\Sigma,
+                                 \derLetRec{f}{\deriv{copyShape}{A}^{\Sigma,
                                  X \mapsto f : A \multimap 1 \otimes A}}{f\ z}
 \end{align*}
 %
 The implementation recursively follows the structure of the type,
 replicating the constructors, reaching the crucial case where a
-polymorphically type $z : \alpha$ is mapped to $[[ (unit ., z) ]]$ in
+polymorphically type $z : \alpha$ is mapped to $( (),\ z )$ in
 the third equation.
 
 Granule implements both these derived combinators in a similar
@@ -122,45 +122,45 @@ application, e.g. \granin{drop @T : T -> ()} if it can be derived.
 Otherwise, the type checker produces an error,
 explaining why \granin{drop} is not derivable at type \granin{T}.
 
-\subsection{Other Combinators in Linear Haskell}
+% \subsection{Other Combinators in Linear Haskell}
 
-As previously covered in Section~\ref{sec:linhaskell}, we demonstrated that the
-\emph{push} and \emph{pull} combinators derived from distributed laws are useful
-in Haskell with its linear types extension, and we demonstrated that they can be
-automatically derived using compile-time meta-programming with Template Haskell.
+% As previously covered in Section~\ref{sec:linhaskell}, we demonstrated that the
+% \emph{push} and \emph{pull} combinators derived from distributed laws are useful
+% in Haskell with its linear types extension, and we demonstrated that they can be
+% automatically derived using compile-time meta-programming with Template Haskell.
 
-To the best of our knowledge, nothing comparable to the \granin{Pushable} and
-\granin{Pullable} type classes proposed here has been previously discussed in
-the literature on Linear Haskell. However, several other type classes have been
-proposed for inclusion in the standard library to deal with common use cases
-when programming with linear function types.\footnote{See the
-\texttt{linear-base} library: \url{https://github.com/tweag/linear-base}.} One
-of these classes, \haskin{Consumable}, roughly corresponds to the
-\granin{drop} combinator above, while the other two, \haskin{Dupable} and
-\haskin{Movable}, are for when a programmer wants to allow a data type to be
-duplicated or moved in linear code.
+% To the best of our knowledge, nothing comparable to the \granin{Pushable} and
+% \granin{Pullable} type classes proposed here has been previously discussed in
+% the literature on Linear Haskell. However, several other type classes have been
+% proposed for inclusion in the standard library to deal with common use cases
+% when programming with linear function types.\footnote{See the
+% \texttt{linear-base} library: \url{https://github.com/tweag/linear-base}.} One
+% of these classes, \haskin{Consumable}, roughly corresponds to the
+% \granin{drop} combinator above, while the other two, \haskin{Dupable} and
+% \haskin{Movable}, are for when a programmer wants to allow a data type to be
+% duplicated or moved in linear code.
 
-\begin{lstlisting}[language=Haskell]
-    class Consumable a where
-      consume :: a %1-> ()
+% \begin{lstlisting}[language=Haskell]
+%     class Consumable a where
+%       consume :: a %1-> ()
     
-    class Consumable a => Dupable a where
-      dup2 :: a %1-> (a, a)
+%     class Consumable a => Dupable a where
+%       dup2 :: a %1-> (a, a)
     
-    class Dupable a => Movable a where
-      move :: a %1-> Ur a
-    \end{lstlisting}
+%     class Dupable a => Movable a where
+%       move :: a %1-> Ur a
+%     \end{lstlisting}
 
-    The \haskin{consume} function is a linear function from a value to unit,
-    whereas \haskin{dup} is a linear function from a value to a pair of that
-    same value. The \haskin{move} linear function maps \haskin{a} to
-    \haskin{Ur a}, where \haskin{Ur} is the ``unrestricted'' modality.
-    Thus, \granin{move} can be used to implement both \granin{consume} and \granin{dup2}:
-    \begin{lstlisting}[language=Haskell]
-        case move x of {Ur _ -> ()}     -- consume x
-        case move x of {Ur x -> x}      -- x
-        case move x of {Ur x -> (x, x)} -- dup2 x
-        \end{lstlisting}
-        %
-        A `copy shape' class may also be a useful addition to Linear
-        Haskell in the future.
+%     The \haskin{consume} function is a linear function from a value to unit,
+%     whereas \haskin{dup} is a linear function from a value to a pair of that
+%     same value. The \haskin{move} linear function maps \haskin{a} to
+%     \haskin{Ur a}, where \haskin{Ur} is the ``unrestricted'' modality.
+%     Thus, \granin{move} can be used to implement both \granin{consume} and \granin{dup2}:
+%     \begin{lstlisting}[language=Haskell]
+%         case move x of {Ur _ -> ()}     -- consume x
+%         case move x of {Ur x -> x}      -- x
+%         case move x of {Ur x -> (x, x)} -- dup2 x
+%         \end{lstlisting}
+%         %
+%         A `copy shape' class may also be a useful addition to Linear
+%         Haskell in the future.

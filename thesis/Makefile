@@ -28,7 +28,11 @@ FILES := 0_preamble/names.tex \
 		 4_deriving/consumption-ottput.tex \
 		 4_deriving/other-ottput.tex \
 		 4_deriving/conclusion-ottput.tex \
+		 5_graded-base/graded-base-ottput.tex \
+		 5_graded-base/intro-ottput.tex \
+		 5_graded-base/calculus-ottput.tex \
 		 5_graded-base/extended-ottput.tex \
+		 5_graded-base/evaluation-ottput.tex \
 		 6_conclusion/conclusion-ottput.tex \
 		 7_appendix/appendix-ottput.tex \
 		 8_proofs/proofs-ottput.tex \
@@ -56,6 +60,10 @@ thesis-ottput.tex : thesis.tex $(FILES) $(GRANULE_OTT)
 3_linear-base/linear-base-ottput.tex : 3_linear-base/linear-base.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
 		-tex_filter 3_linear-base/linear-base.tex 3_linear-base/linear-base-ottput.tex
+
+3_linear-base/intro-ottput.tex : 3_linear-base/intro.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 3_linear-base/intro.tex 3_linear-base/intro-ottput.tex
 
 3_linear-base/calculus-ottput.tex : 3_linear-base/calculus.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
@@ -117,9 +125,25 @@ thesis-ottput.tex : thesis.tex $(FILES) $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
 		-tex_filter 4_deriving/conclusion.tex 4_deriving/conclusion-ottput.tex
 
+5_graded-base/graded-base-ottput.tex : 5_graded-base/graded-base.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 5_graded-base/graded-base.tex 5_graded-base/graded-base-ottput.tex
+
+5_graded-base/intro-ottput.tex : 5_graded-base/intro.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 5_graded-base/intro.tex 5_graded-base/intro-ottput.tex
+
+5_graded-base/calculus-ottput.tex : 5_graded-base/calculus.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 5_graded-base/calculus.tex 5_graded-base/calculus-ottput.tex
+
 5_graded-base/extended-ottput.tex : 5_graded-base/extended.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
 		-tex_filter 5_graded-base/extended.tex 5_graded-base/extended-ottput.tex
+
+5_graded-base/evaluation-ottput.tex : 5_graded-base/evaluation.tex $(GRANULE_OTT)
+	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \
+		-tex_filter 5_graded-base/evaluation.tex 5_graded-base/evaluation-ottput.tex
 
 6_conclusion/conclusion-ottput.tex : 6_conclusion/conclusion.tex $(GRANULE_OTT)
 	$(OTT) $(OTT_FLAGS) -i $(GRANULE_OTT) -o granule-ott.tex -tex_name_prefix GRANULE \

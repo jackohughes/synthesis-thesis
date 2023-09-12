@@ -118,7 +118,8 @@ different first projection function for use with \granin{myPair : (a,
   b) [r]} as:
 %
 \begin{granule}
-fst' : forall {a b : Type, s : Semiring, r : s} . {0 <= r} => (a, b) [r] -> a
+fst' : forall {a b : Type, s : Semiring, r : s} 
+     . {0 <= r} => (a, b) [r] -> a
 fst' [(x, y)] = x
 \end{granule}
 %
@@ -142,7 +143,8 @@ we could define the following distributive law of graded modalities over
 products, call it \granin{pushPair}:
 %
 \begin{granule}
-pushPair : forall {a b : Type, s : Semiring, r : s} . (a, b) [r] -> (a [r], b [r])
+pushPair : forall {a b : Type, s : Semiring, r : s} 
+         . (a, b) [r] -> (a [r], b [r])
 pushPair [(x, y)] = ([x], [y])
 \end{granule}
 %
@@ -154,8 +156,9 @@ Given this combinator, we can now apply \granin{fst (pushPair myPair)} to yield 
 type \granin{a [r]}, on which we can then apply the Granule standard library
 function \granin{extract}, defined:
 \begin{granule}
-  extract : forall {a : Type, s : Semiring, r : s} . {(1 : s) <= r} => a [r] -> a
-  extract [x] = x
+extract : forall {a : Type, s : Semiring, r : s}
+        . {(1 : s) <= r} => a [r] -> a
+extract [x] = x
 \end{granule}
  to get the original \granin{a} value we desired:
 %
@@ -218,7 +221,8 @@ possible with a dual distributive law, which could be written
 by hand as:
 %
 \begin{granule}
-pullPair : forall {a b : Type, s : Semiring, m n : s} . (a [n], b [m]) -> (a, b) [n /\ m]
+pullPair : forall {a b : Type, s : Semiring, m n : s} 
+         . (a [n], b [m]) -> (a, b) [n /\ m]
 pullPair ([x], [y]) = [(x, y)]
 \end{granule}
 %
