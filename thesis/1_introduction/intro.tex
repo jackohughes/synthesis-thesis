@@ -1,0 +1,235 @@
+One of the most useful and well-studied tools available to modern programmers is
+the type system. Not only do type systems allow many kinds of errors to be
+caught statically, they also help inform the design of a program. Many
+programmers will often tend to begin writing their programs by first defining
+the types, from which the program code follows naturally. This phenomenon will
+be familiar to any who have written programs in typed functional programming
+languages, and results from the fact that types form a high-level abstract
+specification of program behaviour. 
+
+Type-directed program synthesis is a well-studied technique for automatically
+generating program code from a given type specification - the \textit{goal}
+type. This approach has a long history, which is deeply intertwined with
+automated theorem proving, thanks to the Curry-Howard
+correspondence~\cite{manna1980deductive,10.5555/1624562.1624585}. 
+
+One lens through which we can view this task is as an inversion of type
+checking: we start with a goal type and inductively synthesise well-typd
+sub-terms by breaking the goal into sub-goals, pruning the search space of
+programs via typing as we go. This approach follows the treatment of program
+synthesis as a form of proof search in logic: given a type $[[ A ]]$ we want to
+find a program term $[[ t ]]$ which inhabits $[[ A ]]$. We can express this in
+terms of a synthesis \textit{judgement} which acts as a kind of inversion of
+typing or proof rules:
+% of Gentzen's sequent calculus~\cite{Gentzen1935UntersuchungenD}:
+%
+\begin{align*}
+  \Gamma \vdash [[ A ]] \Rightarrow [[ t ]]
+\end{align*}
+%
+meaning that the term $[[ t ]]$ can be synthesised for the goal type $[[ A ]]$
+under a context of assumptions $[[ G ]]$. We may construct a calculus of
+synthesis \textit{rules} for a programming language, inductively defining the
+above synthesis judgement for each type former. For example, we may define a
+rule for standard product types in the following way:
+\begin{align*}
+  \inferrule*[Right=$\times_{\textsc{Intro}}$]{ \Gamma \vdash [[ A ]] \Rightarrow [[ t1 ]] \\ \Gamma \vdash [[ B ]] \Rightarrow [[ t2 ]]}{ \Gamma \vdash [[ A ]] \times [[ B ]] \Rightarrow ([[ t1 ]], [[t2]] )}
+\end{align*}
+%
+Reading `clockwise' from the bottom-left: to synthesise a value of type $A
+\times B$, we synthesise a value of type $A$ and then a value of type $B$ and
+combine them into a pair in the conclusion. The `ingredients' for synthesising
+the subterms $[[ t1 ]]$ and $[[ t2 ]]$ come from the free-variable assumptions
+$[[ G ]]$ and any constructors of $A$ and $B$, assuming these types are
+monomorphic.
+
+Depending on the context, there could be many possible combinations of
+assumption choices to synthesise such a pair. Consider the following partial
+program containing a program \emph{hole}, marked with $?$, specifying a position
+at which we wish to perform synthesis:
+\begin{align*}
+\begin{array}{ll}
+    f : A \rightarrow A \rightarrow A \rightarrow A \times A &
+    \\
+    f\ x\ y\ z =\ ? &
+\end{array}
+\end{align*}
+The function has three parameters all of type $A$ which can be used to
+synthesise an expression of the goal type $A \times A$. Expressing this
+synthesis problem as an instantiation of the above $\times_{\textsc{Intro}}$
+rule:
+%
+\begin{align*}
+  \inferrule*[Right=$\times_{\textsc{Intro}}$]
+  { [[ x : A , y : A , z : A ]] \vdash [[ A ]] \Rightarrow [[ t1 ]]
+ \\ [[ x : A, y : A, z : A ]] \vdash [[ A ]] \Rightarrow [[ t2 ]]}
+  { [[ x : A, y : A, z : A ]] \vdash [[ A ]] \times [[ A ]] \Rightarrow ([[ t1 ]] , [[ t2 ]]) }
+\end{align*}
+%
+Even in this simple setting, the number of possibilities starts to become
+unwieldy: there are nine ($3^2$) possible candidate programs based on
+combinations of $x$, $y$ and $z$. Ideally, we would like some way of
+constraining the number of choices that are required by the synthesis algorithm.
+Many systems achieve this by allowing the user to specify additional information
+about their desired program behaviour. For example, recent work has extended
+type-directed synthesis to refinement types~\cite{10.1145/2908080.2908093}, cost
+specifications~\cite{DBLP:journals/corr/abs-1904-07415}, differential
+privacy~\cite{diffprivacysynthesis}, example-guided
+synthesis~\cite{10.1145/2813885.2737977,DBLP:conf/cav/AlbarghouthiGK13} or
+examples integrated with types~\cite{frankle2016example,oseraMYTH1}, and
+ownership information~\cite{fiala2023leveraging}. The general idea is that, with
+more information, whether that be richer types, additional examples, or
+behavioural specifications, the proof search / program synthesis process can be
+pruned and refined.
+
+
+This thesis presents a program synthesis approach that leverages the information
+contained in \emph{linear} and \emph{graded type systems} that track and enforce
+program properties related to data flow, statically. We refer to these systems
+as \emph{resourceful} type systems, since they treat data as though it is a
+physical resource, constraining how data can be used by a program and thus
+reducing the number of possible synthesis choices that need to be made. Our
+hypothesis is that resource-and-type-directed synthesis speeds up type-directed
+synthesis, reducing the number of paths that need to be explored and the amount
+of additional specification (e.g. input-output examples) required.
+
+Graded type systems trace their roots to linear logic. In linear logic, data is
+treated as though it were a finite resource which must be consumed exactly once
+with arbitrary copying and discarding disallowed~\cite{girard1987linear}.
+Non-linear use of data is expressed through the $!$ modal operator (the
+\emph{exponential modality}). This gives a binary view---a value may either be
+used exactly once or in a completely unconstrained way. Bounded Linear Logic
+(BLL) refines this view, replacing ! with a family of indexed modal operators
+where the index provides an upper bound on usage~\cite{girard1992bounded}, e.g.,
+$!_{\leq 4}A$ represents a value $A$ which may be used up to 4 times. In recent
+years, various works have generalised BLL, resulting in \textit{graded} type
+systems in which these indices are drawn from an arbitrary pre-ordered
+semiring~\cite{DBLP:conf/esop/BrunelGMZ14,DBLP:conf/esop/GhicaS14,petricek2014coeffects,DBLP:journals/pacmpl/AbelB20,DBLP:journals/pacmpl/ChoudhuryEEW21,quantitative-type-theory,McBride2016}.
+This allows numerous program properties to be tracked and enforced statically,
+including various kinds of reuse, privacy and confidentiality, and capabilities.
+Such systems are increasingly popular and form the basis of Linear
+Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}, Idris
+2~\cite{DBLP:journals/corr/abs-2104-00480}, as well as the experimental
+programming language Granule~\cite{DBLP:journals/pacmpl/OrchardLE19}.
+
+Returning to our example in a graded setting, the arguments of the function now
+have \emph{grades} (annotations) that, in this context, are natural numbers
+describing the exact number of times the parameters must be used (the choice
+here was ours):
+%
+\begin{align*}
+  \begin{array}{ll}
+    f : A^{2} \rightarrow A^{0} \rightarrow A^{0} \rightarrow A \times A &
+    \\
+    f\ x\ y\ z =\ ? &
+  \end{array}
+\end{align*}
+The first $A$ is annotated with a grade $2$, which in this context indicates that it
+\textit{must} be used twice. Likewise, the types of $y$ and $z$
+are graded with $0$, enforcing zero usage, i.e., we are not allowed
+to use them in the body of $f$ and must discard them.
+
+The result is that there is only one (normal form) inhabitant for this type: $[[
+(x, x) ]]$; the other assumptions will not even be considered in synthesis,
+allowing us to effectively prune out branches which use resources in a way which
+violates the grades. In this example, these annotations take the form of natural
+numbers explaining how many times a value can be used, but we may instead wish
+to represent different kinds of program properties, such as sensitivity,
+strictness, or security levels for tracking non-interference, all of which are
+well-known instances of graded type
+systems~\cite{DBLP:journals/pacmpl/OrchardLE19,DBLP:conf/icfp/GaboardiKOBU16,DBLP:journals/pacmpl/AbelB20}.
+Note that all of these examples are technically graded presentations of
+\emph{coeffects}, tracking how a programs uses its context, in contrast with
+graded types for side
+\emph{effects}~\cite{DBLP:journals/corr/OrchardPM14,DBLP:conf/popl/Katsumata14}, which we do not consider here.
+
+\section{Contributions}
+This dissertation makes the following contributions:
+% \begin{itemize}
+% \end{itemize}
+\section{Thesis Structure}
+The remaining chapters of this work are structured as follows. In the next
+chapter, Chapter~\ref{chapter:background}, the theoretical background of linear
+and graded types is introduced. We introduce two core calculi with simple types
+and grades, which demonstrate differing approaches to resourceful types. The
+first is based on an underlying linear type system, with graded modal types
+introduced and eliminated explicitly through the $\Box$ syntactic construct,
+other \emph{linear-base} graded systems such as the coeffect calculus
+of~\citet{petricek2014coeffects}, and the core Granule caluclus of ~\cite{}
+
+The second caculus does away with this linear basis, embedding graded modalities
+into the function types a la Idris 2 and Linear Haskell. McBride's
+QTT~\cite{McBride2016,quantitative-type-theory}, the core of Linear
+Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}, and the unified graded modal
+calculus of \citet{DBLP:journals/pacmpl/AbelB20}. The system defined here is
+implemented as a new language extension of the experimental programming language
+Granule~\cite{DBLP:journals/pacmpl/OrchardLE19}.
+
+These two core languages make up the target languages of two different synthesis
+tools, the first of which is presented in Chapter~\ref{chapter:core}. This
+chapter introduces the issue of resource management in synthesis - how do we
+ensure that synthesised programs abide by grade and linearity constraints? We
+then introduce two synthesis calculi, based on two variants of a resource
+management scheme adapted from Hodas and Miller's input-output context
+management scheme for linear logic programming ~\cite{HODAS1994327}. We then
+desrcibe our implementation\footnote{The full implementation can be found at
+\url{https://github.com/granule-project/granule/releases/tag/v0.7.8.0}} and give
+a quantitative comparison of the synthesis techniques on a suite of benchmark
+programs. The main finding is that the additive approach is often more efficient
+than the subtractive, presenting a departure from the literature on linear logic
+theorem proving which is typically subtractive.
+
+Chapter~\ref{chapter:deriving} briefly digresses from the main synthesis story
+to address a different style of program generation for programs which distribute
+graded modalities over datatypes, using a methodology inspired by generic
+programming. We present this approach as an alternative to the enumerative
+search-based synthesis showcased in the previous chapter, and as a means of
+addressing some of the limitations of the linear-base synthesis tool. In chapter
+\ref{sec:synthesis}, we present a program synthesis tool synthesis rules for our
+language, showing how we ensure that constraints on resource usage are met and
+how we can use the information from grades to prune the search space of
+candidate programs. Following this, we discuss some details of the
+implementation of our synthesis tool. We observe the close connection between
+synthesis in a graded setting and automated theorem proving for linear logic,
+allowing us to exploit existing optimisation techniques, such as the idea of a
+focused proof~\cite{focusing}. We provide a brief overview of focusing and show
+how we apply it to our calculus. 
+
+Having outlined an approach to synthesis in a linear type system with explicit
+graded modalities, Chapter~\ref{chapter:extended} presents a calculus for 
+synthesising programs in a fully-graded language. Synthesis in this setting 
+introduces new considerations and challenges, . Furthermore, we extend the 
+expressivity of our target language by introdcuing additional language features 
+such as recursive data types, and user-defined ADTs. 
+
+We then evaluate this implementation on a set of 46 benchmarks, including
+several non-trivial programs which make use of these new features. In this evaluation, 
+we compare to 
+From our evaluation we find that using grades in synthesis outperforms purely
+type-driven program synthesis in terms of both speed, number of input-output
+examples required or number of retries to get the desired program.
+
+Finally, to demonstrate the practicality and versatility of our approach, we
+apply our algorithm to synthesising programs in Haskell from type signatures
+using GHC's \emph{linear types} extension (which is implemented underneath by a
+graded type system).
+
+
+\section{Publications}
+In this thesis, the content of some chapters is formed from previously published papers:
+\begin{itemize}
+    \item Hughes, J., and Orchard, D. (2020) Resourceful Program Synthesis from
+    Graded Linear Types. In Logic-Based Program Synthesis and Transformation -
+    30th International Symposium, pp. 151-170. This paper adapts the resource
+    management techniques of Hodas and Miller for linear logic proof search to
+    graded types, and presents two synthesis calculi based on these approaches.
+    This paper constitutes the majority of chapter~\ref{chapter:core}, where a
+    program synthesis tool for a linear and graded type system is introduced. 
+    \item Hughes, J., Vollmer, M., Orchard D. (2020) Deriving Distributive Laws
+    for Graded Linear Types. In 6th edition of the International Workshop on
+    Linearity and of the 4th edition of the International Workshop on Trends in
+    Linear Logic and its Applications. The majority of
+    chapter~\ref{chapter:deriving}, which discusses an approach for
+    automatically deriving certain graded programs in Granule as an alternative
+    to synthesis, is derived from this paper. 
+\end{itemize}
