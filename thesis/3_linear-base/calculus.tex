@@ -14,10 +14,9 @@ unit $1$. The syntax for the full language is given by the following grammar:
 \mid [[ inl t ]] \mid [[ inr t ]] \mid \textbf{case} \ t_{1}\ \textbf{of}\ \textbf{inl}\ x_{1} \rightarrow t_{2};\ \textbf{inr}\ x_{2} \rightarrow t_{3}
 {\small{\tag{terms}}}
 \end{align*}
-We use the syntax $()$ for the inhabitant of  the
-multiplicative unit $1$. Pattern matching via a $\textbf{let}$
-is used to eliminate products and unit types; for sum types,
-$\textbf{case}$ is used to distinguish the constructors.
+We use the syntax $()$ for the inhabitant of  the multiplicative unit $1$.
+Pattern matching via a $\textbf{let}$ is used to eliminate products and unit
+types; for sum types, $\textbf{case}$ is used to distinguish the constructors.
 
 \begin{figure}[H]
 \begin{align*}
@@ -56,23 +55,21 @@ $\textbf{case}$ is used to distinguish the constructors.
 \label{fig:typing-prod-sum-unit}
  \end{figure}
 
-Figure~\ref{fig:typing-prod-sum-unit} gives the typing rules.  Rules
-for multiplicative products (pairs) and additive coproducts (sums) are routine, where
-pair introduction ($\textsc{Pair}$)
-adds the contexts used to type the pair's constituent subterms. Pair
-elimination ($\textsc{LetPair}$) binds a pair's components to two
-linear variables in the scope of the body $[[t2]]$. The
-$\textsc{Inl}$ and $\textsc{Inr}$ rules handle the typing of
-constructors for the sum type $[[Sum A B]]$. Elimination of sums
-($\textsc{Case}$) takes the least upper bound (defined above) of the contexts used to
-type the two branches of the case.
+Figure~\ref{fig:typing-prod-sum-unit} gives the typing rules.  Rules for
+multiplicative products (pairs) and additive coproducts (sums) are routine,
+where pair introduction ($\textsc{Pair}$) adds the contexts used to type the
+pair's constituent subterms. Pair elimination ($\textsc{LetPair}$) binds a
+pair's components to two linear variables in the scope of the body $[[t2]]$. The
+$\textsc{Inl}$ and $\textsc{Inr}$ rules handle the typing of constructors for
+the sum type $[[Sum A B]]$. Elimination of sums ($\textsc{Case}$) takes the
+least upper bound (defined above) of the contexts used to type the two branches
+of the case.
 
-In the typing of $\mathbf{case}$ expressions, the \emph{least-upper
-  bound} of the two contexts used to type each branch is used, defined:
+In the typing of $\mathbf{case}$ expressions, the \emph{least-upper bound} of
+  the two contexts used to type each branch is used, defined:
 
 \begin{definition}[Partial least-upper bounds of
-  contexts]\label{def:context-lub}
-For all $[[ G1 ]]$, $[[ G2 ]]$:
+  contexts]\label{def:context-lub} For all $[[ G1 ]]$, $[[ G2 ]]$:
 \begin{align*}
 \label{def:lub}
 [[G1]] \sqcup [[G2]] =
@@ -100,35 +97,35 @@ For all $[[ G1 ]]$, $[[ G2 ]]$:
 \end{array}
 \end{matrix}\right.
 \end{align*}
-where $r\!\sqcup\!s$ is the least-upper bound of grades $[[r]]$
-and $[[s]]$ if it exists, derived from $\sqsubseteq$.
+where $r\!\sqcup\!s$ is the least-upper bound of grades $[[r]]$ and $[[s]]$ if
+it exists, derived from $\sqsubseteq$.
 \end{definition}
 %
-As an example of the partiality of $\sqcup$, if one branch of a \textbf{case} uses a linear variable,
-then the other branch must also use it to maintain linearity overall,
-otherwise the upper-bound of the two contexts for these branches is not defined.
+As an example of the partiality of $\sqcup$, if one branch of a \textbf{case}
+uses a linear variable, then the other branch must also use it to maintain
+linearity overall, otherwise the upper-bound of the two contexts for these
+branches is not defined.
 
- With these extensions in place, we now have the
- capacity to write more idiomatic functional programs in our target language.
- As a demonstration of this, and to showcase how graded modalities interact with
- these new type extensions, we provide two further examples of different graded
- modalities which complement these new types.
+ With these extensions in place, we now have the capacity to write more
+ idiomatic functional programs in our target language. As a demonstration of
+ this, and to showcase how graded modalities interact with these new type
+ extensions, we provide two further examples of different graded modalities
+ which complement these new types.
 
 \begin{example}%[Intervals]
 \label{exm:or3}
 Exact usage analysis is less useful when control-flow is involved, e.g.,
-eliminating sum types where each control-flow branch
-uses variables differently. The above $\mathbb{N}$-semiring can be imbued with
-a notion of \emph{approximation} via less-than-equal ordering, providing
-upper bounds. A more expressive semiring is that of
-natural number intervals~\cite{DBLP:journals/pacmpl/OrchardLE19}, given by pairs
-$\mathbb{N} \times \mathbb{N}$ written $[[ Intrv r s ]]$ here for
-the lower-bound $r \in \mathbb{N}$ and upper-bound usage $s \in
-\mathbb{N}$ with $0 = [[ Intrv 0 0 ]]$ and $1 = [[ Intrv 1 1 ]]$,
-addition and multiplication defined pointwise,
-and ordering $[[ Intrv r s ]] \sqsubseteq [[ Intrv r' s' ]] = [[ r' ]] \leq [[ r ]]
-\wedge [[ s ]] \leq [[ s' ]]$. Thus a coproduct elimination function
-can be written and typed:
+eliminating sum types where each control-flow branch uses variables differently.
+The above $\mathbb{N}$-semiring can be imbued with a notion of
+\emph{approximation} via less-than-equal ordering, providing upper bounds. A
+more expressive semiring is that of natural number
+intervals~\cite{DBLP:journals/pacmpl/OrchardLE19}, given by pairs $\mathbb{N}
+\times \mathbb{N}$ written $[[ Intrv r s ]]$ here for the lower-bound $r \in
+\mathbb{N}$ and upper-bound usage $s \in \mathbb{N}$ with $0 = [[ Intrv 0 0 ]]$
+and $1 = [[ Intrv 1 1 ]]$, addition and multiplication defined pointwise, and
+ordering $[[ Intrv r s ]] \sqsubseteq [[ Intrv r' s' ]] = [[ r' ]] \leq [[ r ]]
+\wedge [[ s ]] \leq [[ s' ]]$. Thus a coproduct elimination function can be
+written and typed:
 %
 \begin{align*}
 \oplus_e & : [[ {[] {Intrv 0 1} (A -o C)} -o {{[] {Intrv 0 1} (B -o C)} -o {(Sum A B) -o C}} ]] \\
@@ -142,17 +139,15 @@ can be written and typed:
 \begin{example}%[Information flow]
 \label{exm:security}
 %
-Graded modalities can capture a form of information-flow
-security, tracking the flow of labelled data through a
-program~\cite{DBLP:journals/pacmpl/OrchardLE19},
-with a lattice-based semiring on
-$\mathcal{R} = \{[[ Irrelevant ]] \sqsubseteq [[ Private ]] \sqsubseteq  [[ Public ]]\}$
-where $0 = [[ Irrelevant ]]$, $1 = [[ Private ]]$, $+ = \sqcup$ and
-if $r = [[ Irrelevant ]]$ or $s = [[ Irrelevant ]]$ then $[[r * s ]] = [[
-Irrelevant ]]$ otherwise $[[ r * s ]] = \sqcup$. This
-allows the following well-typed program, eliminating a pair of
-$[[ Public ]]$ and $[[ Private ]]$ security values, picking the left
-one to pass to a continuation expecting a $[[ Public ]]$ input:
+Graded modalities can capture a form of information-flow security, tracking the
+flow of labelled data through a program~\cite{DBLP:journals/pacmpl/OrchardLE19},
+with a lattice-based semiring on $\mathcal{R} = \{[[ Irrelevant ]] \sqsubseteq
+[[ Private ]] \sqsubseteq  [[ Public ]]\}$ where $0 = [[ Irrelevant ]]$, $1 = [[
+Private ]]$, $+ = \sqcup$ and if $r = [[ Irrelevant ]]$ or $s = [[ Irrelevant
+]]$ then $[[r * s ]] = [[ Irrelevant ]]$ otherwise $[[ r * s ]] = \sqcup$. This
+allows the following well-typed program, eliminating a pair of $[[ Public ]]$
+and $[[ Private ]]$ security values, picking the left one to pass to a
+continuation expecting a $[[ Public ]]$ input:
 %
 \begin{align*}
 \textit{noLeak} & : [[ (Tup {[] Public A} {[] Private A}) -> {({[]

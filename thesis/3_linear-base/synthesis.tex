@@ -9,11 +9,45 @@ used inductively to synthesise subterms. Each type in the
 core language has right and left
 rules corresponding to its constructors and destructors respectively.
 
-% MOVE TO FOCUSING
-%Our approach to synthesis ensures that it is restricted to generating programs in
-%$\beta$-normal form, which eliminates a class of redundant programs for which
-%behaviourally equivalent $\beta$-normal forms can be synthesised in
-%less steps.
+
+\begin{figure}[H]
+\begin{align*}
+\hspace{-0.5em}
+  \begin{array}{c}
+    \subLinVar
+    \,
+    \subGrVar
+    \\[0.5em]
+    \subAbs
+    \\[0.5em]
+    \subApp
+    \\[0.5em]
+    \subDer
+    \\[0.5em]
+    \subBox
+    \,
+    \subUnbox
+    \\[0.5em]
+    \subPairIntro
+    \\[0.5em]
+    \subPairElim
+    \\[0.5em]
+    \subSumIntroL
+    \,
+    \subSumIntroR
+    \\[0.5em]
+    \subSumElim
+    \\[0.5em]
+    \subUnitIntro
+    \,
+    \subUnitElim
+  \end{array}
+\end{align*}
+\caption{Collected rules of the subtractive synthesis calculus}
+\label{fig:sub-rules}
+  \end{figure}
+
+
 
 \subsection{Subtractive Resource Management}
   Our subtractive approach follows the philosophy of earlier work on
@@ -25,43 +59,8 @@ rules corresponding to its constructors and destructors respectively.
   meaning from the \emph{goal type} $[[A]]$ we can synthesise a term $[[t]]$ using
   assumptions in $[[G]]$, with output context $[[D]]$. We describe
   the rules in turn to aid understanding. Figure~\ref{fig:sub-rules} collects the
-  rules for reference:
+  rules for reference.
 
-\begin{figure}[H]
-\begin{align*}
-\hspace{-0.5em}
-  \begin{array}{c}
-    \subLinVar
-    \,
-    \subGrVar
-    \\
-    \subAbs
-    \\
-    \subApp
-    \\
-    \subDer
-    \\
-    \subBox
-    \,
-    \subUnbox
-    \\
-    \subPairIntro
-    \\
-    \subPairElim
-    \\
-    \subSumIntroL
-    \,
-    \subSumIntroR
-    \\
-    \subSumElim
-    \\
-    \subUnitIntro
-    \,
-    \subUnitElim
-  \end{array}
-\end{align*}
-\caption{Collected rules of the subtractive synthesis calculus}
-  \end{figure}
 
   \paragraph{Variables}
 Variable terms can be synthesised from linear or graded assumptions by rules:
@@ -398,6 +397,42 @@ version (R${\square'^{-}}$):
   Section~\ref{sec:evaluation} considers the cost implications, comparing
   performance of (R$\square^{-}$) versus (R${\square^{-}}'$).
 \fi
+
+\begin{figure}[H]
+\begin{align*}
+\begin{array}{c}
+  \addLinVar
+  \,
+  \addGrVar
+\\[0.5em]
+  \addDer
+\\[0.5em]
+  \addAbs
+\\[0.5em]
+  \addApp
+\\[0.5em]
+  \addBox
+  \\[0.5em]
+  \addUnbox
+\\[0.5em]
+  \addPairIntro
+\\[0.5em]
+  \addPairElim
+\\[0.5em]
+  \addSumIntroL
+  \,
+  \addSumIntroR
+\\[0.5em]
+  \addSumElim
+\\[0.5em]
+  \addUnitIntro
+  \,
+  \addUnitElim
+      \end{array}
+  \end{align*}
+\caption{Collected rules of the additive synthesis calculus}
+\label{fig:add-rules}
+  \end{figure}
 
 \subsection{Additive Resource Management}
 We now present the dual to subtractive resource management --- the
