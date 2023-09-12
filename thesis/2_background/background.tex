@@ -1,15 +1,23 @@
-This chapter provides the relevant background information. It largely
+Up until this point, we have used the term \textit{resourceful types} rather
+freely, and refrained from discussing exactly what we mean by graded modalities.
+This chapter solidifies these concepts, and introduces the core typing calculi
+which will comprise the bases of our synthesis targets.    
 
+Resourceful type systems (also referred to as quantitative type systems)
+integrate the tracking of program properties into 
+% We explore two lineages of resourceful type systems. 
 
+Resourceful type systems can be divided into two traditions: 
 
-We explore two lineages of resourceful type systems. In the first, modern
-resourceful type systems trace their roots to Girard's Linear Logic~\cite{}
-which was one of the first treatments of data as a resource inside a program. Bounded Linear Logic (BLL)
-developed this idea further, refining the coarse grained view of data as either
-linear or non linear. Several subsequent works generalised BLL, coalescing into
-the notion of a \textit{graded} type system in languages such as
-Granule~\cite{}. This lineage treats these systems essentially as refinements of an
-underlying linear structure.
+These split linear/graded systems trace their roots from Girard's Linear Logic~\cite{}. 
+
+In the first, modern resourceful type systems trace their roots to Girard's Linear Logic~\cite{}
+which was one of the first treatments of data as a resource inside a program.
+Bounded Linear Logic (BLL) developed this idea further, refining the coarse
+grained view of data as either linear or non linear. Several subsequent works
+generalised BLL, coalescing into the notion of a \textit{graded} type system in
+languages such as Granule~\cite{}. This lineage treats these systems essentially
+as refinements of an underlying linear structure.
 
 At the same time that these systems were being studied, resourceful types were
 also being approached from an entirely different perspective --- that of
@@ -162,7 +170,7 @@ The idea of data as a resource inside a program has been extended further by the
 proliferation of graded type systems.
 
 
-\subsection{A graded linear typing calculus}
+\subsection{The Graded Linear $\lambda$-calculus}
 \label{sec:linear-base}
 
 Having seen the resourceful types from linear logic to graded type systems, we
@@ -281,7 +289,7 @@ $[[ G2 ]]$:
   \inferrule*[right = Abs]
   {[[ G , x : A |- t : B ]]}
   {[[ G |- \x . t : A -> B ]]}
-\;\;
+\\[0.75em]
   \inferrule*[right = App]
   {[[ G1 |- t1 : A -> B ]] \;\;\;
    [[ G2 |- t2 : A ]] }
@@ -294,7 +302,7 @@ $[[ G2 ]]$:
 \inferrule*[right = Der]
   {[[ G , x : A |- t : B ]]}
   {[[ G , x : [ A ] 1 |- t : B]]}
-\;\;\;
+\\[0.75em]
 \inferrule*[right = Approx]
 {[[ {G, x : [A] r}, G' |- t : A ]] \quad r \sqsubseteq s }
 {[[ {G, x : [A] s}, G' |- t : A ]]}
@@ -398,14 +406,20 @@ then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
 \end{itemize}
 \end{restatable}
 
-\section{Graded types: An alternative history}
-\jnote{talk about lineage of graded type systems}
+\section{Fully Graded Type Systems}
 
-\subsection{Graded-base}
+
+\subsection{A Fully Graded $\lambda$-calculus}
 \label{sec:graded-base}
 
-We now define a core calculus for a fully graded type system. This system is much closer
-to those outlined above than the linear-base calculus, drawing from the coeffect calculus of \citet{petricek2014coeffects}, Quantitative Type Theory (QTT) by \citet{McBride2016} and refined further by \citet{quantitative-type-theory} (although we omit dependent types from our language), the calculus of \citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type theories~\cite{quantitative-type-theory,DBLP:conf/esop/MoonEO21}. Similar
+We now define a core calculus for a fully graded type system. This system is
+much closer to those outlined above than the linear-base calculus, drawing from
+the coeffect calculus of \citet{petricek2014coeffects}, Quantitative Type Theory
+(QTT) by \citet{McBride2016} and refined further by
+\citet{quantitative-type-theory} (although we omit dependent types from our
+language), the calculus of \citet{DBLP:journals/pacmpl/AbelB20}, and other
+graded dependent type
+theories~\cite{quantitative-type-theory,DBLP:conf/esop/MoonEO21}. Similar
 systems also form the basis of the core of the linear types extension to
 Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}. We refer to this system as
 the \textit{graded-base} calculus to differentiate it from linear-base.
@@ -467,9 +481,9 @@ explicitly.
 \GRANULEdruleTyVar{}
 \;\;\;
 \GRANULEdruleTyAbs{}
-\;\;\;
+\\[0.75em]
 \GRANULEdruleTyApp{}
-\\\\
+\\[0.75em]
 \GRANULEdruleTyPr{}
 \;\;\;
 \GRANULEdruleTyApprox{}
