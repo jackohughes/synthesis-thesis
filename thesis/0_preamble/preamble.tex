@@ -302,7 +302,15 @@
 }
 \makeatother
 
+\definecolor{periwinkle}{rgb}{0.8, 0.8, 1.0}
+\newcommand{\newhighlight}[1]{%
+{\setlength{\fboxsep}{0pt}\colorbox{pink!50}{$\displaystyle#1$}}}
 
+\newcommand{\newnewhighlight}[1]{%
+{\setlength{\fboxsep}{0pt}\colorbox{yellow!50}{$\displaystyle#1$}}}
+
+\newcommand{\anotherhighlight}[1]{%
+{\setlength{\fboxsep}{0pt}\colorbox{periwinkle!50}{$\displaystyle#1$}}}
 
 
 % SUBTRACTIVE RULES
@@ -797,35 +805,32 @@
 % \newcommand*{\fsynCase}{\GRANULEdruleCase{}}
 % \newcommand*{\synCaseAltAlt}{\GRANULEdruleCaseAltAlt{}}
 % SYNTAX AND TYPES
-\newcommand{\synLet}[3]{\textbf{let}\ #1 \leftarrow #2\ \textbf{in}\ #3}
-% \newcommand{\synCase}[2]{\mathbf{case}\ #1\ \mathbf{of}\ #2}
-\newcommand{\synCaseBranch}[2]{#1 \rightarrow #2}
+\newcommand{\derLet}[3]{\textbf{let}\ #1 \leftarrow #2\ \textbf{in}\ #3}
+\newcommand{\derCase}[2]{\mathbf{case}\ #1\ \mathbf{of}\ #2}
+\newcommand{\derCaseBranch}[2]{#1 \rightarrow #2}
 
-\newcommand{\synCaseOne}[3]
-  {\synCase{#1}{\synCaseBranch{#2}{#3}}}
+\newcommand{\derCaseOne}[3]
+  {\derCase{#1}{\derCaseBranch{#2}{#3}}}
 
-\newcommand{\synCaseTwo}[5]
-  {\synCase{#1}{\begin{array}[t]{l}\synCaseBranch{#2}{#3};\\ \synCaseBranch{#4}{#5}\end{array}}}
+\newcommand{\derCaseTwo}[5]
+  {\derCase{#1}{\begin{array}[t]{l}\derCaseBranch{#2}{#3};\\ \derCaseBranch{#4}{#5}\end{array}}}
 
 
-\newcommand{\synCaseTwoMultiLine}[5]
+\newcommand{\derCaseTwoMultiLine}[5]
   {\begin{array}[t]{l}
-   \synCase{#1}{\\ \begin{array}[t]{l}\synCaseBranch{#2}{#3};\\
-                     \synCaseBranch{#4}{#5}\end{array}}
+   \derCase{#1}{\\ \begin{array}[t]{l}\derCaseBranch{#2}{#3};\\
+                     \derCaseBranch{#4}{#5}\end{array}}
   \end{array}}
 
 
-\newcommand{\synCaseTwoShort}[5]
-  {\synCase{#1}{\begin{array}[t]{l}\synCaseBranch{#2}{#3};\;\; \synCaseBranch{#4}{#5}\end{array}}}
+\newcommand{\derCaseTwoShort}[5]
+  {\derCase{#1}{\begin{array}[t]{l}\derCaseBranch{#2}{#3};\;\; \derCaseBranch{#4}{#5}\end{array}}}
 
-\newcommand{\synLetRec}[3]
+\newcommand{\derLetRec}[3]
  {\mathbf{letrec}\ #1 = #2\ \mathbf{in}\ #3}
 
 % \newcommand{\synUnbox}[3]
 %  {\mathbf{let}\ [#1] = #2\ \mathbf{in}\ #3}
-
-% \definecolor{coeffectColor}{HTML}{0a40a1}
-% \newcommand{\coeff}[1]{\textcolor{coeffectColor}{#1}}
 
 \newcommand{\tcF}{\mathsf{F}}
 
