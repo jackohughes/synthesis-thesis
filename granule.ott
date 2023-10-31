@@ -171,8 +171,9 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
   | Char :: :: Char {{ com Characters }}  {{ tex \mathsf{Char} }}
   | Unit :: :: Unit {{ com unit }} {{ tex \mathsf{1} }}
   | Prod :: :: Product {{ com Products }} {{ tex \otimes }}
+  | Coprod :: :: Coproduct {{ com CoProducts }} {{ tex \oplus }}
   | Bool :: :: Bool {{ com Bool }} {{ tex \mathbb{B} }}
-  | IO :: :: IO {{ com IO }} {{ tex \mathsf{IO} }}
+  | IO :: :: IO {{ com IO }} {{ tex \mathsf{IO } }}
   | [ A / a ] B :: M :: TySub {{ com Type substitution }}
   | [ A /* a ] B :: M :: TySubs
       {{ com Type substitution }}
@@ -212,6 +213,10 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
   | B [ A /*1 a ] :: M :: TySubsUnary
       {{ com Unary type substitution }}
       {{ tex [[ B ]] { [  [[ A ]]  / [[ a ]]  ] } }}
+  | Forall alpha : k . A :: :: TySch {{ com TySch }} {{ tex \forall \overline{\alpha : \kappa} . [[ A]] }}
+  | alphaT :: :: TyVar {{ tex \alpha }}
+  | Mu A :: :: RecTy {{ tex \mu X . [[ A ]] }}
+  | A1 [Mu X . A2 / X] :: :: RecTy' {{ tex [[ A1 ]] \lbrack \mu X . [[ A2 ]] / X \rbrack }}
 
 op {{ tex \textsf{op} }} :: 'Operator_' ::= {{com Type operators}}
  | OPlus :: :: PlusOp {{ tex + }}
@@ -287,7 +292,7 @@ c, r, s, q :: 'Coeffect_' ::=
   | c iprev :: :: PrevCoeffect {{ tex [[ c ]]_{i - 1} }}
   | c : A   :: M :: Sig {{ tex [[ c ]] : [[ A ]] }}
   | Irrelevant :: :: Irrelevant {{ tex \mathsf{Unused} }}
-  | Intrv r s :: :: Interval {{ tex [ [[ r ]] ... [[ s ]] ] }}
+  | Intrv r s :: :: Interval {{ tex  [[ r ]] ... [[ s ]] }}
   | lub r s :: M :: Lub {{ com LeastUpperBound }} {{ tex [[ r ]] \sqcup [[ s ]] }}
   | glb r s :: M :: Glb {{ com GreatestLowerBound }} {{ tex  [[ r ]] \sqcap [[ s ]] }}
 
@@ -300,22 +305,29 @@ Rel :: 'Rel_' ::= {{ com Relations on grades }}
  | Rel1 && Rel2     :: :: And   {{ tex [[ Rel1 ]] \wedge [[ Rel2 ]] }}
 
 
-k {{ tex \kappa }} :: 'Kind_' ::=
-  | Type :: :: Type {{ com Type }} {{tex \mathsf{Type} }}
-  | lift A :: :: Promote
-      {{ com Promote a type to a kind }}
-      {{ tex {\uparrow\![[ A ]] } }}
-  | Effect :: :: Effect {{ com Effect grades }} {{ tex \mathsf{Effect} }}
-  | Coeffect :: :: Coeffect {{ com Coeffect grades }} {{ tex
-  \mathsf{Coeffect} }}
-  | Eff :: :: EffectAbrv {{ tex \mathsf{Eff} }}
-  | Coeff :: :: CoeffectAbrv {{ tex \mathsf{Coeff} }}
-  | EffCoeff :: :: EffectCoeffectAbrv {{ tex \mathsf{(Co)eff} }}
-  | Predicate :: :: Predicate {{ com Predicates }} {{ tex \mathsf{Predicate} }}
-  | k1 -> k2 :: :: KindFun {{ com Kind function }}
-  | k1 U k2 :: :: KindUnion {{ tex [[ k1 ]] \cup [[ k2 ]] }}
-  | Th k :: :: SubstKind {{ com Substitutions }} {{ tex [[ Th ]][[ k ]] }}
-  | ( k ) :: :: Brackets
+% k {{ tex \kappa }} :: 'Kind_' ::=
+%   | Type :: :: Type {{ com Type }} {{tex \mathsf{Type} }}
+%   | lift A :: :: Promote
+%       {{ com Promote a type to a kind }}
+%       {{ tex {\uparrow\![[ A ]] } }}
+%   | Effect :: :: Effect {{ com Effect grades }} {{ tex \mathsf{Effect} }}
+%   | Coeffect :: :: Coeffect {{ com Coeffect grades }} {{ tex
+%   \mathsf{Coeffect} }}
+%   | Eff :: :: EffectAbrv {{ tex \mathsf{Eff} }}
+%   | Coeff :: :: CoeffectAbrv {{ tex \mathsf{Coeff} }}
+%   | EffCoeff :: :: EffectCoeffectAbrv {{ tex \mathsf{(Co)eff} }}
+%   | Predicate :: :: Predicate {{ com Predicates }} {{ tex \mathsf{Predicate} }}
+%   | k1 -> k2 :: :: KindFun {{ com Kind function }}
+%   | k1 U k2 :: :: KindUnion {{ tex [[ k1 ]] \cup [[ k2 ]] }}
+%   | Th k :: :: SubstKind {{ com Substitutions }} {{ tex [[ Th ]][[ k ]] }}
+%   | ( k ) :: :: Brackets
+%   | alphaK :: :: VarKind {{ tex \alpha }}
+k {{ tex \kappa }} :: 'Kind_' ::= {{ com Kind }}
+  | alphaK :: :: VarKind {{ tex \alpha }}
+  | Type :: :: TyKind {{ tex \text{Type} }}
+  | k1 -> k2 :: :: ArrowKind {{ tex [[ k1 ]] \rightarrow [[ k2 ]] }}
+  | Coeff :: :: CoeffKind {{ tex \text{Coeff} }}
+
 
 Defines {{ tex D }} :: 'DefCtx_' ::=
   | /.  :: :: Empty {{ com Empty }} {{ tex \emptyset }}
@@ -335,9 +347,25 @@ Ass {{ tex As }} :: 'Assume_' ::=
 
   | { x Ix1 Ix2 } : [ T ] c :: :: VarIndexed {{ com Indexed Variable }} {{ tex { [[ x ]]^[[ Ix1 ]]_[[ Ix2 ]] }:_{\textcolor{coeffectColor}{ [[ c ]] } }  [[ T ]] }}
   | { x Ix1 } : [ T ] c :: :: VarIndexedOne {{ com Indexed Variable 1 }} {{ tex { [[ x ]]^[[ Ix1 ]] }:_{\textcolor{coeffectColor}{ [[ c ]] } }  [[ T ]] }}
+  | x : Forall T :: :: ForallSingleton
+      {{ com Def context }}
+      {{ tex [[ x ]] :  \forall \overline{\alpha : \kappa} . [[ T ]] }}
+
+  | Con : Forall T :: :: ForallSingletonCon
+      {{ com Def Con context }}
+      {{ tex [[ Con ]] :  \forall \overline{\alpha : \kappa} . [[ T ]] }}
+
+  | alpha : k :: :: TyVarSingleton
+      {{ com Ty Var context }}
+      {{ tex \overline{\alpha : \kappa} }}
+
+  | alphaS : k :: :: TyVarSingleton'
+      {{ com Ty Var context }}
+      {{ tex {\alpha : \kappa} }}
 
 
-G {{ tex \Gamma }}, D {{ tex \Delta }}, O {{ tex \Omega }} :: 'TyCtx_' ::=
+
+G {{ tex \Gamma }}, D {{ tex \Delta }}, O {{ tex \Omega }}, Sig {{ tex \Sigma }}, Defs {{ tex D }} :: 'TyCtx_' ::=
   | . :: :: Empty {{ com Empty }} {{ tex \emptyset }}
   | Ass :: :: Assumption {{ com Single assumption }}
 
@@ -588,7 +616,11 @@ formula :: 'formula_' ::=
  | ( Con : A1 .*. An -> B ) elem Defines :: :: NArityConstrTy {{ tex ( [[ Con ]] : [[ A1 ]]^1 \rightarrow ... \rightarrow [[ An ]]^1 \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
  | ( Con : A1 - c1 .*. An - cn -> B ) elem Defines :: :: NArityConstrTyCoeffects {{ tex ( [[ Con ]] : [[ A1 ]]^[[ c1 ]] \rightarrow ... \rightarrow [[ An ]]^[[ cn ]] \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
  | ( Con : A1 -* c1 .*. An -* cn -> B ) elem Defines :: :: NArityConstrTyCoeffects' {{ tex ( [[ Con ]] : [[ A1 ]]^{q_1^i} \rightarrow ... \rightarrow [[ An ]]^{q_n^i} \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
+ | ( Con Forall : A1 -* c1 .*. An -* cn -> B ) elem Defines :: :: ForallNArityConstrTyCoeffects' {{ tex ( [[ Con ]] : \forall \overline{\alpha : \kappa}.[[ A1 ]]^{q_1^i} \rightarrow ... \rightarrow [[ An ]]^{q_n^i} \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
+ | ( Con Forall : A1 - c1 .*. An - cn -> B ) elem Defines :: :: ForallNArityConstrTyCoeffects {{ tex ( [[ Con ]] : \forall \overline{\alpha : \kappa}.[[ A1 ]]^[[ c1 ]] \rightarrow ... \rightarrow [[ An ]]^[[ cn ]] \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
+%  | ( Con Forall : A1 -* c1 .*. An -* cn -> B ) elem Defines :: :: ForallNArityConstrTyCoeffects' {{ tex ( [[ Con ]] : \forall \overline{\alpha : \kappa}.[[ A1 ]]^{q_1^i} \rightarrow ... \rightarrow [[ An ]]^{q_n^i} \rightarrow  [[ B ]] ) \in [[ Defines ]] }}
  | ( Null Con : B ) elem Defines :: :: NullConstrTy {{ tex ( [[ Con ]] : [[ B ]] ) \in [[ Defines ]] }}
+ | x : Forall A' elem Defines  :: :: TopLevelDef {{ tex (x : \forall \overline{\alpha : \kappa} . [[ A' ]]) \in [[ Defines ]]}}
 
 
  | minimal( i )  :: :: Minimality {{ tex \textsf{minimal}( [[ i ]] ) }}
@@ -609,6 +641,9 @@ formula :: 'formula_' ::=
  | IfApp G1 G2 G3 G4 c :: :: IfApp {{ tex \text{if}\ [[ G1 ]] \notin [[ G2 ]] \wedge [[ G3 ]] \notin [[G4]] \ \text{then} \ 0 \sqsubseteq [[c]] \ \text{else}  }}
  | assn c1 c2 :: :: Assign {{ tex [[ c1 ]] = [[ c2 ]]  }}
  | Ix = Size A :: :: SizeAssertion {{ tex [[ Ix ]] = | [[ A ]] | }}
+ | inst A1 A2 :: :: Instantiate {{ tex [[ A1 ]] = \text{inst}(\forall \overline{\alpha : \kappa} . [[ A2 ]]) }}
+ | Sig |- A :: :: KindCheck {{ tex [[ Sig ]] \vdash [[ A ]] }}
+ | A is Unit :: :: KindUnit {{ tex [[ A ]] = \text{Unit} }}
 
 defns
   Judgements :: '' ::=
@@ -652,6 +687,65 @@ G, x : [A] s, G' |- t : B
 
 
 defn
+Sig ; G |- t : A :: :: checkMiniDeclPoly :: 'Ty'
+{{ tex [[ Sig ]] ; [[ G ]] \vdash [[ t ]] : [[ A ]] }}
+{{ com \section{TypingPoly} }}
+
+by
+
+Sig |- A : Type
+--------------- :: VarP
+Sig ; { 0 * G }, x : [A] 1 |- x : A
+
+
+x : Forall A' elem Defines && Sig |- inst A A'
+------------------------- :: DefP
+Sig ; {0 * G} |- x : A
+
+
+alpha : k ; . |- t : A
+--------------------------- :: TopLevelP
+ . ; . |- t : Forall alpha : k . A
+
+
+Sig ; G, x : [A] r |- t : B
+------------------------- :: AbsP
+Sig ;  G |- \x . t : A ^ r -> B
+
+
+Sig; G1 |- t1 : A ^ r -> B  && G2 |- t2 : A
+---------------------------------------- :: AppP
+Sig; G1 + r * G2 |- t1 t2 : B
+
+
+( Con Forall : B'1 - q1 .*. B'n - qn -> {K {A' Many}} ) elem Defines
+Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}
+---------------------------- :: ConP
+Sig; 0 * G |- Con . : {B1 - r1 .*. Bn - rn -> {K {A Many}}}
+
+Sig; G |- t : A
+---------------------------- :: PrP
+Sig; r * G |- [ t ] : [] r A
+
+
+Sig; G, x : [A] r, G' |- t : B  &&  r <<= s
+----------------------------------------- :: ApproxP
+Sig; G, x : [A] s, G' |- t : B
+
+(Sig; G |- t : A   &&  Sig ; r |- pi : A |> Di)   && Sig; G', Di |- ti : B
+------------------------------------------------------------------ :: CaseP
+Sig; {r * G}  + G' |- case t of p1 -> t1 ; * ; pn -> tn : B
+
+Sig; G |- t : A [Mu X . A / X]
+------------------------------  :: MuRP
+Sig; G |- t : {Mu A}
+
+Sig; G |- t : {Mu A}
+------------------------------  :: MuLP
+Sig; G |- t : A [Mu X . A / X]
+
+
+defn
 c |- p : A |> G :: :: patternTyping :: 'Pat'
 {{ com Declarative pattern checking for Granule Mini (monomorphic) }}
 {{tex [[ c ]] \vdash \, [[ p ]] : [[ A ]] \, \rhd \, [[ G ]] }}
@@ -681,6 +775,33 @@ r |- Con p1 ... pn : {K {A Many}} |> BigCat Gi
 %%------------------------------------------------------------------------------------------------ :: ConMono
 %%(q1 \*/ qn) * r  |- Con p1 ... pn : A |> BigCat Gi
 
+defn
+Sig ; c |- p : A |> G :: :: patternTypingPoly :: 'Pat'
+{{ com Declarative pattern checking for Granule Mini (polymorphic) }}
+{{tex [[ Sig ]] ; [[ c ]] \vdash \, [[ p ]] : [[ A ]] \, \rhd \, [[ G ]] }}
+by
+
+
+
+0 <<= r && Sig |- A : Type
+------------------------------------------------------------------------------ :: WildP
+Sig; r |- _ : A |> .
+
+Sig |- A : Type
+----------------------------------------------------------------------- :: VarP
+Sig; r |- x : A |> x : [ A ] r
+
+
+Sig; r * s |- p : A |> G
+------------------------------------------------------------------------------ :: BoxP
+Sig; r |- [ p ] : [] s A |> G
+
+
+( Con Forall : B'1 - q1 .*. B'n - qn -> {K {{A'} Many}} ) elem Defines
+Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}
+Sig; qi * r |- pi : Bi |> Gi && {PolyConSimple {K {A Many}} r}
+------------------------------------------------------------------------------------------------ :: ConP
+Sig; r |- Con p1 ... pn : {K {A Many}} |> BigCat Gi
 
 
 defn
@@ -767,6 +888,116 @@ by
 %%exists r4 . r1 >= r4 + (r3 * q2)
 %%--------------------------------- :: Unbox
 %%G, x : [ [] q1 A ] r1 |-^ c B =>- case x of [ y ] -> t ; D, x : [ [] q1 A ] r4
+
+defn
+Sig |- formula  :: :: Instantiation :: ''
+{{ tex [[ Sig ]] \vdash [[ formula ]]}}
+by
+
+defn
+Sig |- A : k :: :: checkKind :: 'kind'
+{{ tex [[ Sig ]] \vdash [[ A ]] : [[ k ]] }}
+{{ com \section {Kinding} }}
+
+by
+
+Sig |- A : Type && Sig |- B : Type
+------------------------------------- :: Arrow
+Sig |- {A ^r -> B} : Type
+
+
+Sig |- A : k1 -> k2   && Sig |- B : k1
+----------------------------------------- :: App
+Sig |- {A B} : k2
+
+
+Sig |- A : Type
+----------------------------------------- :: Box
+Sig |- {[] r A} : Type
+
+
+Sig |- A : k    && Sig |- B : k
+----------------------------------------- :: Prod
+Sig |-  Tup A B : k
+
+
+Sig |- A : k    && Sig |- B : k
+----------------------------------------- :: Sum
+Sig |-  Sum A B : k
+
+------------------------------------ :: Unit
+Sig |- Unit : Type
+
+
+Sig |- A : Type
+------------------------------------ :: MuR
+Sig |- {Mu A} : Type
+
+
+Sig |- A : Type
+------------------------------------ :: MuL
+Sig |- {A [Mu X . A / X]} : Type
+
+
+------------------------------------ :: Var
+Sig, alphaS : k |- alphaT : k
+
+defn
+Sig ; G |- A =>+ t ; D :: :: SynthesiseAddPoly :: 'Syn'
+{{ tex [[ Sig ]] ; [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]] }}
+
+by
+
+alpha : k ; . |- A =>+ t ; .
+--------------------------- :: TopLevelP
+. ; . |- Forall alpha : k . A =>+ t ; .
+
+% Defs, x : Forall A' ; Sig; G |- x : A
+x : Forall A' elem Defines && Sig |- inst A A'
+------------------------- :: DefP
+Sig ; G |- A =>+ x ; 0 * G
+
+Sig |- A : Type
+------------------------- :: VarP
+Sig ; G, x : [A] r |- A =>+ x ; {0 * G}, x : [A] 1
+
+Sig; G, x : [A] q |- B =>+ t ; D, x : [A] r && r <<= q
+---------------------------------------------------- :: AbsP
+Sig ; G |- {A ^ q -> B} =>+ \ x ^ q . t ; D
+
+
+Sig; G, x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 |- C =>+ t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
+Sig; G, x1 : [ A ^ q -> B ] r1 |- A =>+ t2 ; D2, x1 : [ A ^ q -> B ] s3 && Sig |- {A ^ q -> B} : Type
+------------------------------------------------------- :: AppP
+Sig; G, x1 : [ A ^ q -> B ] r1 |- C =>+ {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -> B] {s2 + {s1 + {(s2 * {q * s3})}}}
+
+
+Sig; G |- A =>+ t ; D
+--------------------------------- :: BoxP
+Sig; G |- {[] r A} =>+ [ t ] ; r * D
+
+
+Sig; G, y : [ A ] { r * q }, x : [ [] q A ] r |- B =>+ t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2
+exists s3 . s1 <= {s3 * q} <= {r * q} && Sig |- {[] q A} : Type
+--------------------------------- :: UnboxP
+Sig; G, x : [ [] q A ] r |- B =>+ case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2}
+
+
+( Con Forall : B'1 - q1 .*. B'n - qn -> {K {A' Many}}) elem Defines
+Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}
+Sig; G |- Bi =>+ ti ; Di
+--------------------------------- :: ConP
+Sig; G |- K {A Many} =>+ Con t1 ... tn ; {0 * G} + {(q1 * D1) + ... + (qn * Dn)}
+
+
+
+( Coni Forall : B'1 -* q1 .*. B'n -* qn -> {K {A' Many}}) elem Defines && Sig |- {K {A Many}} : Type
+Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}
+Sig; { {G, x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B =>+ ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+{exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj} && assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}}} && {PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}}
+--------------------------------- :: CaseP
+Sig ; G, x : [ {K {A Many}} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}
+
 
 
 defn
@@ -1354,13 +1585,13 @@ by
 %G ; O, x1 : A + B |- C => case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
 
 
-defn
-G ; O |- A =>+ t ; D :: :: FocusSynthesisAdd :: 'focus_syn_add_'
-{{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{+} [[ t ]] \ | \ [[ D ]] }}
-by
+% defn
+% G ; O |- A =>+ t ; D :: :: FocusSynthesisAdd :: 'focus_syn_add_'
+% {{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{+} [[ t ]] \ | \ [[ D ]] }}
+% by
 
------------------------- :: lin_var
-G ; x : A |- A =>+ x ; x : A
+% ------------------------ :: lin_var
+% G ; x : A |- A =>+ x ; x : A
 
 
 %1 <= r

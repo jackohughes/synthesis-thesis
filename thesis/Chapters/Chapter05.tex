@@ -1,0 +1,112 @@
+\chapter{An extended synthesis calculus}
+\label{chapter:extended}
+
+\section{A Fully Graded Target Language}
+\label{section:graded-base-typing}
+
+
+\begin{align*}
+    \hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+           [[ A ^ r -> B ]]
+      \mid K
+      \mid [[ A B ]]
+      \mid [[ [] r A ]]
+      \mid \mu X . [[ A ]]
+      \mid X
+      \mid \alpha
+    {\small{\tag{\textit{types}}}}
+    \\[0em]
+    \hspace{-0.9em} K & ::=
+           [[ Unit ]]
+      \mid [[ Prod ]]
+      \mid [[ Coprod ]]
+    {\small{\tag{\textit{type constructors}}}}
+    \\[0em]
+    \hspace{-0.9em} \tau & ::=
+           [[ Forall alpha : k . A  ]]
+    {\small{\tag{\textit{type schemes}}}}
+\end{align*}
+
+\begin{align*}
+        \hspace{-0.8em} [[ t ]] ::= \;
+               & [[ x ]]
+          \mid [[ \x ^ c . t ]]
+          \mid [[ t1 t2 ]]
+          \mid [[ [t] ]]
+          \mid [[ Con t1 ... tn ]]
+          \mid [[ case t of p1 -> t1 ; * ; pn -> tn  ]]
+        {\small{\tag{\textit{terms} }}}
+                 \\
+        \hspace{-0.8em} [[ p ]] ::= \;
+               & [[ x ]]
+          \mid [[ _ ]]
+          \mid [[ [p] ]]
+          \mid [[ Con p1 ... pn ]]
+        {\small{\tag{\textit{patterns}}}}
+\end{align*}
+
+\begin{align*}
+    \tyTopP
+\end{align*}
+
+\begin{figure}[t]
+    \hspace{-0.5em}
+    \begin{align*}
+    \hspace{-0.5em}
+    \begin{array}{c}
+    \tyVarP
+    \\[1.25em]
+    \tyDefP
+    \\\\
+    \tyAbsP
+    \;\;\;
+    \tyAppP
+    \\\\
+    \tyPrP
+    \;\;\;
+    \tyApproxP
+    \\\\
+    \tyConP
+    \\\\
+    \tyCaseP
+    \\\\
+    \tyMuRP
+    \;\;\;
+    \tyMuLP
+    \end{array}
+    \end{align*}
+    \vspace{-1em}
+    \caption{Typing rules for fully graded typing calculus}
+    \label{fig:typing}
+    \vspace{-0.5em}
+\end{figure}
+
+\begin{figure}[t]
+    \begin{align*}
+    \begin{array}{c}
+    \patWildP
+    \\[1.25em]
+    \patVarP
+    \;\;\;
+    \patBoxP
+    \\[1.25em]
+    \patConP
+    \end{array}
+    \end{align*}
+    \vspace{-1.25em}
+      \caption{Pattern typing rules of for the fully graded typing calculus}
+    \label{fig:pat-typing}
+\end{figure}
+
+
+\section{A Fully Graded Synthesis Calculus}
+\label{section:graded-base-synthesis}
+
+\section{Focusing the Fully Graded Synthesis Calculus}
+\label{section:graded-base-focusing}
+
+\section{Evaluation}
+\label{section:graded-base-evaluation}
+
+\section{Conclusion}
+\label{section:graded-base-conclusion}

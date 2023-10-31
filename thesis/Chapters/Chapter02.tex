@@ -1,0 +1,568 @@
+\chapter{Background}
+\label{chapter:background}
+Since Girard's original work on Linear Logic in 1987~\cite{girard1987linear}, the development of type
+systems which convey additional information about the program's structure has
+evolved into a distinct paradigm, culminating in recent years with the notion of
+\textit{graded types}. Approaches to graded type systems run the gamut,
+incorporating a wide range of effect and coeffect systems, however, they 
+can typically be distilled into two categories, with distinct lineages: 
+\begin{itemize}
+  \item Systems where a graded modal type operator introduces and eliminates
+        graded modalities above some existing type system. This is the default
+        approach of Granule, where the underlying type system is linear,
+        and grade modalities are introduced and eliminated via the $\Box$ modal
+        type operator.
+  \item Systems where grades permeate the program, and are introduced via annotations 
+        on function arrows. This is the approach taken by Linear Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}, where 
+        grades (or ``multiplicities'') are specified using the \granin{\%} operator. 
+\end{itemize}  
+These two different styles to graded types mirror the dual development of 
+effect systems and graded monadic systems in the literature. In the latter case, 
+the two were eventually found to be equivalent. 
+
+% The same treatment for graded systems is ongoing 
+
+% In the first, modern resourceful type systems trace their roots to Girard's
+% Linear Logic~\cite{} which was one of the first treatments of data as a resource
+% inside a program. Bounded Linear Logic (BLL) developed this idea further,
+% refining the coarse grained view of data as either linear or non linear. Several
+% subsequent works generalised BLL, coalescing into the notion of a
+% \textit{graded} type system in languages such as Granule~\cite{}. This lineage
+% treats these systems essentially as refinements of an underlying linear
+% structure.
+
+
+
+% \begin{table}[htbp]
+% \centering
+% \caption{Timeline.}
+% \label{tbl:1}
+% \begin{tabular}{r l l}
+%   Year & \ \ Linear & \ \ Graded \\
+%   \toprule
+%   1986 & & \textasteriskcentered\ D.K. Gifford, J.M. Lucassen \\
+%        & & \ \ \textit{Integrating Functional and} \\
+%        & & \ \ \textit{Imperative Programming}  \\
+
+%   1987 & \textasteriskcentered\ J.Y. Girard \\
+%        & \ \ \textit{Linear Logic} & \\
+
+%   1990 & & \textasteriskcentered\ E. Moggi \\
+%        & & \ \ \textit{Notions of Computation and Monads} \\
+
+%   1991 & \textasteriskcentered\ J.Y. Girard et al. & \\
+%        & \ \ \textit{Bounded Linear Logic} & \\
+
+%   1994 & \textasteriskcentered\ J.S. Hodas, D. Miller &  \\
+%        & \ \ \textit{Logic Programming in a Fragment} & \\
+%        & \ \ \textit{of Intuitionistic Linear Logic} & \\
+
+%   2000 & & \textasteriskcentered\ P. Wadler, P. Thiemann \\
+%        & & \ \ \textit{Marriage of effects and monads} \\
+%   2011 & \textasteriskcentered\ U.D. Lago, M. Gaboardi &  \\
+%        & \ \ \textit{Linear Dependent Types} & \\
+%        & \ \ \textit{and Relative Completeness} & \\
+%   2013 & & \textasteriskcentered\ T. Petricek et al. \\
+%        & & \ \ \textit{Coeffects: Unified Static} \\
+%        & & \ \ \textit{Analysis of Context-Dependence} \\
+%   2014 & \textasteriskcentered\ D.R. Ghica, A. I. Smith & \textasteriskcentered\
+%   T. Petricek et al. \\
+%        & \ \ \textit{Bounded Linear Types in} & \ \ \textit{Coeffects: a
+%                                                 Calculus of} \\
+%        & \ \ \textit{a Resource Semiring}  & \ \ \textit{Context-Dependent Computation} \\
+%        & \textasteriskcentered\ A. Brunel et al. & \\
+%        & \ \ \textit{A Core Quantative Coeffect Calculus} & \\
+%   2016 & \textasteriskcentered\ M. Gaboardi et al. & \textasteriskcentered\ C. McBride \\
+%        & \ \ \textit{Combining Effects and} & \ \ \textit{I Got Plenty o' Nuttin'} \\
+%        & \ \ \textit{Coeffects via Grading} & \\
+%   2017 & & \textasteriskcentered\ J.P. Bernardy et al. \\
+%        & & \ \ \textit{Linear Haskell} \\
+%   2018 & & \textasteriskcentered\ R. Atkey \\
+%        & & \ \ \textit{Syntax and Semantics of} \\
+%        & & \ \ \textit{Quantative Type Theory} \\
+%   2019 & \textasteriskcentered\ Orchard et al. & \\
+%        & \ \ \textit{Quantitative Program Reasoning} & \\
+%        & \ \ \textit{with Graded Modal Types} & \\
+%   % 2020 & LOPSTR &  \\
+%   % 2021 & & \textasteriskcentered\ A. Abel, J.P. Bernardy \\
+%   %      & & \ \ \textit{A Unified View of Modalities} \\
+%   %      & & \ \ \textit{in Type Systems} \\
+%   %      & & \textasteriskcentered\ P. Choudhury et al. \\
+%   %      & & \ \ \textit{A Graded Dependent Type System} \\
+%   %      & & \ \ \textit{with a Usage-Aware Semantics} \\
+%   %      & & \textasteriskcentered\ B. Moon et al. \\
+%   %      & & \ \ \textit{Graded Modal Dependent} \\
+%   %      & & \ \ \textit{Type Theory} \\
+%   %      & & \textasteriskcentered\ E. Brady \\
+%   %      & & \ \ \textit{Idris 2: Quantative Type} \\
+%   %      & & \ \ \textit{Theory in Practice} \\
+%   %
+%   \bottomrule
+% \end{tabular}
+% \end{table}
+
+
+\section{Terminology}
+Before delving into linear and graded systems, we briefly frame the approach we
+will take to discussing the relevant background material. Throughout we will
+tend towards using a \textit{types-and-programs} terminology rather than
+\textit{propositions-and-proofs}. Through the lens of the Curry-Howard
+correspondence, one can switch smoothly to viewing our approach to program
+synthesis as proof search in logic.
+
+The functional programming languages we discuss are presented as typed
+calculi given by sets of \textit{types}, \textit{terms} (programs), and \textit{typing
+ rules} that relate a term to its type. The most well-known typed
+calculus is the simply-typed $\lambda$-calculus, which corresponds to
+intuitionistic logic.
+
+A \textit{judgment} defines the typing relation between a type and a term based on a
+\textit{context}. In the simple typed $\lambda$-calculus, judgments have the
+form: $\Gamma \vdash t : A$, stating that under some context of
+\textit{assumptions} $\Gamma$ the program term $t$ can be assigned the type $A$.
+An assumption is a name with an associated type, written $x : A$ and
+corresponds to an in-scope variable in a program.
+
+A term can be related to a type if we can derive a valid judgment through the
+application of typing rules. The application of these rules forms a tree
+structure known as a \textit{typing derivation}.
+
+
+\section{Linear and substructural logics}
+Linear logic~\cite{} was introduced by Girard as a way of being more descriptive
+about the properties of a derivation in intuitionistic logic. In type systems
+such as the simply typed $\lambda$-calculus, the properties of
+\textit{weakening}, \textit{contraction}, and \textit{exchange} are assumed
+implicitly. These are typing rules which are \textit{structural} as they
+determine how the context may be used rather than being directed by the syntax.
+Weakening is a rule which allows terms that are not needed in a typing
+derivation to be discarded. Contraction works as a dual to weakening, allowing
+an assumption in the context to be used more than once. Finally, exchange allows
+assumptions in a context to arbitrarily re-ordered.
+
+
+\begin{figure}[H]
+  \begin{align*}
+  \begin{array}{c}
+    \inferrule*[right=Weakening]{\Gamma \vdash t : B}{\Gamma, x : A \vdash t : B}
+    \;\;\;\;
+    \;\;\;\;
+    \;\;\;\;
+    \inferrule*[right=Contraction]{\Gamma, x : A, y : A \vdash t : B}{\Gamma, x : A \vdash t : B}
+    \\\\
+    \inferrule*[right=Exchange]{\Gamma_{1}, y : B, x : A, \Gamma_{2} \vdash t : C} {\Gamma_{1}, x : A, y : B, \Gamma_{2} \vdash t : C}
+    \end{array}
+  \end{align*}
+  \caption{Substructural rules for weakening, contraction, and exchange}
+\end{figure}
+
+Linear logic is known as a \textit{substructural} logic because it lacks the weakening
+and contraction rules, while permitting exchange.
+
+The disallowance of these rules means that in order to construct of a typing
+derivation, each assumption must be used exactly once --- arbitrarily copying or
+discarding values is disallowed, excluding a vast number of programs from being
+typeable in linear logic. Non-restricted usage of a value is recovered through
+the modal operator $!$ (also called ``bang'', ``of-course'', or the
+\textit{exponential} modality). Affixing $!$ to a type captures the notion that values of
+that type may be used freely in a program.
+
+providing a binary view of data as a
+resource inside a program: values are either linear or completely unrestricted.
+
+Bounded Linear Logic, took this idea further --- instead of a single modal
+operator, $!$ is replaced with a family of modal operators indexed by terms
+which provide an upper bound on usage~\cite{}. These terms provide an upper bound on
+the usage of a values inside term, e.g. $!_{3}A$ is the type of $A$ values which
+may be used up to 3 times.
+
+
+
+
+\section{The Graded Linear $\lambda$-calculus}
+\label{sec:linear-base}
+We now define a core type system, based on the linear
+$\lambda$-calculus extended with a graded modal type. 
+This calculus is equivalent to the core calculus of Granule,
+\textsc{GrMini}\cite{}. Granule's full type system extends this
+graded linear core with polymorphism, algebraic data types (ADTs), indexed types, pattern
+matching. We refer to this system as the \textit{graded linear $\lambda$-calculus}, reflecting the underlying
+linear structure of the system.
+
+This system forms the basis of the target language for our synthesis tool in
+chapter~\ref{chapter:core}. 
+
+The types of the graded linear $\lambda$-calculus are defined as:
+\begin{align*}
+\hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+       [[ A ]] \multimap [[ B ]]
+  \mid [[ [] r A ]]
+{\small{\tag{types}}}
+\end{align*}
+where the type $\Box_{r} A$ is an indexed family of type operators where $r$ is a
+\textit{grade} ranging over the elements of a pre-ordered semiring
+$({\mathcal{R}}, {*}, {1}, {+}, {0},
+{\sqsubseteq})$ parameterising the calculus (where $\ast$ and $+$
+are monotonic with respect to the pre-order $\sqsubseteq$). Linear functions 
+are specified by the $\multimap$ arrow\footnote{Although Granule uses $\rightarrow$ syntax rather than
+$\multimap$ for linear functions for the sake of familiarity with
+standard functional languages}.
+
+The syntax of terms provides the elimination and introduction forms:
+\begin{align*}
+\hspace{-0.8em} [[ t ]] ::= \;
+       & [[ x ]]
+  \mid [[ \x . t ]]
+  \mid [[ t1 t2 ]]
+  \mid [[ [t] ]]
+  \mid [[ let [ x ] = t1 in t2 ]]
+{\small{\tag{terms}}}
+\end{align*}
+In addition the the terms of the linear $\lambda$-calculus, we also have the
+construct $[[ [t] ]]$ which introduces a graded modal type $[[ [] r A
+]]$ by `promoting' a term $t$ to the graded modality, and it's dual $[[ let [x] = t1
+in t2 ]]$ eliminates a graded modal value $[[ t1 ]]$, binding a graded variable $x$
+in scope of $[[ t2 ]]$. The typing rules provide further understanding of the
+behaviour of these terms.
+
+Typing judgments are of the form $[[ G |- t : A ]]$, where $[[ G ]]$ ranges over contexts:
+\begin{equation*}
+  [[ G ]] ::= \emptyset
+  \mid [[ G , x : A ]]
+  \mid [[ G , x : [ A ] r ]]
+\tag{contexts}
+\end{equation*}
+
+Thus, a context may be empty $\emptyset$, extended with a
+linear assumption $[[ x : A ]]$ or extended with a graded assumption $[[x : [A]
+r]]$. For linear assumptions, structural rules of weakening
+and contraction are disallowed. Graded assumptions may be used
+non-linearly according to the constraints given by their grade, the
+semiring element $r$. Throughout, comma denotes disjoint context
+concatenation.
+
+Various operations on contexts are used to capture non-linear data flow
+via grading. Firstly, \emph{context addition}~\eqref{def:contextAdd} provides an
+analogue to contraction, combining contexts that have come from
+typing multiple subterms in a rule.
+Context addition, written $[[ G1 + G2]]$, is undefined if $[[ G1 ]]$ and $[[ G2 ]]$
+overlap in their linear assumptions. Otherwise graded assumptions appearing
+in both contexts are combined via the semiring $+$ of their grades.
+
+\begin{definition}[Context addition]\label{def:contextAdd}
+
+\begin{align*}
+    \setlength{\arraycolsep}{0.1em}
+    \begin{array}{cc}
+    \begin{array}{rl}
+    [[ (G, x : A) + G' ]] & = [[ (G + G'), x : A ]] \quad \text{iff} \,\; x
+    \not\in | [[ G' ]] | \\
+    [[ G + (G', x : A) ]] & = [[ (G + G'), x : A ]] \quad \text{iff} \,\; x \not\in | [[ G]] | \\
+    [[ (G, x : [ A ] r) + (G', x : [ A ] s) ]] & = [[ (G + G'), x : [ A ] (r + s) ]]
+    \end{array}
+      \;\;\quad & \quad\;\;
+    \begin{array}{rl}
+      [[ . + G ]] & = [[ G ]] \\
+      [[ G + . ]] & = [[ G ]] \\ \\
+    \end{array}
+  \end{array}
+  \end{align*}
+
+Note that this is a declarative specification of context addition. Graded
+assumptions may appear in any position in $\Gamma$ and $\Gamma'$ as witnessed by
+the algorithmic specification where for all $[[ G1 ]], [[ G2 ]]$
+  \emph{context addition} is defined
+as follows by ordered cases matching inductively on the structure of
+$[[ G2 ]]$:
+\begin{align*}
+[[G1 + G2]] = \left\{\begin{matrix}
+    \begin{array}{ll}
+    [[G1]] &
+     [[G2]] = \emptyset
+             \\
+      (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
+[[ G2]] = [[G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']]  \\
+ ([[G1]] + [[G2']]), [[x : A]] & [[G2]] = [[G2', x : A]]\ \wedge\  [[x
+                                  : A]] \notin [[ G1 ]]
+    \end{array}
+  \end{matrix}\right.
+\end{align*}
+\end{definition}
+
+\begin{figure}[H]
+\hspace{-0.5em}
+\begin{align*}
+\hspace{-0.5em}
+  \begin{array}{c}
+  \inferrule*[right = Var]
+  {\;}
+  {[[ x : A |- x : A ]]}
+\;\;
+  \inferrule*[right = Abs]
+  {[[ G , x : A |- t : B ]]}
+  {[[ G |- \x . t : A -> B ]]}
+\\[0.75em]
+  \inferrule*[right = App]
+  {[[ G1 |- t1 : A -> B ]] \;\;\;
+   [[ G2 |- t2 : A ]] }
+  {[[ G1 + G2 |- t1 t2 : B ]]}
+\\[0.75em]
+ \inferrule*[right = Weak]
+  {[[ G |- t : A ]]}
+  {[[ G , {[ D , 0 ]} |- t : A ]]}
+\;\;\;
+\inferrule*[right = Der]
+  {[[ G , x : A |- t : B ]]}
+  {[[ G , x : [ A ] 1 |- t : B]]}
+\\[0.75em]
+\inferrule*[right = Approx]
+{[[ {G, x : [A] r}, G' |- t : A ]] \quad r \sqsubseteq s }
+{[[ {G, x : [A] s}, G' |- t : A ]]}
+\\[0.75em]
+\inferrule*[right = Pr]
+  {[[ [ G ] |- t : A ]]}
+  {[[ r * {[ G ]} |- [t] : [] r A ]]}
+\;\;\;
+\inferrule*[right = Let$\Box$]
+  {[[ G1 |- t1 : [] r A ]] \;\;\;
+   [[ G2, x : [ A ] r |- t2 : B ]] }
+    {[[ G1 + G2 |- let [x] = t1 in t2 : B ]]}
+\end{array}
+\end{align*}
+\vspace{-1.25em}
+  \caption{Typing rules of the graded linear $\lambda$-calculus}
+\label{fig:typing}
+\vspace{-0.65em}
+ \end{figure}
+
+
+Figure~\ref{fig:typing} defines the typing rules.
+Linear variables are typed in a singleton context
+(\textsc{Var}). Abstraction (\textsc{Abs}) and application (\textsc{App})
+follow the rules of the linear $\lambda$-calculus.
+The $\textsc{Weak}$ rule captures
+weakening of assumptions graded by $0$ (where $[[ [ D , 0 ] ]]$ denotes a context
+containing only graded assumptions graded by $0$). Context addition and
+\textsc{Weak} together therefore provide the rules of substructural rules of contraction
+and weakening.
+Dereliction ($\textsc{Der}$),
+allows a linear assumption to be converted to a graded assumption with grade
+$1$. Grade approximation is captured by the $\textsc{Approx}$
+rule, which allows a grade $s$ to be converted to another grade $r$,
+providing that $r$ \textit{approximates} $s$, where the relation
+$\sqsubseteq$ is the pre-order provided
+with the semiring.
+Introduction and elimination of the graded modality is provided by the
+$\textsc{Pr}$ and $\textsc{Let}$ rules
+respectively. The $\textsc{Pr}$ rule propagates the grade $r$ to the
+assumptions through \emph{scalar multiplication} of $[[G]]$ by $r$ where
+every assumption in $[[ G ]]$ must already be graded (written $[[ [ G
+] ]]$ in the rule), given by definition~\eqref{def:scalar}.
+%
+%
+\begin{definition}[Scalar context multiplication]
+  \label{def:scalar}
+ A context which consists solely of graded assumptions can be multiplied by a
+ semiring grade $r \in \mathcal{R}$
+\begin{align*}
+   [[ r * . ]] = \emptyset
+    \qquad\qquad
+    [[ r * (G , x : [ A ] s) ]] = [[ (r * G), x : [ A ] (r * s) ]]
+\end{align*}
+\end{definition}
+
+The $\textsc{Let}$ rule eliminates a graded modal value $[[ [] r A ]]$
+into a graded assumption $[[ x : [ A ] r ]]$ with a matching
+grade in the scope of the \textbf{let} body. This is also referred to as
+``unboxing''.
+
+We give an example of graded modalities using a graded modality indexed
+by the semiring of natural numbers.
+
+%SKI
+\begin{example}
+\label{ex:s-comb}
+  The natural number semiring with discrete ordering
+  $(\mathbb{N}, \ast, 1, +, 0, \equiv)$ provides a graded modality
+  that counts exactly how many times non-linear values are used. As a
+  simple example, the \emph{S} combinator from the SKI system of combinatory logic is typed and defined:
+% then2 : forall {a b c : Type} . (a -> (b -> c)) -> (a -> b) -> (a
+% [2] -> c)
+\begin{align*}
+s & : [[ (A -> (B -> C)) -> {(A -> B) -> ({[] 2 A} -> C)} ]] \\
+s & = [[ \x . {\y . {\z' . {let [ z ] = z' in {(x z) (y z)}}}} ]]
+\end{align*}
+The graded modal value $z'$ captures the `capability' for a value
+of type $A$ to be used twice. This capability is made available by eliminating
+$\Box$ (via \textbf{let}) to the variable $z$, which is
+graded $z : [A]_2$ in the scope of the body.
+\end{example}
+
+
+
+\paragraph{Metatheory}
+The admissibility of substitution is a key result that holds
+for this language~\cite{DBLP:journals/pacmpl/OrchardLE19}, which is
+leveraged in soundness of the synthesis calculi.
+%
+\begin{restatable}[Admissibility of substitution]{lemma}{linearSubst}
+Let $[[ D |- t' : A]]$, then:
+\label{lemma:substitution}
+\begin{itemize}[leftmargin=1em]
+\item (Linear) \hspace{0.04em} If $[[ {G, x : A}
+    ,, { G' } |- t : B]]$ then $[[ G + D + G' |-
+[ t' / x ] t : B ]]$
+\item (Graded) If $[[ {G, x : [A] r} ,, { G' } |- t : B]]$
+then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
+\end{itemize}
+\end{restatable}
+
+\section{The Fully Graded $\lambda$-calculus}
+\label{sec:graded-base}
+We now define a core calculus for a fully graded type system, in the vein of
+systems where grades permeate the entire program, drawing from the coeffect
+calculus of \citet{petricek2014coeffects}, Quantitative Type Theory (QTT) by
+\citet{McBride2016} and refined further by \citet{quantitative-type-theory}
+(although we omit dependent types from our language), the calculus of
+\citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type
+theories~\cite{quantitative-type-theory,DBLP:conf/esop/MoonEO21}. Similar
+systems also form the basis of the core of the linear types extension to
+Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}. We refer to this system as
+the \textit{fully graded $\lambda$-calculus} to differentiate it from its linearly-based
+counterpart.
+
+The syntax of graded-base types is given by:
+\begin{align*}
+\hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+       [[ A ^ r -> B ]]
+  \mid [[ [] r A ]]
+{\small{\tag{\textit{types}}}}
+\end{align*}
+where the function arrow $[[ A ^ r -> B ]]$ annotates the input type with a \emph{grade} $[[ r ]]$
+which is again drawn from a pre-ordered semiring
+$(\mathcal{R}, {\ast}, {1}, {+}, {0}, \sqsubseteq)$ paramterising the
+calculus. The graded necessity modality $[[ [] r A ]]$ is similarly annotated by the grade
+$[[ r ]]$ being an element of the semiring. 
+
+The syntax of terms is given as:
+%
+\begin{align*}
+\hspace{-0.8em} [[ t ]] ::= \;
+       & [[ x ]]
+  \mid [[ \x ^ c . t ]]
+  \mid [[ t1 t2 ]]
+  \mid [[ [t] ]]
+  % \mid [[ case t of p1 -> t1 ; * ; pn -> tn  ]]
+{\small{\tag{\textit{terms} }}}
+\end{align*}
+%
+Terms comprise the $\lambda$-calculus, extended
+with the \textit{promotion} construct [t] as seen in section~\ref{sec:linear-base}.
+Typing judgements have the same form as section~\ref{sec:linear-base}, however, variable contexts 
+are instead given by: 
+\begin{equation*}
+  [[ D ]], [[ G ]] ::= \emptyset
+  \mid [[ G , x : [ A ] r ]]
+\tag{\textit{contexts}}
+\end{equation*}
+That is, a context may be empty $\emptyset$ or extended with a \textit{graded}
+assumption $ [[ x : [A] r ]]$, which must be used in a
+way which adheres to the constraints of the grade $[[ r ]]$. As before, structural
+exchange is permitted, allowing a context to be arbitrarily reordered. 
+
+
+\begin{figure}[H]
+\hspace{-0.5em}
+\begin{align*}
+\hspace{-0.5em}
+\begin{array}{c}
+\GRANULEdruleTyVar{}
+\;\;\;
+\GRANULEdruleTyAbs{}
+\\[0.75em]
+\GRANULEdruleTyApp{}
+\\[0.75em]
+\GRANULEdruleTyPr{}
+\;\;\;
+\GRANULEdruleTyApprox{}
+\end{array}
+\end{align*}
+\vspace{-0.5em}
+\caption{Typing rules for graded-base}
+\label{fig:graded-typing}
+\vspace{-0.5em}
+ \end{figure}
+
+Figure~\ref{fig:graded-typing} gives the full typing rules, which explains the meaning of
+the syntax with reference to their static semantics.
+
+Variables (rule \textsc{Var}) are typed in a context where the variable $x$ has
+grade $1$ denoting its single usage here. All other variable assumptions are
+given the grade of the $0$ semiring element (providing \emph{weakening}), using
+\textit{scalar multiplication} of contexts by a grade, re-using
+definition~\eqref{def:scalar}.
+
+Abstraction (\textsc{Abs}) captures the assumption's grade $[[ r ]]$ onto the
+function arrow in the conclusion, that is, abstraction binds a variable $[[x]]$
+which may be used in the body $[[t]]$ according to grade $[[ r ]]$. Application
+(\textsc{App}) makes use of context addition to combine the contexts used to
+type the two subterms in the premises of the application rule (providing
+\emph{contraction}):
+
+\begin{definition}[Graded context addition]\label{def:contextAddGraded}
+\begin{align*}
+[[G1 + G2]] = \left\{\begin{matrix}
+    \begin{array}{ll}
+    [[G1]] &
+    [[G2]] = \emptyset
+             \\
+      (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
+[[ G2]] = [[ G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']] \\
+ [[ (G1 + G2'), x : [A] s ]] & [[ G2 ]] = [[ G2' , x : [A] s ]] \wedge [[ x ]] \not\in \mathsf{dom}([[ G1 ]])
+\end{array}
+  \end{matrix}\right.
+\end{align*}
+\end{definition}
+Note that~\ref{def:contextAddGraded} differs only from
+~\ref{def:contextAdd}, in that the former need not consider linear
+assumptions.
+
+Explicit introduction of graded modalities is achieved via the rule for
+promotion (\textsc{Pr}). The grade $[[ r ]]$ is propagated to the assumptions in
+$[[ G ]]$ through the scaling of $[[G]]$ by $[[r]]$. Approximation
+(\textsc{Approx}) allows a grade $[[ r ]]$ to be converted to another grade $[[
+s ]]$, provided that $[[ r ]]$ \textit{approximates} $[[ s ]]$. Here, the
+pre-order relation of the semiring $\sqsubseteq$ provides approximation. This
+relation is occasionally lifted pointwise to contexts: we write $[[ G <<= G' ]]$
+to mean that $[[ G' ]]$ overapproximates $[[ G ]]$ meaning that for all $[[ (x :
+[A] r) ]] \in [[ G ]]$ then $[[ (x : [A] r') ]] \in [[ G' ]]$ and $[[ r <<= r'
+]]$.
+
+\paragraph{Metatheory}
+Lastly we note that the fully graded $\lambda$-calculus also enjoys admissibility of
+substitution~\citep{DBLP:journals/pacmpl/AbelB20}
+which is critical in type preservation proofs,
+and is needed in our proof of soundness for synthesis:
+%
+\begin{restatable}[Admissibility of substitution]{lemma}{subst}
+\label{lemma:substitution}
+Let $[[ D |- t' : A]]$, then:
+If $[[ {G, x : [A] r} , G' |- t : B]]$
+then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
+\end{restatable}
+
+\section{Two Typing Calculi}
+Having outlined the two lineages of graded type systems, we are left with the
+question: what approach should we use as the basis of a target language for a
+program synthesis tool? Both systems embed properties for reasoning about
+program structure into the language, however, they differ in how this
+information is expressed, as shown by the variance in typing and syntax between
+sections ~\ref{sec:linear-base} and ~\ref{sec:graded-base}. 
+
+Rather than focus entirely on one approach, we opt to instead build synthesis
+tools which target both languages. As we have seen, systems based on both
+approaches are used by many languages today, and both pose their unique
+challenges in designing a synthesis tool, which makes favouring a particular
+approach difficult to justify. Furthermore, the target programming language
+Granule of our implementations includes both approaches~\footnote{As of Granule
+v0.9.3.0}. 

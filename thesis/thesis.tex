@@ -1,43 +1,76 @@
-\documentclass[12pt]{UoKthesis}
+% **************************************************************************************************************
+% A Classic Thesis Style
+% An Homage to The Elements of Typographic Style
+%
+% Copyright (C) 2018 André Miede and Ivo Pletikosić
+%
+% If you like the style then I would appreciate a postcard. My address
+% can be found in the file ClassicThesis.pdf. A collection of the
+% postcards I received so far is available online at
+% http://postcards.miede.de
+%
+% License:
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; see the file COPYING.  If not, write to
+% the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+% Boston, MA 02111-1307, USA.
+%
+% PLEASE SEE ALSO THE AUTHORS' NOTE REGARDING THIS LICENSE
+% IN THE DOCUMENTATION (ClassicThesis.pdf --> Chapter 1 / Chapter01.tex)
+% **************************************************************************************************************
+\RequirePackage{silence} % :-\
+    \WarningFilter{scrreprt}{Usage of package `titlesec'}
+    %\WarningFilter{scrreprt}{Activating an ugly workaround}
+    \WarningFilter{titlesec}{Non standard sectioning command detected}
+\documentclass[ twoside,openright,titlepage,numbers=noenddot,%1headlines,
+                headinclude,footinclude,cleardoublepage=empty,abstract=on,
+                BCOR=5mm,paper=a4,fontsize=12pt
+                ]{scrreprt}
 
-% Note: The UoKextentions package includes the xcolor package with the [usenames]
-% options. If you need to add further options, these can be given to UoKextentions
-% to be propogated through.
-\usepackage{UoKextentions}
-\usepackage{lipsum}
-\usepackage{comment}
-\usepackage{dashrule}
-\usepackage{color}
-\usepackage{mathpartir}
-\usepackage{amsmath}
-\usepackage{amsfonts}
+%********************************************************************
+% Note: Make all your adjustments in here
+%*******************************************************
+\input{classicthesis-config}
+\input{granule-ott}
+\input{Preamble/Names.tex}
+\input{Preamble/Preamble-ottput}
+
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{tikz}
 \usepackage{tikz-cd}
-\usepackage{natbib}
 \usepackage{caption}
 \usepackage{xypic}
 \usepackage{enumitem}
+\usepackage{multirow}
 \usepackage{hyperref}
-\usepackage{graphicx}
 \usepackage{float}
-
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage[tableposition = top]{caption}
 \usepackage{booktabs}
 
-\usepackage{multirow}
-
 \newcommand{\jnote}[1]{\textcolor{purple}{\textsc{joh}: #1}}
-
 \usetikzlibrary{automata, positioning, arrows}
 \usetikzlibrary{shapes.multipart}
 \usepackage{thmtools}
 \usepackage{thm-restate}
+\usepackage{mathpartir}
+
+\definecolor{mypink3}{cmyk}{0, 0.82, 0.98, 0.28}
+\newcommand{\maximal}[4]{\forall #2 . #3 \sqsupseteq #4 \implies #1 \sqsupseteq #2}
+
 \declaretheorem[name=Proposition,numberwithin=section]{prop}
-
-\newcommand{\coeff}[1]{\textcolor{coeffectColor}{#1}}
-
 \theoremstyle{plain}% default
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -50,74 +83,77 @@
 \newtheorem{remark}{Remark}
 \newtheorem{question}{Question}[section]
 
+%********************************************************************
+% Bibliographies
+%*******************************************************
+\addbibresource{Bibliography.bib}
+\addbibresource[label=ownpubs]{JHughes_Publications.bib}
+%********************************************************************
+% Hyphenation
+%*******************************************************
+%\hyphenation{put special hyphenation here}
 
-
-\definecolor{mypink3}{cmyk}{0, 0.82, 0.98, 0.28}
-\newcommand{\maximal}[4]{\forall #2 . #3 \sqsupseteq #4 \implies #1 \sqsupseteq #2}
-
-% Used to configure the algorithm enviroment
-\usepackage[ruled,vlined,linesnumbered,commentsnumbered,resetcount]{algorithm2e}
-
-% Used to generate sample image.
-\let\oldincludegraphics\includegraphics\renewcommand{\includegraphics}[1]{\IfFileExists{#1}{\oldincludegraphics{#1}}{\fbox{\phantom{\rule{150pt}{100pt}}}}}
-
-
-\input{granule-ott}
-\input{0_preamble/names.tex}
-\input{0_preamble/preamble-ottput}
-
-
+% ********************************************************************
+% GO!GO!GO! MOVE IT!
+%*******************************************************
 \begin{document}
-\normalsize
-%Cover page information
-\title{University of Kent\\Program Synthesis from Linear and Graded Types}
-\author{Jack Hughes}
-\subject{computer science}
-\degree{PhD}
-
-%thesis preface
-\begin{preface}
-\section{Abstract}
-A type-directed program synthesis tool can leverage the information provided by
-resourceful types (linear and graded types) to prune ill-resourced programs from
-the search space of candidate programs. Therefore, barring any other
-specification information, a synthesise tool will synthesise a target program
-(if one exists) more quickly when given a type specification which includes
-resourceful types than when given an equivalent non-resourceful type.
-
-\section{Acknowledgements}
-\end{preface}
-
-\chapter{Introduction}
-\label{chapter:intro}
-\input{1_introduction/intro-ottput}
-
-\chapter{Background}
-\label{chapter:background}
-\input{2_background/background-ottput}
-
-\chapter{A core synthesis calculus}
-\label{chapter:core}
-\input{3_linear-base/linear-base-ottput}
-
-\chapter{Deriving graded combinators}
-\label{chapter:deriving}
-\input{4_deriving/deriving-ottput}
-
-\chapter{An extended synthesis calculus}
-\label{chapter:extended}
-\input{5_graded-base/extended-ottput}
-
-\chapter{Conclusion}
-\label{chapter:conclusion}
-\input{6_conclusion/conclusion-ottput}
-
-\bibliography{references}{}
-
-% \iffalse
-\newpage
+\frenchspacing
+\raggedbottom
+\selectlanguage{american} % american
+%\renewcommand*{\bibname}{new name}
+%\setbibpreamble{}
+\pagenumbering{roman}
+\pagestyle{plain}
+%********************************************************************
+% Frontmatter
+%*******************************************************
+\include{FrontBackmatter/DirtyTitlepage}
+\include{FrontBackmatter/Titlepage}
+\include{FrontBackmatter/Titleback}
+% \cleardoublepage\include{FrontBackmatter/Dedication}
+% \cleardoublepage\include{FrontBackmatter/Foreword}
+\cleardoublepage\include{FrontBackmatter/Abstract}
+\cleardoublepage\include{FrontBackmatter/Publications}
+\cleardoublepage\include{FrontBackmatter/Acknowledgments}
+\cleardoublepage\include{FrontBackmatter/Contents}
+%********************************************************************
+% Mainmatter
+%*******************************************************
+\cleardoublepage
+\pagestyle{scrheadings}
+\pagenumbering{arabic}
+%\setcounter{page}{90}
+% use \cleardoublepage here to avoid problems with pdfbookmark
+\cleardoublepage
+\part{Program Synthesis from Linear and Graded Types}\label{pt:dissertation}
+\include{Chapters/Chapter01-ottput}
+% \cleardoublepage
+% \ctparttext{}
+% \part{The Showcase}\label{pt:showcase}
+\include{Chapters/Chapter02-ottput}
+\include{Chapters/Chapter03-ottput}
+\include{Chapters/Chapter04-ottput}
+\include{Chapters/Chapter05-ottput}
+\include{Chapters/Chapter06-ottput}
+\cleardoublepage\include{FrontBackmatter/Bibliography}
+%\addtocontents{toc}{\protect\clearpage} % <--- just debug stuff, ignore
+% \include{Chapters/Chapter03}
+%\include{multiToC} % <--- just debug stuff, ignore for your documents
+% ********************************************************************
+% Backmatter
+%*******************************************************
 \appendix
-\input{7_appendix/appendix-ottput}
-\input{8_proofs/proofs-ottput}
-% \fi
+%\renewcommand{\thechapter}{\alph{chapter}}
+\cleardoublepage
+\part{Appendix}
+\include{Appendix/Proofs-ottput}
+%********************************************************************
+% Other Stuff in the Back
+%*******************************************************
+\cleardoublepage\include{FrontBackmatter/Declaration}
+\cleardoublepage\include{FrontBackmatter/Colophon}
+% ********************************************************************
+% Game Over: Restore, Restart, or Quit?
+%*******************************************************
 \end{document}
+% ********************************************************************
