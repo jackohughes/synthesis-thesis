@@ -1,9 +1,46 @@
 \chapter{An extended synthesis calculus}
 \label{chapter:extended}
 
+So far, we have considered a language with a several basic types, but which
+falls short of the full expressive power of Granule. In this chapter, we
+consider a target language which is significantly more expressive than what we
+have seen thus far, adding the synthesis of recursion, polymorphic user-defined
+algebraic data types, as well as the synthesis of recursive function definitions
+from polymorphic type schemes.
+
+The above features could all have been added to the calculi from
+Chapter~\ref{chapter:core}, however, we take the inclusion of these new language
+features as an opportunity to also explore synthesis in a fully graded type
+system. As mentioned in~\ref{chapter:background}, the fully-graded linear-lambda
+calculus is one of the two dominant flavours of quantitative type system. This
+approach is more common in the modern implementations of quantiative types, such
+as Idris 2, the Linear Types language extension to GHC, and the
+\emph{GradedBase} language extension of Granule. It also typical of many of the
+theoretical works~\cite{}. 
+
+
+
 \section{A Fully Graded Target Language}
 \label{section:graded-base-typing}
 
+We now formally define our target language. This system extends the fully graded
+linear $\lambda$-calculus of Chapter~\ref{chapter:background}, which draws from
+the coeffect calculus of \citet{petricek2014coeffects}, Quantitative Type Theory
+(QTT) by \citet{McBride2016} and refined by \citet{quantitative-type-theory}
+(though we omit dependent types from our language), the calculus of
+\citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type
+theories~\citep{DBLP:conf/esop/MoonEO21}. Similar systems also form the basis of
+the core of the linear types extension to
+Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}. This calculus shares much
+in common with languages based on linear types, such as the graded
+monadic-comonadic calculus of~\citep{combining2016}, generalisations of Bounded
+Linear Logic~\citep{DBLP:conf/esop/BrunelGMZ14,DBLP:conf/esop/GhicaS14}, and
+Granule~\citep{DBLP:journals/pacmpl/OrchardLE19} in the original `linear base'
+form.
+
+Our language comprises the $\lambda$-calculus extended with grades and a
+graded necessity modality as well as arbitrary user-defined recursive algebraic
+data types (ADTs). The syntax of types is given by:
 
 \begin{align*}
     \hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
@@ -27,6 +64,24 @@
     {\small{\tag{\textit{type schemes}}}}
 \end{align*}
 
+The function space $[[ A ^ r -> B ]]$ annotates the input type with a
+\emph{grade} $[[ r ]]$ drawn from a pre-ordered semiring $(\mathcal{R}, {\ast},
+{1}, {+}, {0}, \sqsubseteq)$ parameterising the calculus (where pre-ordering
+also requires that $+$ and $\ast$ are monotonic with respect to $\sqsubseteq$).
+Type constructors $K$ include the unit, multiplicative linear product type, and
+linear coproduct type, which is also extended by names of user-defined ADTs in
+the implementation. The graded necessity modality $[[ [] r A ]]$ is similarly
+annotated by the grade $[[ r ]]$ being an element of the semiring. Recursive
+types $\mu X . A$ are equi-recursive (although we also provide explicit typing
+rules) with type recursion variables $X$. Data constructors and other top-level
+definitions are typed by type schemes $\tau$ (rank-1 polymorphic types), which
+bind a set of kind-annotated universally quantified type variables
+$\overline{\alpha : \kappa}$ à la ML~\citep{milner1978theory}. Subsequently,
+types may contain type variables $[[ a ]]$. Kinds $\kappa$ are standard, given
+by figure~\ref{figure:kinding}.
+
+The syntax of terms is given by:
+
 \begin{align*}
         \hspace{-0.8em} [[ t ]] ::= \;
                & [[ x ]]
@@ -44,10 +99,66 @@
           \mid [[ Con p1 ... pn ]]
         {\small{\tag{\textit{patterns}}}}
 \end{align*}
+Terms consist of a graded $\lambda$-calculus, a \textit{promotion} construct $[t]$ which introduces a graded modality explicitly, as well as data constructor introduction ($[[ Con t1 ... tn ]]$) and elimination via
+ $\textbf{case}$ expressions with patterns, which are defined via the syntax of patterns $[[ p ]]$.
 
+Typing judgements have the form
+$[[  Sig ; G |- t : A ]]$ assigning a type $[[ A ]]$ to a term $ [[ t ]]$ under
+type variables $[[ Sig ]]$ and variable context $[[ G ]]$, given by:
+
+\begin{equation*}
+  [[ D ]], [[ G ]] ::= \emptyset
+  \mid [[ G , x : [ A ] r ]]
+\tag{\textit{contexts}}
+\end{equation*}
+%
+That is, a context may be empty $\emptyset$ or extended with a \textit{graded}
+assumption $ [[ x : [A] r ]]$. Graded assumptions must be used in a
+way which adheres to the constraints of the grade $[[ r ]]$. Structural
+exchange is permitted, allowing a context to be arbitrarily reordered. A global
+context $[[ Defs ]]$ paramterises the system, containing top-level definitions
+and data constructors annotated with type schemes. A context of kind annotated
+type variables $[[ Sig ]]$ is used for kinding and when instantiating a type scheme
+from $[[ Defs ]]$. 
+
+Given a typing judgment $[[  Sig ; G |- t : A ]]$ we say that $t$ is both \emph{well typed}
+and \emph{well resourced} to highlight the role of grading in accounting for resource
+use via the semiring information.
+Another judgment types top-level terms (definitions) with polymorphic type schemes:
 \begin{align*}
-    \tyTopP
+\tyTopP
 \end{align*}
+This rule takes the type scheme and adds its universally quantified type variables
+to $[[ Sig ]]$, where they can be used subsequently in the typing rules. The rule's premise
+then types the body at $A$, using the typing rules for terms
+of Figure~\ref{fig:typing}, whose rules help explain the meaning of
+the syntax with reference to their static semantics.
+
+\begin{figure}[H]
+    \begin{align*}
+    \begin{array}{c}
+        \kVar 
+        \;\;\;
+        \kBox 
+        \\\\
+        \kArrow
+        \\\\
+        \kApp 
+        \\\\
+        \kUnit
+        \;\;\;
+        \kProd 
+        \\\\
+        \kSum
+        \\\\
+        \kMuR
+        \;\;\;
+        \kMuL
+    \end{array}
+    \end{align*}
+    \caption{Kinding rules for \textsc{GrLang}}
+    \label{figure:kinding}
+\end{figure}
 
 \begin{figure}[t]
     \hspace{-0.5em}
@@ -81,6 +192,45 @@
     \vspace{-0.5em}
 \end{figure}
 
+Variables (rule \textsc{Var}) are typed in a context where the variable $x$ has
+grade $1$ denoting its single usage here. All other variable assumptions are
+given the grade of the $0$ semiring element (providing \emph{weakening}), using
+\textit{scalar multiplication} of contexts by a grade, given by
+definition~\ref{}.
+
+Top-level definitions are typed by the \textsc{Def} rule. The definition $x$
+must be present in the global definition context $[[ Defs ]]$, with the type
+scheme $[[  Forall alpha : k . A' ]]$. The type $[[ A ]]$ results from
+instantiating all of the universal variables to types via the judgment $[[ Sig
+|- inst A A' ]]$ in a standard way as in Algorithm W~\citep{milner1978theory}.
+
+Abstraction (\textsc{Abs}) captures the assumption's grade $[[ r ]]$ onto the
+function arrow in the conclusion, that is, abstraction binds a variable $[[x]]$
+which may be used in the body $[[t]]$ according to grade $[[ r ]]$. Application
+(\textsc{App}) makes use of context addition, given by definition~\ref{}, to combine the contexts used to
+type the two subterms in the premises of the application rule (providing
+\emph{contraction}).
+
+Recursion is typed via the $\mu_1$ rule and its inverse $\mu_2$, in a standard
+way.
+
+Introduction and elimination of data constructors is given by
+the \textsc{Con} and \textsc{Case} rules respectively,
+with \textsc{Case} also handling graded modality elimination via
+pattern matching. For \textsc{Con}, we may type a data constructor
+$[[C]]$ of some data type $[[ K {A Many} ]]$ (with zero or more type
+parameters represented by $[[ {A Many} ]]$) if it is present in the global
+context of data constructors $D$. Data constructors are closed
+requiring our context $[[ G ]]$ to have zero-use grades, thus we scale
+$[[G]]$ by $0$. Elimination of data constructors take place via
+pattern matching over a constructor. Patterns $[[p]]$ are typed by the
+judgement $[[ r |- p : A |> D ]]$ which states that a pattern $[[p]]$
+has type $[[A]]$ and produces a context of typed binders $[[D]]$. The
+grade $[[r]]$ to the left of the turnstile represents the grade
+information arising from usage in the context generated by this
+pattern match. The pattern typing rules are given by
+Figure~\ref{fig:pat-typing}.
+
 \begin{figure}[t]
     \begin{align*}
     \begin{array}{c}
@@ -98,15 +248,1665 @@
     \label{fig:pat-typing}
 \end{figure}
 
+Variable patterns are typed by \textsc{PVar}, which simply produces a singleton
+context containing an assumption $[[ x : [A] r]]$ from the variable pattern with
+any grade $[[ r ]]$. A wildcard pattern $\_$, typed by the \textsc{PWild} rule,
+is only permissible with grades that allow for weakening, i.e., where $0
+\sqsubseteq r$. Pattern matching over data constructors is handled by the
+\textsc{PCon} rule. A data constructor may have up to zero or more sub-patterns
+($[[ p1 ]] ... [[ pn ]]$), each of which is typed under the grade $[[ qi ]]
+\cdot [[ r ]]$ (where $[[ qi ]]$ is the grade of corresponding argument type for
+the constructor, as defined in $D$). Additionally, we have the constraint
+$[[{PolyConSimple {K {A Many}} r}]]$ which witnesses the fact that if there is
+more than one data constructor for the data type (written $|[[ K {A Many} ]]| >
+1$), then $[[ r ]]$ must approximate 1 because pattern matching on a data
+constructor incurs some usage since it reveals information about that
+constructor.\footnote{A discussion of this additional constraint on grades for
+case expressions is given by \citet{DBLP:journals/corr/abs-2112-14966} comparing
+how this manifests in various approaches.} By contrast, pattern matching on a
+type with only one constructor cannot convey any information by itself and so no
+usage requirement is imposed. Finally, elimination of a graded modality (often
+called \textit{unboxing}) takes place via the \textsc{PBox} rule, with syntax
+$[[ [p] ]]$. Like \textsc{PCon}, this rule propagates the grade information of
+the box pattern's type $[[s]]$ to the enclosed sub-pattern $[[ p ]]$, yielding a
+context with the grades $[[r * s]]$. One may observe that \textsc{PBox} (and by
+extension \textsc{Pr}) could be considered as special cases of \textsc{PCon}
+(and \textsc{Con} respectively), if we were to treat our promotion construct as
+a data constructor with the type $[[ A ^ r -> {[] r A} ]]$. We find it helpful
+to keep explicit modality introduction and elimination distinct from
+constructors, however, particularly with regard to synthesis.
+
 
 \section{A Fully Graded Synthesis Calculus}
 \label{section:graded-base-synthesis}
 
+Having defined the target language, we define our synthesis calculus, which uses
+the \emph{additive} approach to resource management (see
+Section~\ref{sec:overview}), with judgements:
+%
+\begin{align*}
+[[ Sig; G |- A =>+ t ; D ]]
+\end{align*}
+%
+That is, given an input context $[[ G ]]$, for goal type $[[ A ]]$ we can
+synthesise the term $[[ t ]]$ with the output context $[[ D ]]$ describing how
+variables were used in $[[ t ]]$. As with the typing rules, top-level
+definitions and data constructors in scope are contained in a set $[[ Defs ]]$,
+which parameterises the system. $[[ Sig ]]$ is a context of kind-annotated type
+variables, which we elide in rules where it is simply passed inductively to the
+premise(s). The graded context $[[ D ]]$ need not use all the variables in $[[ G
+]]$, nor with exactly the same grades. Instead, the relationship between
+synthesis and typing is given by the central soundness result, which we state
+up-front: % (the appendix provides the proof):
+%(Appendix~\ref{sec:soundness-proofs} provides the proof):
+
+\begin{restatable}[Soundness of synthesis]{theorem}{synthSound}
+\label{lemma:synthSound}
+Given a particular pre-ordered semiring $\mathcal{R}$ parameterising the calculi,
+then:
+\begin{enumerate}
+\item For all contexts $[[ G ]]$ and $[[ D ]]$, types $[[ A ]]$, terms $[[ t ]]$:
+\begin{align*}
+[[ Sig; G |- A =>+ t ; D ]] \quad \implies \quad [[ Sig; D |- t : A ]]
+\end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$ whose grades capture variable use in $[[ t ]]$.
+
+
+\begin{figure}
+    \begin{align*}
+    \begin{array}{c}
+      \synDefP
+      \\\\
+      \synTopP
+      \\\\
+      \synVarP
+      \\\\
+      \synAbsP
+      \\\\
+      \synAppP
+      \\\\
+      \synConP
+      \\\\
+      \synCaseP
+      \\\\
+      \synBoxP
+      \\\\
+      \synUnboxP
+      \\\\
+      \synMuRP
+      \;\;\;\;
+      \synMuLP
+        \end{array}
+      \end{align*}
+    \caption{Synthesis rules for \textsc{GrLang}}
+    \end{figure}
+
+
+\item At the top-level,
+for all type schemes $[[ Forall alpha : k . A ]]$ and terms $[[ t ]]$ then:
+%
+\begin{align*}
+[[ . ; . |- Forall alpha : k . A =>+ t ; . ]]
+\quad \implies \quad [[  . ; . |- t : Forall alpha : k . A ]]
+\end{align*}
+%
+\end{enumerate}
+\end{restatable}
+%
+The first part of soundness on its own does not guarantee that a synthesised
+program $t$ is \emph{well resourced}, i.e., the grades in $[[ D ]]$ may not be
+approximated by the grades in $[[ G ]]$. For example, a valid judgement (whose
+more general rule is seen shortly) under semiring $\mathbb{N}_\equiv$ is:
+%
+\begin{align*}
+[[ x : [A] 2 |- A =>+ x ; x : [A] 1 ]]
+\end{align*}
+%
+i.e., for goal $A$, if $x$ has type $A$ in the context then we synthesis $x$ as
+the result program, regardless of the grades. A synthesis judgement such as this
+may be part of a larger derivation in which the grades eventually match, i.e.,
+this judgement forms part of a larger derivation which has a further
+subderivation in which $x$ is used again and thus the total usage for $x$ is
+eventually $2$ as prescribed by the input context. However, at the level of an
+individual judgement we do not guarantee that the synthesised term is
+well-resourced. A reasonable \emph{pruning condition} that could be used to
+assess whether any synthesis judgement is \emph{potentially} well-resourced is
+$\exists [[ D' ]] . [[ (D + D') <<= G ]]$, i.e., there is some additional usage
+$[[ D' ]]$ (that might come from further on in the synthesis process) that
+`fills the gap' in resource use to produce $[[ D + D' ]]$ which is
+overapproximated by $[[ G ]]$. In this example, $[[ D' ]] = [[ x : [A] 1 ]]$
+would satisfy this constraint, explaining that there is some further possible
+single usage which will satisfy the incoming grade. However, previous work on
+graded linear types showed that excessive pruning at every step becomes too
+costly in a general setting~\citep{DBLP:conf/lopstr/HughesO20}. Instead, we
+apply such pruning more judiciously, only requiring that variable use is
+well-resourced at the point of synthesising binders. Therefore synthesised
+closed terms are always well-resourced (second part of the soundness theorem).
+
+Appendix~\ref{sec:soundness-proofs} provides the soundness proof, which in part
+resembles a translation from sequent calculus to natural deduction, but also
+with the management of grades between synthesis and type checking.
+
+
+For open terms, the implementation checks that from a user-given top-level goal
+$A$ for which $[[ G |- A =>+ t ; D ]]$ is derivable then $t$ is only provided as
+a valid (well-typed and well-resourced) synthesis result if $[[ D <<= G ]]$.
+
+We next present the synthesis calculus in stages. Each type former of the core
+calculus (with the exception of type variables) has two corresponding synthesis
+rules: a right rule for introduction (labelled $\textsc{R}$) and a left rule for
+elimination (labelled $\textsc{L}$). We frequently apply the algorithmic reading
+of the judgements, where meta-level terms to the left of $\Rightarrow$ are
+inputs (i.e., context $[[ G ]]$ and goal type $[[ A ]]$) and terms to the right
+of $\Rightarrow$ are outputs (i.e., the synthesised term $[[ t ]]$ and the usage
+context $[[ D ]]$).
+%Section~\ref{subsection:rules} focuses primarily on a
+%simply-typed core of synthesis, explaining how each synthesis
+%rule addresses the issue of resource management, and how usage
+%information is conveyed from a rule's input to its output.
+%Section~\ref{sec:recursion} explains
+%the approach to synthesising recursive programs (and handling recursive data types).
+%Section~\ref{sec:polymorphism} briefly explains the handling of polymorphism.
+%
+% \iffalse
+The synthesis calculus is non-deterministic, i.e., for any $[[ G ]]$
+and $[[ A ]]$ there may be many possible $[[ t ]]$ and $[[ D ]]$ such
+that $[[ G |- A =>+ t ; D ]]$. Section~\ref{sec:focusing} explains how
+the core rules are `reorganised' into a deterministic system via the
+approach of focusing proof search.  
+% \fi
+%
+Whilst we largely present the approach here in abstract terms, via the synthesis judgements,
+we highlight some choices made in our implementation (e.g., heuristics
+applied in the algorithmic version of the rules).% into Granule.
+
+\subsection{Core synthesis rules}
+\label{subsection:rules}
+\subsubsection{Top-level}
+We begin with the \textsc{TopLevel} rule, which is
+for a judgment form with a type scheme goal instead of just a
+type, providing the entry-point to synthesis:
+\begin{align*}
+  \synTopP
+\end{align*}
+This rule takes the universally quantified type variables $\overline{\alpha : \kappa}$
+from the type scheme and adds them to the type variable context $\Sigma$;
+type variables are only equal to themselves. This rule corresponds
+to the generalisation step of typing polymorphic definitions~\citep{milner1978theory}.
+
+\subsubsection{Variables}
+For any goal type $A$, if there is a variable in the context matching this type
+then it can be synthesised for the goal, given by the terminal rule:
+%
+\begin{align*}
+  \synVarP
+\end{align*}
+%
+Said another way, to synthesise the use of a variable $[[ x ]]$, we require that $[[ x ]]$ be
+present in the input context $[[ G ]]$. The output context here then explains
+that only variable $x$ is used: it consists of the
+entirety of the input context $[[ G ]]$ scaled by grade $0$ (using
+definition~\ref{def:scalar}), extended with $[[x : [A] 1]]$, i.e. a single usage
+of $[[ x ]]$ as denoted by the $1$ element of the semiring.
+Maintaining this zeroed $[[ G ]]$ in the output context simplifies
+subsequent rules by avoiding excessive context membership checks.
+
+The $\textsc{Var}$ rule permits the synthesis of terms which may not
+be well-resourced, e.g., if $r = 0$, the rule still synthesises a use of
+$x$. This is locally ill-resourced, but is acceptable at the global
+level as we check that an assumption has been used correctly in the rule where the assumption is bound. This does leads us to consider some branches of synthesis
+that are guaranteed to fail: at the point of synthesising a usage of a
+variable in the additive scheme, isolated from information about how
+else the variable is used, there is no way of knowing if such a usage
+will be permissible in the final synthesised program. However, it also
+reduces the amount of intermediate theorems that need solving, which
+can significantly effect performance as shown
+by~\citet{DBLP:conf/lopstr/HughesO20}, especially since the variable
+rule is applied very frequently.
+
+\subsubsection{Functions}
+
+Synthesis of programs from function types is handled by the \GRANULEdruleAbsName and
+\GRANULEdruleAppName rules, which synthesise abstraction and application terms,
+respectively. An abstraction is synthesised like so:
+\begin{align*}
+    \synAbs
+\end{align*}
+%
+Reading bottom up, to synthesise a term of type
+$[[ A ^ q -> B ]]$ in context $[[ G ]]$ we first
+extend the context
+with a fresh variable assumption $[[ x : [A] q ]]$ and synthesise a term of type $[[ B ]]$ that will ultimately become the body
+of the function. The type $[[ A ^ q -> B ]]$ conveys that $[[ A ]]$ must be
+used according to $[[ q ]]$ in our term for $[[ B ]]$. The fresh variable
+$[[ x ]]$  is passed to the premise of the rule using
+the grade of the binder: $[[ q ]]$. The $[[ x ]]$ must then be used to synthesise a term
+$[[ t ]]$ with $[[ q ]]$ usage. In the premise, after synthesising $[[ t ]]$ we obtain an output context
+$[[ D, x : [A] r ]]$. As mentioned, the $\textsc{Var}$ rule ensures
+that $[[ x ]]$ is present in this context, even if it was not used in the
+synthesis of $[[ t ]]$ (e.g., $[[ r ]] = 0$).
+The rule ensures the usage of bound term ($r$) in $[[t]]$ does not violate the
+input grade $q$ via the requirement that $[[ r ]] \sqsubseteq [[ q ]]$ i.e. that $[[ r ]]$
+\textit{approximates} $[[ q ]]$. If met, $[[ D ]]$ becomes the output context of the rule's conclusion.
+
+The counterpart to abstraction synthesises an
+application from the occurrence of a function in the context (a left rule):
+\begin{align*}
+    \synApp
+\end{align*}
+%
+Reading bottom up again, the input context contains an assumption with a function type
+$[[ x1 : [A ^ q -> B] r1 ]]$. We may attempt to use this assumption in the synthesis of a
+term with the goal type $[[ C ]]$, by applying some argument to it. We do this
+by synthesising the argument from the input type of the function $[[ A ]]$, and
+then binding the result of this application as an assumption of type $[[ B ]]$ in the
+synthesis of $[[ C ]]$. This is decomposed into two steps corresponding to the two
+premises (though in the implementation the first premise is considered first):
+\begin{enumerate}
+        \item The first premise synthesises a term $[[ t1 ]]$ from the goal type
+        $[[ C ]]$ under the assumption that the function $[[ x1 ]]$ has been
+        applied and its result is bound to
+        $[[ x2 ]]$. This placeholder assumption is bound with the same grade as
+        $[[ x1 ]]$.
+        \item The second premise synthesises an argument $[[ t2 ]]$
+        of type $[[ A ]]$ for the function $[[ x1 ]]$.
+        In the implementation, this synthesis step occurs only after
+        a term $[[ t1 ]]$ is found for the goal $[[ C ]]$ as a heuristic
+        to avoid possibly unnecessary work if no term can be synthesised for
+        $[[ C ]]$ anyway.
+\end{enumerate}
+%
+In the conclusion of the rule, a term is synthesised
+which substitutes in $[[ t1 ]]$ the result placeholder variable $[[ x2 ]]$ for the application
+$[[ x1 t2 ]]$.
+
+The first premise yields an output context
+$[[ D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2 ]]$.
+The output context of the conclusion is obtained by taking the context addition of
+$[[ D1 ]]$ and $[[ s2 * {q * D2} ]]$. The output context $[[ D2 ]]$ is first scaled by
+$[[ q ]]$ since $[[ t2 ]]$ is used according to $[[ q ]]$ when applied to
+$[[ x1 ]]$ (as per the type of $[[ x1 ]]$). We then scale this again by $[[ s2 ]]$
+which represents the usage of the entire application $[[ x1 t2 ]]$ inside
+$[[ t1 ]]$.
+
+The output grade of $[[ x1 ]]$ follows a similar pattern
+since this rule permits the re-use of
+$[[ x1 ]]$ inside both premises of the application (which
+differs from our treatment of synthesis in a linear setting).
+As $[[ x1 ]]$'s input grade $[[ r1 ]]$ may permit multiple uses both inside the
+synthesis of the application argument $[[ t2 ]]$ and in $[[ t1 ]]$ itself, the
+total usage of $[[ t1 ]]$ across both premises must be calculated. In the first
+premise $[[ x1 ]]$ is used according to $[[ s1 ]]$, and in the second according
+to $[[ s3 ]]$. As with $[[ D2 ]]$, we take the semiring multiplication of $[[ s3 ]]$ and $[[ q ]]$ and then
+multiply this by $[[ s2 ]]$ to yield the final usage of $[[ x1 ]]$ in $[[ t2 ]]$.
+We then add this to $[[ s2 + s1 ]]$ to yield the total usage of $[[ x1 ]]$ in
+$[[ t1 ]]$.
+
+\subsubsection{Using polymorphic definitions}
+
+Programs can be synthesised from a polymorphic type scheme (the
+previously shown \textsc{TopLevel} rule), treating
+universally-quantified type variables at the top-level of our goal type
+as logical atoms which cannot be unified with and are only equal to
+themselves. The \textsc{Def} rule handles the synthesis of a \emph{use}
+of a top-level polymorphic function via instantiation:
+\begin{align*}
+  \synDefP
+\end{align*}
+%
+For example, in the following we have a polymorphic
+function \granin{flip} that we want to use to synthesise a monomorphic function:
+%
+\begin{granule}
+flip : forall c d  . (c, d) %1 -> (d, c)
+flip (x, y) = (y, x)
+f : (Int, Int) %1 -> (Int, Int)
+f x = ? -- synthesis to flip x trivially
+\end{granule}
+%
+To synthesise the term \granin{flip x}, the type scheme of \granin{flip} is
+instantiated via \textsc{Def} with
+$\emptyset \vdash (\mathit{Int} \otimes \mathit{Int})^1 \rightarrow (\mathit{Int} \otimes \mathit{Int})
+= \text{inst}(\forall c : \text{Type}, d : \text{Type} . (c \otimes d)^1 \rightarrow (d \otimes c))$.
+
+\subsubsection{Graded modalities}
+
+Graded modalities are introduced and eliminated explicitly through the
+\GRANULEdruleBoxName and \GRANULEdruleUnboxName rules, respectively. In the
+\GRANULEdruleBoxName{} rule, we synthesise a promotion $[[ [ t ] ]]$ for some graded
+modal goal type $[[ [] r A ]]$:
+\begin{align*}
+  \synBox
+\end{align*}
+In the premise, we synthesise from $[[ A ]]$, yielding the subterm $[[ t ]]$ and
+an output context $[[ D ]]$. In the conclusion, $[[ D ]]$ is scaled by the grade
+of the goal type $[[ r ]]$: as $[[ [t] ]]$ must use $[[ t ]]$ as $[[ r ]]$
+requires.
+
+Grade elimination (\textit{unboxing}) takes place via
+pattern matching in \textbf{case}:
+\begin{align*}
+  \synUnbox
+\end{align*}
+To eliminate the assumption $[[ x ]]$ of graded modal type $[[ [] q
+A ]]$, we bind a fresh assumption in the synthesis of the premise: $[[ y : [A]
+{r * q} ]]$. This assumption is graded with $[[ {r * q} ]]$: the grade from the
+assumption's type multiplied by the grade of the assumption itself. As with
+previous elimination rules, $[[ x ]]$ is rebound in the rule's premise. A
+term $[[ t ]]$ is then synthesised resulting in the output context $[[ {D, y :
+[A] s1}, x : [ [] q A ] {s2} ]]$, where $[[ s1 ]]$ and $[[ s2 ]]$ describe how
+$[[ y ]]$ and $[[ x ]]$ were used in $[[ t ]]$. The second premise ensures that
+the usage of $[[ y ]]$ is well-resourced. The grade $[[ s3 ]]$ represents how
+much the usage of $[[ y ]]$ inside $[[ t]]$ contributes to the overall usage of
+$ [[ x]]$. The constraint $[[ s1 ]] \sqsubseteq [[ s3 * q ]]$ conveys the fact
+that $[[ q ]]$ uses of $[[y]]$ constitutes a single use of $[[ x ]]$, with the constraint
+$[[ s3 * q ]] \sqsubseteq [[r * q]]$ ensuring that the overall usage does not exceed the binding grade. For the
+output context of the conclusion, we simply remove the bound $[[y]]$ from $[[ D
+]]$ and add $[[ x ]]$, with the grade $[[ s2 + s3 ]]$: representing the total
+usage of $[[ x ]]$ in $[[ t ]]$.
+
+\subsubsection{Data types}
+
+The synthesis of introduction forms for data types is by the \GRANULEdruleConName rule:
+\begin{align*}
+    \synConP
+\end{align*}
+where $D$ is the set of data constructors in global scope, e.g., coming from ADT
+definitions, including here products, unit, and coproducts with $(,) : A^1 \rightarrow B^1
+\rightarrow A \otimes B$, $Unit : [[ Unit ]]$, $\mathsf{inl} : A^1
+\rightarrow A \oplus B$, and $\mathsf{inr} : B^1 \rightarrow A \oplus B$.
+
+For a goal type $[[ K {A Many} ]]$ where $K$ is a data type with zero or more
+type arguments (denoted by the vector $[[ A Many ]]$), then a constructor term
+$[[ Con t1 .. tn ]]$ for $[[ K {A Many} ]]$ is synthesised. The type scheme of
+the constructor in $D$ is first instantiated (similar to \textsc{Def} rule),
+yielding a type $ [[ {B1 - q1 .*. Bn -
+qn -> {K {A Many}}} ]] $. A sub-term is then synthesised for each of the
+constructor's arguments $[[ ti ]]$ in the third premise (which is repeated for
+each instantiated argument type $[[ Bi ]]$), yielding output contexts $[[ Di
+]]$. The output context for the rule's conclusion is obtained by performing a
+context addition across all the output contexts generated from the premises,
+where each context $[[ Di ]]$ is scaled by the corresponding grade $[[ qi ]]$
+from the data constructor in $D$ capturing the fact that each argument $[[ ti
+]]$ is used according to $[[ qi ]]$.
+
+Dual to the above, constructor elimination synthesises \textbf{case}
+statements with branches pattern matching on each data constructor of the target
+data type $[[K {A Many}]]$, with various associated constraints on grades which
+require some explanation:
+%
+\begin{align*}
+    \synCaseP
+\end{align*}
+%
+where $1 \leq i \leq m$ is used to index the data constructors of which there
+are $m$ (i.e., $m = |[[ K {A Many} ]]|$) and
+$1 \leq j \leq n$ is used to index the arguments of the $i^{th}$ data constructor.
+For brevity, the rule focuses $n$-ary data constructors where $n > 0$.
+
+As with constructor introduction, the relevant data
+constructors are retrieved from the global scope $D$ in the first premise.
+A data constructor type
+is a function type from the constructor's arguments $[[ B1 ]] \ldots [[ Bn ]]$ to
+a type constructor applied to zero or more type parameters $[[ K {A Many} ]]$.
+However, in the case of nullary
+data constructors (e.g., for the unit type), the data constructor type is simply the type
+constructor's type with no arguments. For each data constructor $C_{i}$,
+we synthesise a term $[[ ti ]]$ from the result type of the data constructor's
+type in $D$, binding the data constructor's argument types as fresh assumptions
+to be used in the synthesis of $[[ ti ]]$.
+
+To synthesise the body for each branch $i$, the arguments of the
+data constructor are bound to fresh variables in the premise,
+with the grades from their respective argument types in $D$ multiplied by the
+$[[ r ]]$. This follows the pattern typing rule for constructors; a pattern
+match under some grade $[[ r ]]$ must bind assumptions that have the capability
+to be used according to $[[ r ]]$.
+
+The assumption being eliminated
+$[[ x : [K {A Many}] r ]]$ is also included in the premise's context (as in \GRANULEdruleAppName) as we may perform
+additional eliminations on the current assumption subsequently if the grade
+$[[ r ]]$ allows us. If successful,
+this will yield both a term $t_{i}$ and an output context for the
+pattern match branch.
+The output context can be broken down into three parts:
+\begin{enumerate}
+\item $[[ Di ]]$ contains any
+assumptions from $[[ G ]]$ were used to construct $[[ ti ]]$
+\item  $[[ x : [K A] ri ]]$ describes how the assumption $[[ x ]]$ was
+used
+\item $[[ {{y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} ]]$ describes how each assumption  $[[ y Vari Varj ]]$ bound in the pattern
+match was used in $[[ ti ]]$.
+\end{enumerate}
+%
+This leaves the question of how we calculate the final grade to
+attribute to $ [[ x ]]$  in the output context of the rule's conclusion.
+For each bound assumption, we generate a fresh grade variable
+$[[ s' Vari Varj  ]]$ which represents how that variable was used in $[[ ti ]]$
+after factoring out the multiplication by $[[ q Vari Varj ]]$. This is done via the
+constraint in the third premise that $ [[
+exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj} ]]$.
+The join of each $[[ s' Vari Varj ]]$ (for each assumption) is then taken to
+form a grade variable $[[ Vari s ]]$ which represents the total usage of
+$[[ x ]]$ for this branch that arises from the use of assumptions which were
+bound via the pattern match (i.e. not usage that arises from reusing $[[x]]$
+explicitly inside $[[ ti ]]$). For the output context of the conclusion, we then
+take the join of output context from the constructors used. This is extended
+with the original $[[ x ]]$ assumption with the output grade consisting of the
+join of each $[[ ri ]]$ (the usages of $[[ x ]]$ directly in each branch) plus
+the join of each $[[ si ]]$ (the usages of the assumptions that were bound from
+matching on a constructor of $[[ x ]]$).
+
+\begin{example}[Example of \textbf{case} synthesis]
+%
+Consider two possible synthesis results:
+%
+\begin{align}
+\label{eq:case-ex-branchOne}
+& [[  x : [Sum Unit A] r, y : [ A ] s , z : [A] {r * q1} |- A =>+ z ; x : [Sum Unit A] 0, y : [A] 0 , z : [A] 1 ]] \\
+\label{eq:case-ex-branchTwo}
+& [[  x : [Sum Unit A] r, y : [ A ] s |- A =>+ y ; x : [Sum Unit A] 0 , y : [A] 1 ]]
+\end{align}
+%
+We will plug these into the rule for generating case expressions as follows
+where in the following instead of using the above concrete grades we have used
+the abstract form of the rule (the two will be linked by equations after):
+%
+\begin{gather*}
+\inferrule*[right=Case]
+{
+\mathsf{Just} : \forall \overline{\alpha : \kappa} .  [[ A' ^ 1 -> Sum A' Unit ]] \in [[ Defines ]] \\ \\
+ \mathsf{Nothing} : \forall \overline{\alpha : \kappa} . [[ Unit ^ 1 -> Sum A' Unit ]] \in [[ Defines ]] \\ \\
+  [[ Sig |- inst {A ^ 1 -> Sum A Unit} {A' ^ 1 -> Sum A' Unit} ]] \\ \\
+  [[ Sig |- inst {Unit ^ 1 -> Sum A Unit} {Unit ^ 1 -> Sum A' Unit} ]] \\ \\
+ \eqref{eq:case-ex-branchOne} \qquad [[  Sig ; x : [Sum Unit A] r, y : [ A ] s , z : [A] {r * q1} |- A =>+ z ; x : [Sum Unit A] 0, y : [A] 0 , z : [A] s1 ]] \\ \\ \\
+ \eqref{eq:case-ex-branchTwo} \qquad [[  Sig ; x : [Sum Unit A] r, y : [ A ] s |- A =>+ y ; x : [Sum Unit A] 0 , y : [A] 1 ]] \\ \\
+ [[ exists s1' . s1 <= s1' * q1 <= r * q1 ]] \\ \\
+ [[ assn s' s1' ]]
+}
+{
+[[ Sig ; x : [Sum Unit A] r, y : [ A ] s  |- A =>+ (case x of {Just z} -> z  ; {Nothing .} -> y) ; {x : [ {Sum Unit A} ] {(0 \/ 0)} + {s'}} , y : [A] {0 \/ 1} ]]
+}
+\end{gather*}
+%
+Thus, to unify \eqref{eq:case-ex-branchOne}
+and \eqref{eq:case-ex-branchTwo} with the rule format we
+have that  $[[ s1 ]] = 1$ and $[[ q1 ]] = 1$.  Applying these
+two equalities as rewrites to the remaining constraint, we have:
+%
+\begin{align*}
+& [[ exists s1' . 1 <= s1' * 1 <= r * 1 ]] \quad \implies \quad [[ exists s1' . 1 <= s1' <= r ]]
+\end{align*}
+%
+These constraints can be satisfied with the natural-number intervals semiring
+where $[[ y ]] $ has grade $ [[IntervalSyn 0 1]]$ and $[[ x ]]$ has grade $[[
+{IntervalSyn 1 1} ]]$.
+\end{example}
+
+Deep pattern matching, over nested data constructors, is handled via inductively
+applying the \GRANULEdruleCaseName rule but with a post-synthesis refactoring
+procedure substituting the pattern match of the inner case statement into the
+outer pattern match. For example, nested matching on pairs becomes a single
+$\textbf{case}$ with nested pattern matching, simplifying the program:
+% (Section~\ref{sec:refactoring}). For example,
+\begin{align*}
+         &  [[ case x of Pair y1 y2 -> case y1 of Pair z1 z2 -> z2 ]] \\
+\textit{(rewritten to)} \; \leadsto \;\; &  [[ case x of Pair {Pair z1 z2} y2 -> z2 ]]
+\end{align*}
+
+
+\subsubsection{Recursion}
+%\label{sec:recursion}
+
+Synthesis permits recursive definitions, as well as programs which may make use
+of calls to functions from a user-supplied context of function definitions in
+scope (see Section~\ref{sec:examples}). Synthesis of non-recursive function
+applications may take place arbitrarily, however, synthesising a recursive
+function definition application requires more care. To ensure that a synthesised
+programs terminates, we only permit synthesis of terms which are
+\textit{structurally recursive}, i.e., those which apply the recursive
+definition to a subterm of the function's inputs~\citep{oserathesis}.
+
+Synthesis rules for recursive types ($\mu$-types) are fairly straightforward:\footnote{Though $\mu$ types are equi-recursive, we make explicit the synthesis rules here which maps more closely to the implementation where iterative deepening information needs to be tracked at the points of using  $\mu_\textsc{L}$ and  $\mu_\textsc{R}$.}
+\begin{align*}
+  \begin{array}{cc}
+  \synMuR & \synMuL
+  \end{array}
+\end{align*}
+This $\mu_\textsc{R}$ rule states that to synthesise a recursive data structure
+of type $\mu X . [[ A ]]$, we must be able to synthesise $[[ A ]]$ with $\mu X .
+[[ A ]]$ substituted for the recursion variables $X$ in $[[ A ]]$. For example,
+if we wish to synthesise a list data type \granin{List a} with constructors
+\granin{Nil} and \granin{Cons a (List a)}, then when choosing the \granin{Cons}
+constructor in the $\mu_\textsc{R}$ rule, the type of this constructor requires
+us to re-apply the $\mu_\textsc{R}$ rule, to synthesise the recursive part of
+\granin{Cons}. Elimination of a recursive data structure may be synthesised
+using the $\mu_\textsc{L}$ rule. In this rule, we have some recursive data type
+$\mu X . [[ A ]]$ in our context which we may wish to pattern match on via the
+$\textsc{C}_\textsc{L}$ rule. To do this, the assumption is bound in the premise
+with the type $[[ A ]]$, substituting $\mu X. [[ A]]$ for the recursion
+variables $X$ in $[[ A ]]$.
+
+Recursive data structures present a challenge in the implementation. For our
+list data type, how do we prevent our synthesis tool from simply applying the
+$\mu_\textsc{L}$ rule, followed by the $\textsc{C}_\textsc{L}$ rule on the
+\granin{Cons} constructor ad infinitum? We resolve this issue using an
+\textit{iterative deepening} approach to synthesis similar to the approach used
+by \textsc{Myth}~\citep{oserathesis}. Programs are synthesised with elimination
+(and introduction) forms of constructors restricted up to a given depth. If no
+program is synthesised within these bounds, then the depth limits are
+incremented. Combined with focusing (see Section~\ref{sec:focusing}), this
+provides the basis for an efficient implementation of the above rules.
+
+% The benchmarks in Section~\ref{sec:evaluation} make heavy use of polymorphism.
+
+\section{Input-output examples}
+
+\label{sec:examples}
+
+When specifying the synthesis context of top-level definitions, the user may
+also supply a series of input-output examples showcasing desired behaviour. Our
+approach to examples is deliberately na\"{i}ve; we evaluate a fully synthesised
+candidate program against the inputs and check that the results match the
+corresponding outputs. Unlike many sophisticated example-driven synthesis tools,
+the examples here do not themselves influence the search procedure, and are used
+solely to allow the user to clarify their intent. This lets us consider the
+effectiveness of basing the search primarily around the use of grade
+information. An approach to synthesis of resourceful programs with examples
+closely integrated into the search as well is further work.
+
+We augmented the Granule language with first-class syntax for specifying
+input-output examples, both as a feature for aiding synthesis but also for
+aiding documentation that is type checked (and therefore more likely to stay
+consistent with a code base as it evolves). Synthesis specifications are written
+in Granule directly above a program hole (written using \granin{?}) using the
+\granin{spec} keyword. The input-output examples are then listed per-line.
+\begin{granule}
+tail : forall a . List a %0..1 -> List a
+spec
+  tail (Cons 1 Nil) = Nil;
+  tail (Cons 1 (Cons 2 Nil)) = Cons 2 Nil;
+tail = ?
+\end{granule}
+Any synthesised term must then behave according to the supplied examples. This
+\granin{spec} structure can also be used to describe additional synthesis
+components that the user wishes the tool to make use of. These components
+comprise a list of in-scope definitions separated by commas. The user can choose
+to annotate each component with a grade, describing the required usage in the
+synthesised term. This defaults to a $1$ grade if not specified. For example,
+the specification for a function which returns the length of a list would look
+something like:
+\begin{granule}
+length : forall a . List a %0..$\infty$. -> N
+spec
+    length Nil = Z;
+    length (Cons 1 Nil) = S Z;
+    length (Cons 1 (Cons 1 Nil)) = S (S Z);
+    length %0..$\infty$.
+length = ?
+\end{granule}
+with the following resulting program produced by our synthesis algorithm (on average
+in about 400ms on a standard laptop, see Section~\ref{sec:evaluation} where this is one of the benchmarks for evaluation):
+\begin{granule}
+length Nil = Z;
+length (Cons y z) = S (length z)
+\end{granule}
+
+% \subsection{Focusing proof search}
+% \label{sec:focusing}
+
+% The calculus presented above serves as a starting point for implementing a
+% synthesis algorithm in Granule. However, the rules are highly
+% non-deterministic with regards the order in which they may be applied. For
+% example, after applying a (\GRANULEdruleSynAbsPName{})-rule, we may choose to apply any of
+% the elimination rules before applying an introduction rule for the
+% goal type. This leads to us exploring a large number of redundant search branches which can
+% be avoided through the application of a technique known as
+% \textit{focusing}~\citep{focusing}. Focusing is a tool from linear logic proof
+% theory based on the idea that some rules are invertible, i.e., whenever the
+% conclusion of the rule is derivable, then so are the premises. In other words, the order in which we apply invertible rules doesn't
+% matter. By fixing a particular ordering on the application of invertible rules, we eliminate much of the
+% non-determinism that arises from trying branches which differ only in the order in
+% which invertible rules are applied. We apply focusing to our calculus, which forms
+% the basis of our implementation. The full focusing versions of the rules from our calculus,
+% and their proof of soundness, can be found in the appendix.
+
+% Our implementation also relies on the use of backtracking proof search, leveraging
+% a monadic interface~\citep{logict}. A resulting synthesised program can be rejected
+% and synthesis required to produce an alternate result (what we call a \emph{retry})
+% via backtracking.
+
+\iffalse
+\subsection{Focusing proof search}
+\label{sec:focusing}
+The calculus presented above serves as a starting point for implementing a
+synthesis algorithm in Granule. However, at the moment the rules are highly
+non-deterministic with regards the order in which they may be applied. For
+example, after applying a $\rightarrow{R}$ rule, we may choose to apply any of
+the elimination rules before applying an introduction rule for the goal type.
+This leads to us exploring a large number of redundant search branches which can
+be avoided through the application of a technique known as
+\textit{focusing}~\citep{focusing}. Focusing is a tool from linear logic proof
+theory based on the idea that some rules are invertible, i.e., whenever the
+conclusion of the rule is derivable, then so are the premises. In other words,
+the order in which we apply invertible rules doesn't matter. By fixing a
+particular ordering on the application of invertible rules, we eliminate much of
+the non-determinism that arises from trying branches which differ only in the
+order in which invertible rules are applied. We briefly outline focusing and how
+we apply it.
+
+We begin by augmenting our previous synthesis judgement with an additional
+context:
+\begin{align*}
+\Gamma ; \Omega \vdash [[ A ]] \Rightarrow [[t ]]\ |\ \Delta
+\end{align*}
+Unlike $\Gamma$ and $\Delta$, $\Omega$ is an \textit{ordered} context. Using the
+terminology of Pfenning, we refer to rules that are invertible as
+\textit{asynchronous} and rules that are not as
+\textit{synchronous}~\citep{pfenninglecture}. The intuition here is that
+asynchronous rules can be applied eagerly, while the non-invertible synchronous
+rules require us to \textit{focus} on a particular part of the judgement: either
+on the assumption (if we are in an elimination rule) or on the goal (for an
+introduction rule). When focusing we apply a chain of synchronous rules, until
+we either reach a position where no rules may be applied (at which point the
+branch terminates), we have synthesised a term for our goal, or we have exposed
+an asynchronous connective at which point we switch back to applying
+asynchronous rules.
+
+We divide our synthesis rules into four categories, each with their own
+judgement form, refining the focusing judgement above with an arrow indicating
+which part of the judgement is currently in focus. An $\Uparrow$ indicates an
+asynchronous phase, and $\Downarrow$ a synchronous (focused) phase. The location
+of the arrow in the judgement indicates whether we are in an introduction or
+elimination phase:
+\begin{enumerate}
+  \item Right Async: $\rightarrow{\textsc{R}}$ rule with the judgement $\Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow t\ |\ \Delta $
+        \item Left Async:  $\textsc{C}_{\textsc{L}}$, $\Box_{\textsc{L}}$ rules with the judgement
+        $\Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta $
+        \item Right Sync:  $\textsc{C}_{\textsc{R}}$, $\Box_{\textsc{R}}$ rules with the judgement
+        $\Gamma ; \Omega \vdash A \Downarrow\ \Rightarrow t\ |\ \Delta $
+        \item Left Sync:   $\rightarrow{\textsc{L}}$ rule with the judgement $\Gamma ; \Omega \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta $
+\end{enumerate}
+We find it helpful to view focusing in terms of a finite state machine, as given
+in figure~\ref{fig:focusingFSM}. States comprise the four phases of focusing,
+plus two additional states, \textsc{Focus}, and \textsc{Var}. Edges are then the
+synthesis rules that direct the transition between focusing phases. The
+transitions between these focusing phases are handled by dedicated focusing
+rules for each transition. For the asynchronous phases, the
+$\Uparrow_{R}$/$\Uparrow_{L}$ handle the transition between right to left
+phases, and left to focusing phases, respectively. Conversely, the
+$\Downarrow{R}$ rule deals with the transition from a right synchronous phase
+back to a right asynchronous phase, with the $\Downarrow{L}$ rule likewise
+transitioning to a left asynchronous phase. Depending on the current phase of
+focusing, these rules consider the goal type, the assumption currently being
+focused on's type, the size of $\Omega$, and the current level of iterative
+deepening to decide whether to transition between focusing phases. For brevity,
+we elide the full details here.
+
+% We begin in an \textsc{Intro Async} phase, which breaks down the
+% goal type by applying the $\multimap_{\textsc{Right}}$ rule. In the
+% focused form of $\multimap_{\textsc{Right}}$, the assumption bound in the premise is added to
+% our focused context $\Omega$ rather than $\Gamma$. When $\multimap_{\textsc{Right}}$ can no longer be
+% applied, we transition to an Elim Async phase via the $\Uparrow_{\textsc{R}}$ rule:
+% The full calculus of focused synthesis rules can be found in appendix~\ref{sec:focusing-calculus}.
+\fi
+
+
+% \iffalse
+\section{Post-synthesis refactoring}
+\label{sec:refactoring}
+
+In section~\ref{}, we considered how our synthesised terms could be refactored
+into a more idiomatic programming style. Those same refactoring transformations
+apply to our calculus here, along with the additional treatment of case
+statements.
+
+Recall that the $\textsc{C}_{L}$ binds a data constructor's patterns as a series
+of variables. Synthesising a pattern match over a nested data structure
+therefore yields a term such as:
+\begin{granule}
+  case x of
+    C_1 y ->
+      case y of
+        D_1 z -> ...
+        D_2 z -> ...
+    C_2 y ->
+      case y of
+        D_1 z -> ...
+        D_2 z -> ...
+\end{granule}
+which would be rather unnatural for a programmer to write. Nested case statements are therefore folded together to yield a single case statement which pattern matches over all combination of patterns from each statement. The above cases are then transformed into the much more compact and readable single case:
+\begin{granule}
+  case x of
+    C_1 (D_1 z) -> ...
+    C_1 (D_2 z) -> ...
+    C_2 (D_1 z) -> ...
+    C_2 (D_2 z) -> ...
+\end{granule}
+        Furthermore, pattern matches over a function's arguments in the form of case statements are refactored such that a new function equation is created for each unique combination of pattern match. In this way, a refactored program should only contain case statements that arise from pattern matching over the result of an application.
+\begin{granule}
+neg : Bool %1 -> Bool %1
+neg x = case x of
+          True -> False;
+          False -> True
+\end{granule}
+is refactored into:
+\begin{granule}
+neg : Bool %1 -> Bool %1
+neg True = False;
+neg False = True;
+\end{granule}
+The exception to this is where the scrutinee of a case statement is re-used
+inside one of the case branches, in which case refactoring would cause us to throw
+away the binding of the scrutinee's name and so it cannot be folded into the head pattern match, for example:
+\begin{granule}
+last : forall a . (List a) %0..$\infty$ -> Maybe a
+spec
+    last Nil = Nothing;
+    last (Cons 1 Nil) = Just 1;
+    last (Cons 1 (Cons 2 Nil)) = Just 2;
+    last %0..$\infty$
+last Nil = Nothing;
+last (Cons y z) =
+    (case z of
+      Nil -> Just y;
+      Cons u v -> last z)
+\end{granule}
+
+% \subsection{Unboxing}
+% An unboxing term is synthesised via the $\Box_{L}$ rule as a case statement which pattern matches over a box pattern, yielding an assumption with the grade's usage. Such terms can also be refactored both into function equations and to avoid nested case statements. For example, we may write the $k$ combinator example above using an explicit graded modality:
+% \begin{granule}
+% k : forall {a b : Type} . a %1 -> b [0] -> a
+% k x y = case y of [z] -> x
+% \end{granule}
+% which we can then refactor into
+% \begin{granule}
+% k : forall {a b : Type} . a %1 -> b [0] -> a
+% k x [z] = z
+% \end{granule}
+% \fi
+
+
+
+
+
+
+% \begin{align% *} \begin{array}{c}
+%     \inferrule*[right=Base]{ \quad }{ \Gamma ; \Delta \vdash M \Rightarrow \Delta ; M}
+%     \\\\
+%     \inferrule*[right=$\lambda$]{\Gamma; \Delta, p \vdash M \Rightarrow \Delta' ; N }{ \Gamma ; \Delta \vdash \lambda p . M \Rightarrow \Delta' ; N }
+%     \\\\
+%     \inferrule*[right=case]{ \Delta_{1} ; x ; p \vdash \Delta_{2} \\ \Gamma, y ; \Delta_{2} \vdash M \Rightarrow \Delta_{3} ; N }{ \Gamma ; \Delta_{1} \vdash (\textbf{case } x \textbf{ of } p_{1} \mapsto t_{1} ; ... ; p_{n} \mapsto t_{n}  )\ x \Rightarrow \Delta_{3} ; }
+%     \\\\
+%     \inferrule*[right=$\beta$-redex]{ \Delta_{1} ; x ; p \vdash \Delta_{2} \\ \Gamma, y ; \Delta_{2} \vdash M \Rightarrow \Delta_{3} ; N }{ \Gamma ; \Delta_{1} \vdash (\lambda  y . M)\ x \Rightarrow \Delta_{3} ; N }
+%     \\\\
+%     \inferrule*[right=Skip-$\beta$-redex]{\Gamma ; \Delta \vdash M \Rightarrow \Delta' ; N \\ x \in \Gamma }{ \Gamma ; \Delta \vdash (\lambda p . M) \ x \Rightarrow \Delta' ; (\lambda p . N) \ x }
+%     \end{array}
+%  \end{align*}
+%  \subsection*{Replace Patterns}
+% \begin{align*}
+%   \begin{array}{c}
+%     \inferrule*[right=PEmpty]{\quad}{\emptyset, x ; id ; p \vdash \emptyset}
+%     \\\\
+%     \inferrule*[right=PVar]{\Delta ; id ; p \vdash \Delta' \\ id = x}{\Delta, x ; id ; p \vdash \Delta', p}
+%     \\\\
+%     \inferrule*[right=PWild]{\Delta ; id ; p \vdash \Delta'}{\Delta, \_ ; id ; p \vdash \Delta', \_}
+%     \\\\
+%     \inferrule*[right=PBox$_{1}$]{\Delta, p ; id ; p_{s} \vdash \Delta', p'}{\Delta, [p] ; id ; [p_{s}] \vdash \Delta', [p']}
+%     \\\\
+%     \inferrule*[right=PBox$_{2}$]{\Delta, p ; id ; p_{s} \vdash \Delta', p' }{\Delta, [p] ; id ; p_{s} \vdash \Delta', [p']}
+%     \\\\
+%     \inferrule*[right=PCon]{\Delta, p_{1},..,p_{n} ; id ; p_{s} \vdash \Delta', p'_{1},..,p'_{n}  }{\Delta, C\ p_{1},..,p_{n} ; id ; p_{s} \vdash \Delta', C\ p'_{1},..,p'_{n}}
+%     \end{array}
+%  \end{align*}
+
+
 \section{Focusing the Fully Graded Synthesis Calculus}
 \label{section:graded-base-focusing}
+
+
+
+\tikzset{
+->, % makes the edges directed
+node distance=5cm, % specifies the minimum distance between two nodes. Change if necessary.
+every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+initial text=$ $, % sets the text that appears on the start arrow
+}
+
+\begin{figure}[h] % ’ht’ tells LaTeX to place the figure ’here’ or at the top of the page
+\centering % centers the figure
+
+\scalebox{1.0}{
+\begin{tikzpicture}[every text node part/.style={align=center}]
+\node[state, initial, draw] (RA) {\textsc{Right Async} \\ $ \Gamma ; \Omega \vdash A \Uparrow \Rightarrow t | \Delta $};
+\node[state] at (10,  0) (LA) { \textsc{Left Async} \\ $\Gamma ; \Omega \Uparrow \vdash t \Rightarrow A | \Delta $};
+\node[state] at (5, -1) (F) { \textsc{Focus} \\ $\Gamma ; \emptyset \Uparrow \vdash t \Rightarrow A | \Delta $};
+\node[state] at (1, -6) (RS) { \textsc{Right Sync} \\ $\Gamma ; \emptyset \vdash t \Rightarrow A \Downarrow | \Delta $};
+\node[state] at (9, -6) (LS) { \textsc{Left Sync} \\ $\Gamma ; [[ x : [ B ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
+\node[state, accepting] at (5, -10) (V) { \textsc{Var} \\ $\Gamma ; [[ x : [ A ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
+\draw (RA) edge[loop above] node{$\rightarrow{\textsc{R}}$} (RA)
+(RA) edge[above, bend left] node{$\Uparrow_{\textsc{R}}$} (LA)
+(LA) edge[loop above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Box_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{R}$} (LA)
+% (LA) edge[loop right] node{$\Uparrow_{L}$} (LA)
+(LA) edge[above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{L}$} (F)
+% (LA) edge[right, bend left] node{$\Uparrow_{L}$} (F)
+(F) edge[left] node{$\textsc{F}_{\textsc{R}}$} (RS)
+(RS) edge[left] node{$\Downarrow_{\textsc{L}}$} (RA)
+(F) edge[right] node{$\textsc{F}_{\textsc{L}}$} (LS)
+(LS) edge[right] node{$\Downarrow_{\textsc{L}}$} (LA)
+(LS) edge[below] node{$\rightarrow{\textsc{L}}$} (RS)
+(LS) edge[loop below] node{$\rightarrow{\textsc{L}}$} (LS)
+(RS) edge[loop below] node{$\textsc{C}_{\textsc{R}}$ \\ $\Box_{\textsc{R}}$ \\ $\mu_\textsc{R}$} (RS)
+(LS) edge[left] node{$\textsc{Var}$} (V)
+;
+\end{tikzpicture}
+}
+\caption{Focusing State Machine}
+\label{fig:focusingFSM}
+\end{figure}
+
+\begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
+  For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$:
+  \begin{align*}
+  \begin{array}{lll}
+   1.\ Right\ Async: & [[ Defs ; Sig; G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Defs ; Sig ; G ,, O |- A =>+ t ; D ]]\\
+   2.\ Left\ Async: & [[ Defs ; Sig; G ; O async |- B => t ; D ]] \quad &\implies \quad [[ Defs ; Sig  ; G ,, O |- B =>+ t ; D ]]\\
+   3.\ Right\ Sync: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ Defs ; Sig ; G |- A =>+ t ; D ]]\\
+   4.\ Left\ Sync: & [[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Defs ; Sig ; G, x : [ A] r |- B =>+ t ; D ]]\\
+   5.\ Focus\ Right: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ; Sig ;  G |- B =>+ t ; D ]]\\
+   6.\ Focus\ Left: & [[ Defs ; Sig ; G, x : [A] r ]] ; \emptyset \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ; Sig ; G, x : [A ] r |- B =>+ t ; D ]]
+  \end{array}
+  \end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$,
+which contains variables with grades reflecting their use in $[[ t ]]$.
+The appendix provides the proof.
+%Appendix~\ref{sec:soundness-proofs} provides the proof.
+  \end{restatable}
+% \fi
+
+\begin{align*}
+    \begin{array}{c}
+      \fsynAbsP
+      \\\\
+      \fsynTopP
+      \\\\
+      \fsynRAsyncTransP
+      \\\\
+      \fsynCaseP
+      \\\\
+      \fsynMuLP
+      \\\\
+      \fsynUnboxP
+      \\\\
+      \fsynLAsyncTransP
+      \\\\
+      \fsynFocusRP
+      \,
+      \fsynFocusLP
+      \\\\
+      \fsynConP
+    \\\\
+      \fsynBoxP
+    \end{array}
+    \end{align*}
+    
+    \begin{figure}[h]
+    \begin{align*}
+    \begin{array}{c}
+      \fsynMuRP
+      \,
+      \fsynRSyncTransP
+      \\\\
+      \fsynAppP
+      \\\\
+      \fsynVarP
+      \\\\
+      \fsynDefP
+      \\\\
+      \fsynLSyncTransP
+      \end{array}
+      \end{align*}
+      \caption{Focusing synthesis calculus for \textsc{GrLang}}
+    \end{figure}
 
 \section{Evaluation}
 \label{section:graded-base-evaluation}
 
+In evaluating our approach and tool, we made the following hypotheses:
+\begin{enumerate}
+\item[H1.] (\textbf{Expressivity; less consultation}) The use of grades in synthesis results in a synthesised program
+  that is more likely to have the behaviour desired by the user; the user needs to request
+  fewer alternate synthesised results (\emph{retries}) and thus is consulted less in order to arrive at the desired program. %When
+%        synthesising a program from a graded type, the user can refine
+%        their synthesis specification with input-output examples, to accurately
+ %       convey their intent.
+        %If the same example set is used to synthesis a graded type
+        %vs that type without grades, then in the non-graded case the resulting
+        %programs will often be ill-resources, type checker
+        %will frequently have to be consulted to check whether a candidate
+        %program type checks against the original graded type.
+\item[H2.] (\textbf{Expressivity; fewer examples}) Grade-and-type directed
+  synthesis requires fewer input-output examples to arrive at the desired
+  program compare with a purely type-driven approach. % if the candidate programs do not consult the type checker.
+\item[H3.] (\textbf{Performance; more pruning}) The ability to prune resource-violating candidate programs from the search
+        tree leads to a synthesised program being found more quickly when
+        synthesised from a graded type compared with
+        the same type but without grades (purely type-driven approach).
+\end{enumerate}
+
+\subsection{Methodology}
+%
+To evaluate our approach, we collected a suite of benchmarks
+comprising graded type signatures for common transformations on data
+structures such as lists, streams, booleans, option (`maybe')
+types, unary natural numbers, and binary trees. We draw many of these
+from the benchmark suite of the \textsc{Myth} synthesis
+tool~\citep{oseraMYTH1}.  Benchmarks are divided into classes based
+on the main data type, with an additional category of miscellaneous
+programs. The type schemes for the full suite of benchmarks can be found
+in Appendix~\ref{sec:benchmark-problems}.
+
+To compare, in various ways, our grade-and-type-directed
+synthesis to traditional type-directed synthesis, each benchmark
+signature is also ``de-graded'' by replacing all grades in the goal
+with \granin{Any} which is the only element of the singleton
+\granin{Cartesian} semiring in Granule. When synthesising in this
+semiring, we can forgo discharging grade constraints in the SMT solver
+entirely.  Thus, synthesis for Cartesian grades degenerates to
+typed-directed synthesis following our rules.
+
+To assess hypothesis 1 (grade-and-type directed leads to less consultation
+/ more likely to synthesise the intended program) we perform grade-and-type
+directed synthesis on each benchmark problem and type-directed synthesis
+on the corresponding de-graded version. For the de-graded
+versions, we record the number of
+retries $N$ needed to arrive at a well-resourced answer by
+type checking the output programs against
+the original graded type signature, retrying if the program is not well-typed
+(essentially, not well-resourced). This provides a means to check whether a program
+may be as intended without requiring input from a user. In each
+case we also compared whether the resulting programs from synthesis via graded-and-type directed
+vs. type-directed with retries (on non-well-resourced outputs) were equivalent.
+
+To assess hypothesis 2 (graded-and-type directed requires
+fewer examples than type-directed), we run the de-graded (Cartesian)
+synthesis with the smallest set of examples which
+leads to the model program being synthesised (without any retries).
+To compare across approaches to the state-of-the-art
+type-directed approach, we also run
+a separate set of experiments comparing the minimal number
+of examples required to synthesise in Granule (with grades)
+vs. \textsc{Myth}.
+
+To assess hypothesis 3 (grade-and-type-directed faster than
+type-directed) we compare performance in the graded setting to the
+non-graded Cartesian setting. Comparing our tool for speed
+against another type-directed (but not graded-directed) synthesis tool
+is likely to be largely uninformative due to differences in
+implementation approach obscuring any meaningful comparison. Thus, we
+instead compare timings for the graded approach and de-graded approach
+within Granule. We also record the number of search paths taken (over
+all retries) to assess the level of pruning in the graded vs
+non-graded case.
+
+% In which
+% case, for each benchmark we need a model solution against which we can compare.
+% %was not equivalent to the synthesised graded term .
+% In a real life scenario, the oracle is a user who manually accepts or
+% rejects programs, asking the synthesis algorithm for the next possible output
+% until it matches the desired program behaviour (model solution).
+% We consider that such an oracle request also has a time cost.
+% We model this cost by calculating total synthesis time plus
+% a simple model of the manual, user-driven behaviour by multiplying each rejection
+% from the oracle by a 1 second penalty (a conservative estimate of how long it takes
+% a user to inspect a program for accept/reject).
+
+
+We ran our synthesis tool on each benchmark for both the graded
+type and the de-graded Cartesian case, computing
+the mean after 10 trials for timing data. Benchmarking was carried out using
+version 4.12.1 of Z3 on an M1 MacBook Air with 16 GB of RAM.
+A timeout limit of 10 seconds was set for synthesis.
+
+\subsection{Results and analysis}
+
+
+Table~\ref{tab:results} records the results comparing grade-and-type
+synthesis vs. the Cartesian (de-graded) type-directed synthesis.  The
+left column gives the benchmark name, number of top-level definitions
+in scope that can be used as components (size of the synthesis
+context) labelled $\textsc{Ctxt}$, and the minimum number of examples
+needed (\#/Exs) to synthesise the Graded and Cartesian programs. In
+the Cartesian setting, where grade information is not available, if we
+forgo type-checking a candidate program against the original graded
+type then additional input-output examples are required to provide a
+strong enough specification such that the correct program is
+synthesised (see H3). The number of additional examples is given in
+parentheses for those benchmarks which required these additional
+examples to synthesise a program in the Cartesian setting.
+
+Each subsequent results column records: whether a program was synthesised
+successfully \success{} or not \fail{} (due to timeout or no solution found),
+the mean synthesis time ($\mu{}T$) or if timeout occurred, and
+the number branching paths (Paths) explored in the synthesis search space.
+
+The first results column (Graded) contains the results for graded synthesis.
+The second results column (Cartesian + Graded type-check) contains the
+results for synthesising a program in the Cartesian (de-graded) setting, using
+the same examples set as the Graded column, and recording the number of retries
+(consultations of the type-checker) \textsc{N} needed to reach a well-resourced program.
+In all cases, this resulting program in the Cartesian column was equivalent to that generated by
+the graded synthesis, none of which needed any retries (i.e., implicitly $N = 0$ for
+graded synthesis). H1 is confirmed by the fact that $N$ is greater than $0$ in
+29 out of 46 benchmarks (60\%), i.e., the Cartesian case does not synthesis the
+correct program first time and needs multiple retries to reach a well-resource
+program, with a mean of $19.60$ retries and a median of $4$ retries.
+
+For each row, we highlight the column which synthesised a result the
+fastest in $\highlight{\text{blue}}$. The results show that in $17$ of the $46$ benchmarks (37\%)
+the graded approach out-performed non-graded synthesis. This contradicts
+hypothesis 3 somewhat: whilst type-directed synthesis often requires multiple
+retries (versus no retries) it still outperforms the graded equivalent. This
+appears to be due to the cost of our SMT solving procedure which must first compile
+a first-order theorem on grades into the SMT-lib file format, start up Z3, and then run the solver.
+Considerable amounts of system overhead are incurred in this procedure. A more
+efficient implementation calling Z3 directly (e.g., via a dynamic library call) may
+give more favourable results here. However, H3 is still somewhat supported: the cases in
+which the graded does outperform the Cartesian are those which involve
+considerable complexity in their use of grades, such as \granin{stutter},
+\granin{inc}, and \granin{bind} for lists, as well as \granin{sum} for both
+lists and trees. In each of these cases, the Cartesian column is significantly
+slower, even timing out for \granin{stutter}; this shows the power of the graded
+approach. Furthermore, we highlight the column with the smallest number of synthesis paths explored in 
+$\newhighlight{\text{yellow}}$, observing that the number of paths in the graded case
+is always the same or less than that those in the Cartesian+graded type check case (apart from Tree stutter). 
+
+Interestingly the paths explored are sometimes the same because we use backtracking
+search in the Cartesian+Graded type check case where, if an output program fails to
+type check against the graded type signature, the search backtracks rather than
+starting again.
+
+Confirming H2, we find that for the non-graded setting without graded type-checking,
+further examples are required to synthesise the same program as the graded in
+$20$ out of $46$ (43\%) cases. In these cases, an average of $1.25$ additional
+examples was required.
+
+\begin{table}[H]
+    \begin{center}
+        \begin{tabular}{p{4.25em}l|l}
+            \hline \multicolumn{2}{c}{{Data Type}} & \multicolumn{1}{|c}{Type Scheme} \\ \hline
+\hline \textbf{List} &
+        Cons      & $\forall a . a^{1} \rightarrow \text{List}\ a^{1} \rightarrow \text{List}\ a$\\ &
+        Nil       & $\forall a . \text{List}\ a$ \\
+\hline \textbf{Stream} &
+        Next      & $\forall a . a^{1} \rightarrow \text{Stream}\ a^{1} \rightarrow \text{Stream}\ a$ \\
+\hline \textbf{Bool} &
+        True      & $ \text{Bool} $ \\ &
+        False     & $ \text{Bool} $ \\
+\hline \textbf{Maybe} &
+        Just      & $ \forall a . a^{1} \rightarrow \text{Maybe}\ a $ \\ &
+        Nothing   & $ \forall a . \text{Maybe}\ a $ \\
+\hline \textbf{N} &
+        S         & $ \text{N}^{1} \rightarrow \text{N} $ \\ &
+        Z         & $ \text{N} $ \\
+\hline \textbf{Tree} &
+        Node      & $ \forall a . \text{Tree}\ a^{1} \rightarrow a^{1} \rightarrow \text{Tree}\ a^{1} \rightarrow \text{Tree}\ a$ \\ &
+        Leaf      & $ \forall a . \text{Tree}\ a $ \\
+        \end{tabular}
+    \end{center}
+\caption{Data types used in synthesis benchmarking problems}
+\end{table}
+
+\label{app:list-of-types}
+        \begin{table}[H]
+                {\footnotesize{
+                \begin{center}
+                \setlength{\tabcolsep}{0.3em}
+                \scalebox{1}{
+                \begin{tabular}{p{1.25em}c|l}
+                \hline \multicolumn{2}{c}{{Problem}} & \multicolumn{1}{|c}{Type Scheme} \\ \hline
+                    \hline \multirow{19}{*}{{\rotatebox{90}{\textbf{List}}}} &
+                append      & $\forall a . \text{List}\ a^1 \rightarrow a^1 \rightarrow \text{List}\ a $\\ &
+                concat      & $\forall a . \text{List}\ a^{1..\infty} \rightarrow \text{List}\ a^{1..\infty} \rightarrow \text{List}\ a$\\ &
+                empty       & $\forall a . \text{Unit}^1\ \rightarrow \text{List}\ a$\\ &
+                snoc        & $\forall a . \text{List}^{1..\infty}\ \rightarrow a^{1..\infty}  \rightarrow \text{List}\ a$\\ &
+                drop        & $\forall a . \text{N}^{0..\infty}\ \rightarrow \text{List}^{0..\infty}\ \rightarrow \text{List}\ a$\\ &
+                flatten     & $\forall a . \text{List}\ (\text{List}\ a)^{0..\infty} \rightarrow \text{List}\ a$\\ &
+                bind        & $\forall a\ b. \text{List}\ a^{1..\infty} \rightarrow (a^{1..\infty} \rightarrow \text{List}\ b)^{0..\infty} \rightarrow \text{List}\ b$\\ &
+                return      & $\forall a . a^{1} \rightarrow \text{List}\ a$\\ &
+                inc         & $\text{List N}^{1..\infty} \rightarrow \text{List N}$\\ &
+                head        & $\forall a . \text{List}\ a^{0..1} \rightarrow a^{0..1} \rightarrow a t$\\ &
+                tail        & $\forall a . \text{List}\ a^{0..1} \rightarrow \text{List}\ a$\\ &
+                last        & $\forall a . \text{List}\ a^{0..\infty} \rightarrow \text{Maybe}\ a$\\ &
+                length      & $\forall a . \text{List}\ a^{} \rightarrow \text{N}$\\ &
+                map         & $\forall a\ b . (a^{1..\infty} \rightarrow b)^{0..\infty} \rightarrow \text{List}\ a^{1..\infty} \rightarrow \text{List}\ b$\\ &
+                replicate5  & $\forall a . a^{5} \rightarrow \text{List}\ a$\\ &
+                replicate10 & $\forall a . a^{10} \rightarrow \text{List}\ a$\\ &
+                replicateN  & $\forall a . \text{N}^{0..\infty} \rightarrow a^{0..\infty} \rightarrow \text{List} a$\\ &
+                stutter     & $\forall a . \text{List}\ (a\ [2])^{1..\infty} \rightarrow \text{List}\ a$\\ &
+                sum         & $\text{List N}^{0..\infty} \rightarrow \text{N}$ \\
+                    \hline \multirow{5}{*}{{\rotatebox{90}{\textbf{Stream}}}} &
+                build       & $\forall a . a^{1..1} \rightarrow \text{Stream}\ a^{1..1} \rightarrow \text{Stream}\ a$\\ &
+                map         & $\forall a\ b . \text{Stream}\ a^{1..\infty} \rightarrow (a^{1..\infty} \rightarrow b)^{1..\infty} \rightarrow \text{Stream}\ b $\\ &
+                take1       & $\forall a . \text{Stream}\ a^{0..1} \rightarrow a $\\  &
+                take2       & $\forall a . \text{Stream}\ a^{0..1} \rightarrow (a,\ a) $\\ &
+                take3       & $\forall a . \text{Stream}\ a^{0..1} \rightarrow (a,\ (a,\ a))$\\
+                    \hline \multirow{5}{*}{{\rotatebox{90}{\textbf{Bool}}}} &
+                neg         & $\text{Bool}^{1}\ \rightarrow \text{Bool}$\\ &
+                and         & $\text{Bool}^{1}\ \rightarrow \text{Bool}^{1}\ \rightarrow \text{Bool}$\\ &
+                impl        & $\text{Bool}^{1}\ \rightarrow \text{Bool}^{1}\ \rightarrow \text{Bool}$\\ &
+                or          & $\text{Bool}^{1}\ \rightarrow \text{Bool}^{1}\ \rightarrow \text{Bool}$\\ &
+                xor         & $\text{Bool}^{1}\ \rightarrow \text{Bool}^{1}\ \rightarrow \text{Bool}$\\
+                    \hline \multirow{7}{*}{{\rotatebox{90}{\textbf{Maybe}}}} &
+                bind        & $\forall a\ b . \text{Maybe}\ a^{1..1} \rightarrow (a^{1..1} \rightarrow \text{Maybe}\ b)^{0..1} \rightarrow \text{Maybe}\ b$\\ &
+                fromMaybe   & $\forall a . \text{Maybe}\ a^{1..1} \rightarrow a^{0..1} \rightarrow a$\\ &
+                return      & $\forall a . a^{1} \rightarrow \text{Maybe}\ a$ \\ &
+                isJust      & $\forall a . \text{Maybe}\ a^{1} \rightarrow \text{Bool}$ \\ &
+                isNothing   & $\forall a . \text{Maybe}\ a^{1} \rightarrow \text{Bool}$ \\ &
+                map         & $\forall a\ b . (a^{1..1} \rightarrow b)^{0..1}  \rightarrow \text{Maybe}\ a^{1..1} \rightarrow \text{Maybe}\ b $ \\ &
+                mplus       & $\forall a\ b . \text{Maybe}\ a^{1} \rightarrow \text{Maybe}\ b^{1} \rightarrow \text{Maybe}\ (a,\ b)$ \\
+                    \hline \multirow{4}{*}{{\rotatebox{90}{\textbf{Nat}}}} &
+                isEven      & $\text{N}^{1..\infty} \rightarrow \text{Bool}$ \\ &
+                pred        & $\text{N}^{1} \rightarrow \text{N}$ \\ &
+                succ        & $\text{N}^{1} \rightarrow \text{N}$ \\ &
+                sum         & $\text{N}^{1..\infty} \rightarrow \text{N}^{1..\infty} \rightarrow \text{N}$ \\
+                    \hline \multirow{3}{*}{{\rotatebox{90}{\textbf{Tree}}}} &
+                map         & $\forall a\ b . (a^{1..\infty} \rightarrow b)^{0..\infty} \rightarrow \text{Tree}\ a^{1..\infty} \rightarrow \text{Tree}\ b$ \\ &
+                stutter     & $\forall a . \text{Tree}\ (a\ [2])^{1..\infty} \rightarrow \text{Tree}\ (a,\ a)$ \\ &
+                sum         & $\text{Tree N}^{0..\infty} \rightarrow \text{N}$ \\
+                    \hline \multirow{3}{*}{{\rotatebox{90}{\textbf{Misc}}}} &
+                compose     & $\forall k : \text{Coeffect}, n\ m : k, a\ b\ c : \text{Type} . (a^{m} \rightarrow b)^{n} \rightarrow (b^{n} \rightarrow c)^{1 : k} \rightarrow a^{n \cdot m} \rightarrow c $ \\   &
+                copy        & $\forall a . a^{2} \rightarrow (a,\ a)$ \\  &
+                push        & $\forall k : \text{Coeffect}, c : k, a\ b : \text{Type} . (a^{1} \rightarrow b)^{c} \rightarrow a^{c} \rightarrow b\ [c]$
+            \end{tabular}}
+                \end{center}}}
+                \caption{Type schemes for synthesis benchmarking results}
+                \label{tab:problems}
+                \vspace{-2.5em}
+                \end{table}
+
+
+%
+        % \begin{table}[t]
+        %         {\footnotesize{
+        %         \begin{center}
+        %         \setlength{\tabcolsep}{0.3em}
+        %         \scalebox{0.70}{
+        %         \begin{tabular}{p{1.25em}cc|p{0.75em}rc|p{0.75em}rcc|p{0.75em}rc} & & &
+        %         \multicolumn{3}{c|}{Graded}&\multicolumn{4}{c|}{Cartesian}&\multicolumn{3}{c|}{Cartesian (No Retries)} \\ \hline \multicolumn{2}{c}{{Problem}}& \multicolumn{1}{c|}{{Ctxt}} & & \multicolumn{1}{c}{$\mu{T}$ (ms)} & \multicolumn{1}{c|}{{\#/Exs.}} & & \multicolumn{1}{c}{$\mu{T}$ (ms)} & \multicolumn{1}{c}{\textsc{N}} & \multicolumn{1}{c|}{$\mu{T}$ + OracleT (ms)}  & & \multicolumn{1}{c}{$\mu{T}$ (ms)} & \multicolumn{1}{c|}{{\#/Exs.}}\\ \hline
+        %         \hline \multirow{19}{*}{{\rotatebox{90}{\textbf{List}}}} &
+        %         append &   0       & \success{} & {\highlight{$ 114.19 (\stderr{  1.22}) $}} &   0       & \success{} & 281.02 (\stderr{  0.80}) &   8       & 383.40 (\stderr{  1.48}) & \success{} & 305.92 (\stderr{  5.24}) &   1      \\
+        %         %
+        %          &
+        %         concat &   1       & \success{} & {\highlight{$ 1129.85 (\stderr{  0.88}) $}} &   0       & \success{} & 2372.70 (\stderr{  2.55}) &  12       & 2967.16 (\stderr{  2.65}) & \success{} & 2779.17 (\stderr{ 22.62}) &   3      \\
+        %         %
+        %          &
+        %         empty &   0       & \success{} & {\highlight{$   5.29 (\stderr{  0.03}) $}} &   0       & \success{} &   5.38 (\stderr{  0.02}) &   0       &   6.57 (\stderr{  0.02}) & \success{} &   5.54 (\stderr{  0.16}) &   0      \\
+        %         %
+        %          &
+        %         snoc &   1       & \success{} & {\highlight{$ 2183.50 (\stderr{  1.08}) $}} &   1       & \success{} & 4011.04 (\stderr{  2.69}) &   8       & 5049.18 (\stderr{  2.83}) & \success{} & 4118.02 (\stderr{ 42.14}) &   1      \\
+        %         %
+        %          &
+        %         drop &   1       & \success{} & {\anotherhighlight{$1209.60 (\stderr{  1.41})$}} &   1       & \success{} & 1568.58 (\stderr{  0.49}) &   8       & 1977.29 (\stderr{  0.84}) & \success{} & {\highlight{$ 831.05 (\stderr{  9.60}) $}} &   1      \\
+        %         %
+        %          &
+        %         flatten &   2       & \success{} & 1397.15 (\stderr{  0.64}) &   1       & \success{} & {\newhighlight{$ 831.18 (\stderr{  0.84}) $}} &   8       & 1347.12 (\stderr{  0.90}) & \success{} & {\highlight{$ 913.95 (\stderr{ 12.44}) $}} &   1      \\
+        %         %
+        %          &
+        %         bind &   2       & \success{} & {\highlight{$  64.68 (\stderr{  0.17}) $}} &   0       & \success{} & 269.95 (\stderr{  0.65}) &  18       & 891.25 (\stderr{  1.82}) & \success{} & 276.54 (\stderr{  3.21}) &   2      \\
+        %         %
+        %          &
+        %         return &   0       & \success{} & {\highlight{$  20.50 (\stderr{  0.10}) $}} &   0       & \success{} & {\newhighlight{$  19.83 (\stderr{  0.10}) $}} &   4       &  41.29 (\stderr{  0.20}) & \success{} &  21.10 (\stderr{  0.26}) &   1      \\
+        %         %
+        %          &
+        %         inc &   1       & \success{} & {\highlight{$ 724.35 (\stderr{  1.43}) $}} &   1       & \success{} & 3209.55 (\stderr{  1.41}) &  24       & 6029.36 (\stderr{  3.29}) & \success{} & 3416.38 (\stderr{ 62.46}) &   1      \\
+        %         %
+        %          &
+        %         head &   0       & \success{} &  {\anotherhighlight{$69.62 (\stderr{  0.18})$}} &   1       & \success{} & {\newhighlight{$  49.11 (\stderr{  0.08}) $}} &   4       &  70.08 (\stderr{  0.09}) & \success{} & {\highlight{$  48.75 (\stderr{  0.21}) $}} &   1      \\
+        %         %
+        %          &
+        %         tail &   0       & \success{} &  {\anotherhighlight{$87.12 (\stderr{  1.01})$}} &   1       & \success{} & {\newhighlight{$  61.43 (\stderr{  0.19}) $}} &   8       & 100.57 (\stderr{  0.33}) & \success{} & {\highlight{$  36.29 (\stderr{  0.11}) $}} &   1      \\
+        %         %
+        %          &
+        %         last &   1       & \success{} & {\anotherhighlight{$1323.72 (\stderr{  1.17})$}} &   1       & \success{} & {\newhighlight{$ 1010.42 (\stderr{  0.81}) $}} &   4       & 1403.61 (\stderr{  1.19}) & \success{} & {\newnewhighlight{$ 921.10 (\stderr{  7.01}) $}} &   2      \\
+        %         %
+        %          &
+        %         length &   1       & \success{} & 474.98 (\stderr{  0.64}) &   1       & \success{} & {\newhighlight{$ 304.31 (\stderr{  0.46}) $}} &   4       & 425.67 (\stderr{  0.67}) & \success{} & {\highlight{$ 306.96 (\stderr{  2.52}) $}} &   1      \\
+        %         %
+        %          &
+        %         map &   1       & \success{} & {\highlight{$ 563.44 (\stderr{  0.80}) $}} &   0       & \success{} & 736.07 (\stderr{  1.08}) &   4       & 939.22 (\stderr{  1.09}) & \success{} & 739.58 (\stderr{  1.57}) &   1      \\
+        %         %
+        %          &
+        %         replicate5 &   0       & \success{} & {\highlight{$ 382.76 (\stderr{  0.39}) $}} &   0       & \success{} & {\newhighlight{$ 379.05 (\stderr{  0.50}) $}} &   4       & 803.30 (\stderr{  0.96}) & \success{} & 387.55 (\stderr{  0.54}) &   1      \\
+        %         %
+        %          &
+        %         replicate10 &   0       & \success{} & {\highlight{$ 2303.97 (\stderr{  3.57}) $}} &   0       & \success{} & 2399.01 (\stderr{100.22}) &   4       & 5184.56 (\stderr{102.21}) & \success{} & 2347.98 (\stderr{  4.21}) &   1      \\
+        %         %
+        %          &
+        %         replicateN &   1       & \success{} & 608.43 (\stderr{  0.64}) &   1       & \success{} & {\newhighlight{$ 415.33 (\stderr{  0.35}) $}} &   4       & 507.33 (\stderr{  0.58}) & \success{} & {\highlight{$ 416.69 (\stderr{  1.12}) $}} &   1      \\
+        %         %
+        %          &
+        %         stutter &   1       & \success{} & {\anotherhighlight{$1354.95 (\stderr{  0.96})$}} &   0       & \fail{} & Timeout & - & - & \success{} &  {\highlight{$15.14 (\stderr{  0.03})$}} &   0      \\
+        %         %
+        %          &
+        %         sum &   2       & \success{} & {\highlight{$  86.59 (\stderr{  0.40}) $}} &   1       & \success{} & 2667.80 (\stderr{  4.89}) & 192       & 5764.73 (\stderr{  9.98}) & \success{} & 2715.72 (\stderr{  4.25}) &   2      \\
+        %         %
+        %         \hline \multirow{5}{*}{{\rotatebox{90}{\textbf{Stream}}}} &
+        %         build &   0       & \success{} & {\highlight{$  63.30 (\stderr{  0.61}) $}} &   0       & \success{} & 105.76 (\stderr{  0.36}) &   4       & 189.25 (\stderr{  0.58}) & \success{} & 104.99 (\stderr{  0.28}) &   1      \\
+        %         %
+        %          &
+        %         map &   1       & \success{} & {\highlight{$ 361.16 (\stderr{  1.45}) $}} &   0       & \success{} & 452.21 (\stderr{  0.66}) &   0       & 586.12 (\stderr{  0.77}) & \success{} & 862.39 (\stderr{  1.97}) &   1      \\
+        %         %
+        %          &
+        %         take1 &   0       & \success{} &  {\anotherhighlight{$35.16 (\stderr{  0.13})$}} &   0       & \success{} & {\highlight{$  25.52 (\stderr{  0.07}) $}} &   0       &  45.23 (\stderr{  0.07}) & \success{} &  25.60 (\stderr{  0.08}) &   1      \\
+        %         %
+        %          &
+        %         take2 &   0       & \success{} & {\highlight{$ 112.80 (\stderr{  0.23}) $}} &   0       & \success{} & 165.75 (\stderr{  0.24}) &   0       & 254.58 (\stderr{  0.46}) & \success{} & 169.80 (\stderr{  0.26}) &   1      \\
+        %         %
+        %          &
+        %         take3 &   0       & \success{} & {\highlight{$ 931.72 (\stderr{  0.96}) $}} &   0       & \success{} & 1567.68 (\stderr{  1.52}) &   0       & 2193.77 (\stderr{  2.42}) & \success{} & 1591.96 (\stderr{  1.60}) &   1      \\
+        %         %
+        %         \hline \multirow{5}{*}{{\rotatebox{90}{\textbf{Bool}}}} &
+        %         neg &   0       & \success{} & {\anotherhighlight{$ 213.97 (\stderr{  0.36})$}} &   2       & \success{} & {\highlight{$ 176.02 (\stderr{  0.23}) $}} &   0       & 346.55 (\stderr{  0.72}) & \success{} & 180.38 (\stderr{  1.51}) &   2      \\
+        %         %
+        %          &
+        %         and &   0       & \success{} & {\anotherhighlight{$ 3178.44 (\stderr{  1.29})$}} &   4       & \fail{} & Timeout & - & - & \success{} & {\highlight{$ 1706.81 (\stderr{  4.23}) $}} &   4      \\
+        %         %
+        %          &
+        %         impl &   0       & \success{} & {\anotherhighlight{$ 1754.02 (\stderr{  2.31})$}} &   4       & \fail{} & Timeout & - & - & \success{} & {\highlight{$ 541.16 (\stderr{  1.19})$}} &   4      \\
+        %         %
+        %          &
+        %         or &   0       & \success{} & {\anotherhighlight{$ 1231.19 (\stderr{  1.84})$}} &   4       & \fail{} & Timeout & - & - & \success{} & {\highlight{$ 307.74 (\stderr{  0.32}) $}} &   4      \\
+        %         %
+        %          &
+        %         xor &   0       & \success{} & {\highlight{$ 2897.35 (\stderr{  2.18}) $}} &   4       & \fail{} & Timeout & - & - & \success{} & 9202.67 (\stderr{  3.98}) &   4      \\
+        %         %
+        %         \hline \multirow{7}{*}{{\rotatebox{90}{\textbf{Maybe}}}} &
+        %         bind &   0       & \success{} & {\anotherhighlight{$ 162.79 (\stderr{  0.34})$}} &   0       & \success{} & 121.40 (\stderr{  0.54}) &   0       & 172.47 (\stderr{  0.58}) & \success{} & {\newnewhighlight{$ 120.15 (\stderr{  0.20}) $}} &   1      \\
+        %         %
+        %          &
+        %         fromMaybe &   0       & \success{} &  55.36 (\stderr{  0.12}) &   0       & \success{} &  39.18 (\stderr{  0.16}) &   0       &  49.78 (\stderr{  0.31}) & \success{} & {\newnewhighlight{$  39.11 (\stderr{  0.06}) $}} &   2      \\
+        %         %
+        %          &
+        %         return &   0       & \success{} &  {\anotherhighlight{$10.09 (\stderr{  0.05})$}} &   0       & \success{} &  10.89 (\stderr{  0.40}) &   4       &  22.75 (\stderr{  0.83}) & \success{} & {\highlight{$   5.29 (\stderr{  0.10}) $}} &   0      \\
+        %         %
+        %          &
+        %         isJust &   0       & \success{} &  {\anotherhighlight{$70.58 (\stderr{  0.11})$}} &   2       & \success{} &  56.84 (\stderr{  1.43}) &   0       &  79.52 (\stderr{  2.13}) & \success{} & {\highlight{$  52.64 (\stderr{  0.49}) $}} &   2      \\
+        %         %
+        %          &
+        %         isNothing &   0       & \success{} & {\anotherhighlight{$103.97 (\stderr{  0.28})$}} &   2       & \success{} &  82.79 (\stderr{  2.73}) &   0       & 114.10 (\stderr{  3.71}) & \success{} & {\highlight{$  77.92 (\stderr{  0.10}) $}} &   2      \\
+        %         %
+        %          &
+        %         map &   0       & \success{} &  {\anotherhighlight{$56.17 (\stderr{  0.16})$}} &   0       & \success{} & {\highlight{$  39.57 (\stderr{  0.08}) $}} &   0       &  60.04 (\stderr{  0.16}) & \success{} &  40.18 (\stderr{  0.52}) &   1      \\
+        %         %
+        %          &
+        %         mplus &   0       & \success{} & 323.95 (\stderr{  0.38}) &   1       & \success{} & {\highlight{$ 187.30 (\stderr{  0.57}) $}} &   0       & 252.95 (\stderr{  0.57}) & \success{} & 188.87 (\stderr{  1.13}) &   1      \\
+        %         %
+        %         \hline \multirow{4}{*}{{\rotatebox{90}{\textbf{Nat}}}} &
+        %         isEven &   1       & \success{} & {\anotherhighlight{$1041.21 (\stderr{  1.07})$}} &   2       & \success{} & {\newhighlight{$ 1027.42 (\stderr{ 12.34}) $}} &   8       & 1351.11 (\stderr{ 16.70}) & \success{} & {\highlight{$ 981.20 (\stderr{  1.78}) $}} &   2      \\
+        %         %
+        %          &
+        %         pred &   0       & \success{} &  {\anotherhighlight{$ 50.63 (\stderr{  0.26})$}} &   1       & \success{} &  66.93 (\stderr{  1.90}) &   8       & 120.55 (\stderr{  4.25}) & \success{} & {\highlight{$  38.27 (\stderr{  1.49}) $}} &   1      \\
+        %         %
+        %          &
+        %         succ &   0       & \success{} & {\highlight{$ 117.53 (\stderr{  0.19}) $}} &   1       & \success{} & 189.67 (\stderr{  3.25}) &   8       & 361.33 (\stderr{  5.81}) & \success{} & 179.54 (\stderr{  0.89}) &   1      \\
+        %         %
+        %          &
+        %         sum &   1       & \success{} & {\highlight{$ 1596.32 (\stderr{  1.22}) $}} &   1       & \success{} & 2438.60 (\stderr{ 20.95}) &  12       & 3177.10 (\stderr{ 30.93}) & \success{} & 2705.51 (\stderr{  2.89}) &   3      \\
+        %         %
+        %         \hline \multirow{3}{*}{{\rotatebox{90}{\textbf{Tree}}}} &
+        %         map &   1       & \success{} & {\anotherhighlight{$1183.14 (\stderr{  1.66})$}} &   0       & \success{} & 1643.18 (\stderr{  7.83}) &   4       & 2097.70 (\stderr{ 12.95}) & \success{} & {\newnewhighlight{$ 1063.38 (\stderr{  1.11}) $}} &   1      \\
+        %         %
+        %          &
+        %         stutter &   1       & \success{} & {\anotherhighlight{$703.27 (\stderr{  0.53})$}} &   0       & \success{} & 1065.97 (\stderr{ 10.64}) &   4       & 1275.54 (\stderr{ 15.49}) & \success{} & {\newnewhighlight{$ 664.37 (\stderr{  1.45}) $}} &   1      \\
+        %         %
+        %          &
+        %         sum &   2       & \success{} & {\highlight{$ 1499.00 (\stderr{  1.31}) $}} &   3       & \success{} & 2787.05 (\stderr{ 28.36}) & 192       & 6229.86 (\stderr{ 69.85}) & \success{} & 2675.69 (\stderr{ 11.44}) &   3      \\
+        %         %
+        %         \hline \multirow{3}{*}{{\rotatebox{90}{\textbf{Misc}}}} &
+        %         compose &   0       & \success{} &  {\anotherhighlight{$40.82 (\stderr{  0.23})$}} &   0       & \success{} &  40.93 (\stderr{  0.82}) &   2       &  55.28 (\stderr{  0.95}) & \success{} & {\highlight{$  39.27 (\stderr{  0.13}) $}} &   0      \\
+        %         %
+        %          &
+        %         copy &   0       & \success{} &   {\anotherhighlight{$5.42 (\stderr{  0.04})$}} &   0       & \success{} & {\newhighlight{$   5.38 (\stderr{  0.16}) $}} &   2       &  11.70 (\stderr{  0.36}) & \success{} & {\highlight{$   5.38 (\stderr{  0.15}) $}} &   0      \\
+        %         %
+        %          &
+        %         push &   0       & \success{} & {\highlight{$  26.87 (\stderr{  0.14}) $}} &   0       & \success{} &  27.75 (\stderr{  0.86}) &   2       &  42.14 (\stderr{  1.28}) & \success{} &  27.03 (\stderr{  0.99}) &   0      \\
+        %         %
+        %         \end{tabular}}
+        %         \end{center}}}
+        %         \caption{Results. $\mu{T}$ in \emph{ms} to 2 d.p. with standard sample error in brackets}
+        %         \label{tab:results}
+        %         \vspace{-2.5em}
+        %         \end{table}
+
+        \begin{table}[H]
+                {\footnotesize{
+                \begin{center}
+                \setlength{\tabcolsep}{0.3em}
+                \scalebox{0.9}{
+                \begin{tabular}{p{1.25em}ccl|p{0.75em}rc|p{0.75em}rcc} & & & &
+                \multicolumn{3}{c|}{Graded}&\multicolumn{4}{c|}{Cartesian + Graded type-check} \\ \hline \multicolumn{2}{c}{{Problem}}& \multicolumn{1}{c}{{Ctxt}} & \multicolumn{1}{l|}{{\#/Exs.}} & & \multicolumn{1}{c}{$\mu{T}$ (ms)} & \multicolumn{1}{c|}{{Paths}} & & \multicolumn{1}{c}{$\mu{T}$ (ms)} & \multicolumn{1}{c}{\textsc{N}} & \multicolumn{1}{c|}{{Paths}} \\ \hline
+                \hline \multirow{19}{*}{{\rotatebox{90}{\textbf{List}}}} &
+                append &   0       &   0 (+1)        & \success{} & 115.35 (\stderr{  5.13}) & 130       & \success{} & {\highlight{$ 105.24 (\stderr{  0.36}) $}} &   8      & 130      \\
+                %
+                 &
+                concat &   1       &   0 (+3)        & \success{} &  1104.76 (\stderr{  1.60})  & 1354       & \success{} & {\highlight{$ 615.29 (\stderr{  1.43}) $}} &  12      &1354      \\
+                %
+                 &
+                empty &   0       &   0        & \success{} &   5.31 (\stderr{  0.02}) &  17       & \success{} & {\highlight{$   1.20 (\stderr{  0.01}) $}} &   0      & 17      \\
+                %
+                 &
+                snoc &   1       &   1       & \success{} & 2137.28 (\stderr{  2.14}) & {\newhighlight{$2204$}}       & \success{} & {\highlight{$ 1094.03 (\stderr{  4.75}) $}} &   8      &2278      \\
+                %
+                 &
+                drop &   1       &   1        & \success{} & 1185.03 (\stderr{  2.53})  &  {\newhighlight{$1634$}}       & \success{} & {\highlight{$ 445.95 (\stderr{  1.71}) $}} &   8      &1907      \\
+                %
+                 &
+                flatten &   2       &   1       & \success{} & 1369.90 (\stderr{  2.60})  & 482       & \success{} & {\highlight{$ 527.64 (\stderr{  1.04}) $}} &   8      &482      \\
+                %
+                 &
+                bind &   2       &   0  (+2)    &  \success{} & {\highlight{$  62.20 (\stderr{  0.21}) $}} &  {\newhighlight{$129$}}       & \success{} & 622.84 (\stderr{  0.95}) &  18      &427      \\
+                %
+                 &
+                return &   0       &   0 (+1)       & \success{} & {\highlight{$  19.71 (\stderr{  0.18}) $}} &  49       & \success{} &  22.00 (\stderr{  0.08})  &   4      & 49      \\
+                %
+                 &
+                inc &   1       &   1       &  \success{} & {\highlight{$ 708.23 (\stderr{  0.69}) $}} & {\newhighlight{$879$}}       & \success{} &  2835.53 (\stderr{  7.69}) &  24      &1664      \\
+                %
+                 &
+                head &   0       &   1        & \success{} & 68.23 (\stderr{  0.53})  &  34       & \success{} & {\highlight{$  20.78 (\stderr{  0.10}) $}} &   4      & 34      \\
+
+                 &
+                tail &   0       &   1        & \success{} &  84.23 (\stderr{  0.20}) &  33       & \success{} & {\highlight{$  38.59 (\stderr{  0.06}) $}} &   8      & 33      \\
+                %
+                 &
+                last &   1       &   1 (+1)        & \success{} & 1298.52 (\stderr{  1.17}) & {\newhighlight{$ 593 $}}      & \success{} & {\highlight{$ 410.60 (\stderr{  6.25}) $}} &   4      &684      \\
+                %
+                 &
+                length &   1       &   1        & \success{} &  464.12 (\stderr{  0.90})  & 251       & \success{} & {\highlight{$ 127.91 (\stderr{  0.58}) $}} &   4      &251      \\
+                %
+                 &
+                map &   1       &   0 (+1)       &  \success{} &  550.10 (\stderr{  0.61})  & 3075       & \success{} & {\highlight{$ 249.42 (\stderr{  0.73}) $}} &   4      &3075      \\
+                %
+                 &
+                replicate5 &   0       &   0 (+1)       & \success{} & {\highlight{$ 372.23 (\stderr{  0.70}) $}} & 1295       & \success{} & 435.78 (\stderr{  1.06}) &   4      &1295      \\
+                %
+                 &
+                replicate10 &   0       &   0  (+1)      & \success{} & {\highlight{$ 2241.87 (\stderr{  4.74}) $}} & 10773       & \success{} &  2898.93 (\stderr{  1.47}) &   4      &10773      \\
+                %
+                 &
+                replicateN &   1       &   1        & \success{} & 593.86 (\stderr{  1.68})  & 772       & \success{} & {\highlight{$ 108.98 (\stderr{  0.65}) $}} &   4      &772      \\
+                %
+                 &
+                stutter &   1       &   0       &  \success{} & {\highlight{$ 1325.36 (\stderr{  1.77}) $}} & {\newhighlight{$1792$}}       & \fail{} & Timeout & - & -\\
+                %
+                 &
+                sum &   2       &   1 (+1)      &  \success{} & {\highlight{$  84.09 (\stderr{  0.25}) $}} & {\newhighlight{$ 208 $}}      & \success{} & 3236.74 (\stderr{  0.87}) & 192      &3623      \\
+                %
+                \hline \multirow{5}{*}{{\rotatebox{90}{\textbf{Stream}}}} &
+                build &   0       &   0  (+1)     & \success{} & {\highlight{$  61.27 (\stderr{  0.45}) $}} &  75       & \success{} &  84.44 (\stderr{  0.49}) &   4      & 75      \\
+                %
+                 &
+                map &   1       &   0  (+1)      & \success{} & 351.93 (\stderr{  0.91}) & 1363       & \success{} & {\highlight{$ 153.01 (\stderr{  0.37}) $}} &   0      &1363      \\
+                %
+                 &
+                take1 &   0       &   0    (+1)    & \success{} &  34.02 (\stderr{  0.23}) &  22       & \success{} & {\highlight{$  19.32 (\stderr{  0.05}) $}} &   0      & 22      \\
+                %
+                 &
+                take2 &   0       &   0  (+1)     &  \success{} & 110.18 (\stderr{  0.31}) & {\newhighlight{$ 204$}}       & \success{} & {\highlight{$  89.10 (\stderr{  0.18}) $}} &   0      &208      \\
+                %
+                 &
+                take3 &   0       &   0  (+1)     &  \success{} & 915.39 (\stderr{  1.42}) & {\newhighlight{$ 1139 $}}      & \success{} & {\highlight{$ 631.47 (\stderr{  1.14}) $}} &   0      &1172      \\
+                %
+                \hline \multirow{5}{*}{{\rotatebox{90}{\textbf{Bool}}}} &
+                neg &   0       &   2       &  \success{} & 209.09 (\stderr{  0.31}) &  42       & \success{} & {\highlight{$ 168.37 (\stderr{  0.56}) $}} &   0      & 42      \\
+                %
+                 &
+                and &   0       &   4       &  \success{} & {\highlight{$3129.30 (\stderr{  2.82})$}} & {\newhighlight{$ 786$}}       & \success{} & 7069.14 (\stderr{ 15.91}) &   0      &2153      \\
+                %
+                 &
+                impl &   0       &   4       &   \success{} & {\highlight{$1735.09 (\stderr{  4.31})$}} & {\newhighlight{$ 484$}}       & \success{} & 3000.48 (\stderr{  4.65}) &   0      &1214      \\
+                %
+                 &
+                or &   0       &   4       &   \success{} & {\highlight{$1213.86 (\stderr{  1.02})$}} &  {\newhighlight{$374 $}}      & \success{} &  2867.74 (\stderr{  3.52})  &   0      &1203      \\
+                %
+                 &
+                xor &   0       &   4       &   \success{} & {\highlight{$2865.79 (\stderr{  4.33})$}} &  {\newhighlight{$736$}}       & \success{} & 7251.38 (\stderr{ 32.06}) &   0      &2229      \\
+                %
+                \hline \multirow{7}{*}{{\rotatebox{90}{\textbf{Maybe}}}} &
+                bind &   0       &   0 (+1)      &   \success{} & 159.87 (\stderr{  0.52}) & 237       & \success{} & {\highlight{$  55.33 (\stderr{  0.33}) $}} &   0      &237      \\
+                %
+                 &
+                fromMaybe &   0       &   0 (+2)        & \success{} &  54.27 (\stderr{  0.35}) &  18       & \success{} & {\highlight{$  11.58 (\stderr{  0.10}) $}} &   0      & 18      \\
+                %
+                 &
+                return &   0       &   0        & \success{} & {\highlight{$   9.89 (\stderr{  0.02}) $}} &  17       & \success{} &  11.49 (\stderr{  0.04}) &   4      & 17      \\
+                %
+                 &
+                isJust &   0       &   2        & \success{} &  69.33 (\stderr{  0.17}) &  48       & \success{} & {\highlight{$  22.07 (\stderr{  0.09}) $}} &   0      & 48      \\
+                %
+                 &
+                isNothing &   0       &   2         & \success{} & 102.42 (\stderr{  0.32}) &  49       & \success{} & {\highlight{$  31.89 (\stderr{  0.22}) $}} &   0      & 49      \\
+                %
+                 &
+                map &   0       &   0  (+1)     &   \success{} &  54.90 (\stderr{  0.22}) & 120       & \success{} & {\highlight{$  22.01 (\stderr{  0.10}) $}} &   0      &120      \\
+                %
+                 &
+                mplus &   0       &   1       &   \success{} & 319.64 (\stderr{  0.47}) & 318       & \success{} & {\highlight{$  70.98 (\stderr{  0.05}) $}} &   0      &318      \\
+                %
+                \hline \multirow{4}{*}{{\rotatebox{90}{\textbf{Nat}}}} &
+                isEven &   1       &   2       &  \success{} & 1027.79 (\stderr{  1.28}) & {\newhighlight{$466$}}       & \success{} & {\highlight{$ 313.77 (\stderr{  0.92}) $}} &   8      &468      \\
+                %
+                 &
+                pred &   0       &   1       &  \success{} & {\highlight{$  46.20 (\stderr{  0.18}) $}} &  33       & \success{} & 48.04 (\stderr{  0.13}) &   8      & 33      \\
+                %
+                 &
+                succ &   0       &   1       &   \success{} & {\highlight{$ 115.16 (\stderr{  0.91}) $}} &  76       & \success{} &  156.02 (\stderr{  0.50}) &   8      & 76      \\
+                %
+                 &
+                sum &   1       &   1 (+2)      &   \success{} & 1582.23 (\stderr{  3.60})  & 751       & \success{} & {\highlight{$ 734.38 (\stderr{  1.41}) $}} &  12      &751      \\
+                %
+                \hline \multirow{3}{*}{{\rotatebox{90}{\textbf{Tree}}}} &
+                map &   1       &   0 (+1)      &   \success{} &  1168.60 (\stderr{  1.21}) & 4259       & \success{} & {\highlight{$ 525.47 (\stderr{  1.31}) $}} &   4      &4259      \\
+                %
+                 &
+                stutter &   1       &   0  (+1)       & \success{} &  693.44 (\stderr{  1.21}) & 832       & \success{} & {\highlight{$ 219.91 (\stderr{  1.02}) $}} &   4      & {\newhighlight{$674$}}      \\
+                %
+                 &
+                sum &   2       &   3       &  \success{} & {\highlight{$ 1477.83 (\stderr{  1.28}) $}} &  {\newhighlight{$3230 $}}      & \success{} & 3532.24 (\stderr{  7.19}) & 192      &3623      \\
+                %
+                \hline \multirow{3}{*}{{\rotatebox{90}{\textbf{Misc}}}} &
+                compose &   0       &   0         & \success{} & 40.27 (\stderr{  0.08}) &  38       & \success{} & {\highlight{$  14.53 (\stderr{  0.09}) $}} &   2      & 38      \\
+                %
+                 &
+                copy &   0       &   0       &  \success{} & {\highlight{$   5.24 (\stderr{  0.04}) $}} &  21       & \success{} &  6.16 (\stderr{  0.10}) &   2      & 21      \\
+                %
+                 &
+                push &   0       &   0       &   \success{} &  26.66 (\stderr{  0.18}) &  45       & \success{} & {\highlight{$  14.23 (\stderr{  0.13}) $}} &   2      & 45      \\
+                %
+                \end{tabular}}
+                \end{center}}}
+                \caption{Results. $\mu{T}$ in \emph{ms} to 2 d.p. with standard sample error in brackets}
+                \label{tab:results}
+                \vspace{-2.5em}
+                \end{table}
+
+
+
+
+% \iffalse
+% The first results column (Graded) contains the results for graded synthesis,
+% including the number of examples needed (\#/Exs).
+% The second results column (Cartesian - Consulting) contains the results for synthesising a
+% program in the Cartesian (de-graded) setting, using the
+% same examples set as the Graded column, recording the number of
+% retries (consultations of the oracle) \textsc{N}
+% and $(\mu{}T + \text{OracleT})$ records the total synthesis
+% time plus the time taken by the Oracle to type-check potential solutions against the
+% original graded type.
+% The third results column (Cartesian - Examples) contains the results for
+% synthesising from the de-graded type but without allowing retries from
+% the oracle. Instead, additional input-output examples are supplied
+% to provide a strong
+% specification such that no retries are needed. As with the Graded column, the number of
+% input-output examples used is recorded.
+
+% For each row, we then highlight the column which synthesised a result the fastest in
+% $\highlight{\text{blue}}$ (taking into account OracleT). We highlight
+% in $\newhighlight{\text{pink}}$ the results in the Cartesian setting which were
+% synthesised faster than the Graded without the inclusion of OracleT. If the Graded result was
+% faster than the Cartesian (with consulting)'s OracleT time, but was outperformed by Cartesian (Examples),
+% then we highlight this result in $\anotherhighlight{\text{purple}}$.
+
+% Finally, in the Cartesian (Examples) column,
+% we highlight results which were synthesised faster than the Graded but which required more input-output examples in
+% $\newnewhighlight{\text{yellow}}$.
+
+% When comparing the Graded column to the Cartesian (with consulting) column,
+% the results show that in $41$ of the $46$ benchmarks (89\%) the graded
+% approach out-performed non-graded synthesis when taking into account
+% the modest penalty for consulting the oracle (the sum of the $\highlight{\text{blue}}$ and $\anotherhighlight{\text{purple}}$ results in the Graded column).
+% Ignoring the oracle, for $36$ of the $46$ benchmarks (78\%) the graded approach still out-performed
+% the Cartesian with consulting.
+
+
+% We also find that for the non-graded setting without consulting the oracle --- the Cartesian (with examples) column, further examples
+% are required to synthesise the same program as the graded in $20$ out of $46$ (43\%) cases. In these cases, an average of
+% $1.25$ additional examples was required, with $5$ of these benchmarks synthesising a result faster than the graded equivalent.
+% The difference in speed between Graded and Cartesian (with examples) is
+% less stark than Graded and Cartesian (with consulting), with the graded approach faster in 22 out of 46 benchmarks (48\%).
+% \fi
+
+
+We briefly examine some of the more complex benchmarks which make use
+of almost all of our synthesis rules in one program. The
+\granin{stutter} case from the List class of benchmarks is specified as:
+%
+\begin{granule}
+stutter : forall a . List (a [2]) %1..$\infty$ -> List a
+spec
+    stutter % 0..$\infty$
+stutter = ?
+\end{granule}
+%
+This is a function which takes a list of values of type \granin{a}, where each element in the list is explicitly graded by
+\granin{2}, indicating that each element must be used twice. The return type of
+\granin{stutter} is a list of type \granin{a}. The argument list itself
+must be used at least once with potential usage extending up to infinity,
+suggesting that some recursion will be necessary in the program. This is further
+emphasised by the \granin{spec}, which states that we can use the definition of
+\granin{stutter} inside the function body in an unrestricted way. From this, we synthesise the program:
+%
+\begin{granule}
+stutter Nil = Nil;
+stutter (Cons [u] z) = (Cons u) ((Cons u) (stutter z))
+\end{granule}
+%
+in 1325ms ($\sim$1.3 seconds).
+We also have a \granin{stutter} case in the Tree class of benchmarks, which instead performs
+the above transformation over a binary tree data type, which yields the following program
+in 693ms ($\sim$0.7 seconds):
+\begin{granule}
+stutter : forall a b . Tree (a [2]) % 1..$\infty$ -> Tree (a, a)
+spec
+    stutter %0..$\infty$
+stutter Leaf = Leaf;
+stutter (Node y [v] u) = ((Node (stutter y)) (v, v)) (stutter u)
+\end{granule}
+%
+Lastly, we compare between the number of examples required by Granule (using grades)
+and the \textsc{Myth} program synthesis tool (based on pruning by examples).
+We take the cases from our benchmark set which have an equivalent in the \textsc{Myth} benchmark suite~\citep{oseraMYTH1}.
+Table \ref{tab:example-comp} shows the number of input-output examples used in Granule,
+and the number required for the equivalent \textsc{Myth} case. In both Granule and \textsc{Myth} this number represents
+the minimal number of examples required to synthesise the correct program.
+
+\begin{table}[h]
+\begin{center}
+\setlength{\tabcolsep}{0.3em}
+\scalebox{.95}{
+\begin{tabular}{p{2.25em}c|c|c} & &
+\multicolumn{1}{c|}{Granule}&\multicolumn{1}{c}{\textsc{Myth}}\\ \hline
+\multicolumn{2}{c|}{{Problem}} & \multicolumn{1}{c}{\#/Exs} & \multicolumn{1}{c}{\#/Exs} \\ \hline
+\hline \multirow{12}{*}{{\rotatebox{0}{\textbf{List}}}}
+& append & 0 & 6 \\
+& concat & 1 & 6 \\
+& snoc & 1 & 8 \\
+& drop & 1 & 13 \\
+& inc & 1 & 4 \\
+& head & 1 & 3 \\
+& tail & 1 & 3 \\
+& last & 1 & 6 \\
+& length & 1 & 3 \\
+& map  & 0 & 8 \\
+& stutter & 0 & 3 \\
+& sum & 1 & 3 \\
+\hline \multirow{5}{*}{{\rotatebox{0}{\textbf{Bool}}}}
+& neg & 2 & 2 \\
+& and & 4  & 4 \\
+& impl &4  & 4 \\
+& or & 4 & 4 \\
+& xor & 4 & 4 \\
+\hline \multirow{2}{*}{{\rotatebox{0}{\textbf{Nat}}}}
+& isEven & 2 & 4 \\
+& pred & 1 & 3 \\
+\hline \multirow{1}{*}{{\rotatebox{0}{\textbf{Tree}}}}
+& map & 0 & 7 \\ \\ \\ \\ \\
+\end{tabular}}
+\end{center}
+\vspace{0.5em}
+\caption{Number of examples needed for synthesis, comparing Granule vs. \textsc{Myth}}
+\label{tab:example-comp}
+\vspace{-2.5em}
+\end{table}
+
+
+For most of the problems (15 out of 20), Granule required fewer examples to identify the desired
+program in synthesis. The disparity in the number of examples required is quite significant in some cases: with
+13 examples required by \textsc{Myth} to synthesise the \emph{concat} problem but only 1 example for
+Granule. This shows the pruning power of graded information in synthesis, confirming H2.
+
+
+\section{Synthesis of Linear Haskell programs}
+\label{sec:linear-haskell}
+
+As part of a growing trend of resourceful types being added to more mainstream languages,
+Haskell has introduced support for linear types as of GHC 9, using an underlying
+graded type system which can be enabled as a language extension of GHC's existing type
+system~\citep{DBLP:journals/pacmpl/BernardyBNJS18} (the \haskin{LinearType} extension). This system is closely related to Granule, but limited only to one semiring for its grades.
+This however presents an exciting opportunity: can we leverage our tool to synthesise (linear) Haskell programs?
+
+Like Granule, grades in Linear Haskell can be expressed as ``multiplicities'' on function types: \haskin{a \%r -> b}.
+The multiplicity $r$ can be either $1$ or $\omega$ (or polymorphic), with $1$
+denoting linear usage (also written as \haskin{'One}) and $\omega$ for
+(\haskin{'Many}) unrestricted usage. Likewise, in Granule, we can model linear
+types using the $0$-$1$-$\omega$ semiring (see example \ref{example:01omega}) \citep{hughes:lirmm-03271465}.
+
+Synthesising Linear Haskell programs then simply becomes a task of parsing a
+Haskell type into a Granule equivalent, synthesising a term from this, and
+compiling the synthesised term back into Haskell. The close syntactic correspondence between
+Granule and Haskell makes this translation straightforward.
+
+Our implementation includes a prototype synthesis tool using this approach.
+A synthesis problem takes the form of a Linear Haskell program with a hole, e.g.
+\begin{haskell}
+{-# LANGUAGE LinearTypes #-}
+swap :: (a, b) %One -> (b, a)
+swap = _
+\end{haskell}
+We invoke the synthesis tool with \haskin{gr --linear-haskell swap.hs} which produces:
+\begin{haskell}
+swap (z, y) = (y, z)
+\end{haskell}
+%
+Users may make use of lists, tuples, \haskin{Maybe} and \haskin{Either} data types from Haskell's prelude, as well
+as user-defined ADTs. Further integration of the tool, as well as support for additional Haskell features
+such as GADTs is left as future work.
+
+
 \section{Conclusion}
 \label{section:graded-base-conclusion}
+
+In this chapter we presented a program synthesis tool for 

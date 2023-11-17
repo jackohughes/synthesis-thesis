@@ -1,24 +1,26 @@
 \chapter{Background}
 \label{chapter:background}
-Since Girard's original work on Linear Logic in 1987~\cite{girard1987linear}, the development of type
-systems which convey additional information about the program's structure has
-evolved into a distinct paradigm, culminating in recent years with the notion of
-\textit{graded types}. Approaches to graded type systems run the gamut,
-incorporating a wide range of effect and coeffect systems, however, they 
-can typically be distilled into two categories, with distinct lineages: 
+Since Girard's original work on Linear Logic in 1987~\cite{girard1987linear},
+the development of type systems which convey additional information about the
+program's structure has evolved into a distinct paradigm, culminating in recent
+years with the notion of \textit{graded types}. Approaches to graded type
+systems run the gamut, incorporating a wide range of effect and coeffect
+systems, however, they can typically be distilled into two categories, with
+distinct lineages: 
 \begin{itemize}
   \item Systems where a graded modal type operator introduces and eliminates
         graded modalities above some existing type system. This is the default
-        approach of Granule, where the underlying type system is linear,
-        and grade modalities are introduced and eliminated via the $\Box$ modal
-        type operator.
-  \item Systems where grades permeate the program, and are introduced via annotations 
-        on function arrows. This is the approach taken by Linear Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}, where 
-        grades (or ``multiplicities'') are specified using the \granin{\%} operator. 
+        approach of Granule, where the underlying type system is linear, and
+        grade modalities are introduced and eliminated via the $\Box$ modal type
+        operator.
+  \item Systems where grades permeate the program, and are introduced via
+        annotations on function arrows. This is the approach taken by Linear
+        Haskell~\cite{DBLP:journals/pacmpl/BernardyBNJS18}, where grades (or
+        ``multiplicities'') are specified using the \granin{\%} operator. 
 \end{itemize}  
-These two different styles to graded types mirror the dual development of 
-effect systems and graded monadic systems in the literature. In the latter case, 
-the two were eventually found to be equivalent. 
+These two different styles to graded types mirror the dual development of effect
+systems and graded monadic systems in the literature. In the latter case, the
+two were eventually found to be equivalent. 
 
 % The same treatment for graded systems is ongoing 
 
@@ -164,20 +166,49 @@ derivation, each assumption must be used exactly once --- arbitrarily copying or
 discarding values is disallowed, excluding a vast number of programs from being
 typeable in linear logic. Non-restricted usage of a value is recovered through
 the modal operator $!$ (also called ``bang'', ``of-course'', or the
-\textit{exponential} modality). Affixing $!$ to a type captures the notion that values of
-that type may be used freely in a program.
+\textit{exponential} modality). Affixing $!$ to a type captures the notion that
+values of that type may be used freely in a program.
 
-providing a binary view of data as a
-resource inside a program: values are either linear or completely unrestricted.
+% providing a binary view of data as a
+% resource inside a program: values are either linear or completely unrestricted.
+
+
+\subsection{The Linear $\Lambda$-Calculus}
+By only permitting the \textsc{Exchange} structural rule, we can integrate linear logic into 
+the simply-typed $\lambda$-calculus, yielding a \emph{linear $\lambda-$calculus}. This provides 
+us with a foundation for programming with substructural logics, which we will later refine with graded
+types. 
+
+The types of the linear $\lambda$-calculus are given by: 
+\begin{align*}
+  \hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+         [[ A ]] \multimap [[ B ]]
+  {\small{\tag{types}}}
+\end{align*}
+
+\begin{align*}
+\inferrule*[right = Var]
+{\;}
+{[[ x : A |- x : A ]]}
+\;\;
+\inferrule*[right = Abs]
+{[[ G , x : A |- t : B ]]}
+{[[ G |- \x . t : A -o B ]]}
+\\[0.75em]
+\inferrule*[right = App]
+{[[ G1 |- t1 : A -o B ]] \;\;\;
+ [[ G2 |- t2 : A ]] }
+{[[ G1 + G2 |- t1 t2 : B ]]}
+\end{align*}
+
+
+\section{From Linear Logic to Graded Types}
 
 Bounded Linear Logic, took this idea further --- instead of a single modal
 operator, $!$ is replaced with a family of modal operators indexed by terms
 which provide an upper bound on usage~\cite{}. These terms provide an upper bound on
 the usage of a values inside term, e.g. $!_{3}A$ is the type of $A$ values which
 may be used up to 3 times.
-
-
-
 
 \section{The Graded Linear $\lambda$-calculus}
 \label{sec:linear-base}
@@ -300,10 +331,10 @@ $[[ G2 ]]$:
 \;\;
   \inferrule*[right = Abs]
   {[[ G , x : A |- t : B ]]}
-  {[[ G |- \x . t : A -> B ]]}
+  {[[ G |- \x . t : A -o B ]]}
 \\[0.75em]
   \inferrule*[right = App]
-  {[[ G1 |- t1 : A -> B ]] \;\;\;
+  {[[ G1 |- t1 : A -o B ]] \;\;\;
    [[ G2 |- t2 : A ]] }
   {[[ G1 + G2 |- t1 t2 : B ]]}
 \\[0.75em]

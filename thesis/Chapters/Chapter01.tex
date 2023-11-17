@@ -13,7 +13,7 @@ Type-directed program synthesis is a well-studied technique for automatically
 generating program code from a given type specification - the \textit{goal}
 type. This approach has a long history, which is deeply intertwined with
 automated theorem proving, thanks to the Curry-Howard
-correspondence~\cite{manna1980deductive,10.5555/1624562.1624585}. 
+correspondence~\citep{manna1980deductive,10.5555/1624562.1624585}. 
 
 One lens through which we can view this task is as an inversion of type
 checking: we start with a goal type and inductively synthesise well-typd
@@ -158,14 +158,14 @@ although we concern ourselves only with the former two in this work.
 
 Specifically, this work makes the following contributions:
 \begin{itemize}
-  \item We identify two approaches which make type-directed program synthesis in
+  \item We identify an approach which makes type-directed program synthesis in
         a resourceful setting feasible. Drawing inspiration from the work of
         Hodas and Miller on theorem proving~\citep{HODAS1994327}, we adapt their
-        method to graded types, and propose a dual approach, yielding two
-        strategies for managing the usage of values as resources in the
+        method to graded types, and propose a dual to their own strategy, yielding two
+        schemes for managing the usage of values as resources in the
         synthesis of a program term. 
 
-  \item We use these approaches to construct two simple synthesis calculi for a
+  \item We use these schemes to construct two simple synthesis calculi for a
         simplified core of Granule, which demonstrate their effectiveness as
         tools for resourceful program synthesis. We implement both approaches as 
         part of the Granule toolchain. 
@@ -238,7 +238,7 @@ the two. Thus, we adopt the following structure:
         contrasting the resource management approaches against each other, before 
         selecting the most performant to use going forward.  
 
-        \item We then make a brief diversion from type-directed synthesis,
+        \item We then consider an altenrative approach to type-directed synthesis,
         exploring a mechanism for automatically deriving programs from their
         type à la Haskell's generic deriving mechanism~\cite{generic-deriving}.
         Again for this we base the approach on the graded linear

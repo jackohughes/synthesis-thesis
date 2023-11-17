@@ -1788,3 +1788,658 @@ then:
     \item Case 6. Left Focus: \fAddFocusLName\ - The proof for left focusing rule is equivalent to that of lemma \eqref{lemma:fAddSynthSound}\\
   \end{enumerate}
 \end{proof}
+
+
+\synthSound*
+\begin{proof}
+Induction on the synthesis rules. We consider the cases of the lemma in order, first proving soundness for 
+synthesis of open terms from types, followed by soundness of synthesis for closed term from type schemes.
+\begin{enumerate}
+\item \begin{enumerate}
+\item Case $\textsc{Var}$ \\
+        For synthesis of a variable term, we have the derivation:
+        \begin{align*}
+          \synVarP
+        \end{align*}
+        From the premise, we have that: 
+        \begin{align*}
+          [[ Sig |- A : Type ]]
+        \end{align*}
+        from which we can construct the following typing derivation, matching the above conclusion:
+        \begin{align*}
+          \tyVarP
+        \end{align*}
+\item Case $\textsc{Def}$ \\
+        For synthesis of a top-level definition usage, we have the derivation:
+        \begin{align*}
+          \synDefP
+        \end{align*}
+        From the premise, we have that: 
+        \begin{align*}
+          [[ Sig |- inst A A' ]]
+        \end{align*}
+        from which we can construct the following typing derivation, matching the above conclusion:
+        \begin{align*}
+          \tyDefP
+        \end{align*}
+\item Case $\rightarrow_{\textsc{R}}$\\
+        For synthesis of an abstraction term, we have the derivation:
+        \begin{align*}
+          \synAbsP
+        \end{align*}
+        By induction on the premise, we have:
+        \begin{align*}
+          [[  Sig; D, x : [ A ] r |- t : B ]] \tag{ih}
+        \end{align*}
+        and that:
+        \begin{align*}
+          [[ r <<= q ]]
+        \end{align*}
+        from which we can construct the following typing derivation, matching the conclusion:
+        \begin{align*}
+          \inferrule*[Right=Abs]
+            {\inferrule*[Right=Approx]{[[  Sig ; D, x : [A] r |- t : B ]] \\ [[ r <<= q ]]}{[[  Sig; D, x : [ A ] q |- t : B ]]}}
+            {[[  Sig ; D |- \ x ^ q . t  : A ^ q -> B ]]}
+        \end{align*}
+\item Case $\rightarrow_{\textsc{L}}$\\
+        For synthesising an application, we have the derivation:
+        \begin{align*}
+          \synAppP
+        \end{align*}
+        By induction on the premises, we obtain the following typing judgements:
+        \begin{align*}
+          [[  Sig; D1, x1 : [ A ^ q -> B ] s1, x2 : [ B ] s2 |- t1 : C  ]] \tag{ih} \\ 
+          [[  Sig; D2, x1 : [ A ^ q -> B ] s3 |- t2 : A  ]] \tag{ih}
+        \end{align*}
+        and from the premises, we have that: 
+        \begin{align*}
+          [[ Sig |- {A ^q -> B} : Type ]]
+        \end{align*}
+        from which we can construct the following derivation, making use of the admissibility of substitution:
+        \begin{equation}
+          \label{soundAppSub1}
+          \inferrule*[Right=App]{
+            \inferrule*[Right=Var]
+              {[[ Sig |- {A ^q -> B} : Type ]]}
+              {[[  Sig; x1 : [ A ^ q -> B ] 1 |- x1 : A ^ q -> B ]]} \\ [[  Sig; D2, x1 : [A ^ q -> B] s3 |- t2 : A]]}{ [[  Sig; {q * D2}, x1 : [ A ^ q -> B ] {1 + (q * s3)} |-  x1 t2 : B ]]}
+        \end{equation}
+
+        \begin{align*}
+          \inferrule*[Right=Subst]{
+          \eqref{soundAppSub1} \\ [[  Sig ; D1, x1 : [ A ^ q -> B ] s1, x2 : [ B ] s2 |- t1 : C ]]}
+          {[[  Sig; (D1 + s2 * {q * D2}), x1 : [ A ^ q -> B ] {s2 + {s1 + (s2 * {q * s3})}} |- {[ ( x1 t2 ) / x2 ] t1} : C  ]]}
+        \end{align*}
+        making use of the distributivity property of semirings, along with unitality of $1$
+        and commutativity of $+$, such that
+        $[[ s1 + s2 * (1 + (q * s3)) ]] =  [[ s1 + (s2 * 1) + (s2 * q * s3) ]] = [[  s2 + s1 + (s2 * q * s3) ]]$.
+
+\item Case $\textsc{Con}_{\textsc{R}}$\\
+        For synthesising a constructor introduction, we have the derivation:
+        \begin{align*}
+          \synConP
+        \end{align*}
+        By induction on the premises, we obtain the following typing judgements:
+        \begin{align*}
+          [[  Sig; D1 |- t1 : B1 ]] \quad , ..., \quad [[  Sig; Dn |- tn : Bn ]] \tag{ih}
+        \end{align*}
+        from which we can construct the following derivation, matching the above conclusion:
+% 
+\begin{equation}
+  \label{soundConRSub1}
+\inferrule*[Right=Con]
+                  {[[ ( Con Forall : B'1 - q1 .*. B'n - qn -> {K {A' Many}} ) elem Defines]] \\\\ [[ Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}  ]]  }
+                  {[[  Sig; 0 * G |- Con . : B1 - q1 .*. Bn - qn -> {K {A Many}}  ]]}
+\end{equation}
+
+\begin{equation}
+          \label{soundConRSub2}
+            \inferrule*[Right=App]
+              {\inferrule*[right=App, vdots=1em]
+                {\eqref{soundConRSub1} \\  [[  Sig; D1 |- t1 : B1 ]]}
+                {{[[  Sig; {0 * G} + q1 * D1 |- Con t1 : {B2 - q2 .*. Bn - qn -> { K {A Many} } } ]]}}}
+              {[[  Sig; {0 * G} + q1 * D1 + ... + qn-1 * Dn-1 |-  Con t1 ... tn-1 : Bn ^ qn -> { K {A Many} } ]]} 
+\end{equation}
+        \begin{align*}
+          \inferrule*[Right=App]
+              { \eqref{soundConRSub2} \\ [[  Sig; Dn |- tn : Bn ]]}
+            {  \Sigma ; [[ {0 * G} + q1 * D1 ]]+ ...+  [[ qn * Dn |- Con t1 ... tn :  K { A Many } ]]}
+        \end{align*}
+
+\item Case $\textsc{Con}_{\textsc{L}}$ \\
+        For synthesising a case statement, we have the derivation:
+        \begin{align*}
+          \synCaseP
+        \end{align*}
+        By induction on the premises we obtain the following typing judgements:
+        \begin{align*}
+          [[  Sig; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]] \tag{ih}
+        \end{align*}
+        % By monotonicty of $\sqcup$ we have that $ [[ {Vari s} <<= {{Var1 s} \*/ {Varn s}}  ]]$
+        % and by $*_{1}$ that $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$. Therefore, by monotonicty of $\sqcup$
+        % we have that $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+        % from which we can construct the following
+        % derivation, matching the above conclusion:
+        We have by the definition of $\sqcup$:
+        %
+        \begin{enumerate}
+                \item $ [[ Di]] \sqsubseteq [[(D1 ++*+ Dm) ]]$
+                \item $ [[ {Vari r} <<= {{Var1 r} \*/ {Varm r}}  ]]$
+                % \item $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$
+                % \item $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+        \end{enumerate}
+
+        and from the premises of the synthesis rule:
+        \begin{enumerate}[resume]
+                \item $[[ {s' Vari Varj} <<= {{Var1 s} \*/ {Varm s}} ]]$
+                \item $ [[ {s Vari Varj} <<= {s' Vari Varj } * {q Vari Varj} ]]$
+                \item $ [[ {PolyConSimple {K A} {{Var1 s} \*/ {Varm s}}} ]] $
+                \item $ [[ Sig |- {K {A Many}} : Type ]]$ 
+        \end{enumerate}
+        and from rule $\kappa_\rightarrow$ we have that 
+        \begin{align*}
+           [[ Sig |- {K {A Many}} : Type ]] \Rightarrow [[ Sig |- {B1 -* q1 .*. Bn -* qn -> {K {A Many}}} : Type ]]
+        \end{align*}
+        thus we have that 
+        \begin{enumerate}[resume]
+          \item $[[ Sig |- Bj : Type ]]$
+        \end{enumerate}
+        We then construct the following three derivations towards the goal:
+        \begin{equation}
+          \label{soundConLSub3}
+          \inferrule*[Right=PVar]
+              {(g)}
+              { [[  Sig; {q Vari Varj} * {{Var1 s} \*/ {Varm s}} |- Special y : Bj |> {y Vari Varj} : [Bj] {q Vari Varj} * {{Var1 s} \*/ {Varm s}} ]] }
+        \end{equation}
+        %
+        \begin{equation}
+          \label{soundConLSub1}
+          \inferrule*[Right=PCon]
+            {  [[ ( Con Forall : B'1 - q1 .*. B'n - qn -> {K {A' Many}} ) elem Defines ]] \\\\ [[ Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}} ]] \\\\  \eqref{soundConLSub3} \\  (e) }
+            {[[  Sig; {{Var1 s} \*/ {Varm s}} |- Coni Var1 Varn Vari y y   : K {A Many} |> {y Vari Varj} : [ Bj ] {q Vari Varj} * {{Var1 s} \*/ {Varm s}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}}  ]]}\\
+        \end{equation}
+        and
+        \begin{equation}
+          \label{soundConLSub2}
+          \hspace{-7em}
+          \inferrule*[Right=Approx, rightskip=5em]
+            {\inferrule*[Right=Approx]
+              {\inferrule*[Right=induction]
+                {\quad}
+                {[[  Sig; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]]} \qquad \\ (d) }
+                {\inferrule*[Right=Approx]
+                  { [[  Sig; { Di, x : [ {K {A Many}} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {s' Vari Varj}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {s' Vari Varj} |- ti : B  ]] \qquad (c)}
+                  {\inferrule*[Right=Approx, leftskip=3em]
+                    { [[  Sig; { Di, x : [ {K {A Many}} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varm s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}} |- ti : B  ]] \qquad (b)}
+                    {[[  Sig; { Di, x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varm s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}} |- ti : B  ]] \qquad (a)} }}}{ [[  Sig; { (D1 ++*+ Dm), x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varm s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s} \*/ {Varm s}} |- ti : B  ]] \\}
+        \end{equation}
+
+
+        \begin{align*}
+          \inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{(f)}{[[  Sig; x : [ {K {A Many}} ] 1 |- x : {K A} ]]} \quad \\ \eqref{soundConLSub1} \\ \eqref{soundConLSub2} }
+          { \inferrule*[Right=$\equiv$] {[[  Sig; ((D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})}}) + x : [{K {A Many}}] {({{Var1 s} \*/ {Varm s}} * 1)} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]} {[[  Sig ;(D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({{Var1 s} \*/ {Varm s}})}} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]}}
+        \end{align*}
+
+
+
+% \item Case $\textsc{Con}_{L}$ \\
+%         For synthesising a case statement, we have the derivation:
+%         \begin{align*}
+%           \synCaseAltAlt
+%         \end{align*}
+%         By induction on the premises we obtain the following typing judgements:
+%         \begin{align*}
+%           [[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]]
+%         \end{align*}
+%         % By monotonicty of $\sqcup$ we have that $ [[ {Vari s} <<= {{Var1 s} \*/ {Varn s}}  ]]$
+%         % and by $*_{1}$ that $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$. Therefore, by monotonicty of $\sqcup$
+%         % we have that $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+%         % from which we can construct the following
+%         % derivation, matching the above conclusion:
+%         We have:
+
+%         \begin{enumerate}
+%                 \item $ [[ Di]] \sqsubseteq [[(D1 ++*+ Dn) ]]$
+%                 \item $ [[ {Vari r} <<= {{Var1 r} \*/ {Varn r}}  ]]$
+%                 % \item $[[ assn {Vari s} {{s Vari Var1} \*/ {s Vari Varn}} ]]$
+%                 % \item $[[ {s Vari Varj} <<= {{Var1 s} \*/ {Varn s}} ]]$
+%                 \item $[[ {Vari s'} <<= {{Var1 s'} \*/ {Varn s'}} ]]$
+%                 \item $ [[ {Vari s} <<= {Vari s'} * {q Vari Varj} ]]$
+%                 \item $[[ {s Vari Varj} <<= {Vari s} ]]$
+%         \end{enumerate}
+%         \begin{equation}
+%           \label{soundConLAltSub1}
+%           \inferrule*[Right=PCon]{\inferrule*[Right=PVar]{\quad}{ [[  {q Vari Varj} * {{Var1 s'} \*/ {Varn s'}} |- Special y : Bj |> {y Vari Varj} : [Bj] {q Vari Varj} * {{Var1 s'} \*/ {Varn s'}} ]]  }}{[[ {{Var1 s'} \*/ {Varn s'}} |- Coni Var1 Varn Vari y y   : K A |> {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s'} \*/ {Varn s'}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}}  ]]}\\
+%         \end{equation}
+
+%         \begin{equation}
+%           \label{soundConLAltSub2}
+%           \inferrule*[Right=Approx, rightskip=5em]{ \inferrule*[Right=Approx]{ [[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} |- ti : B ]] \\ (e)}{\inferrule*[Right=Approx]{[[ {{Di, x : [K A] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {Vari s} |- ti : B ]] \\ (e)}{\inferrule*[Right=Approx]{[[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {Vari s}} , .M. , {y Vari Varn} : [ Bn ]  {Vari s } |- ti : B  ]]  \\ (d)  }{\inferrule*[Right=Approx]{ [[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {Vari s'}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {Vari s' } |- ti : B  ]] \\ (c)}{\inferrule*[Right=Approx]{ [[ { Di, x : [ {K A} ] {Vari r}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s} \*/ {Varn s}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}} |- ti : B  ]] \\ (b)}{[[ { Di, x : [ {K A} ] {({Var1 r} \*/ {Varn r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s'} \*/ {Varn s'}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}} |- ti : B  ]] \\ (a)} }}}}}{ [[ { (D1 ++*+ Dn), x : [ {K A} ] {({Var1 r} \*/ {Varn r})}, {y Vari Var1} : [ B1 ] {q Vari Var1} * {{Var1 s'} \*/ {Varn s'}}} , .M. , {y Vari Varn} : [ Bn ] {q Vari Varn} * {{Var1 s'} \*/ {Varn s'}} |- ti : B  ]] }
+%         \end{equation}
+
+
+%         \begin{align*}
+%           \inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{\quad}{[[ x : [ {K A} ] 1 |- x : {K A} ]]} \\ \eqref{soundConLAltSub1} \\ \eqref{soundConLAltSub2} }
+%           {[[ (D1 ++*+ Dn), {x : [ {K A} ] {({Var1 r} \*/ {Varn r})} + {({{Var1 s'} \*/ {Varn s'}} * 1)}} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]}
+        % \end{align*}
+
+\item Case $\Box_{\textsc{R}}$ \\
+        For synthesising a promotion, we have the derivation:
+        \begin{align*}
+          \synBoxP
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          [[  Sig; D |- t : A ]]
+        \end{align*}
+        From which we can construct the following derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[Right=Pr]{[[  Sig; D |- t : A ]]}{ [[ r * D |- [ t ] : [] r  A ]]}
+        \end{align*}
+  \item Case $\Box_{\textsc{L}}$ \\
+        For synthesising an unboxing, we have the derivation:
+        \begin{align*}
+          \synUnboxP
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          [[  Sig; {D, y : [A] s1}, x : [ [] q A ] s2 |- t : B ]] \tag{ih}
+        \end{align*}
+        and from the premises we have that:
+        \begin{enumerate}[resume]
+          \item $[[ s1 <<= {s3 * q} ]]$
+          \item $[[ Sig |- {[] q A} : Type ]]$
+        \end{enumerate}
+        and through the $\kappa_\Box$ rule, we have that: 
+        \begin{align*}
+          [[ Sig |- {[] q A} : Type ]] \Rightarrow [[ Sig |- A : Type]]
+        \end{align*}       
+        From this we can construct the following derivation, towards the goal:
+        \begin{equation}
+          \label{soundBoxLSub1}
+            \inferrule*[Right=Var]{(i)}{[[  Sig; x : [ [] q A ] 1 |- x : [] q A ]]}  
+        \end{equation}
+        \begin{align*}
+          \inferrule*[Right=Case]{ \inferrule*[Right=PBox, leftskip=1.5em]{\inferrule*[Right=PVar]{[[Sig |- A : Type ]]}{[[  Sig; s3 * q |- y : A |> y : [A] {s3 * q} ]]}}{[[  Sig; s3 |- [ y ] : [] q A |> y : [A] {s3 * q}  ]]}  \\ \eqref{soundBoxLSub1} \\ \inferrule*[Right=Approx, rightskip=0.5em] {[[  Sig; D, y : [A ] s1, x : [ [] q A ] s2 |- t : B ]] \\ [[ s1 <<= {s3 * q} ]]} { [[  Sig ; D, y : [A ] {s3 * q}, x : [ [] q A ] s2 |- t : B ]]} }{[[  Sig; D, x : [ [] q A ] {s3 + s2} |- case x of [ y ] -> t : B  ]]}
+        \end{align*}
+  \item Case $\mu{\textsc{R}}$ \\
+        For synthesising a recursive data type introduction form, we have the derivation:
+        \begin{align*}
+          \synMuRP
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          % {\Gamma \vdash [[ A ]] [ \mu X . A / X] \Rightarrow t \mid\ \Delta}
+          { D; \Sigma; \Delta \vdash t : [[ A ]] [ \mu X . A / X] } \tag{ih}
+        \end{align*}
+        from which we can construct the derivation, matching the form of the lemma, leveraging the equirecursivity of our types:
+        \begin{align*}
+          \inferrule*[right=$\mu_1$]{D ; \Sigma; \Delta \vdash t : [[ A ]] [ \mu X . A / X] }
+          {D ; \Sigma ; \Delta \vdash t :  \mu X . A  }
+        \end{align*}
+  \item Case $\mu{\textsc{L}}$ \\
+        For synthesising a recursive data type elimination form, we have the derivation:
+        \begin{align*}
+          \synMuLP
+        \end{align*}
+        By induction on the premise we have:
+        \begin{align*}
+          {D ; \Sigma ; [[D]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \vdash [[ t ]] : [[ B ]] } \tag{ih}
+        \end{align*}
+        from which we can construct the derivation:
+        \begin{align*}
+          \inferrule*[right=$\mu_2$]
+            {\inferrule*[right=\textsc{Var}]
+            {[[ Sig ]] \vdash \mu X . A :  \text{Type} } 
+            {D ; \Sigma ; x :_r \mu X . [[ A ]] \vdash x :_1 \mu X . A }}
+            { D ; \Sigma ; x :_r \mu X . [[ A ]] \vdash x :_1 A [\mu X . A] }
+        \end{align*}
+        and by using lemma \ref{lemma:substitution} on :
+        \begin{align*}
+            D ; \Sigma ; x : A [ \mu X . A / X ] \vdash [[ t ]] : B
+        \end{align*}
+        we obtain the following, matching the above conclusion:
+        \begin{align*}
+            D ; \Sigma ; D, x : \mu X . A \vdash [x/x] t : B = D ; \Sigma ; D, x : \mu X . A \vdash t : B
+        \end{align*}
+        % \begin{align*}
+        %   \inferrule*[right=$\mu_2$]{ D ; \Sigma ; [[D]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \vdash [[ t ]] : [[ B ]] }
+        %   { D ; \Sigma; [[ D ]], x :_r \mu X . [[ A ]] \vdash [[ t ]] : [[ B ]] } 
+        % \end{align*}
+        
+\end{enumerate}
+\item 
+  \begin{enumerate}
+  \item Case $\textsc{TopLevel}$ \\
+        For the top-level of synthesis, we have the derivation:
+        \begin{align*}
+          \synTopP
+        \end{align*}
+        from induction on the premise, we have that:
+        \begin{align*}
+          [[ alpha : k ; .  |- t : A  ]] \tag{ih}
+        \end{align*}
+        from which we can construct the following typing derivation, matching the above conclusion:
+        \begin{align*}
+          \inferrule*[right=\GRANULEdruleTyTopLevelPName{}]
+            {[[  alpha : k ; . |- t : A ]]}
+            {[[ . ; . |- t : Forall alpha : k . A ]]}
+        \end{align*}
+      \end{enumerate}
+    \end{enumerate}
+
+
+\end{proof}
+
+% \focusSynthSound*
+% \begin{proof}
+
+% \end{proof}
+\begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
+  For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+  then:
+  \begin{align*}
+  \begin{array}{lll}
+   1.\ TopLevel: & \emptyset ; \emptyset ; \emptyset \vdash [[ Forall alpha : k . A ]] \Rightarrow [[ t ]] \mid \emptyset \quad &\implies \quad  \emptyset ; \emptyset \vdash [[ Forall alpha : k . A ]] \Rightarrow [[ t ]] \mid \emptyset\\
+   1.\ Right\ Async: & [[ Sig ]] ; [[ G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Sig ; G ,, O |- A =>+ t ; D ]]\\
+   2.\ Left\ Async: & [[ Sig ]] ; [[ G ; O async |- B => t ; D ]] \quad &\implies \quad [[  Sig ; G ,, O |- B =>+ t ; D ]]\\
+   3.\ Right\ Sync: & [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[  Sig ; G |- A =>+ t ; D ]]\\
+   4.\ Left\ Sync: & [[ Sig ]] ; [[ G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Sig; G, x : [ A] r |- B =>+ t ; D ]]\\
+   5.\ Focus\ Right: &  [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Sig ; G |- B =>+ t ; D ]]\\
+   6.\ Focus\ Left: & [[ Sig ]]  ; [[ G, x : [A] r ]] ; \emptyset \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Sig; G, x : [A ] r |- B =>+ t ; D ]]
+  \end{array}
+  \end{align*}
+  \end{restatable}
+  \begin{proof}
+  \begin{enumerate}
+  \item Case: 1. TopLevel: \\
+    \begin{enumerate}
+        \item Case $\textsc{TopLevel}$\\
+            In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+            \[
+              \fsynTopP
+            \]
+            By induction on the first premise, we have that:
+            \[
+              [[ alpha : k; . |- A =>+ t ; . ]]   \tag{ih}
+            \]
+            from case 1 of the lemma. From which, we can construct the following instatiation of the $\textsc{TopLevel}$ synthesis rule in the non-focusing calculus:
+            \[
+      \inferrule*[right=$\textsc{TopLevel}$]
+      {[[ alpha : k ; . |- A =>+ t ; . ]]}{[[ . ; . |- Forall alpha : k . A =>+ t ; . ]]}
+            \]
+    \end{enumerate}
+  \item Case: 2. Right Async: \\
+      \begin{enumerate}
+        \item Case $\rightarrow_{\textsc{R}}$\\
+            In the case of the right asynchronous rule for abstraction introduction, the synthesis rule has the form:
+            \[
+              \fsynAbsP
+            \]
+            By induction on the premise, we have that:
+            \[
+              [[ Sig; (G , O), x : [ A] q |- B =>+ t ; D, x : [A ] r]]   \tag{ih}
+            \]
+            from case 2 of the lemma. From which, we can construct the following instatiation of the $\rightarrow_{\textsc{R}}$ synthesis rule in the non-focusing calculus:
+            \[
+      \inferrule*[right=$\rightarrow_{\textsc{R}}$]
+      {[[ Sig; (G , O), x : [ A ] q |- B =>+ t ; D, x : [A] r && r <<= q ]]}{[[  Sig ; G , O |- A -> B =>+ \x ^ q . t ; D]]}
+            \]
+            \item Case \fsynRAsyncTransName\ \\
+            In the case of the right asynchronous rule for transition to a left asynchronous judgement, the synthesis rule has the form:
+            \[
+              \fsynRAsyncTransP
+            \]
+            By induction on the first premise, we have that:
+            \[
+              [[  Sig; G , O |- B =>+ t ; D ]] \tag{ih}
+            \]
+            from case 3 of the lemma.
+      \end{enumerate}
+  \item Case 3. Left Async: \\
+      \begin{enumerate}
+        \item Case $\textsc{Con}_{\textsc{L}}$\\
+          In the case of the left asynchronous rule for constructor elimination, the synthesis rule has the form:
+              \[
+              \fsynCaseP
+              \]
+              By induction on the second premise, we have that:
+              \[
+  [[ Sig; {(G, O) , {{{x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}}}} async |- B =>+ ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn} ]] \tag{ih}
+              \]
+              from case 3 of the lemma. From the second premise, we have that:
+              \[
+                [[ Sig |- {K {A Many}} : Type ]]
+                \] 
+              From which we can construct the following instantiation of the $\textsc{Con}_{\textsc{L}}$ rule in the non-focusing calculus:
+              \begin{align*}
+              \inferrule*[right=$\textsc{Con}_{\textsc{L}}$]
+              {
+              [[ ( Coni Forall : B'1 -* q1 .*. B'n -* qn -> {K {A' Many}} ) elem Defines ]]\\ [[  Sig |- {K {A Many}} : Type ]] \\\\
+              [[  Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}  ]] \\\\
+              [[  Sig ; { {(G, O), x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}} |- B =>+ ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}]]\\\\
+              [[ exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj} ]]\\
+              [[ assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}} ]]\\ [[ {PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}} ]]
+              }
+              {[[ Sig ; (G, O), x : [ {K {A Many}} ] r |- B =>+ case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}]]
+              }
+              \end{align*}
+  
+  
+        \item Case $\Box_{\textsc{L}}$ \\
+              In the case of the left asynchronous rule for graded modality elimination, the synthesis rule has the form:
+              \[
+              \fsynUnboxP
+              \]
+              By induction on the first premise, we have that:
+              \[
+              [[ Sig; {{(G, O), y : [ A ] { r * q }}, x : [ [] q A ] r} |- B =>+ t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2 ]] \tag{ih}
+              \]
+              from case 3 of the lemma. 
+              From the third premise, we have that:
+              \[
+                [[ Sig |- {[] q A} : Type ]]
+                \]           
+              From which, we can construct the following instantiation of the $\Box_{\textsc{L}}$ synthesis rule in the non focusing calculus:
+              \[
+              \inferrule*[right=$\Box_{\textsc{L}}$]
+              {
+              [[ Sig;  {{(G, O), y : [ A ] { r * q }}, x : [ [] q A ] r} |- B =>+ t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2 ]] \\
+              [[ exists s3 . s1 <= {s3 * q} <= {r * q} ]] \\ [[ Sig |- {[] q A} : Type ]]
+              }
+              {
+              [[ Sig; {(G, O), x : [ [] q A ] r} |- B =>+ case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2} ]]
+              }
+              \]
+
+        \item Case $\mu_{\textsc{L}}$ \\
+              In the case of the left asynchronous rule for recursive data type elimination, the synthesis rule has the form:
+              \[
+              \fsynMuLP
+              \]
+              By induction on the first premise, we have that:
+              \[
+              { \Sigma ; ([[G]], [[O]] ), x :_r [[ A]] [\mu X . [[ A ]] / X ] \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]}   \tag{ih}
+              \]
+              from case 3 of the lemma. From which, we can construct the following instantiation of the $\mu_{\textsc{L}}$ synthesis rule in the non focusing calculus:
+              \[
+              \inferrule*[right=$\mu_\textsc{L}$]
+                {{  \Sigma ; ([[G]], [[O]]), x :_r [[ A]] [\mu X . [[ A ]] / X ] \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]}}
+                {{ \Sigma ; ([[ G ]], [[ O]]), x :_r \mu X . [[ A ]] \vdash [[ B ]] \Rightarrow [[ t]] \mid\ [[D]]}}
+              \]
+  
+          \item Case \fsynLAsyncTransName \\
+            In the case of the left asynchronous rule for transitioning an assumption from the focusing context $[[ O ]]$ to the non-focusing context $[[G]]$, the synthesis rule has the form:
+            \[
+              \fsynLAsyncTransP
+            \]
+            By induction on the first premise, we have that:
+            \[
+              [[ Sig ; {G, x : A}, O |- C =>+ t ; D ]] \tag{ih}
+            \]
+            from case 3 of the lemma.
+      \end{enumerate}
+  \item Case 4. Right Sync: \\
+      \begin{enumerate}
+        \item Case $\textsc{Con}_{\textsc{R}}$\\
+            In the case of the right synchronous rule for constructor introduction, the synthesis rule has the form:
+              \[
+              \inferrule*[Right=$\textsc{Con}_{\textsc{R}}$]
+              { [[ ( Con Forall : B'1 - q1 .*. B'n - qn -> {K {A' Many}}) elem Defines  ]] \\\\
+               [[ Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}} ]] \\\\
+                \Sigma ; [[ G ]] ; \emptyset \vdash [[ Bi ]] \Downarrow\ \Rightarrow [[ ti ]] \mid\ [[ Di ]]}
+              {  \Sigma ; [[  G ]] ; \emptyset \vdash [[{K {A Many}}]] \Downarrow\ \Rightarrow [[Con t1 ... tn]] \mid\ [[  {D1 + ... + Dn} ]]}
+              \]
+            By induction on the second premise, we have that:
+              \[
+              [[  Sig ; G |- Bi =>+ ti ; Di]] \tag{ih}
+              \]
+            from case 4 of the lemma. From which, we can construct the following instantiation of the $\textsc{Con}_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+              \[
+              \inferrule*[Right=$\textsc{Con}_{\textsc{R}}$]
+              {
+              [[ ( Con Forall : B1 - q1 .*. Bn - qn -> { K {A Many} } ) elem Defines ]] \\\\
+               [[ Sig |- inst {B1 - q1 .*. Bn - qn -> { K {A Many} } } {B'1 - q1 .*. B'n - qn -> { K {A' Many} }} ]] \\\\
+              [[  Sig ; G |- Bi =>+ ti ; Di]]
+              }
+              {[[  Sig ; G |- K {A Many} =>+ Con t1 ... tn ; {0 * G} + {(q1 * D1) + ... + (qn * Dn)} ]]}
+              \]
+        \item Case $\Box_{\textsc{R}}$ \\
+  
+            In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
+              \[
+              \inferrule*[Right=$\Box_{\textsc{R}}$]
+              { \Sigma ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \Rightarrow [[ t ]] \mid\ [[D]]}
+              {  \Sigma ; [[ G ]] ; \emptyset \vdash [[ {[] r A} ]] \Downarrow\ \Rightarrow [[ [t] ]] \mid\ [[ r * D ]]}
+              \]
+            By induction on the premises, we have that:
+              \[
+              [[ Sig ; G |- A =>+ t ; D]] \tag{ih}
+              \]
+            from case 4 of the lemma. From which, we can construct the following instantiation of the $\mu{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+              \[
+              \synBoxP
+              \]
+
+        \item Case $\mu_{\textsc{R}}$ \\ 
+            In the case of the right synchronous rule for recursive data type introduction, the synthesis rule has the form:
+              \[
+                \fsynMuRP
+              \]
+            By induction on the premises, we have that:
+              \[
+              {  \Sigma ; \Gamma \vdash [[ A ]] [ \mu X . A / X] \Rightarrow t \mid\ \Delta} \tag{ih}
+              \]
+            from case 4 of the lemma. From which, we can construct the following instantiation of the $\mu_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+              \[
+              \synMuRP
+              \]
+
+          \item Case \fsynRSyncTransName \\
+            In the case of the right synchronous rule for transitioning from the right focusing phase to an asynchronous right phase, the synthesis rule has the form:
+            \[
+              \fsynRSyncTransP
+            \]
+            By induction on the first premise, we have that:
+            \[
+              [[ Sig ; G |- A =>+ t ; D ]] \tag{ih}
+            \]
+            from case 4 of the lemma.
+      \end{enumerate}
+  \item Case 5. Left Sync: \\
+      \begin{enumerate}
+        \item Case $\rightarrow_{\textsc{L}}$\\
+              In the case of the left synchronous rule for application, the synthesis rule has the form:
+              \[
+              \inferrule*[]{
+              [[  Sig ]] ; [[ G, x1 : [ A ^ q -> B ] r1 ; {x2 : [B] r1} sync |- C => t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2 ]] \\
+              [[ Sig ]] ; [[ G, x1 : [ A ^ q -> B ] r1]] ; \emptyset \vdash [[A]] \Downarrow\ \Rightarrow [[t2]] \mid\ [[D2, x1 : [ A ^ q -> B ] s3 ]] \\ [[ Sig |- {A ^ q -> B} : Type ]]
+              }
+              {
+              [[  Sig ]] ; [[ G ; {x1 : [ A ^ q -> B ] r1} sync |- C => {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -> B] {s2 + {s1 + {(s2 * {q * s3})}}}
+              ]]
+              }
+              \]
+              By induction on the first premise, we have that:
+              \[
+  [[  Sig ; G, x1 : [ A ^ q -> B ] r1, {x2 : [B] r1} |- C =>+ t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2 ]]
+              \]
+              from case 5 of the lemma. By induction on the second premise, we have that:
+              \[
+               [[ Sig ]] ; [[ G, x1 : [ A ^ q -> B ] r1]] \vdash [[ A ]] \Rightarrow [[ t2 ]] \mid\ [[ D2, x1 : [ A ^ q -> B ] s3 ]] \tag{ih}
+              \]
+              from case 4 of the lemma. From the third premise, we have that:
+              \[
+                [[ Sig |- {A ^ q -> B} : Type ]]
+              \]
+              From which, we can construct the following instantiation of the $\rightarrow_{{\textsc{L}}}$ synthesis rule in the non-focusing calculus:
+              \[
+              \inferrule*[right=$\rightarrow_{{\textsc{L}}}$]
+              {
+              [[  Sig ; G, x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 |- C =>+ t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
+              ]]\\
+              [[  Sig ; G, x1 : [ A ^ q -> B ] r1 |- A =>+ t2 ; D2, x1 : [ A ^ q -> B ] s3
+              ]] \\ [[ Sig |- {A ^ q -> B} : Type ]]
+              }
+              {[[  Sig ; G, x1 : [ A ^ q -> B ] r1 |- C =>+ {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -> B] {s2 + {s1 + {(s2 * {q * s3})}}}
+              ]]}
+              \]
+  
+        \item Case $\textsc{Var}$ \\
+          In the case of the left synchronous rule for variable synthesis, the synthesis rule has the form:
+            \[
+            \fsynVarP
+            \]
+            From the premise, we have that: 
+            \[
+            [[ Sig |- A : Type ]]   
+            \]
+            from which, we can construct the following instantiation of the \textsc{Var}\ synthesis rule in the non-focusing calculus:
+            \[
+              \synVarP
+            \]
+        \item Case $\textsc{Def}$ \\
+          In the case of the left synchronous rule for synthesis of a top-level definition usage, the synthesis rule has the form:
+            \[
+            \fsynDefP
+            \]
+            From the premise, we have that: 
+            \[
+            [[ Sig |- A : Type ]]   
+            \]
+            from which, we can construct the following instantiation of the \textsc{Var}\ synthesis rule in the non-focusing calculus:
+            \[
+              \synDefP
+            \]
+          \item Case \fsynLSyncTransName \\
+            In the case of the left synchronous rule for transitioning from the right focusing phase to an asynchronous left phase, the synthesis rule has the form:
+            \[
+              \fsynLSyncTransP
+            \]
+            By induction on the first premise, we have that:
+            \[
+              [[  Sig ; G, x : [A ] r |- B =>+ t ; D ]] \tag{ih}
+            \]
+            from case 5 of the lemma.
+      \end{enumerate}
+  \item Case 6. Right Focus: \\
+            In the case of the focusing rule for transitioning from a left asynchronous judgement to a right synchronous judgement, the synthesis rule has the form:
+            \[
+              \fsynFocusRNoLabelP
+            \]
+            By induction on the first premise, we have that:
+            \[
+              [[  Sig ; G |- C =>+ t ; D ]] \tag{ih}
+            \]
+            from case 3 of the lemma.
+  \item Case 7. Left Focus: \\
+            In the case of the focusing rule for transitioning from a left asynchronous judgement to a left synchronous judgement, the synthesis rule has the form:
+            \[
+              \fsynFocusLP
+            \]
+            By induction on the first premise, we have that:
+            \[
+              [[  Sig; G, x :  [A] r |- C =>+ t ; D ]] \tag{ih}
+            \]
+            from case 3 of the lemma.
+  \end{enumerate}
+  \end{proof}

@@ -302,15 +302,18 @@
 }
 \makeatother
 
-\definecolor{periwinkle}{rgb}{0.8, 0.8, 1.0}
-\newcommand{\newhighlight}[1]{%
-{\setlength{\fboxsep}{0pt}\colorbox{pink!50}{$\displaystyle#1$}}}
+% \definecolor{periwinkle}{rgb}{0.8, 0.8, 1.0}
+% \newcommand{\highlight}[1]{%
+% {\setlength{\fboxsep}{0pt}\colorbox{SkyBlue!50}{$\displaystyle#1$}}}
 
-\newcommand{\newnewhighlight}[1]{%
+\newcommand{\newhighlight}[1]{%
 {\setlength{\fboxsep}{0pt}\colorbox{yellow!50}{$\displaystyle#1$}}}
 
-\newcommand{\anotherhighlight}[1]{%
-{\setlength{\fboxsep}{0pt}\colorbox{periwinkle!50}{$\displaystyle#1$}}}
+% \newcommand{\newnewhighlight}[1]{%
+% {\setlength{\fboxsep}{0pt}\colorbox{yellow!50}{$\displaystyle#1$}}}
+
+% \newcommand{\anotherhighlight}[1]{%
+% {\setlength{\fboxsep}{0pt}\colorbox{Periwinkle!50}{$\displaystyle#1$}}}
 
 
 % SUBTRACTIVE RULES
@@ -926,3 +929,78 @@
 % \newcommand*{\fsynCon}{\GRANULEdruleConF{}}
 % \newcommand*{\fsynCaseP}{\GRANULEdruleCaseFP{}}
 % \newcommand*{\fsynBox}{\GRANULEdruleBoxF{}}
+
+\newcommand*{\synMuR}{ \inferrule*[right=$\mu_\textsc{R}$]
+  {\Gamma \vdash [[ A ]] [ \mu X . A / X] \Rightarrow t \mid\ \Delta} {\Gamma \vdash \mu X . A \Rightarrow t \mid\ \Delta}}
+\newcommand*{\synMuL}{ \inferrule*[right=$\mu_\textsc{L}$]
+  { [[G]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]} {[[ G ]], x :_r \mu X . [[ A ]] \vdash [[ B ]] \Rightarrow [[ t]] \mid\ [[D]]}}
+
+\newcommand*{\synMuRP}{ \inferrule*[right=$\mu_\textsc{R}$]
+  {D ; \Sigma ; \Gamma \vdash [[ A ]] [ \mu X . A / X] \Rightarrow t \mid\ \Delta} { D ; \Sigma; \Gamma \vdash \mu X . A \Rightarrow t \mid\ \Delta}}
+\newcommand*{\synMuLP}{ \inferrule*[right=$\mu_\textsc{L}$]
+  { D ; \Sigma; [[G]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]} { D ; \Sigma ; [[ G ]], x :_r \mu X . [[ A ]] \vdash [[ B ]] \Rightarrow [[ t]] \mid\ [[D]]}}
+
+\newcommand*{\fsynMuR}{ \inferrule*[right=$\mu_\textsc{R}$]
+  {\Gamma ; \emptyset \vdash [[ A ]] [ \mu X . A / X] \Downarrow\ \Rightarrow t \mid\ \Delta} {\Gamma ; \emptyset \vdash \mu X . A \Downarrow\ \Rightarrow t \mid\ \Delta}}
+\newcommand*{\fsynMuL}{ \inferrule*[right=$\mu_\textsc{L}$]
+  { [[G]] ; [[ O ]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \Uparrow\ \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]} {[[ G ]]; [[O]], x :_r \mu X . [[ A ]] \Uparrow\ \vdash [[ B ]] \Rightarrow [[ t]] \mid\ [[D]]}}
+
+\newcommand*{\fsynMuRP}{ \inferrule*[right=$\mu_\textsc{R}$]
+  {[[Defs]]; \Sigma; \Gamma ; \emptyset \vdash [[ A ]] [ \mu X . A / X] \Downarrow\ \Rightarrow t \mid\ \Delta} { [[Defs ]] ; \Sigma ; \Gamma ; \emptyset \vdash \mu X . A \Downarrow\ \Rightarrow t \mid\ \Delta}}
+\newcommand*{\fsynMuLP}{ \inferrule*[right=$\mu_\textsc{L}$]
+  { [[ Defs ]]; \Sigma ; [[G]] ; [[ O ]], x :_r [[ A]] [\mu X . [[ A ]] / X ] \Uparrow\ \vdash [[ B ]] \Rightarrow [[ t ]] \mid\ [[ D]]} { [[ Defs ]] ; \Sigma ; [[ G ]]; [[O]], x :_r \mu X . [[ A ]] \Uparrow\ \vdash [[ B ]] \Rightarrow [[ t]] \mid\ [[D]]}}
+
+
+
+% ------------ Polymorphic focusing rules
+
+\newcommand*{\fsynRAsyncTransP}{
+  \inferrule*[right=\fsynRAsyncTransName]
+  {[[ Defs ; Sig ; G ; O async |- B => t ; D ]] \\ [[ B ]] \text{ not right async}}{[[ Defs ; Sig ; G ; O |- B async => t ; D]]}
+}
+%
+\newcommand*{\fsynLAsyncTransP}{
+  \inferrule*[right=\fsynLAsyncTransName]
+  {[[ Defs ; Sig ; G, x : [A] r ; O async |- B => t ; D ]] \\ \text{A not left async}}{[[ Defs ; Sig ; G ; {O, x : [A] r} async |- B => t ; D]]}
+}
+%
+\newcommand*{\fsynFocusRP}{
+\inferrule*[right=\fsynFocusRName,lab=Focus]
+{ [[ Defs ]] ; [[ Sig ]] [[G ]] ; \emptyset \vdash [[ B ]] \Downarrow\ \Rightarrow [[t]] \mid\ [[D]]
+  \\ \text{B not atomic}}{[[ Defs ; Sig ; G ; . async |- B => t ; D]]}
+}
+%
+\newcommand*{\fsynFocusRNoLabelP}{
+\inferrule*[right=\fsynFocusRName]
+{ [[ Defs ]] ; [[ Sig ]] ; [[G ]] ; \emptyset \vdash [[ B ]] \Downarrow\ \Rightarrow [[t]] \mid\ [[D]]
+  \\ \text{B not atomic}}{[[ Defs ; Sig ; G ; . async |- B => t ; D]]}
+}
+%
+\newcommand*{\fsynFocusLP}{
+\inferrule*[right=\fsynFocusLName]
+  {[[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D]]}{[[ Defs ; Sig ; G, x : [A] r; . async |- B => t ; D]]}
+}
+%
+\newcommand*{\fsynRSyncTransP}{
+  \inferrule*[right=\fsynRSyncTransName]
+  {[[ Defs ; Sig ; G ; . |-  A async => t ; D]]}{ [[ Defs ]] ; [[ Sig ]] ; \Gamma ; \emptyset \vdash [[ A]] \Downarrow [[t ]] \mid\ [[ D]]}
+}
+%
+\newcommand*{\fsynLSyncTransP}{
+  \inferrule*[right=\fsynLSyncTransName]
+  {[[ Defs ; Sig ; G ; {x : [A] r} async |- B => t ; D]] \\ \text{ A not atomic and not left sync }}{[[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D]]}
+}
+
+\newcommand*{\fsynConP}{
+              \inferrule*[Right=$\textsc{Con}_{\textsc{R}}$]
+              { [[ ( Con Forall : B'1 - q1 .*. B'n - qn -> {K {A' Many}}) elem Defines ]]  \\\\
+              [[ Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}} ]]
+              \\\\
+               [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ Bi ]] \Downarrow\ \Rightarrow [[ ti ]] \mid\ [[ Di ]]}
+              { [[ Defs ]] ; [[ Sig ]] ; [[  G ]] ; \emptyset \vdash [[{K {A Many}}]] \Downarrow\ \Rightarrow [[Con t1 ... tn]] \mid\ [[  {D1 + ... + Dn} ]]}
+}
+\newcommand*{\fsynBoxP}{
+              \inferrule*[Right=$\Box_{\textsc{R}}$]
+              { [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \Rightarrow [[ t ]] \mid\ [[D]]}
+              { [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ {[] r A} ]] \Downarrow\ \Rightarrow [[ [t] ]] \mid\ [[ r * D ]]}
+}

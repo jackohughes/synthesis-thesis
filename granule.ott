@@ -1515,138 +1515,80 @@ G ; O |- A =>- t ; D :: :: FocusSynthesisSub :: 'focus_syn_sub_'
 by
 
 
-% ------------------------ :: lin_var
-% G ; x : A |- A => x ; G
+G ; O, x : [A] q |- B async => t ; D, x : [A] r && r <<= q
+---------------------------------------------------- :: AbsF
+G ; O |- {A ^ q -> B} async => \ x ^ q . t ; D
 
 
-%1 <= r
-%exists ex
-%------------------------ :: gr_var
-%G ; x : [A] r |- A => x ; G, x : [A] s
+defn
+Defs ; Sig ; G ; O |- A async => t ; D :: :: RASynFocusP :: ''
+{{ tex [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; [[ O ]] \vdash [[ A ]] \Uparrow\ \Rightarrow [[ t ]] \mid [[ D ]] }}
 
-%G ; x : [A] r, y : A |- B => t; D, x : [A] s
-%y notin D
-%exists s . r >= s + 1
-%---------------------------------------------- :: der
-%G ; x : [A] r |- B => [y/x] t; D, x : [A] s'
+by
 
-
-%x notin D
-%G ; O, x : A |- B => t ; D
-%------------------------ :: abs
-%G ; O |- A -> B => \x . t ; D
+Defs; alpha : k ; . ; . |- A async => t ; .
+--------------------------- :: TopLevelFP
+Defs; . ; . ; . |- Forall alpha : k . A async => t ; .
 
 
-%x2 notin D1
-%G ; x2 : B |- C => t1 ; D1
-%D1 ; . |- A => t2 ; D2
-%------------------------ :: app
-%G ; x1 : A -> B |- C => [(x1 t2) / x2] t1 ; D2
-
-
-%G ; . |- A => t ; D
-%------------------------ :: box
-%G ; . |- [] r A => t ; G - r * (G - D)
-
-
-%G ; O, x2 : [A] r |- B => t ; D, x2 : [A] s && 0 <= s
-%-------------------------------------------------- :: unbox
-%G ; O, x1 : [] r A |- B => let [x2] = x1 in t ; D
-
-
-%G ; . |- A => t1 ; D1
-%D1 ; . |- B => t2 ; D2
-%------------------------ :: pair_intro
-%G ; . |- A * B => t1, t2 ; D2
-
-
-%x1 notin D
-%x2 notin D
-%G ; O, x1 : A, x2 : B |- C => t2 ; D
-%------------------------ :: pair_elim
-%G ; O, x3 : A * B |- C => let x1, x2 = x3 in t2 ; D
+Defs ; Sig; G ; O, x : [A] q |- B async => t ; D, x : [A] r && r <<= q
+---------------------------------------------------- :: AbsFP
+Defs ; Sig; G ; O |- {A ^ q -> B} async => \ x ^ q . t ; D
 
 
 
-%G ; . |- A => t ; D
-%------------------------ :: sum_intro_left
-%G ; . |- A + B => inl t ; D
 
 
-%G ; . |- B => t ; D
-%------------------------ :: sum_intro_right
-%G ; . |- A + B => inr t ; D
 
-%x2 notin D1
-%x3 notin D2
-%G ; O, x2 : A |- C => t1 ; D1
-%G ; O, x3 : B |- C => t2 ; D2
-%------------------------ :: sum_elim
-%G ; O, x1 : A + B |- C => case x1 of inl x2 -> t1 | inr x3 -> t2 ; D1 ++- D2
+defn
+Defs ; Sig ; G ; O async |- A => t ; D :: :: LASynFocusP :: ''
+{{ tex [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; [[ O ]] \Uparrow \ \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]] }}
+
+by
 
 
-% defn
-% G ; O |- A =>+ t ; D :: :: FocusSynthesisAdd :: 'focus_syn_add_'
-% {{tex [[ G ]] ; [[ O ]] \vdash [[ A ]] \Rightarrow^{+} [[ t ]] \ | \ [[ D ]] }}
-% by
-
-% ------------------------ :: lin_var
-% G ; x : A |- A =>+ x ; x : A
-
-
-%1 <= r
-%exists ex
-%------------------------ :: gr_var
-%G ; x : [A] r |- A =>+ x ; x : [A] 1
+( Coni Forall : B'1 -* q1 .*. B'n -* qn -> {K {A' Many}}) elem Defines && Sig |- {K {A Many}} : Type
+Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}
+Defs; Sig; G ; O, {{{x : [K {A Many}] {r}}, {y Vari Var1} : [B1] {r * {q Vari Var1}} } , .M. , {y Vari Varn} : [Bn] {r * {q Vari Var1}}} async |- B => ti ; {{Di, x : [K {A Many}] {ri}}, {y Vari Var1} : [B1] {s Vari Var1} } , .M. , {y Vari Varn} : [Bn] {s Vari Varn}
+{exists {s' Vari Varj} . {s Vari Varj} <= {s' Vari Varj} * {q Vari Varj} <= r * {q Vari Varj} && assn {Vari s} {{s' Vari Var1} \*/ {s' Vari Varn}}} && {PolyConSimple {K {A Many}} {{Var1 s} \*/ {Varm s}}}
+--------------------------------- :: CaseFP
+Defs ; Sig ; G ; {O, x : [ {K {A Many}} ] r} async |- B => case x of Coni Var1 Varn Vari y y -*> ti ; (D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({Var1 s} \*/ {Varm s})}}
 
 
-%G ; x : [A] s, y : A |- B =>+ t ; D, y : A
-%---------------------------------------------------- :: der
-%G ; x : [A] s |- B =>+ [y / x] t ; D + x : [A] 1
-
-%G ; O, x : A |- B =>+ t ; D, x : A
-%------------------------ :: abs
-%G ; O |- A -> B =>+ \x . t ; D
 
 
-%G ; x2 : B |- C =>+ t1 ; D1, x2 : B
-%G - (D1, x2 : B) ; . |- A =>+ t2 ; D2
-%------------------------ :: app
-%G ; x1 : A -> B |- C =>+ [(x1 t2) / x2] t1 ; (D1 + D2), x1: A -> B
+Defs; Sig; G ; {O, y : [ A ] { r * q }, x : [ [] q A ] r} async |- B => t ; D, y : [ A ] { s1 } , x : [ [] q A ] s2
+exists s3 . s1 <= {s3 * q} <= {r * q} && Sig |- {[] q A} : Type
+--------------------------------- :: UnboxFP
+Defs; Sig; G ; {O, x : [ [] q A ] r} async |- B => case x of [ y ] -> t ; {D}, x : [ [] q A ] {s3 + s2}
 
 
-%G ; . |- A =>+ t ; D
-%---------------------------- :: box
-%G ; . |- [] r A =>+ [t] ; r * D
 
 
-%G ; O, x2 : [A] r |- B =>+ t ; D, x2 : [A] s    && s <= r
-%--------------------------------------------------------- :: unbox
-%G ; O, x1 : [] r A |- B =>+ let [x2] = x1 in t ; D, x1 : [] r A
 
 
-%G ; . |- A =>+ t1 ; D1
-%G - D1 ; . |- B =>+ t2 ; D2
-%------------------------ :: pair_intro
-%G ; . |- A * B =>+ t1, t2 ; D1 + D2
 
 
-%G ; O, x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B
-%------------------------ :: pair_elim
-%G ; O, x3 : A * B |- C =>+ let x1, x2 = x3 in t2 ; D, x3 : A * B
+
+defn
+Defs ; Sig ; G ; O sync |- A => t ; D :: :: LSSynFocusP :: ''
+{{ tex [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; [[ O ]] \Downarrow\ \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]] }}
+
+by
 
 
-%G ; . |- A =>+ t ; D
-%------------------------ :: sum_intro_left
-%G ; . |- A + B =>+ inl t ; D
+Sig |- A : Type
+------------------------- :: VarFP
+Defs ; Sig ; G ; x : [A] r sync |- A => x ; {0 * G}, x : [A] 1
+
+Defs ; Sig ; G ; {x1 : [ A ^ q -> B ] r1 , x2 : [B] r1 } sync |- C => t1 ; D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2
+Defs ; Sig ; G ; x1 : [ A ^ q -> B ] r1 sync |- A => t2 ; D2, x1 : [ A ^ q -> B ] s3 && Sig |- {A ^ q -> B} : Type
+------------------------------------------------------- :: AppFP
+Defs ; Sig ; G ; x1 : [ A ^ q -> B ] r1 sync |- C => {[ ( x1 t2 ) / x2 ] t1} ; (D1 + s2 * {q * D2}), x1 : [A ^ q -o B] {s2 + {s1 + {(s2 * {q * s3})}}}
 
 
-%G ; . |- B =>+ t ; D
-%------------------------ :: sum_intro_right
-%G ; . |- A + B =>+ inr t ; D
 
-
-%G ; O, x2 : A |- C =>+ t1 ; D1, x2 : A
-%G ; O, x3 : B |- C =>+ t2 ; D2, x3 : B
-%------------------------ :: sum_elim
-%G ; O, x1 : A + B |- C =>+ case x1 of inl x2 -> t1 | inr x3 -> t2 ; (D1 +++ D2), x1 : A + B
+% Defs, x : Forall A' ; Sig; G |- x : A
+Sig |- inst A A'
+------------------------- :: DefFP
+Defs, x : Forall A'; Sig ; G ; . sync |- A => x ; 0 * G

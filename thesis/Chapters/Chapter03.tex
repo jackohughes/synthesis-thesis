@@ -232,9 +232,9 @@ continuation expecting a $[[ Public ]]$ input:
 \begin{align*}
 \textit{noLeak} & : [[ (Tup {[] Public A} {[] Private A}) -> {({[]
                   Public (Tup A Unit)} -> B) -> B} ]] \\
-\textit{noLeak} & = \textbf{let}\ (x',\ y')\ =\ z\ \textbf{in}\ \\
+\textit{noLeak} & = \lambda z . \lambda u . \textbf{let}\ \textlangle x',\ y' \textrangle\ =\ z\ \textbf{in}\ \\
                 & \;\;\;\;\;\;\;\;\;\;\; \textbf{let}\ [x]\ =\ x'\ \textbf{in}\ \\ 
-                & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; \textbf{let}\ [y]\ =\ y'\ \textbf{in}\ [(x,\ ())]
+                & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; \textbf{let}\ [y]\ =\ y'\ \textbf{in}\ u\ [(x,\ ())]
 \end{align*}
 \end{example}
 
@@ -422,7 +422,7 @@ rules corresponding to its constructors and destructors respectively.
 
 \begin{figure}[H]
 \begin{align*}
-\hspace{-0.5em}
+% \hspace{-0.5em}
   \begin{array}{c}
     \subLinVar
     \\[0.5em]
@@ -565,11 +565,18 @@ dereliction typing rule (converting a linear assumption to graded) as:
     \subDer
     \end{align*}
 %
-  Dereliction captures the ability to reuse a graded assumption being
-  considered in a left rule. A fresh linear assumption $[[y]]$ is generated that
-  represents the graded assumption's use in a left rule, and must be used
-  linearly in the subsequent synthesis of $[[t]]$. The output context of this premise then contains $[[x]]$ graded by $s'$, which reflects how $[[x]]$ was used in the synthesis of $[[t]]$, i.e. if $[[x]]$ was not used then $s' = s$. The premise $[[ exists s . r >= s + 1 ]]$ constrains the number of times dereliction can be applied so that it does not exceed $x$'s
-  original grade $r$.
+Dereliction captures the ability to reuse a graded assumption being
+considered in a left rule. A fresh linear assumption $[[y]]$ is generated that
+represents the graded assumption's use in a left rule, and must be used
+linearly in the subsequent synthesis of $[[t]]$. The output context of this premise then contains $[[x]]$ graded by $s'$, which reflects how $[[x]]$ was used in the synthesis of $[[t]]$, i.e. if $[[x]]$ was not used then $s' = s$. The premise $[[ exists s . r >= s + 1 ]]$ constrains the number of times dereliction can be applied so that it does not exceed $x$'s
+original grade $r$.
+
+One may observe that the $\subDerName$ rule makes the presence of the
+$\subGrVarName$ rule admissable. Synthesising the usage of a graded variable can
+instead be achieved through the use of dereliction on the graded assumption,
+followed by the $\subLinVarName$. Nonetheless, we find the inclusion of
+$\subGrVarName$ useful as an explanatory tool and optimisation in the
+implementation of the calculus. 
 
   \subsubsection{Graded modalities}
   For a graded modal goal type $[[ [] r A ]]$, we synthesise a promotion
@@ -915,6 +922,7 @@ appear in the output context of the premise, ensuring it is used. The final
 context therefore adds to $[[ D ]]$ an assumption of $[[x]]$ graded by
 $1$, accounting for this use of $[[ x ]]$ (temporarily renamed to
 $y$).
+As with the subtractive case, $\addDerName$ makes $\addGrVarName$ admissable. 
 
 \subsubsection{Products}
 The right rule for products \addPairIntroName\ follows the same structure as its
@@ -1014,7 +1022,70 @@ The \addAppName\ rule is similarly adjusted:
 Appendix~\ref{sec:soundness-proofs} gives the proof.
 \end{restatable}
 
-\newpage
+
+\section{Post-Synthesis Refactoring}
+\label{sec:linear-base-refactoring}
+A synthesised term often contains some artefacts of the fact that it was
+constructed automatically. The structure of our synthesis rules means aspects of
+our synthesised programs are unrepresentative in some stylistic ways of the kind
+of programs functional programmers typically write. We consider two examples
+of these below using Granule code, and show how we apply a refactoring procedure to any synthesised
+term to rewrite them in a more idiomatic style. 
+
+\subsection{Abstractions}
+A function definition synthesised from a function type using the
+$\multimap_{\textsc{R}}$ will take the form of a sequence of nested abstractions which
+bind the function's arguments, with the sub-term of the innermost abstraction
+containing the function body, e.g.
+
+\begin{granule}
+pair : forall {a b : Type} . a -> b -> (a, b)
+pair = \x -> \y -> (x, y)
+\end{granule}
+
+In most cases, a programmer would write a function definition as a series of
+equations with the function arguments given as patterns. Our refactoring
+procedure collects the outermost abstractions of a synthesised term and
+transforms them into equation-level patterns with the innermost abstraction
+body forming the equation body:
+
+\begin{granule}
+pair : forall {a b : Type} . a -> b -> (a, b)
+pair x y = (x, y)
+\end{granule}
+
+Note that in Granule code \granin{->} is equivalent to the linear function arrow
+$\multimap$.
+
+\subsection{Unboxing}
+An unboxing term is synthesised via the $\Box_{\textsc{L}}$ rule as a case statement
+which pattern matches over a box pattern, yielding an assumption with the
+grade's usage. Such terms can also be refactored both into function equations
+and to avoid nested let bindings. For example, we may write the $k$
+combinator example above using an explicit graded modality:
+
+\begin{granule}
+k : forall {a b : Type} . a -> b [0] -> a
+k x y = let [z] = y in x
+\end{granule}
+which we can then refactor into
+\begin{granule}
+k : forall {a b : Type} . a -> b [0] -> a
+k x [z] = z
+\end{granule}
+This procedure included programs which perform a nested unboxing, refactoring:
+\begin{granule}
+comp : forall {k : Coeffect, n m : k, a : Type, b : Type, c : Type} .
+       (a [m] -> b) [n] -> (b [n] -> c) -> a [n * m] -> c
+comp x y z = let [u] = x in let [v] = z in y [ u [v] ]
+\end{granule}
+into:
+\begin{granule}
+comp : forall {k : Coeffect, n m : k, a : Type, b : Type, c : Type} .
+       (a [m] -> b) [n] -> (b [n] -> c) -> a [n * m] -> c
+comp [u] y [v] = y [ u [v] ]
+\end{granule}
+
 \section{Focusing}
 \label{sec:linear-base-focusing}
 
