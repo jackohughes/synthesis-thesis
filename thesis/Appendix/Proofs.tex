@@ -1,10 +1,10 @@
 \chapter{Proofs}
 \label{appendix:proofs}
-\section{Proofs for the Additive and Subtractive Linear-Base Calculi}
+\section{Proofs for the Linear-Base Calculi}
 \label{sec:linear-proofs}
 This section gives the proofs of Lemma~\ref{lemma:subSynthSound} and
 Lemma~\ref{lemma:addSynthSound}, along with soundness results for the
-variant systems: additive pruning and subtractive division.
+additive pruning variant.
 
 We first state and prove some intermediate results about context manipulations
 which are needed for the main lemmas.
@@ -354,6 +354,8 @@ Thus we get that:
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Soundness of the Subtractive Graded Linear Typing Calculus}
+\label{proof:linear-sub-sound}
 \subSynthSound*
 
 \begin{proof}
@@ -775,15 +777,18 @@ rules are considered in turn.
          {[[ (G - D), x : [A] q, y : A |- t : B ]]}
          {[[ (G - D) , x : [ A ] q, y : [ A ]1 |- t : B]]}
          }
-         {[[ (G - D) , x : [ A ] {q + 1} |- [x/y] t : B]]}
+         {[[ (G - D) , x : [ A ] {q + 1} |- [pat x/y] t : B]]}
          \quad (8)}
-        {[[ (G - D), x : [A] q' |- [x/y] t : B]]}
+        {[[ (G - D), x : [A] q' |- [pat x/y] t : B]]}
          \end{align*}
        Which matches the goal.
 
 \end{enumerate}
 \end{proof}
 
+
+\subsection{Soundness of the Additive Graded Linear Typing Calculus}
+\label{proof:linear-add-sound}
 \addSynthSound*
 \begin{proof}
 
@@ -898,7 +903,7 @@ rules are considered in turn.
             \inferrule*[Right=\textsc{Der}]
              {[[ D', x : [A] s', y : A |- t : B]]}{[[ D', x : [A] s', y : [A] 1 |- t : B ]]}
             }
-            { [[ (D', x : [A] s') + x : [A] 1 |- [x/y] t : B ]] }
+            { [[ (D', x : [A] s') + x : [A] 1 |- [pat x/y] t : B ]] }
         \end{align*}
         %
         Satisfying the lemma statment.
@@ -912,7 +917,7 @@ rules are considered in turn.
             \inferrule*[Right=\textsc{Der}]
              {[[ D, y : A |- t : B]]}{[[ D, y : [A] 1 |- t : B ]]}
             }
-            { [[ D + x : [A] 1 |- [x/y] t : B ]] }
+            { [[ D + x : [A] 1 |- [pat x/y] t : B ]] }
         \end{align*}
         %
         which is well defined as $x \not\in [[ D ]]$ and gives the
@@ -1073,6 +1078,8 @@ rules are considered in turn.
 
   \end{enumerate}
 \end{proof}
+\subsection{Soundness of the Additive Pruning Graded Linear Typing Calculus}
+\label{sec:add-pruning-sound}
 \addPruningSynthSound*
 \begin{proof}
   The cases for the rules in the additive pruning synthesis calculus are equivalent to lemma \eqref{lemma:addSynthSound}, except for the cases of the \addPruningAppName and \addPruningPairIntroName rules which we consider here:
@@ -1132,20 +1139,10 @@ rules are considered in turn.
 \end{proof}
 
 %\focusSoundSub*
-\begin{restatable}[Soundness of focusing for subtractive synthesis]{lemma}{focusSoundSub}
-For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
-then:
-\begin{align*}
-\begin{array}{lll}
- 1.\ Right\ Async: & [[ G ; O |- A async =>- t ; D ]] \quad &\implies \quad [[ G , O |- A =>- t ; D ]]\\
- 2.\ Left\ Async: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G , O |- C =>- t ; D ]]\\
- 3.\ Right\ Sync: & [[ G ; . |- A sync =>- t ; D ]] \quad &\implies \quad [[ G |- A =>- t ; D ]]\\
- 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>- t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>- t ; D ]]\\
- 5.\ Focus\ Right: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]\\
- 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]
-\end{array}
-\end{align*}
-\end{restatable}
+
+\subsection{Soundness of Focusing for the Subtractive Linear Graded Synthesis Calculus}
+\label{proof:focusSubSound}
+\focusSoundSub*
 \begin{proof}
   \begin{enumerate}
       \item Case 1. Right Async: \\
@@ -1255,7 +1252,7 @@ then:
 [[ y notin D ]] \\
 [[ exists s . r >= s + 1]]
 }
-{[[ G, x : [A] r |- B =>- [x/y] t ; D, x : [A] s' ]]}
+{[[ G, x : [A] r |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
           \]
 
         \item Case \fSubLAsyncTransitionName \\
@@ -1425,22 +1422,10 @@ then:
   \end{enumerate}
 \end{proof}
 
-%\focusSoundAdd*
-\begin{restatable}[Soundness of focusing for additive synthesis]{lemma}{focusSoundAdd}
-  \label{lemma:fAddSynthSound}
-For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
-then:
-\begin{align*}
-\begin{array}{lll}
- 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- A =>+ t ; D ]]\\
- 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- C =>+ t ; D ]]\\
- 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
- 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
- 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
- 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
-\end{array}
-\end{align*}
-\end{restatable}
+
+\subsection{Soundness of Focusing for the Additive Linear Graded Synthesis Calculus}
+\label{proof:focusAddSound}
+\focusSoundAdd*
 \begin{proof}
   \begin{enumerate}
       \item Case 1. Right Async: \\
@@ -1549,7 +1534,7 @@ then:
           \[
 \inferrule*[right=der$^{+}$]
 { [[ G, x : [A]s, y : A |- B =>+ t ; D, y : A ]] }
-{ [[ G, x : [A]s |- B =>+ [x / y] t ; D + x : [A]1 ]] }
+{ [[ G, x : [A]s |- B =>+ {[pat x / y] t} ; D + x : [A]1 ]] }
           \]
         \item Case \fAddLAsyncTransitionName \\
           In the case of the left asynchronous rule for transitioning an assumption from the focusing context $[[ O ]]$ to the non-focusing context $[[G]]$, the synthesis rule has the form:
@@ -1722,21 +1707,11 @@ then:
   \end{enumerate}
 \end{proof}
 
+\subsection{Soundness of Focusing for the Additive Pruning Linear Graded Synthesis Calculus}
+\label{proof:focusAddPruningSound}
 %\focusSoundAddPruning*
-\begin{restatable}[Soundness of focusing for additive pruning synthesis]{lemma}{focusSoundAddPruning}
-For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
-then:
-\begin{align*}
-\begin{array}{lll}
- 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- A =>+ t ; D ]]\\
- 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G ,, O |- C =>+ t ; D ]]\\
- 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
- 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
- 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
- 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
-\end{array}
-\end{align*}
-\end{restatable}
+\focusSoundAddPruning*
+
 \begin{proof}
   \begin{enumerate}
       \item Case: 1. Right Async: The proofs for right asynchronous rules are equivalent to those of lemma  \eqref{lemma:fAddSynthSound}\\
@@ -1789,6 +1764,1207 @@ then:
   \end{enumerate}
 \end{proof}
 
+\section{Proofs for the Deriving Mechanism}
+This section contains the proofs relating to Chapter~\ref{chapter:deriving}. We begin 
+by presenting a typed equational theory for use in the proofs that \emph{push} and 
+\emph{pull} are the inverse of each other (Section~\ref{sec:typed-eq}). The type soundness proofs 
+of \emph{push} and \emph{pull} then follow in Section~\ref{proof:deriving-type-soundness}, followed by the aforementioned 
+inverse proofs in Section~\ref{proof:inverse-proofs}.
+
+\subsection{Typed Equational Theory}
+\label{sec:typed-eq}
+
+Figure~\ref{fig:equational} defines an equational theory for
+\grminip{}. The equational theory is typed, but for brevity we elide
+the typing for most cases since it follows
+exactly from the structure of the terms. The fully typed
+ rules are provided in the appendix~\cite{appendix}. For
+those rules which are type restricted, we include the full
+typed-equality judgment here. The typability of these equations relies on previous work on the Granule language which proves that pattern matching and substitution are well typed~\cite{DBLP:journals/pacmpl/OrchardLE19}.
+
+\begin{figure}[h]
+  \begin{align*}
+    \hspace{-10em}\begin{array}{c}
+      \setlength{\arraycolsep}{0.15em}
+  \begin{array}{rlr}
+    [[ ( \ x . t2 ) t1 ]] \ &\equiv \ [[t2]] [ [[t1]] / [[ x ]] ]  \ & \ \beta \\
+    [[ \ x . {t x} ]] \ &\equiv \ [[t]]   \ & ( [[ x ]] \# [[ t ]] ) \
+                                            \eta \\ \\
+    [[ letrec x = t1 in t2  ]] &\equiv \ [[ t2 ]] [ [[ letrec x = t1 in t1 ]] / [[ x ]] ]  & \ \beta_{letrec} \\
+    [[ f (letrec x = t1 in t2)  ]] &\equiv \ [[ letrec x = t1 in (f t2)  ]]  &
+                                                                     {\small{\textsc{LetRecDsitrib}}} \\
+    \\
+    [[ case t of many pi ti ]] \ &\equiv \ (t \rhd [[ pj ]] )[[ tj ]]  \ & \;\; (\textsf{minimal}(j)) \ \beta_{case} \\
+    [[ case t1 of many pi { [ pi / z ] t2  } ]] \ &\equiv \ [[ [ t1 / z ] t2  ]] & \ \eta_{case} \\
+    %[[ case t1 of p1 -> {t2 [ p1 / z ]} ; * ; pn -> {t2 [ pn / z ]} ]] \ &\equiv \ [[ t2 [ t1 / z ] ]] & \ \eta_{case} \\
+%    [[ case (case t of p1 -> t1; * ; pn -> tn ) of p1' -> t1'; * ; pn' -> tn' ]] &\equiv \ [[ case t of p1 -> (case t1 of p1' -> t1'); * ; pn -> (case tn of pn' -> tn') ]] & \ \textit{case assoc.} \\
+   [[ case (case t of many pi ti) of many pi' ti' ]] &\equiv\
+   [[ case t of many pi (case ti of many pi' ti') ]] &\ {\small{\GRANULEdruleEquivXXcaseAssocName{}}}\\
+   [[ f (case t of many pi ti) ]] \ &\equiv\ [[ case t of many pi (f ti) ]] & \ {\small{\textsc{CaseDistrib}}} \\
+   [[ case [case t of many pi ti] of many [pi'] ti' ]] &\equiv\
+   [[ case [t] of many [pi] {case [ti] of many [pi'] ti'} ]] & \;\; ([[ lin  pi ]]) \ {\small{\GRANULEdruleEquivXXcaseBoxAssocName{}}}\\
+   %
+  \end{array}
+\\ \\
+\GRANULEdruleEquivXXcaseGen{}
+    \end{array}
+   \end{align*}
+ \caption{Equational theory for \grminip{}}
+ \label{fig:equational}
+\end{figure}
+
+The $\beta$ and $\eta$ rules follow the standard rules from the
+$\lambda$-calculus, where $\#$ is a \textit{freshness} predicate,
+denoting that variable $x$ does not appear inside term $t$.
+
+For recursive \textbf{letrec} bindings, the $\beta_{letrec}$ rule substitutes
+any occurrence of the bound variable $x$ in $[[t2]]$ with $[[ letrec x
+= t1 in t1 ]]$, ensuring that recursive uses of $x$ inside $[[t1]]$
+can be substituted with $[[t1]]$ through subsequent $\beta_{letrec}$
+reduction. The \textsc{LetRecDistrib} rule allows distributivity of
+functions over \textbf{letrec} expressions, stating that if a function
+$f$ can be applied to the entire \textbf{letrec} expression, then this
+is equivalent to applying $f$ to just the body term $[[t2]]$.
+
+Term elimination is via \textbf{case},
+requiring rules for both $\beta$- and $\eta$-equality on
+case expressions, as well as rules for associativity and
+distributivity. In $\beta_{case}$, a term $t$ is matched against a
+pattern $[[ pj ]]$ in the context of the term $[[ tj ]]$ through the use of the partial function
+$(t\ \rhd\ [[ pj ]])[[ tj ]] = t'$ which may substitute terms bound in $[[ pj ]]$
+into $[[ tj ]]$ to yield $t'$ if the match is successful. This partial function is defined inductively:
+%
+{{
+\begin{align*}
+\setlength{\arraycolsep}{0em}
+\begin{array}{cc}
+\inferrule*[right=$\rhd_{-}$]
+ {\quad}
+  {( [[ t ]] \rhd \_) [[ t' ]] = [[ t' ]]}
+%
+\;\;\;
+&
+\inferrule*[right=$\rhd_{var}$]
+ {\quad}
+ {( [[ t ]] \rhd [[ x ]]) [[ t' ]] = [[ [ t / x ] t' ]]}
+ \\[1.25em]
+\inferrule*[right=$\rhd_{\Box}$]
+ {( [[ t ]] \rhd [[ p ]]) [[ t' ]] = [[ t'' ]]}
+ {( [[ [ t ] ]] \rhd [[ [ p ] ]]) [[ t' ]] = [[ t'' ]]}
+%
+\;
+&
+\inferrule*[right=$\rhd_{C}$]
+ {( [[ ti ]] \rhd [[ pi ]]) [[ t ]]'_{i} = [[ t ]]'_{i+1}}
+ {( C\ {t_{1} ... t_{n}} \rhd [[ Con p1 ... pn ]]) [[ t ]]'_{1} = [[ t ]]'_{n+1}}
+\end{array}
+\end{align*}
+}}
+As a predicate to the $\beta_{case}$ rule, we require that $j$ be
+minimal, i.e.\ the first pattern $[[pj]]$ in $[[p1]] ... [[ pn ]]$ for
+which $(t\ \rhd\ [[ pj ]])[[ tj ]] = t'$ is defined. Rule $\eta_{case}$ states that if all branches of the case expression share a common term $t_{2}$ which differs between branches only in the occurrences of terms that match the pattern used, then we can substitute $t_{1}$ for the pattern inside $t_{2}$.
+
+Associativity of case expressions is provided by the
+\textsc{CaseAssoc} rule. This rule allows us to restructure nested
+case expressions such that the output terms $[[ ti ]]$ of the inner
+case may be matched against the patterns of the outer case, to achieve
+the same resulting output terms $[[ t'i ]]$. The \textsc{[CaseAssoc]}
+rule provides a graded alternative to the \textsc{CaseAssoc} rule,
+where the nested case expression is graded, provided that the patterns
+$[[ p'i ]]$ of the outer case expression are also graded. Notably,
+this rule only holds when the patterns of the inner case expression
+are linear (i.e., variable or constant) so that there are no nested box patterns, represented via the $[[ lin pi ]]$ predicate. As with \textbf{letrec}, distributivity of functions over a case expression is given by \textsc{CaseDistrib}.
+
+
+Lastly generalisation of an arbitrary boxed pattern to a variable is permitted through the \textsc{CaseGen} rule. Here, a boxed pattern $[[  [pi] ]]$ and the output term of the case may be converted to a variable if the output term is equivalent to the pattern inside the box. The term $[[t]]$ being matched against must therefore have a grade approximatable by 1, as witnessed by the predicate $[[ 1 <<= r ]]$ in the typing derivation.
+
+
+
+{\scalebox{0.92}{\begin{minipage}{1.0\linewidth}
+      \begin{align*}
+        {\footnotesize{
+        \hspace{-6em}
+  \begin{array}{c}
+\GRANULEdruleEquivXXbeta{} \\[1.25em]
+\GRANULEdruleEquivXXeta{} \\[1.25em]
+\GRANULEdruleEquivXXletrecBeta{} \\[1.25em]
+\GRANULEdruleEquivXXletrecDist{} \\[1.25em]
+\GRANULEdruleEquivXXcaseBeta{} \\[1.25em]
+\GRANULEdruleEquivXXcaseEta{} \\[1.25em]
+\GRANULEdruleEquivXXcaseGen{} \\[1.25em]
+\GRANULEdruleEquivXXcaseAssoc{} \\[1.25em]
+\GRANULEdruleEquivXXcaseBoxAssoc{} \\[1.25em]
+\GRANULEdruleEquivXXcaseDist{} \\[1.25em]
+\end{array}
+        }}
+\end{align*}
+\end{minipage}}}
+%
+In $\GRANULEdruleEquivXXcaseAssocName{}$
+the predicate $[[ lin p ]]$ classifies those
+patterns which are \emph{linear}, which are those which
+are variables or constructor patterns only.
+
+\subsubsection{Derived Rules}
+
+\begin{restatable}[`Case push' property]{prop}{casePush}
+%
+\[
+\GRANULEdruleEquivXXcasePushDerived{}
+\]
+\end{restatable}
+
+\begin{proof}
+Applying $\beta_{case}$ and congruence over promotion, to the left-hand side
+of the case push equation yields:
+$$[[ [case t of [pi] -> ti] ]] = [[ [ (t |> pj) tj ] ]]$$
+for the smallest $j$.
+Applying $\beta_{case}$ to the right-hand side of the case
+push equation yields:
+$$[[ case [t] of [pi] -> [ti] ]] = [[ ([t] |> [pi]) [tj] ]]$$
+for the same smallest $j$ (since the patterns $pi$ are the same).
+
+By \GRANULEdrulepatSemunboxName{}, then we have the
+derivation of pattern matching:
+%
+\[
+\inferrule*[Right=\GRANULEdrulepatSemunboxName{}]
+ {[[ ( t |> pi ) [tj] = t'' ]]}
+ {[[ ( [ t ] |> [ pi ] ) [tj] = t'']]}
+\]
+%
+therefore $[[ case [t] of [pi] -> [ti] ]] = [[ ([t] |> [pi]) [tj] ]] =
+ [[ ( t |> pi ) [tj] ]]$.
+
+Then by Proposition~\ref{prop:pat-distrib} (below),
+$[[ ( t |> pi ) [tj] ]] = [[ [ (t |> pj) tj ] ]]$,
+yielding case push.
+\end{proof}
+
+\begin{restatable}[Pattern matching distributes with promotion]{prop}{patDistrib}
+\label{prop:pat-distrib}
+For all $[[ t ]], [[ p ]], [[ t' ]]$ then:
+%
+\[
+[[ (t |> p) [t'] ]] = [[ [(t |> p) t'] ]]
+\]
+\end{restatable}
+
+\begin{proof}
+By induction on syntactic pattern matching:
+\begin{itemize}
+\item (wild) $[[ (t |> _) [t'] ]] = [[ [t'] ]]$
+and $[[ [ (t |> _) t'] ]] = [[ [t'] ]]$.
+
+\item (var) $[[ (t |> x) [t'] ]] = [[ [t / x] [t'] ]] = [[ { [ { [t / x] t'  } ] }
+  ]]$
+and $[[ [(t |> x) t' ] ]] = [[ {[ [t / x] t'  ]} ]]$
+
+\item (unbox)
+\[
+\GRANULEdrulepatSemunbox{}
+\]
+%
+By induction then $[[ (t |> p) [t'] ]] = [[ { [ (t |> p) t' ] } ]]$
+therefore $[[ ([t] |> [p]) [t'] ]] = [[ { [ ([t] |> [p]) t' ] } ]]$
+since this rule preserves its result in the conclusion.
+
+\item (constr)
+\[
+\GRANULEdrulepatSemconstr{}
+\]
+%
+By induction, similarly to the above case, but across
+multiple terms.
+
+\end{itemize}
+\end{proof}
+
+\subsection{Functor Derivation}
+\label{app:functor-derivation}
+
+\begin{definition}[Deriving functor]
+Given a function $f : \alpha \multimap \beta$ then
+there is a function $\deriv{fmap}{\tcF \overline{\alpha}}(f)
+: \tcF\ \alpha \multimap \tcF\ \beta$ derived from the type
+$\tcF \overline{\alpha}$ as follows:
+%
+\begin{align*}
+  \begin{array}{ll}
+  \deriv{fmap}{1}^\Sigma(f)\ z &= \ [[ case z of () -> () ]]\\
+  \deriv{fmap}{\alpha}^\Sigma(f)\ z &= \ f\ z\\
+  \deriv{fmap}{X}^\Sigma(f)\ z &= \ (\Sigma(X)\ f)\ z \\
+  \deriv{fmap}{\Box_{r}A}(f)\ z &= \derCaseOne{z}{ [[ [y] ]] }{ [ \deriv{fmap}{A}(f)\  [[ y ]] ] } \\
+  \deriv{fmap}{A \oplus B}^\Sigma(f)\ z &= \ \derCaseTwo{z}{\mathsf{inl}\
+                                       x}{\mathsf{inl}\ \deriv{fmap}{A}^\Sigma(f)\ x}{\mathsf{inr}\ y}
+                            {\mathsf{inr}\ \deriv{fmap}{B}^\Sigma(f)\ y}
+\\
+  \deriv{fmap}{A \otimes B}^\Sigma(f)\ z &= \ \derCaseOne{z}{(x, y)}
+   {( \deriv{fmap}{A}^\Sigma(f)\ x, \deriv{fmap}{B}^\Sigma(f)\ y )} \\
+  \deriv{fmap}{A \multimap B}^\Sigma(f)\ z &= \  \lambda x . \deriv{fmap}{B}^\Sigma(f)\ (z\ x) \\
+  \deriv{fmap}{\mu X . A}^\Sigma(f)\ z &= \ \derLetRec{g}{\deriv{fmap}{A}^{\Sigma, X \mapsto
+g : [[ (a -o b) ]] \multimap [[ {mu X . A} ]] \multimap [[ {{(mu X . A)} [ a /* b ]} ]] }(f)}{g\ z}
+    \end{array}
+\end{align*}
+\end{definition}
+
+\subsection{Type Soundness of \emph{push} and \emph{pull}}
+\label{proof:deriving-type-soundness}
+%
+The following shows that the calculation of \emph{push}
+and \emph{pull} distributive laws is well-typed.
+
+\begin{proposition}
+\label{prop:soundness-pull}
+Type soundness of $\deriv{pull}{\tcF\ \overline{\alpha_i}} : \tcF\ (\overline{\Box_{r_i} \alpha_i})
+\rightarrow \Box_{\bigwedge^n_{i = 1} r_i} (\tcF\  \overline{\alpha_i})$.
+\end{proposition}
+
+\begin{proof}
+  \
+\begin{itemize}
+
+%%%%% pull Unit
+
+\item $\deriv{pull}{ [[ Unit ]]}^{\Sigma} : [[ Unit -> [] (BigMeet ri) Unit ]]$
+    (i.e. $\tcF\ \overline{\alpha_i} = [[ Unit ]]$).
+{\footnotesize{
+\begin{align*}
+  \inferrule*[Right=case]
+   {
+    %\inferrule*[Right=var]
+    %   {\quad}{[[ Sigma, z : Unit |- z : Unit ]]}
+   % \\
+    \quad
+    \inferrule*[Right=pr]
+      {\inferrule*[Right=con]
+         {\quad}{[[ . |- () : Unit ]]}}
+      {[[ . |- [ () ] : [] {BigMeet ri} Unit ]]}
+    \\
+    \quad
+    \\
+    \quad
+     \inferrule*[Right=Pcon]
+       {| [[ Unit ]] = 1 |}
+       {[[ none |- () : Unit |> . ]]}
+   }
+   {[[ z : Unit |- case z of () -> [ () ] : [] {BigMeet ri} Unit ]]}
+\end{align*}
+}}
+
+%%%%% pull rec var
+
+\item $\deriv{pull}{ X }^{\Sigma} : [[ X -> [] (BigMeet ri) X ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = X$).
+
+{\footnotesize{
+    \begin{align*}
+      \inferrule*[right=app]
+      {\inferrule*[right=lookup,leftskip=10em]{ X : [[{mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] \in [[ Sig ]]}{[[ Sig |- {lookup Sig X} : {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]]} \\
+      \inferrule*[right=var,rightskip=10em]{\quad}{[[z : {(mu X . A)
+      [ [] ri ai /* ai ]} |- z : {(mu X . A) [ [] ri ai /* ai ]}]]}}{[[ Sig, z
+      : {(mu X . A) [ [] ri ai /* ai ]} |- {lookup Sig X}  z : [] {BigMeet ri} (mu X . A)]]}
+    \end{align*}
+    }}
+
+%%%%% pull ty var
+
+\item $\deriv{pull}{ [[ aj ]] } : [[ {[] rj aj} -> [] (BigMeet ri) aj ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = \alpha $).
+
+\footnotesize{
+\begin{align*}
+\inferrule*[right=approx]
+{\inferrule*[right=var]
+  {\quad}
+  {[[ Sig, z : {[] rj aj} |- z : {[] rj aj} ]]}
+}
+{[[ Sig, z : {[] rj aj} |- z : {[] (BigMeet ri) aj} ]]}
+\end{align*}
+    }
+
+%%%%% pull sum
+
+\item $\deriv{pull}{[[ (Sum A B) [ [] ri ai /* ai ] ]]}^{\Sigma} : [[ { Sum A B } -> [] (BigMeet ri) { Sum A B} ]]$
+    (i.e. $\tcF\ \overline{\alpha_i} = [[ Sum A B ]] $).
+
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sum-sub4}
+  \inferrule*[right=pr]
+  {\inferrule*[right=Con]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          x' : A |- x' : A]]}}{[[ x' : [ A ] 1 |-
+        x' : A ]]}}{[[ x' : [ A ] 1 |- inl (
+      x' ) : {Sum A B} ]]}}
+  {[[ x' : [ A ] {BigMeet ri} |- [ inl ( x' ) ] : [] {BigMeet ri} {Sum A B} ]]}
+\end{equation}
+    }
+
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sum-sub2}
+  \inferrule*[right=case,leftskip=15em]
+  {\inferrule*[right=app]{\inferrule*[right=pull]{\quad}{ [[. |- pullP Sig A : A -o [] {BigMeet ri} A ]]} \\ \inferrule*[right=var]{\quad}{[[ x : A [ [] ri ai /*
+        ai ] |- x : A [ [] ri ai /*
+        ai ] ]]}}{[[ x : A [ [] ri ai /* ai ] |- pull Sig A ( x ) : [] {BigMeet ri} A ]]} \\ \eqref{eq:pull-deriv-sum-sub4} \\
+    \inferrule*[right={[}pbox{]},rightskip=15em]{\inferrule*[right={[}pvar{]}]{\quad}{[[ {BigMeet ri} |- x' : A |>
+        x' : [ A ] {{BigMeet ri} }]]}}{[[ none |- [ x' ] : [] {BigMeet ri} A |> x' : [ A ] {BigMeet ri} ]]}}
+  {[[ x : A [ [] ri ai /* ai ] |- case pull Sig A ( x ) of [ x' ] -> [
+  inl (
+  x' ) ] : [] {BigMeet ri} {
+  Sum A B} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sum-sub5}
+  \inferrule*[right=pr]
+  {\inferrule*[right=Con]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[y' : B
+          |- y' : B]]}}{[[ y' : [ B ] 1 |-
+        y' : B ]]}}{[[ y' : [ B ] 1 |- inr (
+      y' ) : {Sum A B} ]]}}
+  {[[ y' : [ B ] {BigMeet ri} |- [ inr ( y' ) ] : [] {BigMeet ri} {Sum A B} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sum-sub3}
+  \inferrule*[right=case,leftskip=15em]
+  {\inferrule*[right=app]{\inferrule*[right=pull]{\quad}{[[ . |- pullP Sig B : B -o [] {BigMeet ri} B ]]} \\ \inferrule*[right=var]{\quad}{[[ y : B [ [] ri ai /*
+        ai ] |- y : B [ [] ri ai /*
+        ai ] ]]}}{[[ y : B [ [] ri ai /* ai ] |- pull B ( y ) : [] {BigMeet ri} B ]]} \\ \eqref{eq:pull-deriv-sum-sub5} \\
+    \inferrule*[right={[}pbox{]},rightskip=15em]{\inferrule*[right={[}pvar{]}]{\quad}{[[ {BigMeet ri} |- y' : B |>
+        y' : [ B ] { {BigMeet ri} }]]}}{[[ none |- [ y' ] : [] {BigMeet ri} B |> y' : [ B ] {BigMeet ri} ]]}}
+  {[[ y : B [ [] ri ai /* ai ] |- case pull Sig B ( y ) of [ y' ] -> [
+  inr (
+  x2' ) ] : [] {BigMeet ri} {
+  Sum A B} ]]}
+\end{equation}
+}
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sum-sub6}
+  \inferrule*[right=Pcon]{\inferrule*[right=pvar]{\quad}{[[none |- x : A [ [] ri ai /* ai ]
+  |> x : A [ [] ri ai /* ai ] ]]}}{[[none |- inl ( x ) : ( Sum A B ) [ [] ri ai /* ai ] |> x : A [ [] ri ai /* ai ] ]]}
+\end{equation}
+}
+
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sum-sub7}
+\inferrule*[right=Pcon]{\inferrule*[right=pvar]{\quad}{[[none |- y :
+  B [ [] ri ai /* ai ] |> y : B [ [] ri ai /* ai ] ]]}}{[[none |- inr ( x ) : (
+Sum A B ) [ [] ri ai /* ai ] |> y : B [ [] ri ai /* ai ] ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{align*}
+ \hspace{-15em}\inferrule*[right=case,leftskip=5em]{
+  \eqref{eq:pull-deriv-sum-sub2} \\ \eqref{eq:pull-deriv-sum-sub3} \\
+  \\ \eqref{eq:pull-deriv-sum-sub6} \\ \eqref{eq:pull-deriv-sum-sub7} }
+  {[[ z : {Sum A B} [ [] ri ai /* ai ] |- case z of inl ( x ) -> ( case pull Sig A ( x ) of [ x' ] -> [
+  inl (
+  x' ) ] ) ; inr ( y ) -> ( case pull Sig B ( y ) of [ y' ] -> [ inr ( y' ) ] ) : [] {BigMeet ri} {
+  Sum A B} ]]}
+\end{align*}
+}
+
+%%%%%%%% PULL OTIMES
+\item $\deriv{pull}{ [[ Tup A B ]] }^{\Sigma} : [[ ( Tup A B ) [ [] ri ai /*
+  ai ] -> [] (BigMeet ri) ( Tup A B ) ]]$
+    (i.e. $\tcF\ \overline{\alpha_i} = [[ Tup A B ]]$).
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sub2}
+  \inferrule*[Right=pr]
+  {\inferrule*[right=Con]{
+    \inferrule*[right=der]
+      {\inferrule*[right=var]{\quad}{[[ x' : A |- x' :  A ]]}}
+      {[[ x' : [ A ] 1 |- x' : A ]]
+      } \\
+     \inferrule*[right=der]
+      {\inferrule*[right=var]{\quad}{[[ y' : B |- y' : B ]]}}
+      {[[ y' : [ B ] 1 |- y' : B ]]}
+   }
+   {{[[ x' : [ A ] 1, y' : [ B ] 1  |- pair x' y' : Tup A B ]]}}
+  }
+  {[[ x' : [ A ] {BigMeet ri}, y' : [ B ] {BigMeet ri} |- [ pair x' y' ] :  [] {BigMeet ri} { Tup A B} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sub3}
+\inferrule*[right={[}Pcon{]},rightskip=12em]{\inferrule*[right={[}pbox{]},leftskip=3em]{\inferrule*[right={[}pvar{]}]{\quad}{ [[ {BigMeet ri} |- x' :
+      A |> x' : [ A ] { {BigMeet ri}  }]]}}{[[ none |- [ x' ] : [] {BigMeet ri} A |> x' : [ A ] {BigMeet ri} ]]} \\
+  \inferrule*[right={[}pbox{]},rightskip=3em]{\inferrule*[right={[}pvar{]}]{\quad}{
+      [[ {BigMeet ri} |- y' : B |> y' : [ B ] { {BigMeet ri} }]]} \\
+    | [[Tup A B ]] | = 1}{[[
+    none |- [ y' ] : [] {BigMeet ri} B |> y' : [ B ] {BigMeet ri}  ]]}
+}{[[ none |- Pair {[ x' ]} {[ y' ]} : Tup ([] {BigMeet ri} A) ([] {BigMeet ri} B) |> x' : [ A ] {BigMeet ri}, y' : [ B ] {BigMeet ri}  ]]}
+\end{equation}
+    }
+
+\footnotesize{
+
+}
+
+\footnotesize{
+    \begin{equation}
+      \label{eq:pull-deriv-sub10}
+ \inferrule*[Right=app]{ \inferrule*[right=pull]{\quad}{[[ . |- pullP Sig A : A -o [] {BigMeet ri} A ]]}\\\inferrule*[right=var]{\quad}{[[
+          x :
+        A [ [] ri ai /* ai ] |- x : A [ [] ri ai /*
+        ai ] ]]}}{[[ x :
+        A [ [] ri ai /* ai ] |- pull Sig A (x) : [] {BigMeet ri} A ]]}
+\end{equation}
+}
+
+\footnotesize{
+    \begin{equation}
+      \label{eq:pull-deriv-sub11}
+\inferrule*[Right=app]{\inferrule*[right=pull]{\quad}{ [[ . |- pullP Sig B : B -o [] {BigMeet ri} B]]} \\ \inferrule*[right=var]{\quad}{[[ y : B [ [] ri ai /*
+    ai ] |- y : B [ [] ri ai /*
+        ai ] ]]}}{[[ y : B [ [] ri ai /* ai ] |-
+        pull Sig B (y) : [] {BigMeet ri} B
+  ]]}
+    \end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-sub1}
+  \inferrule*[Right=case]
+  {\inferrule*[Right=pair,leftskip=15em]{
+      \eqref{eq:pull-deriv-sub10}
+\\ \eqref{eq:pull-deriv-sub11} }{[[ x : A [ [] ri ai /* ai ] , y : B [ [] ri ai /* ai ]  |-
+pair {pull Sig A (x)} {pull Sig B (y)} : Tup ([] {BigMeet ri} A) ([] {BigMeet ri} B) ]]}
+\\
+  \eqref{eq:pull-deriv-sub2}
+\\
+  \eqref{eq:pull-deriv-sub3}
+  }
+  {[[ x : A [ [] ri ai /* ai ] , y : B [ [] ri ai /* ai ] |- case {pair {pull Sig A
+    x} {pull Sig B y} } of Pair [ x' ] [
+  y' ]
+  -> [ pair x' y' ] :  [] {BigMeet ri} { Tup A B} ]]}
+\end{equation}
+}
+
+{\footnotesize{
+\begin{align*}
+ \hspace{-7em}\inferrule*[Right=case]
+  {
+  % elide
+  %\inferrule*[Right=var]{\quad}{[[ z : ( Tup A B ) [ [] ri ai /* ai ] |- z : ( Tup A B ) [ [] ri ai /* ai ]  ]]}
+  %\\
+  \eqref{eq:pull-deriv-sub1}
+  \\
+  \inferrule*[Right=pcon]
+    {\inferrule*[right=pvar,leftskip=5em]
+      {\quad}
+      {[[ none |- x : A [ [] ri ai /* ai ] |> x : A [ [] ri ai /* ai ] ]]}
+  \\ \inferrule*[right=pvar, rightskip=5em]
+      {\quad}
+      {[[ none |- y : B [ [] ri ai /* ai ] |> y : B [ [] ri ai /* ai ] ]]}
+    }{ [[ none |- Pair x y : (Tup A B) [ [] ri ai /* ai ]
+            |> x : A [ [] ri ai /* ai ] , y : B [ [] ri ai /* ai ] ]]}
+  }{[[ z : ( Tup A B ) [ [] ri ai /* ai ]
+       |- case z of Pair x y -> ( case {pair {pull Sig A x} {pull Sig B y} } of
+            Pair [ x' ] [ y' ] -> [ pair x' y' ] )
+       :  [] {BigMeet ri} { Tup A B} ]]}
+\end{align*}
+    }}
+    %
+\item $\deriv{pull}{ [[ mu X . A ]] }^{\Sigma} : [[ ( mu X . A ) [ [] ri ai /*
+  ai ] -> [] (BigMeet ri) ( mu X . A ) ]]$
+    (i.e. $\tcF\ \overline{\alpha_i} = [[ mu X . A ]]$).
+
+    \footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-rec-sub1}
+      \inferrule*[right=app]{\inferrule*[right=var,leftskip=10em]{\quad}{[[ Sig, f
+      : {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) |- f : {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A)]]}
+      \\ \inferrule*[right=var,rightskip=10em]{\quad}{[[ Sig, z : {mu X . {A [ [] ri ai /* ai ]}} |- z :
+      {mu X . A} [ [] ri ai /* ai ] ]]}}{[[ Sig, f
+      : {mu X . A} [ [] ri ai /* ai ]
+                                 -o [] {BigMeet ri} (mu X . A), z : {mu X . {A [ [] ri ai /* ai ]}}|- f z :  [] {BigMeet ri} (mu X . A)  ]]}
+\end{equation}
+    }
+
+{\footnotesize{
+    \begin{align*}
+      \inferrule*[right=letrec]{ {\inferrule*[right=pull,leftskip=10em]{\quad}{
+      [[ Sig |- pull {Sig, recvar {{mu X . {A [ [] ri ai /* ai ]}} -o {[]
+      {BigMeet ri} (mu X . A)}}}  A
+      nothing : {mu X . {A [ [] ri ai /* ai ]}}
+      -o [] {BigMeet ri} (mu X . A) ]]} } \\
+      \eqref{eq:pull-deriv-rec-sub1}
+  }{[[ Sig, z : (mu X . A) [ ri ai /* ai ] |- letrec f
+      = {pull {Sig, recvar {{mu X . {A [ [] ri ai /* ai ]}} -o {[]
+      {BigMeet ri} (mu X . A)}}} A nothing} in {f z} : {[] {BigMeet ri} { mu X . A }}
+      ]]}
+      \end{align*}
+}}
+\end{itemize}
+\end{proof}
+
+\begin{proposition}
+\label{prop:soundness-push}
+Type soundness of $\deriv{push}{\tcF\ \overline{\alpha_i}}^{\Sigma} :
+\deriv{push}{\tcF \overline{\alpha_i}}^{\Sigma} : \Box_{r} \tcF \overline{\alpha_i}
+  \rightarrow  \tcF  (\overline{\Box_{r} \alpha_i})$.
+\end{proposition}
+
+\begin{proof}
+  \
+\begin{itemize}
+\item $\deriv{push}{ [[ Unit ]]}^{\Sigma} : [[ {[] r Unit} -> Unit ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = [[ Unit ]]$).
+
+{\footnotesize{
+\begin{align*}
+  \inferrule*[right=case]
+   {
+    \inferrule*[right=con]
+         {\quad}{[[ . |- () : Unit ]]}
+    \quad
+    \inferrule*[right={[}pbox{]}]{
+     \inferrule*[right={[}pcon{]}]
+       {[[ | Unit | == 1 ]] }
+       {[[ r  |- () : Unit |> . ]]}
+     }{
+       [[ none |- [ () ] : Unit |> . ]]
+     }
+   }
+   {[[ z : [] r Unit |- case z of [ () ] -> () : Unit ]]}
+\end{align*}
+    }}
+
+%%%%% push rec var
+
+\item $\deriv{push}{ X }^{\Sigma} : [[ {[] r X} -> {X [ [] r ai /* ai ]} ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = X$).
+
+{\footnotesize{
+    \begin{align*}
+      \inferrule*[right=app]
+      {\inferrule*[right=lookup,leftskip=10em]
+      { X : [[ {[] r (mu X . A)} -o {(mu X . A) [ [] r ai /* ai ]} ]] \in [[ Sig ]]}
+      {[[ Sig |- {lookup Sig X} : {[] r (mu X . A)} -o {(mu X . A) [ [] r ai /* ai ]} ]]} \\
+      \inferrule*[right=var,rightskip=10em]{\quad}
+      {[[z : {[] r (mu X . A)} |- z : {[] r (mu X . A)} ]]}}{[[ Sig, z
+      : {[] r (mu X . A)} |- {lookup Sig X}  z : (mu X . A) [ [] r ai /* ai ] ]]}
+    \end{align*}
+    }}
+\item $\deriv{push}{ [[ aj ]] }^{\Sigma} : [[ {[] rj aj} -> [] rj aj ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = \alpha $).
+
+{\footnotesize{
+\begin{align*}
+\inferrule*[right=var]
+  {\quad}
+  {[[ z : {[] rj aj} |- z : {[] rj aj} ]]}
+\end{align*}
+    }}
+
+\item $\deriv{push}{ [[ Sum A B ]]}^{\Sigma} : [[ {[] r (Sum A B)} -> (Sum {{A} [ [] r ai /* ai ]} {{B} [ [] r ai /* ai ]}) ]]$
+
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub1}
+\inferrule*[right=Con]{\inferrule*[right=app]{ \inferrule*[right=push]{\quad}{[[ . |- pushP Sig A : {[] r A} -o {A [ [] r ai /* ai ]} ]] } \\ \inferrule*[right=Pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          x : A |- x : A ]]}}{[[
+       x : [ A ] 1 |- x : A ]]}}{[[ x : [
+      A ] r |- [ x ] : [] r A  ]]}}{[[ x : [ A ] r |- push Sig A ( [ x ] ) : {
+      A} [ [] r ai /* ai ]
+    ]]}}{[[ x : [ A ] r |- inr push Sig A ( [ x ] )  : Sum { {A} [ [] r ai /* ai ]}
+  {{B} [ [] r ai /* ai ]} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub2}
+\inferrule*[right=Con]{\inferrule*[right=app]{ \inferrule*[right=push]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai ]} ]] } \\ \inferrule*[right=Pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          y : B |- y : B ]]}}{[[
+       y : [ B ] 1 |- y : B ]]}}{[[ y : [
+      B ] r |- [ y ] : [] r B  ]]}}{[[ y : [ B ] r |- push Sig B ( [ y ] ) : {
+      B} [ [] r ai /* ai ]
+    ]]}}{[[ y : [ B ] r |- inr push Sig B ( [ y ] )  : Sum { {A} [ [] r ai /* ai ]}
+  {{B} [ [] r ai /* ai ]} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub3}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pcon{]}]{ \inferrule*[right={[}Pvar{]}]{\quad}{[[ r
+       |- x : A |> x : [ A ] r ]]} \\ [[ |Sum A B| > 1 ]] \Rightarrow [[ 1 <<= r ]]}{ [[ r |- inl ( x ) : Sum A B |> x :
+    [ A ] r  ]] }}{[[ none |- [ inl ( x ) ] : [] r {Sum A B} |> x :
+  [ A ] r ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub4}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pcon{]}]{ \inferrule*[right={[}Pvar{]}]{\quad}{[[ r |- y : B |>  y : [ B ] r ]]} \\ [[ |Sum A B| > 1 ]] \Rightarrow [[ 1 <<= r ]]}{ [[ r  |- inr ( y ) : Sum A B |> y :
+    [ B ] r ]] }}{[[ none |- [ inr ( y ) ] : [] r {Sum A B} |> y :
+  [ B ] r ]]}
+\end{equation}
+    }
+
+
+{\footnotesize{
+\begin{align*}
+  \hspace{-7em}\inferrule*[right=Case]{
+    % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Sum A B |- z : Sum A B ]]} \\
+  \eqref{eq:push-deriv-sum-sub1} \\ \eqref{eq:push-deriv-sum-sub2} \\
+  \eqref{eq:push-deriv-sum-sub3} \\ \eqref{eq:push-deriv-sum-sub4}
+  }{[[ z : [] r (Sum A B) |- case z of [ inl ( x ) ] -> inl push Sig A ( [ x ] ) ;
+  [ inr ( y ) ] -> inr push Sig B ( [ y ] ) : Sum {{ A} [ [] r ai /* ai ]} {{
+  B} [ [] r ai /* ai ] } ]]}
+\end{align*}
+ }}
+
+\item $\deriv{push}{ [[ Tup A B ]]}^{\Sigma} : [[ {[] r (Tup A B)} -> (Tup {{
+    A} [ [] r ai /* ai ]} {{B} [ [] r ai /* ai ]}) ]]$
+
+\footnotesize{
+\begin{equation}
+  \label{eq:push-deriv-pair-sub4}
+  \inferrule*[right=app]{\inferrule*[right=push]{\quad}{ [[ . |- pushP Sig A : {[] r A} -o {A [ [] r ai /* ai ]}]]} \\ \inferrule*[right=pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          x : A |- x : A  ]]}}{[[
+        x : [ A ] 1 |- x : A ]]}}{[[ x : [ A ] r |- [ x ] : [] r
+      A ]]}}{[[ x : [ A ] r |- push Sig A ( [ x ] ) : {A} [ [] r ai /* ai ]  ]]}
+\end{equation}}
+
+\footnotesize{
+\begin{equation}
+  \label{eq:push-deriv-pair-sub5}
+  \inferrule*[right=app]{\inferrule*[right=push]{\quad}{ [[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai] }]]}\\ \inferrule*[right=pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          y : B |- y : B   ]]}}{[[
+        y : [ B ] 1 |- y : B ]]}}{[[ y : [ B ] r |- [ y ] : [] r
+      B ]]}}{[[ y : [ B ] r |-
+    push Sig B ( [ y ] ) : {B} [ [] r ai /* ai ]  ]]}
+\end{equation}}
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-pair-sub1}
+\inferrule*[right=Con]
+{ \eqref{eq:push-deriv-pair-sub4}
+  \\
+\eqref{eq:push-deriv-pair-sub5}
+  }
+{ [[ x : [ A ] r, y : [ B ] r |- pair {push Sig A ( [ x ] )} {push Sig B ( [ y ] )} : Tup
+  { {A} [ [] r ai /* ai ] } {  {B} [ [] r ai /* ai ] } ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-pair-sub2}
+\inferrule*[right={[}Pbox{]},rightskip=10em]{\inferrule*[right={[}PCon{]}]{\inferrule*[right={[}Pvar{]},leftskip=1em]{\quad}{[[
+  r  |- x : A |> x : [ A ] r ]]} \\
+\inferrule*[right={[}Pvar{]},rightskip=2em]{\quad}{[[ r  |- y : B |> y : [ B
+ ] r ]]} \\ |[[Tup A B]]| = 1 }{[[ r
+  |- Pair x y : Tup A B |> x : [ A ] r, y : [ B ] r ]]}}{[[ none |- [ Pair x y ] : [] r
+  {Tup A B} |> x : [ A ] r, y : [ B ] r ]]}
+\end{equation}
+   }
+
+\footnotesize{
+\begin{align*}
+  \inferrule*[right=Case]{
+  % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Tup A B |- z : Tup A B ]]} \\
+  \eqref{eq:push-deriv-pair-sub1} \\ \eqref{eq:push-deriv-pair-sub2}
+  }{[[ z : [] r (Tup A B) |- case z of [ Pair x y ] -> pair {
+  push Sig A ( [ x ] )}  {push Sig B ( [ y ] )} : Tup {{A} [ [] ri ai /* ai ]} {{
+  B} [ [] ri ai /* ai ]} ]]}
+\end{align*}
+    }
+
+\item $\deriv{push}{ [[ A -o B ]]}^{\Sigma} : [[ {[] r (A -o B)} -> ({{A} [ [] r ai /* ai ]}
+  -o {{B} [ [] ri ai /* ai ]}) ]]$
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub3}
+\inferrule*[right=app]{ \inferrule*[right=push, leftskip=10em]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai]} ]]} \\ \inferrule*[right=Pr, rightskip=15em]{\inferrule*[right=app]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          f : {A -o B} |- f : A -o B ]]}}{ [[ f : [ { A
+      -o B }  ] 1 |- f : A -o B ]]} \\
+      \inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[ x : A  |- x : A
+          ]]}}{[[  x : [ A ] 1 |- x : A ]]}}{[[ f : [ { A
+      -o B } ] 1, x : [ A ] 1 |- f x : B
+    ]]}}{[[ f : [ {A -o B} ] r, x : [ A ]
+    {BigMeet ri} |- [ f x ] : {[] r {B }}]]}}
+{[[ f : [ {A -o B} ] r, x : [ A ] {BigMeet ri} |- push Sig B [ f x ] : {{B [ [] r ai /* ai ] } }  ]]}
+\end{equation}
+ }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub4}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pvar{]}]{\quad}{[[ {BigMeet ri} |- x : A |> x :
+    [ A ] {BigMeet ri}]]}}{[[none |- [ x ] : [] r
+  A |> x : [ A ] {BigMeet ri} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub1}
+\inferrule*[right=Case]{
+  \inferrule*[right=app]{\inferrule*[right=pull]{\quad}{[[ . |- pullP Sig A : A -o {[] {BigMeet ri} A} ]]} \\ \inferrule*[right=var]{\quad}{[[ y : { A } |- y : {A}
+      ]]}}{[[ y : { A } |- pull Sig A (y) : [] {BigMeet
+      ri} A ]]} \\
+  \eqref{eq:push-deriv-abs-sub3} \\ \eqref{eq:push-deriv-abs-sub4} }{[[ y : {A} , f : [ {A -o B} ] r |- case pull Sig A (y) of [
+  x ] -> push Sig B [ f x ] : {{B [ [] r ai /* ai ]}} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub2}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pvar{]}]{\quad}{[[ r  |- f : (A -o B) |> f : [
+    {A -o B}] r ]]}}{[[ none |- [ f ] : [] r ( A -o B ) |> f : [ {A -o B} ] r  ]]}
+\end{equation}
+    }
+
+{\footnotesize{
+\begin{align*}
+\hspace{-5em}\inferrule*[right=abs]
+  {\inferrule*[right=Case]{
+ % \inferrule*[right=Var]{\quad}{[[ z : [] r (A -o B) |- z : [] r ( A -o B ) ]]}
+  \eqref{eq:push-deriv-abs-sub1} \\
+  \eqref{eq:push-deriv-abs-sub2}}{[[ z : [] r (A -o B), y : {  A }  |- case z
+  of [f] -> case pull Sig A (y)  of [ x
+  ] -> push Sig B [ f x ] : {B} [ [] r ai /* ai ] ]]}}
+{[[ z : [] r (A -o B) |- \ y . case z of [f] -> case pull Sig A (y) of [ x
+  ] -> push Sig B [ f x ] : {{A [ [] r ai /* ai ]}} -o {{B [ [] r ai /* ai ]}} ]]}
+\end{align*}
+    }}
+
+\item $\deriv{push}{ [[ mu X . A ]] }^{\Sigma} : [[( mu X . {[] r A} ) -> ( mu X
+    . { A [ [] ri ai /*
+  ai ] }) ]]$
+    (i.e. $\tcF\ \overline{\alpha_i} = [[ mu X . A ]]$).
+
+    \footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-rec-sub1}
+      \inferrule*[right=app]{\inferrule*[right=var,leftskip=10em]{\quad}{[[ Sig, f
+      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}) |- f : {mu X . {[] r A}}
+                                 -o (mu X . { A [ [] r ai /* ai ]}) ]]}
+      \\ \inferrule*[right=var,rightskip=10em]{\quad}{[[ Sig, z : {mu X . {[]
+            r A}} |- z :
+      {mu X . {[] r A} } ]]}}{[[ Sig, f
+      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}), z : {mu X . {[] r
+          A}} |- f z : (mu X . {A [ [] r ai /* ai ]})  ]]}
+\end{equation}
+    }
+
+{\footnotesize{
+    \begin{align*}
+      \inferrule*[right=letrec]{ {\inferrule*[right=push,leftskip=10em]{\quad}{
+      [[ Sig |- push {Sig, recvar {{mu X . {[] r A }} -o (mu X . {A [ [] r ai /* ai ]})}}  A
+      nothing : {mu X . {[] r A}}
+      -o (mu X . {A [ [] r ai /* ai ]}) ]]} } \\
+      \eqref{eq:pull-deriv-rec-sub1}
+  }{[[ Sig, z : (mu X . {[] r A}) |- letrec f =
+      {push {Sig, recvar {{mu X . {[] r A }} -o (mu X . {A [ [] r ai
+      /* ai ]})}} A nothing} in {f z} : { mu X . {A [ [] r ai /* ai ] }}
+      ]]}
+      \end{align*}
+}}
+\end{itemize}
+\end{proof}
+
+
+\subsection{Inverse Property of the Distributive Laws}
+\label{proof:inverse-proofs}
+
+\pushPullInverse*
+
+\begin{proof}
+By induction on the syntax of the type $\tcF \overline{\alpha_i}$ which we denote
+by $T$ in the following. We first prove a subresult that for
+$\deriv{pull}{T}^{\Sigma'}(\deriv{push}{T}^\Sigma \ z) \equiv z$, which by
+function extensionality then gives us
+$\deriv{pull}{T}^{\Sigma'}(\deriv{push}{T}^\Sigma) \equiv id$,
+under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
+\Sigma'(X)$ then $g \circ f = id$, in order to apply the recursive argument.
+%
+\begin{itemize}
+\item $T = 1$
+%
+\begin{align*}
+\begin{array}{rll}
+       & \deriv{pull}{1}^{\Sigma'}(\deriv{push}{1}^\Sigma \ z) & \\
+%
+\equiv & \deriv{pull}{1}^{\Sigma'}([[ case z of [ () ] -> () ]])
+& \{\textit{defn.}\ \deriv{push}{1}^\Sigma \} \\
+%
+\equiv & [[ case (case z of [ () ] -> () ) of () -> [ () ] ]]
+& \{\textit{defn.}\ \deriv{pull}{1}^{\Sigma'}\} \\
+%
+\equiv & [[ case z of [()] -> case () of () -> [ () ] ]]
+& \{\textit{case assoc.}\} \\
+%
+\equiv & [[ case z of [()] -> [ () ] ]]
+& \{\beta_{case}\} \\
+%
+\equiv & [[ z ]]
+& \{\textit{$\eta_{case}$}\}
+\end{array}
+\end{align*}
+%
+
+\item $T = \alpha$
+%
+\begin{align*}
+\begin{array}{rll}
+       & \deriv{pull}{\alpha}^{\Sigma'}(\deriv{push}{\alpha}^\Sigma \ z) & \\
+%
+\equiv & \deriv{pull}{\alpha}^{\Sigma'}([[ z ]])
+& \{\textit{defn.}\ \deriv{push}{\alpha}^\Sigma  \} \\
+%
+\equiv & [[ z ]] & \{\textit{defn.}\ \deriv{pull}{\alpha}^{\Sigma'} \}
+\end{array}
+\end{align*}
+
+\item $T = X$
+%
+\begin{align*}
+\begin{array}{rll}
+       & \deriv{pull}{[[ X ]]}^{\Sigma'}(\deriv{push}{[[ X ]]}^\Sigma \ z) & \\
+  %
+\equiv & \deriv{pull}{[[ X ]]}^{\Sigma'}(\Sigma ([[ X ]]) z) & \{ \textit{defn.}\  \deriv{push}{[[ X ]]}^\Sigma \} \\
+%
+\equiv & \Sigma' ([[ X ]]) (\Sigma ([[X]]) z) & \{ \textit{defn.} \  \deriv{pull}{[[ X ]]}^{\Sigma'} \} \\
+\equiv & z & \{ \textit{recursion assumption} \}
+\end{array}
+\end{align*}
+\item $T = A \oplus B$:
+
+{\scalebox{0.88}{\begin{minipage}{1\linewidth}
+\begin{align*}
+\hspace{-7em}\begin{array}{rll}
+       & \deriv{pull}{A \oplus B}^{\Sigma'}(\deriv{push}{A \oplus B}^\Sigma \ z) & \\
+%
+\equiv & \deriv{pull}{A \oplus B}^{\Sigma'}(\derCaseTwoShort{z}{[\mathsf{inl}\ x]}{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}[x]}{[\mathsf{inr}\ y]}
+                            {\mathsf{inr}\ \deriv{push}{B}^{\Sigma}[y]})
+& \{\textit{defn.}\ \deriv{push}{A \oplus B}^\Sigma  \} \\
+%
+\equiv &
+\derCaseTwoMultiLine{(\derCaseTwoShort{z}{[\mathsf{inl}\ x]}{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}[x]}{[\mathsf{inr}\ y]}
+                            {\mathsf{inr}\ \deriv{push}{B}^{\Sigma}[y]})}{\mathsf{inl}\
+                                       x}{\derCaseOne{\deriv{pull}{A}^{\Sigma'}\ x}{[u]}{[\mathsf{inl}\ u]}}{\mathsf{inr}\ y}
+                            {\derCaseOne{\deriv{pull}{B}^{\Sigma'}\
+                                       y}{[v]}{[\mathsf{inr}\ v]}}
+& \{\textit{defn.}\ \deriv{pull}{A \oplus B}^{\Sigma'} \} \\
+%
+\equiv &
+\derCaseTwo{z}{[\mathsf{inl}\ x]}{\derCaseTwo{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}[x]}{\mathsf{inl}\
+                                       x}{\derCaseOne{\deriv{pull}{A}^{\Sigma'}\ x}{[u]}{[\mathsf{inl}\ u]}}{\mathsf{inr}\ y}
+                            {\derCaseOne{\deriv{pull}{B}^{\Sigma'}\
+                                       y}{[v]}{[\mathsf{inr}\ v]}}}{[\mathsf{inr}\ y]}
+                            {\derCaseTwo{\mathsf{inr}\ \deriv{push}{B}^{\Sigma}[y]}{\mathsf{inl}\
+                                       x}{\derCaseOne{\deriv{pull}{A}^{\Sigma'}\ x}{[u]}{[\mathsf{inl}\ u]}}{\mathsf{inr}\ y}
+                            {\derCaseOne{\deriv{pull}{B}^{\Sigma'}\
+                                       y}{[v]}{[\mathsf{inr}\ v]}}}
+& \{\textit{case assoc.}\} \\
+\equiv & \derCaseTwo{z}{[\mathsf{inl}\ x]}
+{\derCaseOne{\deriv{pull}{A}^{\Sigma'}\ \deriv{push}{A}^{\Sigma}[x]}{[u]}{[\mathsf{inl}\ u]}}
+{[\mathsf{inr}\ y]}
+{\derCaseOne{\deriv{pull}{B}^{\Sigma'}\ \deriv{push}{B}^{\Sigma}[y]}{[v]}{[\mathsf{inr}\ v]}}
+%
+& \{\beta_{case} \} \\
+%
+\equiv & \derCaseTwo{z}{[\mathsf{inl}\ x]}
+{\derCaseOne{[x]}{[u]}{[\mathsf{inl}\ u]}}
+{[\mathsf{inr}\ y]}
+{\derCaseOne{[y]}{[v]}{[\mathsf{inr}\ v]}}
+%
+& \{\textit{induction}\} \\
+%
+\equiv & \derCaseTwoShort{z}{[\mathsf{inl}\ x]}
+{[\mathsf{inl}\ x]}
+{[\mathsf{inr}\ y]}
+{[\mathsf{inr}\ y]}
+%
+& \{\textit{$\beta_{case}$}\} \\
+\equiv & [[ z ]]
+& \{\textit{$\eta_{case}$}\}
+\end{array}
+\end{align*}
+\end{minipage}
+}}
+
+\end{itemize}
+%
+\item $T = A \otimes B$:
+
+{\scalebox{0.85}{\begin{minipage}{1\linewidth}
+\begin{align*}
+\hspace{-7em}\begin{array}{rll}
+       & \deriv{pull}{A \otimes B}^{\Sigma'}(\deriv{push}{A \otimes B}^\Sigma \ z) & \\
+\equiv & \deriv{pull}{A \otimes B}^{\Sigma'} ( \derCaseOne{z}{[(x, y)]}
+   {(\deriv{push}{A}^{\Sigma}[x], \deriv{push}{B}^{\Sigma}[y])})
+                                                                                & \{\textit{defn.}\ \deriv{push}{A \otimes B}^\Sigma \} \\
+\equiv & \derCaseOne{(\derCaseOne{z}{[(x, y)]}
+   {(\deriv{push}{A}^{\Sigma}[x], \deriv{push}{B}^{\Sigma}[y])})}{(x, y)}
+   \\ & \qquad {\derCaseOne{(\deriv{pull}{A}^{\Sigma'}\ x, \deriv{pull}{B}^{\Sigma'}\ y)}
+                {([u], [v])}{[(u, v)]}}
+& \{\textit{defn.}\ \deriv{pull}{A \otimes B}^{\Sigma'} \} \\
+\equiv & \derCaseOne{z}{[(x,
+         y)]}{\derCaseOne{(\deriv{push}{A}^{\Sigma}[x],
+         \deriv{push}{B}^{\Sigma}[y])}{(x, y)}{\\ & \hspace{8em}  \derCaseOne{(\deriv{pull}{A}^{\Sigma'}\ x, \deriv{pull}{B}^{\Sigma'}\ y)}
+                {([u], [v])}{[(u, v)]}}}
+& \{\textit{case assoc.} \} \\
+\equiv & \derCaseOne{z}{[(x, y)]}
+   {(\derCaseOne{(\deriv{pull}{A}^{\Sigma'}\deriv{push}{A}^{\Sigma}\ [x], \deriv{pull}{B}^{\Sigma'}\deriv{push}{B}^{\Sigma}\ [y])}{([u], [v])}{[(u, v)]})}
+& \{\beta_{case}\} \\
+\equiv & \derCaseOne{z}{[(x, y)]}
+   {(\derCaseOne{([x], [y])}{([u], [v])}{[(u, v)]})}
+& \{\textit{induction}\} \\
+\equiv & \derCaseOne{z}{[(x, y)]}
+   {[(x, y)]}
+& \{\textit{$\beta_{case}$}\} \\
+\equiv & [[ z ]]
+& \{\textit{$\eta_{case}$}\}
+\end{array}
+\end{align*}
+\end{minipage}
+}}
+
+\item $T = \mu X . A$:
+%
+\begin{align*}
+\hspace{-12em}\begin{array}{rll}
+  & \deriv{pull}{\mu X . A}^{\Sigma'}(\deriv{push}{\mu X . A}^{\Sigma}\ z)& \\
+  \equiv & \deriv{pull}{\mu X . A}^{\Sigma'}(\derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}{f\ z}) &\{\textit{defn.}\ \deriv{push}{\mu X . A}^{\Sigma} \} \\
+  \equiv & \derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' : [[ {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] }}\\ & \qquad \qquad {f' (\derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}{f\ z})} &\{\textit{defn.}\ \deriv{pull}{\mu X . A}^{\Sigma'} \} \\
+  \equiv & \derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' : [[ {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] }}\\ & \qquad \qquad {\derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}{f' (f\ z)}} &\{\textit{let dist.}\ \} \\
+  \equiv & \derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' : [[ {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] }}\\ & \qquad \qquad {\derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}{f'} ({{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}\ z})} &\{\beta_{letrec} \} \\
+  \equiv & \derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' }}\\ & \qquad \qquad {\derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' }} ({{\deriv{push}{A}^{\Sigma, X \mapsto
+           f }}\ z})} &\{\beta_{letrec} \} \\
+  \equiv & \derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' }}\\ & \qquad \qquad {{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' }} ({{\deriv{push}{A}^{\Sigma, X \mapsto
+           [[ letrec f = pushP {Sig, X |-> f} A in f ]] }}\ z})} &\{\beta_{letrec} \} \\
+  \equiv & {{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto [[ letrec f' = pullP {Sig', X |-> f'} A in f' ]] }} ({{\deriv{push}{A}^{\Sigma, X \mapsto
+           [[ letrec f = pushP {Sig, X |-> f} A in f ]] }}\ z})} &\{\beta_{letrec} \} \\
+\equiv & z & \{\textit{induction}\}
+\end{array}
+\end{align*}
+\end{proof}
+
+\pullPushInverse*
+
+\begin{proof}
+By induction on the syntax of the type $\tcF \overline{\alpha_i}$ which we denote
+by $T$ in the following. The following proof is for
+$\deriv{push}{T}^\Sigma(\deriv{pull}{T}^\Sigma \ z) \equiv z$, which by
+function extensionality then gives us
+$\deriv{push}{T}^\Sigma(\deriv{pull}{T}^\Sigma) \equiv id$,
+under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
+\Sigma'(X)$ then $g \circ f = id$, in order to apply the recursive argument.
+%
+\begin{itemize}
+\item $T = 1$
+%
+\begin{align*}
+\begin{array}{rll}
+       & \deriv{push}{1}^\Sigma(\deriv{pull}{1}^{\Sigma'} \ z) & \\
+%
+\equiv & \deriv{push}{1}^{\Sigma}( [[ case z of () -> [ () ] ]] )
+& \{\textit{defn.}\ \deriv{pull}{1}^{\Sigma'} \} \\
+%
+\equiv & [[ case (case z of () -> [ () ]) of [ () ] -> () ]]
+& \{\textit{defn.}\ \deriv{push}{1}^{\Sigma} \} \\
+\equiv & [[ case z of () -> case [ () ] of [ () ] -> () ]]
+& \{\textit{case assoc.} \} \\
+%
+\equiv &  [[ case z of () -> () ]]
+& \{\beta_{case} \} \\
+%
+\equiv & [[ z ]]
+& \{\eta_{case} \}
+\end{array}
+\end{align*}
+\item $T = \alpha$
+%
+\begin{align*}
+\begin{array}{rll}
+       & \deriv{push}{\alpha}^\Sigma(\deriv{pull}{\alpha}^{\Sigma'} \ z) & \\
+%
+\equiv & \deriv{push}{\alpha}^\Sigma([[ z ]])
+& \{\textit{defn.}\ \deriv{pull}{\alpha}^{\Sigma'} \} \\
+%
+\equiv & [[ z ]] & \{\textit{defn.}\ \deriv{push}{\alpha}^\Sigma \}
+\end{array}
+\end{align*}
+%
+\item $T = X$
+%
+\begin{align*}
+\begin{array}{rll}
+       & \deriv{push}{[[ X ]]}^{\Sigma}(\deriv{pull}{[[ X ]]}^{\Sigma'} \ z) & \\
+%
+\equiv &  \deriv{push}{[[ X ]]}^{\Sigma}(\Sigma' ([[X]]) z) & \{\textit{defn.}\ \deriv{pull}{[[ X ]]}^{\Sigma'} \}
+\\
+\equiv & \Sigma ([[ X ]]) (\Sigma' ([[X]]) z) & \{\textit{defn.}\ \deriv{push}{[[ X ]]}^{\Sigma} \} \\
+\equiv & z & \{ \textit{recursion assumption}\}
+\end{array}
+\end{align*}
+%
+\item $T = A \oplus B$
+%
+
+{\scalebox{0.84}{\begin{minipage}{1\linewidth}
+\begin{align*}
+\hspace{-5em}\begin{array}{rll}
+  & \deriv{push}{A \oplus B}^\Sigma(\deriv{pull}{A \oplus B}^{\Sigma'} \ z) & \\
+%
+\equiv & \deriv{push}{A \oplus B}^\Sigma \derCaseTwo{z}{\mathsf{inl}\
+                                       x}{\derCaseOne{\deriv{pull}{A}^{\Sigma'}\ x}{[u]}{[\mathsf{inl}\ u]}}{\mathsf{inr}\ y}
+                            {\derCaseOne{\deriv{pull}{B}^{\Sigma'}\
+                                       y}{[v]}{[\mathsf{inr}\ v]}}
+& \{\textit{defn.}\ \deriv{pull}{A \oplus B}^{\Sigma'} \} \\
+\equiv & \derCaseTwo{(\derCaseTwo{z}{\mathsf{inl}\
+                                       x}{\derCaseOne{\deriv{pull}{A}^{\Sigma'}\ x}{[u]}{[\mathsf{inl}\ u]}} {\mathsf{inr}\ y}
+                            {\derCaseOne{\deriv{pull}{B}^{\Sigma'}\
+                                       y}{[v]}{[\mathsf{inr}\ v]}})}{[\mathsf{inl}\ x]}{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}[x]}{[\mathsf{inr}\ y]}
+                            {\mathsf{inr}\
+                                      \deriv{push}{B}^{\Sigma}[y]} & \{\textit{defn.}\ \deriv{push}{A \oplus B}^\Sigma\} \\
+\equiv & \derCaseTwo{z}{\mathsf{inl}\
+                                       x}{\derCaseTwo{\derCaseOne{\deriv{pull}{A}^{\Sigma'}\ x}{[u]}{[\mathsf{inl}\ u]}}{[\mathsf{inl}\ x]}{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}[x]}{[\mathsf{inr}\ y]}
+                            {\mathsf{inr}\
+                                      \deriv{push}{B}^{\Sigma}[y]}} {\mathsf{inr}\ y}
+                            {\derCaseTwo{\derCaseOne{\deriv{pull}{B}^{\Sigma'}\
+                                       y}{[v]}{[\mathsf{inr}\ v]}}{[\mathsf{inl}\ x]}{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}[x]}{[\mathsf{inr}\ y]}
+                            {\mathsf{inr}\
+                                      \deriv{push}{B}^{\Sigma}[y]}} & \{\textit{case assoc.}\} \\
+\equiv & \derCaseTwo{z}{\mathsf{inl}\ x}{\mathsf{inl}\ \deriv{push}{A}^{\Sigma}\deriv{pull}{A}^{\Sigma'}\ x}{\mathsf{inr}\ y}{\mathsf{inr}\ \deriv{push}{B}^{\Sigma}\deriv{pull}{B}^{\Sigma'}\ y}
+ & \{\beta_{case}\} \\
+\equiv & \derCaseTwo{z}{\mathsf{inl}\ x}{\mathsf{inl}\ x}{\mathsf{inr}\ y}{\mathsf{inr}\ y}
+                                                                            & \{\textit{induction}\} \\
+ \equiv & z  & \{\eta_{case}\}
+\end{array}
+\end{align*}
+\end{minipage}}}
+
+%
+\item $T = A \otimes B$
+
+{\scalebox{0.82}{\begin{minipage}{1\linewidth}
+\begin{align*}
+  \hspace{-7em}\begin{array}{rll}
+    & \deriv{push}{A \otimes B}^{\Sigma}(\deriv{pull}{A \otimes B}^{\Sigma'}\ z) & \\
+    \equiv & \deriv{push}{A \otimes B}^{\Sigma}(\derCaseOne{z}{(x, y)}
+   {\derCaseOne{(\deriv{pull}{A}^{\Sigma'}\ x, \deriv{pull}{B}^{\Sigma'}\ y)}
+                {([u], [v])}{[(u, v)]}})
+& \{\textit{defn.}\ \deriv{pull}{A \otimes B}^{\Sigma'} \} \\
+\equiv & \derCaseOne{(\derCaseOne{z}{(x, y)}
+   \\ & \qquad {\derCaseOne{(\deriv{pull}{A}^{\Sigma'}\ x, \deriv{pull}{B}^{\Sigma'}\ y)}
+                {([u], [v])}{[(u, v)]}})}{[(x, y)]}
+   {(\deriv{push}{A}^{\Sigma}[x], \deriv{push}{B}^{\Sigma}[y])}
+& \{\textit{defn.}\ \deriv{push}{A \otimes B}^{\Sigma}\} \\
+\equiv & \derCaseOne{z}{(x, y)}
+   \\ & \qquad {\derCaseOne{(\deriv{pull}{A}^{\Sigma'}\ x, \deriv{pull}{B}^{\Sigma'}\ y)}
+                {([u], [v])}{\derCaseOne{[(u, v)]}{{[(x, y)]}}{(\deriv{push}{A}^{\Sigma}[x], \deriv{push}{B}^{\Sigma}[y])}}}
+& \{\textit{case assoc.}\} \\
+\equiv & \derCaseOne{z}{(x, y)}
+   (\deriv{push}{A}^{\Sigma}\deriv{pull}{A}^{\Sigma'}\ x, \deriv{push}{B}^{\Sigma}\deriv{pull}{B}^{\Sigma'}\ y)
+& \{\beta_{case}\} \\
+\equiv & \derCaseOne{z}{(x, y)}{(x, y)}
+& \{\textit{induction}\} \\
+\equiv & z
+& \{\eta_{case}\}
+  \end{array}
+\end{align*}
+\end{minipage}
+}}
+
+%
+\item $T = \mu X . A$
+%
+\begin{align*}
+  \hspace{-12em}\begin{array}{rll}
+  & \deriv{push}{\mu X . A}^{\Sigma}(\deriv{pull}{\mu X . A}^{\Sigma'}\ z)& \\
+  \equiv & \deriv{push}{\mu X . A}^{\Sigma}(\derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' : [[ {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] }}{f'\ z}) &\{\textit{defn.}\ \deriv{pull}{\mu X . A}^{\Sigma'} \} \\
+  \equiv & \derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}\\ & \qquad \qquad {f\  (\derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' : [[ {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] }}{f'\ z})} &\{\textit{defn.}\ \deriv{push}{\mu X . A}^{\Sigma} \} \\
+  \equiv & \derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}\\ & \qquad \qquad {\derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' : [[ {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] }}{f\ (f'\ z)}} &\{\textit{let dist.}\  \} \\
+  \equiv & \derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}\\ & \qquad \qquad {\derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' : [[ {mu X . {A [ [] ri ai /* ai ]}}
+                                 -o [] {BigMeet ri} (mu X . A) ]] }}{f\ ({\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' }}\ z)}} &\{\beta_{letrec} \} \\
+  \equiv & \derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}\\ & \qquad \qquad {\derLetRec{f'}{\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' }}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }\ ({\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto f' }}\ z)}} &\{\beta_{letrec} \} \\
+  \equiv & \derLetRec{f}{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }}\\ & \qquad \qquad {{\deriv{push}{A}^{\Sigma, X \mapsto
+           f : [[ {mu X . {[] r A}} -o {{(mu X . A)} [ [] r ai /* ai ]} ]] }\ ({\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto [[ letrec f' = pullP {Sig', X |-> f'} A in f']] }}\ z)}} &\{\beta_{letrec} \} \\
+  \equiv & {\deriv{push}{A}^{\Sigma, X \mapsto {[[ letrec f = pushP {Sig, X |-> f} A in f ]] }}\ ({\deriv{pull}{A}^{\Sigma',
+                                 X \mapsto [[ letrec f' = pullP {Sig', X |-> f'} A in f' ]]}}\ z)} &\{\beta_{letrec} \} \\
+\equiv & z & \{\textit{induction}\}
+  \end{array}
+\end{align*}
+\end{itemize}
+\end{proof}
+
+
+
+\section{Proofs for the Fully Graded Synthesis Calculus}
+This section contains the soundness proof for the fully graded 
+synthesis calculus presented in Chapter~\ref{chapter:extended}, as well 
+as the proof of soundness for focusing this calculus.
+
+\subsection{Soundness of the Fully Graded Synthesis Calculus}
+\label{proofs:graded-base-soundness}
 
 \synthSound*
 \begin{proof}
@@ -1844,7 +3020,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
 \item Case $\rightarrow_{\textsc{L}}$\\
         For synthesising an application, we have the derivation:
         \begin{align*}
-          \synAppP
+          \hspace{-5em}\synAppP
         \end{align*}
         By induction on the premises, we obtain the following typing judgements:
         \begin{align*}
@@ -1908,7 +3084,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
 \item Case $\textsc{Con}_{\textsc{L}}$ \\
         For synthesising a case statement, we have the derivation:
         \begin{align*}
-          \synCaseP
+          \hspace{-10em}\synCaseP
         \end{align*}
         By induction on the premises we obtain the following typing judgements:
         \begin{align*}
@@ -1937,7 +3113,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
         \end{enumerate}
         and from rule $\kappa_\rightarrow$ we have that 
         \begin{align*}
-           [[ Sig |- {K {A Many}} : Type ]] \Rightarrow [[ Sig |- {B1 -* q1 .*. Bn -* qn -> {K {A Many}}} : Type ]]
+           [[ Sig |- {K {A Many}} : Type ]] \Rightarrow {B_1}^{q^i_1} \rightarrow ... \rightarrow {B_n}^{q^i_n} \rightarrow [[ {K {A Many}} ]] : [[ Type ]]
         \end{align*}
         thus we have that 
         \begin{enumerate}[resume]
@@ -1975,7 +3151,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
 
 
         \begin{align*}
-          \inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{(f)}{[[  Sig; x : [ {K {A Many}} ] 1 |- x : {K A} ]]} \quad \\ \eqref{soundConLSub1} \\ \eqref{soundConLSub2} }
+          \hspace{-10em}\inferrule*[Right=Case]{ \inferrule*[Right=Var,leftskip=5em]{(f)}{[[  Sig; x : [ {K {A Many}} ] 1 |- x : {K A} ]]} \quad \\ \eqref{soundConLSub1} \\ \eqref{soundConLSub2} }
           { \inferrule*[Right=$\equiv$] {[[  Sig; ((D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})}}) + x : [{K {A Many}}] {({{Var1 s} \*/ {Varm s}} * 1)} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]} {[[  Sig ;(D1 ++*+ Dm), {x : [ {K {A Many}} ] {({Var1 r} \*/ {Varm r})} + {({{Var1 s} \*/ {Varm s}})}} |- case x of Coni Var1 Varn Vari y y -*> ti : B ]]}}
         \end{align*}
 
@@ -2134,6 +3310,8 @@ synthesis of open terms from types, followed by soundness of synthesis for close
 % \begin{proof}
 
 % \end{proof}
+\subsection{Soundness of Focusing for the Fully Graded Synthesis Calculus}
+\label{proof:focus-graded-sound}
 \begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
   For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
   then:
@@ -2212,7 +3390,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
                 \] 
               From which we can construct the following instantiation of the $\textsc{Con}_{\textsc{L}}$ rule in the non-focusing calculus:
               \begin{align*}
-              \inferrule*[right=$\textsc{Con}_{\textsc{L}}$]
+              \hspace{-10em}\inferrule*[right=$\textsc{Con}_{\textsc{L}}$]
               {
               [[ ( Coni Forall : B'1 -* q1 .*. B'n -* qn -> {K {A' Many}} ) elem Defines ]]\\ [[  Sig |- {K {A Many}} : Type ]] \\\\
               [[  Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}}  ]] \\\\

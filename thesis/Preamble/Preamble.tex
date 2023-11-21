@@ -307,7 +307,9 @@
 % {\setlength{\fboxsep}{0pt}\colorbox{SkyBlue!50}{$\displaystyle#1$}}}
 
 \newcommand{\newhighlight}[1]{%
-{\setlength{\fboxsep}{0pt}\colorbox{yellow!50}{$\displaystyle#1$}}}
+{\setlength{\fboxsep}{0pt}\colorbox{SkyBlue!50}{$\displaystyle#1$}}}
+% {\setlength{\fboxsep}{0pt}\colorbox{Periwinkle!50}{$\displaystyle#1$}}}
+% {\setlength{\fboxsep}{0pt}\colorbox{yellow!50}{$\displaystyle#1$}}}
 
 % \newcommand{\newnewhighlight}[1]{%
 % {\setlength{\fboxsep}{0pt}\colorbox{yellow!50}{$\displaystyle#1$}}}
@@ -324,7 +326,7 @@
 
   \newcommand*{\subGrVar}{
       \inferrule*[right=\subGrVarName]
-  {[[ exists s . r <= {s + 1} ]]}{[[G, x : [A] r |- A =>- x ; G , x : [A] s]]}
+  {[[ exists s . r >= {s + 1} ]]}{[[G, x : [A] r |- A =>- x ; G , x : [A] s]]}
     }
 
   \newcommand*{\subAbs}{
@@ -342,7 +344,7 @@
 [[ y notin D ]] \\
 [[ exists s . r >= s + 1]]
 }
-{[[ G, x : [A] r |- B =>- [x/y] t ; D, x : [A] s' ]]}
+{[[ G, x : [A] r |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
     }
   \newcommand*{\subBox}{
   \inferrule*[right=\subBoxName]
@@ -422,7 +424,7 @@
   \newcommand*{\addDer}{
 \inferrule*[right=\addDerName]
 { [[ G, x : [A]s, y : A |- B =>+ t ; D, y : A ]] }
-{ [[ G, x : [A]s |- B =>+ [x / y] t ; D + x : [A]1 ]] }
+{ [[ G, x : [A]s |- B =>+ [pat x / y] t ; D + x : [A]1 ]] }
     }
   \newcommand*{\addBox}{
     \inferrule*[right=\addBoxName]
@@ -527,7 +529,7 @@
 [[ y notin D ]] \\
 [[ exists s . r >= s + 1]]
 }
-{[[ G ; {x : [A] r} async |- B =>- [x/y] t ; D, x : [A] s' ]]}
+{[[ G ; {x : [A] r} async |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
 }
 \newcommand*{\fSubLAsyncTransitionRule}{
   \inferrule*[right=\fSubLAsyncTransitionName]
@@ -651,7 +653,7 @@
 \newcommand*{\fAddDerRule}{
   \inferrule*[right=\fAddDerName]
   { [[ G ; {x : [A]s, y : A} async |- B =>+ t ; D, y : A ]] }
-  { [[ G ; x : [A]s async |- B =>+ [x / y] t ; D + x : [A] 1 ]] }
+  { [[ G ; x : [A]s async |- B =>+ [pat x / y] t ; D + x : [A] 1 ]] }
 }
 \newcommand*{\fAddLAsyncTransitionRule}{
   \inferrule*[right=\fAddLAsyncTransitionName]
@@ -965,7 +967,7 @@
 }
 %
 \newcommand*{\fsynFocusRP}{
-\inferrule*[right=\fsynFocusRName,lab=Focus]
+\inferrule*[right=\fsynFocusRName]
 { [[ Defs ]] ; [[ Sig ]] [[G ]] ; \emptyset \vdash [[ B ]] \Downarrow\ \Rightarrow [[t]] \mid\ [[D]]
   \\ \text{B not atomic}}{[[ Defs ; Sig ; G ; . async |- B => t ; D]]}
 }

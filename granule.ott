@@ -44,6 +44,7 @@ t , v :: 'Term_' ::= {{ com Terms }}
   | [ t ] :: :: Promote {{ com Promote }}
   | < t > :: :: Pure {{ com Pure }}
   | x :: :: Var {{ com Variable }}
+  | X :: :: RecVar {{ com Recursion Variable }} {{ tex {X} }}
   | Con t0 ... tn :: :: Con {{ com Constructor }}
   | Con v * :: M :: ConValuesPref {{ com Constructor with some values prefix }}
      {{ tex [[ Con ]]\ \overline{[[ v ]]} }}
@@ -72,6 +73,17 @@ t , v :: 'Term_' ::= {{ com Terms }}
   | letrec t1 = t2 in t3 :: :: LetRec {{ com LetRec }} {{ tex \textbf{letrec}\ [[ t1 ]]\ =\ [[ t2 ]]\ \textbf{in}\ [[ t3 ]] }}
   | copyShape G A t :: :: copyShape {{ com CopyShape }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{copyShape} }^{[[ G ]]} [[ t ]] }}
   | drop G A t :: :: drop {{ com Drop }} {{ tex \llbracket{ [[ A ]] }\rrbracket_{\mathsf{drop} }^{[[ G ]]} [[ t ]] }}
+  | lookup G t :: :: lookup {{ com Lookup }} {{ tex \Sigma ([[ t ]]) \  }}
+  | [] r t :: M :: boxFmap {{ com BoxFmap }} {{ tex \Box_{[[ r ]]} [[ t ]] }}
+  % Meta-level operations and syntax for the operational semantics
+  % | [ t1 / x ] t2  :: M :: Subst
+  | [ p / x ] t2  :: M :: PatVarSubst
+  % | t2 [ t1 / x ]  :: M :: SubstTerm
+  % | ti+1 :: M :: TiNext {{ tex t_{i+1} }}
+  % | tn+1 :: M :: TiEnd {{ tex t_{n+1} }}
+
+  % | t2 [ p / x ]  :: M :: PatVarSubstTerm
+  | pat p :: M :: PatAsTerm {{ tex [[ p ]] }}
 
 
 % Meta-level operations and syntax for the operational semantics
@@ -87,6 +99,8 @@ t , v :: 'Term_' ::= {{ com Terms }}
   | ( v |>g p ) t :: M :: PatSubstG {{ tex ( [[ v ]] \rhd_G [[ p ]] ) [[ t ]] }}
   | { t } :: M :: Brackett {{ tex [[ t ]] }}
   | t @ { Ix } :: M :: TermAtIndex {{ tex [[ t ]]_{[[ Ix ]]} }}
+  | mlcase t of MLCases :: S :: MlCase {{ com Multi-line case }}
+    {{ tex \begin{array}{l} \textbf{case} \ [[ t ]] \ \textbf{of} \\ [[ MLCases ]] \end{array} }}
 
 % K {{ tex K }} :: 'TyConstructor_' ::= {{ com Type constructors }}
 
@@ -109,6 +123,11 @@ Cases :: 'Cases_' ::= {{ com Value-level cases }}
   | p -> t         :: :: CaseOne {{ com One case }}
   | p -*> t         :: :: CaseOneOverline {{ com One case overline }} {{ tex \overline{ [[ p ]] \mapsto [[ t ]]} }}
   | p -> t ; * ; p' -> t' :: S :: CasesMany {{ com Many cases (syntactic sugar) }} {{ tex [[ p ]] \mapsto [[ t ]]; ... ; [[ p' ]] \mapsto [[ t' ]] }}
+  | many pi ti :: :: Many {{ com ManyCases }} {{ tex \overline{ [[ pi ]] \rightarrow [[ ti ]] } }}
+
+MLCases :: 'MLCases_' ::= {{ com Value-level cases multiline  }}
+  | p -> t NL MLCases :: :: CaseExtNL {{ com Case cons new line }} {{ tex \quad [[ p ]] \mapsto [[ t ]] \\ [[ MLCases ]] }}
+  | p -> t         :: :: CaseOneNL {{ com One case }} {{ tex \quad [[ p ]] \mapsto [[ t ]] }}
 
 p :: 'Pat_' ::= {{ com Patterns }}
   | x :: :: Var {{ com Variable }}
@@ -197,6 +216,7 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
   | ( A ) :: M :: Brackts {{ com Brackets }}
   | { A } :: M :: MetaBrackets {{ tex [[ A ]] }}
   | A Many :: M :: ManyAs {{ tex \vec{[[ A ]]} }}
+  | c :: M :: coeffect {{ com Coeffect }}
   % Syntactic sugar
   | B1 .*. Bn -> A :: S :: MultiFun {{ com n-Ary Function }}
      {{ tex [[ B1 ]]^1 [[ -> ]]\! ... \![[ -> ]] [[ Bn ]]^1 [[ -> ]] [[ A ]] }}
@@ -362,6 +382,10 @@ Ass {{ tex As }} :: 'Assume_' ::=
   | alphaS : k :: :: TyVarSingleton'
       {{ com Ty Var context }}
       {{ tex {\alpha : \kappa} }}
+  | recvar T :: :: RecVar {{ com RecVar }}{{ tex {X} \mapsto {f} [[ T ]] }}
+    % Things for recursive mappings in derivations
+  | X |-> t : A :: M :: RMapping {{ tex X \mapsto [[ t ]] : [[ A ]] }}
+  | X |-> t     :: M :: RMappingShorthand {{ tex X \mapsto [[ t ]] }}
 
 
 
@@ -644,6 +668,8 @@ formula :: 'formula_' ::=
  | inst A1 A2 :: :: Instantiate {{ tex [[ A1 ]] = \text{inst}(\forall \overline{\alpha : \kappa} . [[ A2 ]]) }}
  | Sig |- A :: :: KindCheck {{ tex [[ Sig ]] \vdash [[ A ]] }}
  | A is Unit :: :: KindUnit {{ tex [[ A ]] = \text{Unit} }}
+ | lin p :: :: LinearPattern {{ tex \textsf{lin}([[ p ]]) }}
+ | fresh t x  :: M :: FreshnessPred {{ tex [ [[x]] \# [[ t ]] ] }}
 
 defns
   Judgements :: '' ::=
@@ -1592,3 +1618,146 @@ Defs ; Sig ; G ; x1 : [ A ^ q -> B ] r1 sync |- C => {[ ( x1 t2 ) / x2 ] t1} ; (
 Sig |- inst A A'
 ------------------------- :: DefFP
 Defs, x : Forall A'; Sig ; G ; . sync |- A => x ; 0 * G
+
+
+defn
+G |- t1 == t2 : A :: :: Equiv :: 'Equiv_'
+  {{ com Equational theory }}
+  {{ tex [[ G ]] \vdash [[ t1 ]] \equiv [[ t2 ]] : [[ A ]] }}
+by
+
+G1, x : A |- t2 : B && G2 |- t1 : A
+----------------------------------------------------- :: beta
+G1 + G2 |- ( \ x . t2 ) t1 == [ t1 / x ] t2 : B
+
+G |- t : A -o B && fresh t x
+----------------------------------------------------- :: eta
+G |- {\ x . {t x}} == t : A -o B
+
+G1, x : A |- t1 : A && G2, x : A |- t2 : B
+----------------------------------------------------- :: letrecBeta
+G1 + G2 |- letrec x = t1 in t2 == [ letrec x = t1 in t1 / x ] t2  : B
+
+
+(G1, x : A |- t1 : A && G2 |- t2 : B) && G3 |- f : B -o W
+----------------------------------------------------- :: letrecDist
+{G1 + G2} + G3 |- f (letrec x = t1 in t2) == letrec x = t1 in (f t2) : W
+
+
+(G1 |- t : A && none |- pi : A |> Di)
+G2, Di |- ti : B
+----------------------------------------------------- :: caseBeta
+G1 + G2 |- case t of many pi ti == (t |> pj) tj : B
+
+
+(G1 |- t1 : A && none |- pi : A |> Di)
+G2, z : A |- t2 : B
+-------------------------------- :: caseEta
+G1 + G2 |- case t1 of many pi { [ pi / z ] t2 } == [t1 / z ] t2  : B
+
+
+(G |- t : [] r A && r |- pi : A |> Di) && (Di |- pat pi : A  && 1 <<= r)
+---------------------------------------------------------- :: caseGen
+G |- case t of many [pi] pat pi == case t of [x] -> x : A
+
+
+
+((((G |- t : A &&  none |- pi : A |> Di) && G', Di' |- ti : B)) && none |- pi' : B |> Di') && G'' , Di' |- ti' : W
+---------------------------------------------------------------------------------- :: caseAssoc
+{G + G'} + G'' |- case (case t of many pi ti) of many pi' ti' == case t of many pi (case ti of many pi' ti') : W
+
+
+
+(G |- t : A &&  none |- pi : A |> Di) && G' , Di' |- ti : B
+(r |- pi' : B |> Di' &&  G'' , Di' |- ti' : W) && lin p
+------------------------------------------------------------------------ :: caseBoxAssoc
+{r * (G + G')} + G'' |- case [ case t of many pi ti ] of many [pi'] ti' == case [t] of many [pi] {case [ti] of many [pi'] ti'} : W
+
+
+
+
+(G |- t : A  &&  r |- pi : A |> Di) &&  G' , Di |- ti : B
+----------------------------------------------------------------------- :: casePushDerived
+{s * {r * G}} + s * G' |- [case t of many [pi] ti] == {case [t] of many [pi] [ti]} : [] s B
+
+
+(G1 |- t : A && none |- pi : A |> Di) && (G2, Di |- ti : B && G3 |- f : B -o W)
+----------------------------------------------------- :: caseDist
+{G1 + G2} + G3 |- f (case t of many pi ti) == {case t of many pi (f ti)} : W
+
+defn
+ ( t1 |> p ) t2 = t3 :: :: patternMatch :: 'patSem'
+ {{ tex ( [[ t1 ]]\rhd[[ p ]] ) [[ t2 ]]\!=\![[ t3 ]] }}
+ {{ com Match and substitutuion through a pattern }}
+by
+
+----------------------------- :: int
+( n |> n ) t = t
+
+( t |> p ) t' = t''
+------------------------------ :: unbox
+( [ t ] |> [ p ] ) t' = t''
+
+( ti |> pi ) ti = ti+1
+------------------------------------------ :: constr
+( Con t0 .. tn |> Con p0 .. pn ) t0 = tn+1
+
+-------------------------------- :: wild
+( t |> _ ) t' = t'
+
+-------------------------------- :: var
+( t |> x ) t' =  t' [ t / x ]
+
+
+defn
+CoeffInfo |- p : A |> G :: :: ctxtFromTypedPatternSimplified :: 'patS'
+{{ com Declarative pattern checking for Granule Mini (monomorphic) }}
+{{tex [[ CoeffInfo ]] \vdash \, [[ p ]] : [[ A ]] \, \rhd \, [[ G ]] }}
+by
+
+0 <<= r
+------------------------------------------------------------------------------ :: wildInsideBox
+r : R |- _ : A |> .
+
+------------------------------------------------------------------------------ :: var
+none |- x : A |> x : A
+
+----------------------------------------------------------------------- :: varInsideBox
+r : R |- x : A |> x : [ A ] { r : R }
+
+
+--------------------------------------------------------------------------- :: int
+none |- n : Int |> .
+
+1 <<= r
+--------------------------------------------------------------------------- :: intInsideBox
+r : R |- n : Int |> .
+
+
+r : R |- p : A |> G
+------------------------------------------------------------------------------ :: box
+none |- [ p ] : [] r A |> G
+
+s : S |- p : A |> D
+Flatten r R r' R' = ( s , S )
+---------------------------------------------------------------------------------- :: boxInsideBox
+r : R |- [ p ] : [] r' A |> D
+
+
+C : ( forall a :* k . B1 .*. Bn -> A' , Thk ) in Defines
+none |- pi : Bi |> Gi
+------------------------------------------------------------------------------------------------ :: constrLin
+none |- C p1 .. pn : A |> BigCat Gi
+
+C : ( forall a :* k . B1 .*. Bn -> A' , Thk ) in Defines
+1 <<= r
+|A| > 1
+r : R |- pi : Bi |> Gi
+------------------------------------------------------------------------------------------------ :: constrGradMono
+r : R |- C p1 .. pn : A |> BigCat Gi
+
+C : ( forall a :* k . B1 .*. Bn -> A' , Thk ) in Defines
+|A| == 1
+r : R |- pi : Bi |> Gi 
+------------------------------------------------------------------------------------------------ :: constrGradPoly
+r : R |- C p1 .. pn : A |> BigCat Gi

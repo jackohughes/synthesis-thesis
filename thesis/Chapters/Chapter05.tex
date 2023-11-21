@@ -1,47 +1,55 @@
-\chapter{An extended synthesis calculus}
+\chapter{An Extended Synthesis Calculus}
 \label{chapter:extended}
 
 So far, we have considered a language with a several basic types, but which
 falls short of the full expressive power of Granule. In this chapter, we
 consider a target language which is significantly more expressive than what we
-have seen thus far, adding the synthesis of recursion, polymorphic user-defined
-algebraic data types, as well as the synthesis of recursive function definitions
-from polymorphic type schemes.
+have seen thus far, constituting a fully-fledged functional programming
+language.
 
 The above features could all have been added to the calculi from
 Chapter~\ref{chapter:core}, however, we take the inclusion of these new language
 features as an opportunity to also explore synthesis in a fully graded type
 system. As mentioned in~\ref{chapter:background}, the fully-graded linear-lambda
 calculus is one of the two dominant flavours of quantitative type system. This
-approach is more common in the modern implementations of quantiative types, such
+approach is common amongst implementations of quantitative type systems, such
 as Idris 2, the Linear Types language extension to GHC, and the
-\emph{GradedBase} language extension of Granule. It also typical of many of the
-theoretical works~\cite{}. 
+\emph{GradedBase} language extension of Granule. 
 
+We begin by extending the calculus of Section~\ref{sec:graded-base}, adding the
+synthesis of recursion, polymorphic user-defined algebraic data types, as well
+as the synthesis of recursive function definitions from polymorphic type
+schemes. Section~\ref{section:graded-base-typing} provides a full formal description 
+of our target language.
+
+We then provide a program synthesis calculus with an additive resource
+management scheme for this language in
+Section~\ref{section:graded-base-synthesis}, describing the rules in turn,
+introducing some additional features such as the ability to specify input-output
+examples for a desired synthesis problem (Section~\ref{sec:examples}), and
+additional post-synthesis refactoring
+procedures(Section~\ref{sec:graded-base-refactoring}). We then apply focusing to
+this calculus in Section~\ref{section:graded-base-focusing}, as we did in
+Chapter~\ref{chapter:core}, using this focused form as the basis of the
+implementation of our synthesis tool.
+
+The synthesis tool is evaluated We evaluate our implementation on a set of 46
+benchmarks (Section~\ref{section:graded-base-evaluation}), including several non-trivial
+programs which use algebraic data types and recursion.
+
+In Section~\ref{sec:linear-haskell}, to demonstrate the practicality and
+versatility of our approach, we apply our algorithm to synthesising programs in
+Haskell from type signatures that use GHC's \emph{linear types} extension.
 
 
 \section{A Fully Graded Target Language}
 \label{section:graded-base-typing}
 
-We now formally define our target language. This system extends the fully graded
-linear $\lambda$-calculus of Chapter~\ref{chapter:background}, which draws from
-the coeffect calculus of \citet{petricek2014coeffects}, Quantitative Type Theory
-(QTT) by \citet{McBride2016} and refined by \citet{quantitative-type-theory}
-(though we omit dependent types from our language), the calculus of
-\citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type
-theories~\citep{DBLP:conf/esop/MoonEO21}. Similar systems also form the basis of
-the core of the linear types extension to
-Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}. This calculus shares much
-in common with languages based on linear types, such as the graded
-monadic-comonadic calculus of~\citep{combining2016}, generalisations of Bounded
-Linear Logic~\citep{DBLP:conf/esop/BrunelGMZ14,DBLP:conf/esop/GhicaS14}, and
-Granule~\citep{DBLP:journals/pacmpl/OrchardLE19} in the original `linear base'
-form.
-
-Our language comprises the $\lambda$-calculus extended with grades and a
-graded necessity modality as well as arbitrary user-defined recursive algebraic
-data types (ADTs). The syntax of types is given by:
-
+We now formally define our target language, extending the fully graded
+$\lambda$-calculus of Chapter~\ref{chapter:background}. Our language comprises
+the $\lambda$-calculus extended with grades and a graded necessity modality,
+arbitrary user-defined recursive algebraic data types (ADTs), as well as rank-1
+polymorphism. The syntax of types is given by:
 \begin{align*}
     \hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
            [[ A ^ r -> B ]]
@@ -52,33 +60,26 @@ data types (ADTs). The syntax of types is given by:
       \mid X
       \mid \alpha
     {\small{\tag{\textit{types}}}}
-    \\[0em]
+\end{align*}
+\begin{align*}
     \hspace{-0.9em} K & ::=
            [[ Unit ]]
       \mid [[ Prod ]]
       \mid [[ Coprod ]]
     {\small{\tag{\textit{type constructors}}}}
-    \\[0em]
+\end{align*}
+\begin{align*}
     \hspace{-0.9em} \tau & ::=
            [[ Forall alpha : k . A  ]]
     {\small{\tag{\textit{type schemes}}}}
 \end{align*}
-
-The function space $[[ A ^ r -> B ]]$ annotates the input type with a
-\emph{grade} $[[ r ]]$ drawn from a pre-ordered semiring $(\mathcal{R}, {\ast},
-{1}, {+}, {0}, \sqsubseteq)$ parameterising the calculus (where pre-ordering
-also requires that $+$ and $\ast$ are monotonic with respect to $\sqsubseteq$).
-Type constructors $K$ include the unit, multiplicative linear product type, and
-linear coproduct type, which is also extended by names of user-defined ADTs in
-the implementation. The graded necessity modality $[[ [] r A ]]$ is similarly
-annotated by the grade $[[ r ]]$ being an element of the semiring. Recursive
-types $\mu X . A$ are equi-recursive (although we also provide explicit typing
-rules) with type recursion variables $X$. Data constructors and other top-level
-definitions are typed by type schemes $\tau$ (rank-1 polymorphic types), which
-bind a set of kind-annotated universally quantified type variables
-$\overline{\alpha : \kappa}$ à la ML~\citep{milner1978theory}. Subsequently,
+Recursive types $\mu X . A$ are equi-recursive (although we also provide
+explicit typing rules) with type recursion variables $X$. Data constructors and
+other top-level definitions are typed by type schemes $\tau$ (rank-1 polymorphic
+types), which bind a set of kind-annotated universally quantified type variables
+$\overline{\alpha : \kappa}$ à la ML~\citep{milner1978theory}. Thus,
 types may contain type variables $[[ a ]]$. Kinds $\kappa$ are standard, given
-by figure~\ref{figure:kinding}.
+by Figure~\ref{figure:kinding}.
 
 The syntax of terms is given by:
 
@@ -91,7 +92,8 @@ The syntax of terms is given by:
           \mid [[ Con t1 ... tn ]]
           \mid [[ case t of p1 -> t1 ; * ; pn -> tn  ]]
         {\small{\tag{\textit{terms} }}}
-                 \\
+\end{align*}
+\begin{align*}
         \hspace{-0.8em} [[ p ]] ::= \;
                & [[ x ]]
           \mid [[ _ ]]
@@ -99,12 +101,15 @@ The syntax of terms is given by:
           \mid [[ Con p1 ... pn ]]
         {\small{\tag{\textit{patterns}}}}
 \end{align*}
-Terms consist of a graded $\lambda$-calculus, a \textit{promotion} construct $[t]$ which introduces a graded modality explicitly, as well as data constructor introduction ($[[ Con t1 ... tn ]]$) and elimination via
- $\textbf{case}$ expressions with patterns, which are defined via the syntax of patterns $[[ p ]]$.
+Terms consist of a graded $\lambda$-calculus, a \textit{promotion} construct
+ $[t]$ which introduces a graded modality explicitly, as well as data
+ constructor introduction ($[[ Con t1 ... tn ]]$) and elimination via
+ $\textbf{case}$ expressions with patterns, which are defined via the syntax of
+ patterns $[[ p ]]$.
 
-Typing judgements have the form
-$[[  Sig ; G |- t : A ]]$ assigning a type $[[ A ]]$ to a term $ [[ t ]]$ under
-type variables $[[ Sig ]]$ and variable context $[[ G ]]$, given by:
+Typing judgements have the form $[[  Sig ; G |- t : A ]]$ assigning a type $[[ A
+]]$ to a term $ [[ t ]]$ under type variables $[[ Sig ]]$ and variable context
+$[[ G ]]$, given by:
 
 \begin{equation*}
   [[ D ]], [[ G ]] ::= \emptyset
@@ -113,105 +118,98 @@ type variables $[[ Sig ]]$ and variable context $[[ G ]]$, given by:
 \end{equation*}
 %
 That is, a context may be empty $\emptyset$ or extended with a \textit{graded}
-assumption $ [[ x : [A] r ]]$. Graded assumptions must be used in a
-way which adheres to the constraints of the grade $[[ r ]]$. Structural
-exchange is permitted, allowing a context to be arbitrarily reordered. A global
-context $[[ Defs ]]$ paramterises the system, containing top-level definitions
-and data constructors annotated with type schemes. A context of kind annotated
-type variables $[[ Sig ]]$ is used for kinding and when instantiating a type scheme
+assumption $ [[ x : [A] r ]]$. Graded assumptions must be used in a way which
+adheres to the constraints of the grade $[[ r ]]$. Structural exchange is
+permitted, allowing a context to be arbitrarily reordered. A global context $[[
+Defs ]]$ parametrises the system, containing top-level definitions and data
+constructors annotated with type schemes. A context of kind annotated type
+variables $[[ Sig ]]$ is used for kinding and when instantiating a type scheme
 from $[[ Defs ]]$. 
 
-Given a typing judgment $[[  Sig ; G |- t : A ]]$ we say that $t$ is both \emph{well typed}
-and \emph{well resourced} to highlight the role of grading in accounting for resource
-use via the semiring information.
-Another judgment types top-level terms (definitions) with polymorphic type schemes:
+Given a typing judgment $[[  Sig ; G |- t : A ]]$ we say that $t$ is both
+\emph{well typed} and \emph{well resourced} to highlight the role of grading in
+accounting for resource use via the semiring information. Another judgment types
+top-level terms (definitions) with polymorphic type schemes:
 \begin{align*}
 \tyTopP
 \end{align*}
-This rule takes the type scheme and adds its universally quantified type variables
-to $[[ Sig ]]$, where they can be used subsequently in the typing rules. The rule's premise
-then types the body at $A$, using the typing rules for terms
-of Figure~\ref{fig:typing}, whose rules help explain the meaning of
-the syntax with reference to their static semantics.
+This rule takes the type scheme and adds its universally quantified type
+variables to $[[ Sig ]]$, where they can be used subsequently in the typing
+rules. The rule's premise then types the body at $A$, using the typing rules for
+terms of Figure~\ref{fig:typing-graded-poly}, whose rules help explain the
+meaning of the syntax with reference to their static semantics.
 
 \begin{figure}[H]
     \begin{align*}
-    \begin{array}{c}
+      {{
+    \hspace{0em}\begin{array}{c}
         \kVar 
         \;\;\;
         \kBox 
-        \\\\
+        \\[1.25em]
         \kArrow
-        \\\\
+        \\[1.25em]
         \kApp 
-        \\\\
+        \\[1.25em]
         \kUnit
         \;\;\;
         \kProd 
-        \\\\
+        \\[1.25em]
         \kSum
-        \\\\
+        \\[1.25em]
         \kMuR
         \;\;\;
         \kMuL
     \end{array}
+      }}
     \end{align*}
-    \caption{Kinding rules for \textsc{GrLang}}
+    \caption{Kinding rules for the fully graded typing calculus}
     \label{figure:kinding}
 \end{figure}
 
 \begin{figure}[t]
-    \hspace{-0.5em}
     \begin{align*}
-    \hspace{-0.5em}
+    {\footnotesize{
+    \hspace{-2.5em}
     \begin{array}{c}
     \tyVarP
     \\[1.25em]
     \tyDefP
-    \\\\
+        \\[1.25em]
     \tyAbsP
     \;\;\;
     \tyAppP
-    \\\\
+        \\[1.25em]
     \tyPrP
     \;\;\;
     \tyApproxP
-    \\\\
+        \\[1.25em]
     \tyConP
-    \\\\
+        \\[1.25em]
     \tyCaseP
-    \\\\
+        \\[1.25em]
     \tyMuRP
     \;\;\;
     \tyMuLP
     \end{array}
+    }}
     \end{align*}
     \vspace{-1em}
-    \caption{Typing rules for fully graded typing calculus}
-    \label{fig:typing}
+    \caption{Typing rules for the fully graded polymorphic calculus}
+    \label{fig:typing-graded-poly}
     \vspace{-0.5em}
 \end{figure}
-
-Variables (rule \textsc{Var}) are typed in a context where the variable $x$ has
-grade $1$ denoting its single usage here. All other variable assumptions are
-given the grade of the $0$ semiring element (providing \emph{weakening}), using
-\textit{scalar multiplication} of contexts by a grade, given by
-definition~\ref{}.
-
 Top-level definitions are typed by the \textsc{Def} rule. The definition $x$
 must be present in the global definition context $[[ Defs ]]$, with the type
 scheme $[[  Forall alpha : k . A' ]]$. The type $[[ A ]]$ results from
 instantiating all of the universal variables to types via the judgment $[[ Sig
 |- inst A A' ]]$ in a standard way as in Algorithm W~\citep{milner1978theory}.
 
-Abstraction (\textsc{Abs}) captures the assumption's grade $[[ r ]]$ onto the
-function arrow in the conclusion, that is, abstraction binds a variable $[[x]]$
-which may be used in the body $[[t]]$ according to grade $[[ r ]]$. Application
-(\textsc{App}) makes use of context addition, given by definition~\ref{}, to combine the contexts used to
-type the two subterms in the premises of the application rule (providing
-\emph{contraction}).
+The graded $\lambda$-calculus fragment of our language remains mostly the same 
+as in Section~\ref{sec:graded-base}. However, the \textsc{Var} rule also checks 
+the kind of the assumption $x$'s type in the premise.  
 
-Recursion is typed via the $\mu_1$ rule and its inverse $\mu_2$, in a standard
+Recursion is typed via the $\mu_1$ and $\mu_2$ rules, in a standard
 way.
 
 Introduction and elimination of data constructors is given by
@@ -233,7 +231,8 @@ Figure~\ref{fig:pat-typing}.
 
 \begin{figure}[t]
     \begin{align*}
-    \begin{array}{c}
+      {\footnotesize{
+    \hspace{-3em}\begin{array}{c}
     \patWildP
     \\[1.25em]
     \patVarP
@@ -242,6 +241,7 @@ Figure~\ref{fig:pat-typing}.
     \\[1.25em]
     \patConP
     \end{array}
+      }}
     \end{align*}
     \vspace{-1.25em}
       \caption{Pattern typing rules of for the fully graded typing calculus}
@@ -276,13 +276,26 @@ a data constructor with the type $[[ A ^ r -> {[] r A} ]]$. We find it helpful
 to keep explicit modality introduction and elimination distinct from
 constructors, however, particularly with regard to synthesis.
 
+\subsection{Metatheory}
+Lastly we note that the fully graded system also enjoys admissibility of
+substitution~\citep{DBLP:journals/pacmpl/AbelB20}
+which is critical in type preservation proofs,
+and is needed in our proof of soundness for synthesis:
+%
+\begin{restatable}[Admissibility of substitution]{lemma}{subst}
+\label{lemma:substitution}
+Let $[[ D |- t' : A]]$, then:
+If $[[ {G, x : [A] r} , G' |- t : B]]$
+then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
+\end{restatable}
+
 
 \section{A Fully Graded Synthesis Calculus}
 \label{section:graded-base-synthesis}
 
 Having defined the target language, we define our synthesis calculus, which uses
 the \emph{additive} approach to resource management (see
-Section~\ref{sec:overview}), with judgements:
+Section~\ref{subsec:additive}), with judgements:
 %
 \begin{align*}
 [[ Sig; G |- A =>+ t ; D ]]
@@ -292,8 +305,8 @@ That is, given an input context $[[ G ]]$, for goal type $[[ A ]]$ we can
 synthesise the term $[[ t ]]$ with the output context $[[ D ]]$ describing how
 variables were used in $[[ t ]]$. As with the typing rules, top-level
 definitions and data constructors in scope are contained in a set $[[ Defs ]]$,
-which parameterises the system. $[[ Sig ]]$ is a context of kind-annotated type
-variables, which we elide in rules where it is simply passed inductively to the
+which parametrises the system. $[[ Sig ]]$ is a context of kind-annotated type
+variables, which we elide in rules where it is passed inductively to the
 premise(s). The graded context $[[ D ]]$ need not use all the variables in $[[ G
 ]]$, nor with exactly the same grades. Instead, the relationship between
 synthesis and typing is given by the central soundness result, which we state
@@ -302,7 +315,7 @@ up-front: % (the appendix provides the proof):
 
 \begin{restatable}[Soundness of synthesis]{theorem}{synthSound}
 \label{lemma:synthSound}
-Given a particular pre-ordered semiring $\mathcal{R}$ parameterising the calculi,
+Given a particular pre-ordered semiring $\mathcal{R}$ parametrising the calculi,
 then:
 \begin{enumerate}
 \item For all contexts $[[ G ]]$ and $[[ D ]]$, types $[[ A ]]$, terms $[[ t ]]$:
@@ -311,38 +324,6 @@ then:
 \end{align*}
 i.e. $[[ t ]]$ has type $[[ A ]]$
 under context $[[ D ]]$ whose grades capture variable use in $[[ t ]]$.
-
-
-\begin{figure}
-    \begin{align*}
-    \begin{array}{c}
-      \synDefP
-      \\\\
-      \synTopP
-      \\\\
-      \synVarP
-      \\\\
-      \synAbsP
-      \\\\
-      \synAppP
-      \\\\
-      \synConP
-      \\\\
-      \synCaseP
-      \\\\
-      \synBoxP
-      \\\\
-      \synUnboxP
-      \\\\
-      \synMuRP
-      \;\;\;\;
-      \synMuLP
-        \end{array}
-      \end{align*}
-    \caption{Synthesis rules for \textsc{GrLang}}
-    \end{figure}
-
-
 \item At the top-level,
 for all type schemes $[[ Forall alpha : k . A ]]$ and terms $[[ t ]]$ then:
 %
@@ -353,6 +334,37 @@ for all type schemes $[[ Forall alpha : k . A ]]$ and terms $[[ t ]]$ then:
 %
 \end{enumerate}
 \end{restatable}
+
+\begin{figure}
+    \begin{align*}
+      {\footnotesize{
+    \hspace{-3em}\begin{array}{c}
+      \synDefP
+      \\[1.25em]
+      \synTopP
+      \;\;\;
+      \synVarP
+      \\[1.25em]
+      \synAbsP
+      \\[1.25em]
+      \synAppP
+      \\[1.25em]
+      \synConP
+      \\[1.25em]
+      \synCaseP
+      \\[1.25em]
+      \synBoxP
+      \\[1.25em]
+      \synUnboxP
+      \\[1.25em]
+      \synMuRP
+      \;\;\;\;
+      \synMuLP
+        \end{array}
+      }}
+      \end{align*}
+    \caption{Collected rules of the fully graded synthesis calculus}
+    \end{figure}
 %
 The first part of soundness on its own does not guarantee that a synthesised
 program $t$ is \emph{well resourced}, i.e., the grades in $[[ D ]]$ may not be
@@ -367,7 +379,7 @@ i.e., for goal $A$, if $x$ has type $A$ in the context then we synthesis $x$ as
 the result program, regardless of the grades. A synthesis judgement such as this
 may be part of a larger derivation in which the grades eventually match, i.e.,
 this judgement forms part of a larger derivation which has a further
-subderivation in which $x$ is used again and thus the total usage for $x$ is
+sub-derivation in which $x$ is used again and thus the total usage for $x$ is
 eventually $2$ as prescribed by the input context. However, at the level of an
 individual judgement we do not guarantee that the synthesised term is
 well-resourced. A reasonable \emph{pruning condition} that could be used to
@@ -377,21 +389,21 @@ $[[ D' ]]$ (that might come from further on in the synthesis process) that
 `fills the gap' in resource use to produce $[[ D + D' ]]$ which is
 overapproximated by $[[ G ]]$. In this example, $[[ D' ]] = [[ x : [A] 1 ]]$
 would satisfy this constraint, explaining that there is some further possible
-single usage which will satisfy the incoming grade. However, previous work on
-graded linear types showed that excessive pruning at every step becomes too
-costly in a general setting~\citep{DBLP:conf/lopstr/HughesO20}. Instead, we
-apply such pruning more judiciously, only requiring that variable use is
-well-resourced at the point of synthesising binders. Therefore synthesised
-closed terms are always well-resourced (second part of the soundness theorem).
+single usage which will satisfy the incoming grade. However,
+Chapter~\ref{chapter:core} showed that excessive pruning at every step becomes
+too costly in a general setting. Instead, we apply such pruning more
+judiciously, only requiring that variable use is well-resourced at the point of
+synthesising binders. Therefore synthesised closed terms are always
+well-resourced (second part of the soundness theorem).
 
-Appendix~\ref{sec:soundness-proofs} provides the soundness proof, which in part
-resembles a translation from sequent calculus to natural deduction, but also
-with the management of grades between synthesis and type checking.
-
+Section~\ref{proofs:graded-base-soundness} of Appendix~\ref{appendix:proofs} provides the soundness
+proof, which in part resembles a translation from sequent calculus to natural
+deduction, but also with the management of grades between synthesis and type
+checking.
 
 For open terms, the implementation checks that from a user-given top-level goal
-$A$ for which $[[ G |- A =>+ t ; D ]]$ is derivable then $t$ is only provided as
-a valid (well-typed and well-resourced) synthesis result if $[[ D <<= G ]]$.
+$A$ for which $[[ G |- A => t ; D ]]$ is derivable then $t$ is only provided as
+a valid (well-typed and well-resourced) result if $[[ D <<= G ]]$.
 
 We next present the synthesis calculus in stages. Each type former of the core
 calculus (with the exception of type variables) has two corresponding synthesis
@@ -412,16 +424,9 @@ context $[[ D ]]$).
 % \iffalse
 The synthesis calculus is non-deterministic, i.e., for any $[[ G ]]$
 and $[[ A ]]$ there may be many possible $[[ t ]]$ and $[[ D ]]$ such
-that $[[ G |- A =>+ t ; D ]]$. Section~\ref{sec:focusing} explains how
-the core rules are `reorganised' into a deterministic system via the
-approach of focusing proof search.  
-% \fi
-%
-Whilst we largely present the approach here in abstract terms, via the synthesis judgements,
-we highlight some choices made in our implementation (e.g., heuristics
-applied in the algorithmic version of the rules).% into Granule.
+that $[[ G |- A =>+ t ; D ]]$. 
 
-\subsection{Core synthesis rules}
+\subsection{Core Synthesis Rules}
 \label{subsection:rules}
 \subsubsection{Top-level}
 We begin with the \textsc{TopLevel} rule, which is
@@ -447,7 +452,7 @@ Said another way, to synthesise the use of a variable $[[ x ]]$, we require that
 present in the input context $[[ G ]]$. The output context here then explains
 that only variable $x$ is used: it consists of the
 entirety of the input context $[[ G ]]$ scaled by grade $0$ (using
-definition~\ref{def:scalar}), extended with $[[x : [A] 1]]$, i.e. a single usage
+Definition~\ref{def:scalar}), extended with $[[x : [A] 1]]$, i.e. a single usage
 of $[[ x ]]$ as denoted by the $1$ element of the semiring.
 Maintaining this zeroed $[[ G ]]$ in the output context simplifies
 subsequent rules by avoiding excessive context membership checks.
@@ -462,7 +467,7 @@ else the variable is used, there is no way of knowing if such a usage
 will be permissible in the final synthesised program. However, it also
 reduces the amount of intermediate theorems that need solving, which
 can significantly effect performance as shown
-by~\citet{DBLP:conf/lopstr/HughesO20}, especially since the variable
+in Chapter~\ref{chapter:core}, especially since the variable
 rule is applied very frequently.
 
 \subsubsection{Functions}
@@ -493,7 +498,9 @@ input grade $q$ via the requirement that $[[ r ]] \sqsubseteq [[ q ]]$ i.e. that
 The counterpart to abstraction synthesises an
 application from the occurrence of a function in the context (a left rule):
 \begin{align*}
+  \hspace{-5em}{\footnotesize{
     \synApp
+  }}
 \end{align*}
 %
 Reading bottom up again, the input context contains an assumption with a function type
@@ -514,7 +521,7 @@ premises (though in the implementation the first premise is considered first):
         In the implementation, this synthesis step occurs only after
         a term $[[ t1 ]]$ is found for the goal $[[ C ]]$ as a heuristic
         to avoid possibly unnecessary work if no term can be synthesised for
-        $[[ C ]]$ anyway.
+        $[[ C ]]$.
 \end{enumerate}
 %
 In the conclusion of the rule, a term is synthesised
@@ -549,7 +556,7 @@ Programs can be synthesised from a polymorphic type scheme (the
 previously shown \textsc{TopLevel} rule), treating
 universally-quantified type variables at the top-level of our goal type
 as logical atoms which cannot be unified with and are only equal to
-themselves. The \textsc{Def} rule handles the synthesis of a \emph{use}
+themselves. The \textsc{Def} rule synthesises a \emph{use}
 of a top-level polymorphic function via instantiation:
 \begin{align*}
   \synDefP
@@ -579,13 +586,13 @@ modal goal type $[[ [] r A ]]$:
 \begin{align*}
   \synBox
 \end{align*}
-In the premise, we synthesise from $[[ A ]]$, yielding the subterm $[[ t ]]$ and
+In the premise, we synthesise from $[[ A ]]$, yielding the sub-term $[[ t ]]$ and
 an output context $[[ D ]]$. In the conclusion, $[[ D ]]$ is scaled by the grade
 of the goal type $[[ r ]]$: as $[[ [t] ]]$ must use $[[ t ]]$ as $[[ r ]]$
 requires.
 
 Grade elimination (\textit{unboxing}) takes place via
-pattern matching in \textbf{case}:
+pattern matching in a \textbf{case} statement:
 \begin{align*}
   \synUnbox
 \end{align*}
@@ -610,7 +617,9 @@ usage of $[[ x ]]$ in $[[ t ]]$.
 
 The synthesis of introduction forms for data types is by the \GRANULEdruleConName rule:
 \begin{align*}
+  \hspace{-1em}{\footnotesize{
     \synConP
+  }}
 \end{align*}
 where $D$ is the set of data constructors in global scope, e.g., coming from ADT
 definitions, including here products, unit, and coproducts with $(,) : A^1 \rightarrow B^1
@@ -637,7 +646,9 @@ data type $[[K {A Many}]]$, with various associated constraints on grades which
 require some explanation:
 %
 \begin{align*}
+  \hspace{-5em}{\footnotesize{
     \synCaseP
+  }}
 \end{align*}
 %
 where $1 \leq i \leq m$ is used to index the data constructors of which there
@@ -714,6 +725,7 @@ where in the following instead of using the above concrete grades we have used
 the abstract form of the rule (the two will be linked by equations after):
 %
 \begin{gather*}
+  \hspace{-3em}{\footnotesize{
 \inferrule*[right=Case]
 {
 \mathsf{Just} : \forall \overline{\alpha : \kappa} .  [[ A' ^ 1 -> Sum A' Unit ]] \in [[ Defines ]] \\ \\
@@ -728,6 +740,7 @@ the abstract form of the rule (the two will be linked by equations after):
 {
 [[ Sig ; x : [Sum Unit A] r, y : [ A ] s  |- A =>+ (case x of {Just z} -> z  ; {Nothing .} -> y) ; {x : [ {Sum Unit A} ] {(0 \/ 0)} + {s'}} , y : [A] {0 \/ 1} ]]
 }
+  }}
 \end{gather*}
 %
 Thus, to unify \eqref{eq:case-ex-branchOne}
@@ -745,7 +758,7 @@ where $[[ y ]] $ has grade $ [[IntervalSyn 0 1]]$ and $[[ x ]]$ has grade $[[
 \end{example}
 
 Deep pattern matching, over nested data constructors, is handled via inductively
-applying the \GRANULEdruleCaseName rule but with a post-synthesis refactoring
+applying the \GRANULEdruleCaseName\ rule but with a post-synthesis refactoring
 procedure substituting the pattern match of the inner case statement into the
 outer pattern match. For example, nested matching on pairs becomes a single
 $\textbf{case}$ with nested pattern matching, simplifying the program:
@@ -766,9 +779,13 @@ applications may take place arbitrarily, however, synthesising a recursive
 function definition application requires more care. To ensure that a synthesised
 programs terminates, we only permit synthesis of terms which are
 \textit{structurally recursive}, i.e., those which apply the recursive
-definition to a subterm of the function's inputs~\citep{oserathesis}.
+definition to a sub-term of the function's inputs~\citep{oserathesis}.
 
-Synthesis rules for recursive types ($\mu$-types) are fairly straightforward:\footnote{Though $\mu$ types are equi-recursive, we make explicit the synthesis rules here which maps more closely to the implementation where iterative deepening information needs to be tracked at the points of using  $\mu_\textsc{L}$ and  $\mu_\textsc{R}$.}
+Synthesis rules for recursive types ($\mu$-types) are
+straightforward:\footnote{Though $\mu$ types are equi-recursive, we make
+explicit the synthesis rules here which maps more closely to the implementation
+where iterative deepening information needs to be tracked at the points of using
+$\mu_\textsc{L}$ and  $\mu_\textsc{R}$.}
 \begin{align*}
   \begin{array}{cc}
   \synMuR & \synMuL
@@ -796,12 +813,12 @@ $\mu_\textsc{L}$ rule, followed by the $\textsc{C}_\textsc{L}$ rule on the
 by \textsc{Myth}~\citep{oserathesis}. Programs are synthesised with elimination
 (and introduction) forms of constructors restricted up to a given depth. If no
 program is synthesised within these bounds, then the depth limits are
-incremented. Combined with focusing (see Section~\ref{sec:focusing}), this
+incremented. Combined with focusing (see Section~\ref{section:graded-base-focusing}), this
 provides the basis for an efficient implementation of the above rules.
 
 % The benchmarks in Section~\ref{sec:evaluation} make heavy use of polymorphism.
 
-\section{Input-output examples}
+\section{Input-Output Examples}
 
 \label{sec:examples}
 
@@ -823,7 +840,7 @@ consistent with a code base as it evolves). Synthesis specifications are written
 in Granule directly above a program hole (written using \granin{?}) using the
 \granin{spec} keyword. The input-output examples are then listed per-line.
 \begin{granule}
-tail : forall a . List a %0..1 -> List a
+tail : forall { a : Type } . List a %0..1 -> List a
 spec
   tail (Cons 1 Nil) = Nil;
   tail (Cons 1 (Cons 2 Nil)) = Cons 2 Nil;
@@ -835,10 +852,9 @@ components that the user wishes the tool to make use of. These components
 comprise a list of in-scope definitions separated by commas. The user can choose
 to annotate each component with a grade, describing the required usage in the
 synthesised term. This defaults to a $1$ grade if not specified. For example,
-the specification for a function which returns the length of a list would look
-something like:
+the specification for a function which returns the length of a list might be:
 \begin{granule}
-length : forall a . List a %0..$\infty$. -> N
+length : forall { a : Type } . List a %0..$\infty$. -> N
 spec
     length Nil = Z;
     length (Cons 1 Nil) = S Z;
@@ -847,120 +863,19 @@ spec
 length = ?
 \end{granule}
 with the following resulting program produced by our synthesis algorithm (on average
-in about 400ms on a standard laptop, see Section~\ref{sec:evaluation} where this is one of the benchmarks for evaluation):
+in about 400ms on a standard laptop, see Section~\ref{section:graded-base-evaluation} where this is one of the benchmarks for evaluation):
 \begin{granule}
 length Nil = Z;
 length (Cons y z) = S (length z)
 \end{granule}
 
-% \subsection{Focusing proof search}
-% \label{sec:focusing}
+\section{Post-Synthesis Refactoring}
+\label{sec:graded-base-refactoring}
 
-% The calculus presented above serves as a starting point for implementing a
-% synthesis algorithm in Granule. However, the rules are highly
-% non-deterministic with regards the order in which they may be applied. For
-% example, after applying a (\GRANULEdruleSynAbsPName{})-rule, we may choose to apply any of
-% the elimination rules before applying an introduction rule for the
-% goal type. This leads to us exploring a large number of redundant search branches which can
-% be avoided through the application of a technique known as
-% \textit{focusing}~\citep{focusing}. Focusing is a tool from linear logic proof
-% theory based on the idea that some rules are invertible, i.e., whenever the
-% conclusion of the rule is derivable, then so are the premises. In other words, the order in which we apply invertible rules doesn't
-% matter. By fixing a particular ordering on the application of invertible rules, we eliminate much of the
-% non-determinism that arises from trying branches which differ only in the order in
-% which invertible rules are applied. We apply focusing to our calculus, which forms
-% the basis of our implementation. The full focusing versions of the rules from our calculus,
-% and their proof of soundness, can be found in the appendix.
-
-% Our implementation also relies on the use of backtracking proof search, leveraging
-% a monadic interface~\citep{logict}. A resulting synthesised program can be rejected
-% and synthesis required to produce an alternate result (what we call a \emph{retry})
-% via backtracking.
-
-\iffalse
-\subsection{Focusing proof search}
-\label{sec:focusing}
-The calculus presented above serves as a starting point for implementing a
-synthesis algorithm in Granule. However, at the moment the rules are highly
-non-deterministic with regards the order in which they may be applied. For
-example, after applying a $\rightarrow{R}$ rule, we may choose to apply any of
-the elimination rules before applying an introduction rule for the goal type.
-This leads to us exploring a large number of redundant search branches which can
-be avoided through the application of a technique known as
-\textit{focusing}~\citep{focusing}. Focusing is a tool from linear logic proof
-theory based on the idea that some rules are invertible, i.e., whenever the
-conclusion of the rule is derivable, then so are the premises. In other words,
-the order in which we apply invertible rules doesn't matter. By fixing a
-particular ordering on the application of invertible rules, we eliminate much of
-the non-determinism that arises from trying branches which differ only in the
-order in which invertible rules are applied. We briefly outline focusing and how
-we apply it.
-
-We begin by augmenting our previous synthesis judgement with an additional
-context:
-\begin{align*}
-\Gamma ; \Omega \vdash [[ A ]] \Rightarrow [[t ]]\ |\ \Delta
-\end{align*}
-Unlike $\Gamma$ and $\Delta$, $\Omega$ is an \textit{ordered} context. Using the
-terminology of Pfenning, we refer to rules that are invertible as
-\textit{asynchronous} and rules that are not as
-\textit{synchronous}~\citep{pfenninglecture}. The intuition here is that
-asynchronous rules can be applied eagerly, while the non-invertible synchronous
-rules require us to \textit{focus} on a particular part of the judgement: either
-on the assumption (if we are in an elimination rule) or on the goal (for an
-introduction rule). When focusing we apply a chain of synchronous rules, until
-we either reach a position where no rules may be applied (at which point the
-branch terminates), we have synthesised a term for our goal, or we have exposed
-an asynchronous connective at which point we switch back to applying
-asynchronous rules.
-
-We divide our synthesis rules into four categories, each with their own
-judgement form, refining the focusing judgement above with an arrow indicating
-which part of the judgement is currently in focus. An $\Uparrow$ indicates an
-asynchronous phase, and $\Downarrow$ a synchronous (focused) phase. The location
-of the arrow in the judgement indicates whether we are in an introduction or
-elimination phase:
-\begin{enumerate}
-  \item Right Async: $\rightarrow{\textsc{R}}$ rule with the judgement $\Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow t\ |\ \Delta $
-        \item Left Async:  $\textsc{C}_{\textsc{L}}$, $\Box_{\textsc{L}}$ rules with the judgement
-        $\Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta $
-        \item Right Sync:  $\textsc{C}_{\textsc{R}}$, $\Box_{\textsc{R}}$ rules with the judgement
-        $\Gamma ; \Omega \vdash A \Downarrow\ \Rightarrow t\ |\ \Delta $
-        \item Left Sync:   $\rightarrow{\textsc{L}}$ rule with the judgement $\Gamma ; \Omega \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta $
-\end{enumerate}
-We find it helpful to view focusing in terms of a finite state machine, as given
-in figure~\ref{fig:focusingFSM}. States comprise the four phases of focusing,
-plus two additional states, \textsc{Focus}, and \textsc{Var}. Edges are then the
-synthesis rules that direct the transition between focusing phases. The
-transitions between these focusing phases are handled by dedicated focusing
-rules for each transition. For the asynchronous phases, the
-$\Uparrow_{R}$/$\Uparrow_{L}$ handle the transition between right to left
-phases, and left to focusing phases, respectively. Conversely, the
-$\Downarrow{R}$ rule deals with the transition from a right synchronous phase
-back to a right asynchronous phase, with the $\Downarrow{L}$ rule likewise
-transitioning to a left asynchronous phase. Depending on the current phase of
-focusing, these rules consider the goal type, the assumption currently being
-focused on's type, the size of $\Omega$, and the current level of iterative
-deepening to decide whether to transition between focusing phases. For brevity,
-we elide the full details here.
-
-% We begin in an \textsc{Intro Async} phase, which breaks down the
-% goal type by applying the $\multimap_{\textsc{Right}}$ rule. In the
-% focused form of $\multimap_{\textsc{Right}}$, the assumption bound in the premise is added to
-% our focused context $\Omega$ rather than $\Gamma$. When $\multimap_{\textsc{Right}}$ can no longer be
-% applied, we transition to an Elim Async phase via the $\Uparrow_{\textsc{R}}$ rule:
-% The full calculus of focused synthesis rules can be found in appendix~\ref{sec:focusing-calculus}.
-\fi
-
-
-% \iffalse
-\section{Post-synthesis refactoring}
-\label{sec:refactoring}
-
-In section~\ref{}, we considered how our synthesised terms could be refactored
-into a more idiomatic programming style. Those same refactoring transformations
-apply to our calculus here, along with the additional treatment of case
-statements.
+In Section~\ref{sec:linear-base-refactoring}, we considered how our synthesised
+terms could be refactored into a more idiomatic programming style. Those same
+refactoring transformations also apply to our calculus here, along with the
+additional treatment relating to case statements.
 
 Recall that the $\textsc{C}_{L}$ binds a data constructor's patterns as a series
 of variables. Synthesising a pattern match over a nested data structure
@@ -995,13 +910,13 @@ is refactored into:
 \begin{granule}
 neg : Bool %1 -> Bool %1
 neg True = False;
-neg False = True;
+neg False = True
 \end{granule}
 The exception to this is where the scrutinee of a case statement is re-used
 inside one of the case branches, in which case refactoring would cause us to throw
 away the binding of the scrutinee's name and so it cannot be folded into the head pattern match, for example:
 \begin{granule}
-last : forall a . (List a) %0..$\infty$ -> Maybe a
+last : forall { a : Type } . (List a) %0..$\infty$ -> Maybe a
 spec
     last Nil = Nothing;
     last (Cons 1 Nil) = Just 1;
@@ -1013,168 +928,192 @@ last (Cons y z) =
       Nil -> Just y;
       Cons u v -> last z)
 \end{granule}
-
-% \subsection{Unboxing}
-% An unboxing term is synthesised via the $\Box_{L}$ rule as a case statement which pattern matches over a box pattern, yielding an assumption with the grade's usage. Such terms can also be refactored both into function equations and to avoid nested case statements. For example, we may write the $k$ combinator example above using an explicit graded modality:
-% \begin{granule}
-% k : forall {a b : Type} . a %1 -> b [0] -> a
-% k x y = case y of [z] -> x
-% \end{granule}
-% which we can then refactor into
-% \begin{granule}
-% k : forall {a b : Type} . a %1 -> b [0] -> a
-% k x [z] = z
-% \end{granule}
-% \fi
-
-
-
+A final minor refactoring procedure is to refactor a variable pattern into a
+wildcard pattern, in the case that the bound variable is not used inside the
+body of the case branch: 
+\begin{granule}
+throwAway : forall { a : Type } . a %0..$\infty$ -> ()
+throwAway x = ()
+\end{granule}
+is refactored into: 
+\begin{granule}
+throwAway : forall { a : Type } . a %0..$\infty$ -> ()
+throwAway _ = ()
+\end{granule}
+For such a scenario to occur a pattern must typed with a grade that is
+approximatable by 0.
 
 
-
-% \begin{align% *} \begin{array}{c}
-%     \inferrule*[right=Base]{ \quad }{ \Gamma ; \Delta \vdash M \Rightarrow \Delta ; M}
-%     \\\\
-%     \inferrule*[right=$\lambda$]{\Gamma; \Delta, p \vdash M \Rightarrow \Delta' ; N }{ \Gamma ; \Delta \vdash \lambda p . M \Rightarrow \Delta' ; N }
-%     \\\\
-%     \inferrule*[right=case]{ \Delta_{1} ; x ; p \vdash \Delta_{2} \\ \Gamma, y ; \Delta_{2} \vdash M \Rightarrow \Delta_{3} ; N }{ \Gamma ; \Delta_{1} \vdash (\textbf{case } x \textbf{ of } p_{1} \mapsto t_{1} ; ... ; p_{n} \mapsto t_{n}  )\ x \Rightarrow \Delta_{3} ; }
-%     \\\\
-%     \inferrule*[right=$\beta$-redex]{ \Delta_{1} ; x ; p \vdash \Delta_{2} \\ \Gamma, y ; \Delta_{2} \vdash M \Rightarrow \Delta_{3} ; N }{ \Gamma ; \Delta_{1} \vdash (\lambda  y . M)\ x \Rightarrow \Delta_{3} ; N }
-%     \\\\
-%     \inferrule*[right=Skip-$\beta$-redex]{\Gamma ; \Delta \vdash M \Rightarrow \Delta' ; N \\ x \in \Gamma }{ \Gamma ; \Delta \vdash (\lambda p . M) \ x \Rightarrow \Delta' ; (\lambda p . N) \ x }
-%     \end{array}
-%  \end{align*}
-%  \subsection*{Replace Patterns}
-% \begin{align*}
-%   \begin{array}{c}
-%     \inferrule*[right=PEmpty]{\quad}{\emptyset, x ; id ; p \vdash \emptyset}
-%     \\\\
-%     \inferrule*[right=PVar]{\Delta ; id ; p \vdash \Delta' \\ id = x}{\Delta, x ; id ; p \vdash \Delta', p}
-%     \\\\
-%     \inferrule*[right=PWild]{\Delta ; id ; p \vdash \Delta'}{\Delta, \_ ; id ; p \vdash \Delta', \_}
-%     \\\\
-%     \inferrule*[right=PBox$_{1}$]{\Delta, p ; id ; p_{s} \vdash \Delta', p'}{\Delta, [p] ; id ; [p_{s}] \vdash \Delta', [p']}
-%     \\\\
-%     \inferrule*[right=PBox$_{2}$]{\Delta, p ; id ; p_{s} \vdash \Delta', p' }{\Delta, [p] ; id ; p_{s} \vdash \Delta', [p']}
-%     \\\\
-%     \inferrule*[right=PCon]{\Delta, p_{1},..,p_{n} ; id ; p_{s} \vdash \Delta', p'_{1},..,p'_{n}  }{\Delta, C\ p_{1},..,p_{n} ; id ; p_{s} \vdash \Delta', C\ p'_{1},..,p'_{n}}
-%     \end{array}
-%  \end{align*}
-
-
-\section{Focusing the Fully Graded Synthesis Calculus}
+\section{Focusing}
 \label{section:graded-base-focusing}
+As in Chapter~\ref{chapter:core}, the synthesis rules as we have presented them
+thus far are far too non-deterministic to form the basis of an
+implementation through direct translation into code. Again, we apply the
+technique of focusing~\citep{focusing} to our calculus, yielding a
+\emph{focused} synthesis calculus which imposes an ordering on when rules may be
+applied at each stage of synthesis. 
+
+We have already outlined the principles behind focusing in
+Section~\ref{sec:linear-base-focusing}, and thus opt not to repeat ourselves here.
+Instead, we merely present the focused form of the fully graded synthesis
+calculus in
+Figures~\ref{fig:focus-graded-right-async},~\ref{fig:focus-graded-left-async},~\ref{fig:focus-graded-focus},~\ref{fig:focus-graded-right-sync}, and~\ref{fig:focus-graded-left-sync},
+and state that focusing is sound (Lemma~\ref{lemma:graded-focus-sound}). The
+proof of soundness of focusing can be found in Section~\ref{proof:focus-graded-sound} of
+Appendix~\ref{appendix:proofs}.
 
 
 
-\tikzset{
-->, % makes the edges directed
-node distance=5cm, % specifies the minimum distance between two nodes. Change if necessary.
-every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
-initial text=$ $, % sets the text that appears on the start arrow
-}
+% \tikzset{
+% ->, % makes the edges directed
+% node distance=5cm, % specifies the minimum distance between two nodes. Change if necessary.
+% every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+% initial text=$ $, % sets the text that appears on the start arrow
+% }
 
-\begin{figure}[h] % ’ht’ tells LaTeX to place the figure ’here’ or at the top of the page
-\centering % centers the figure
+% \begin{figure}[H] % ’ht’ tells LaTeX to place the figure ’here’ or at the top of the page
+% \centering 
 
-\scalebox{1.0}{
-\begin{tikzpicture}[every text node part/.style={align=center}]
-\node[state, initial, draw] (RA) {\textsc{Right Async} \\ $ \Gamma ; \Omega \vdash A \Uparrow \Rightarrow t | \Delta $};
-\node[state] at (10,  0) (LA) { \textsc{Left Async} \\ $\Gamma ; \Omega \Uparrow \vdash t \Rightarrow A | \Delta $};
-\node[state] at (5, -1) (F) { \textsc{Focus} \\ $\Gamma ; \emptyset \Uparrow \vdash t \Rightarrow A | \Delta $};
-\node[state] at (1, -6) (RS) { \textsc{Right Sync} \\ $\Gamma ; \emptyset \vdash t \Rightarrow A \Downarrow | \Delta $};
-\node[state] at (9, -6) (LS) { \textsc{Left Sync} \\ $\Gamma ; [[ x : [ B ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
-\node[state, accepting] at (5, -10) (V) { \textsc{Var} \\ $\Gamma ; [[ x : [ A ] r ]] \Downarrow \vdash t \Rightarrow A | \Delta $};
-\draw (RA) edge[loop above] node{$\rightarrow{\textsc{R}}$} (RA)
-(RA) edge[above, bend left] node{$\Uparrow_{\textsc{R}}$} (LA)
-(LA) edge[loop above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Box_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{R}$} (LA)
-% (LA) edge[loop right] node{$\Uparrow_{L}$} (LA)
-(LA) edge[above] node{$\textsc{C}_{\textsc{L}}$ \\ $\Uparrow_{\textsc{L}}$ \\ $\mu_\textsc{L}$} (F)
-% (LA) edge[right, bend left] node{$\Uparrow_{L}$} (F)
-(F) edge[left] node{$\textsc{F}_{\textsc{R}}$} (RS)
-(RS) edge[left] node{$\Downarrow_{\textsc{L}}$} (RA)
-(F) edge[right] node{$\textsc{F}_{\textsc{L}}$} (LS)
-(LS) edge[right] node{$\Downarrow_{\textsc{L}}$} (LA)
-(LS) edge[below] node{$\rightarrow{\textsc{L}}$} (RS)
-(LS) edge[loop below] node{$\rightarrow{\textsc{L}}$} (LS)
-(RS) edge[loop below] node{$\textsc{C}_{\textsc{R}}$ \\ $\Box_{\textsc{R}}$ \\ $\mu_\textsc{R}$} (RS)
-(LS) edge[left] node{$\textsc{Var}$} (V)
-;
-\end{tikzpicture}
-}
-\caption{Focusing State Machine}
-\label{fig:focusingFSM}
-\end{figure}
+% \scalebox{0.85}{
+% \begin{tikzpicture}[every text node part/.style={align=center}]
+% \node[state, initial, draw] (RA) {\textsc{Right Async} \\ $ \Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow t\ |\ \Delta $};
+% \node[state] at (10,  0) (LA) { \textsc{Left Async} \\ $\Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta $};
+% \node[state] at (5, -5) (F) { \textsc{Focus} \\ $\Gamma ; \emptyset \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta $};
+% \node[state] at (0, -10) (RS) { \textsc{Right Sync} \\ $\Gamma ; \emptyset \vdash A\ \Downarrow\ \Rightarrow t\ |\ \Delta $};
+% \node[state] at (10, -10) (LS) { \textsc{Left Sync} \\ $\Gamma ; [[ x : B ]] \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta $};
+% \node[state, accepting] at (5, -12) (V) { \textsc{Var} \\ $\Gamma ; [[ x : A ]] \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta $};
+% \draw (RA) edge[loop above] node{$\rightarrow_{\textsc{R}}$} (RA)
+% (RA) edge[above, bend left] node{$\Uparrow_{\textsc{R}}$} (LA)
+% (LA) edge[loop above] node{$\textsc{C}_{\textsc{L}}$, $\Box_{\textsc{L}}$, $\Uparrow_{\textsc{L}}$ } (LA)
+% % (LA) edge[loop right] node{$\Uparrow_{L}$} (LA)
+% (LA) edge[left, bend right] node{$\textsc{C}_{\textsc{L}}$, $\Box_{\textsc{L}}$, $\Uparrow_{\textsc{L}}$ \ \ \ \ \\  } (F)
+% % (LA) edge[right, bend left] node{$\Uparrow_{L}$} (F)
+% (F) edge[below, bend right] node{\ \ \ \  $\textsc{F}_{\textsc{R}}$} (RS)
+% (RS) edge[left, bend left] node{$\Downarrow_{\textsc{L}}$} (RA)
+% (F) edge[below, bend left] node{$\textsc{F}_{\textsc{L}}$\ \ } (LS)
+% (LS) edge[right, bend right] node{$\Downarrow_{\textsc{L}}$} (LA)
+% (LS) edge[below, bend right] node{$\rightarrow_{\textsc{L}}$} (RS)
+% (LS) edge[loop below] node{$\rightarrow_{\textsc{L}}$} (LS)
+% (RS) edge[loop below] node{$\textsc{C}_{\textsc{R}}$, $\Box_{\textsc{R}}$} (RS)
+% (LS) edge[below, bend left] node{\\[0.1em] \ \ \ $\textsc{Var}$ } (V)
+% ;
+% \end{tikzpicture}
+% }
+% \caption{Focusing state machine for the fully graded synthesis calculus}
+% \label{fig:focusingFSM-graded}
+% \end{figure}
 
 \begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
   For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$:
   \begin{align*}
-  \begin{array}{lll}
-   1.\ Right\ Async: & [[ Defs ; Sig; G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Defs ; Sig ; G ,, O |- A =>+ t ; D ]]\\
-   2.\ Left\ Async: & [[ Defs ; Sig; G ; O async |- B => t ; D ]] \quad &\implies \quad [[ Defs ; Sig  ; G ,, O |- B =>+ t ; D ]]\\
-   3.\ Right\ Sync: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ Defs ; Sig ; G |- A =>+ t ; D ]]\\
-   4.\ Left\ Sync: & [[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Defs ; Sig ; G, x : [ A] r |- B =>+ t ; D ]]\\
-   5.\ Focus\ Right: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ; Sig ;  G |- B =>+ t ; D ]]\\
-   6.\ Focus\ Left: & [[ Defs ; Sig ; G, x : [A] r ]] ; \emptyset \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ; Sig ; G, x : [A ] r |- B =>+ t ; D ]]
+    {\footnotesize{
+  \hspace{-3.5em}\begin{array}{lll}
+   1.\ Right\ Async: & [[ Defs ; Sig; G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G , O ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   2.\ Left\ Async: & [[ Defs ; Sig; G ; O async |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]]  ; [[ G , O ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   3.\ Right\ Sync: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   4.\ Left\ Sync: & [[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [ A] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   5.\ Focus\ Right: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ;  [[ G ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   6.\ Focus\ Left: & [[ Defs ]] ; [[ Sig ]]; [[ G ]], [[ x : [A] r ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [A ] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]
   \end{array}
+    }}
   \end{align*}
 i.e. $[[ t ]]$ has type $[[ A ]]$
 under context $[[ D ]]$,
 which contains variables with grades reflecting their use in $[[ t ]]$.
-The appendix provides the proof.
 %Appendix~\ref{sec:soundness-proofs} provides the proof.
+\label{lemma:graded-focus-sound}
   \end{restatable}
-% \fi
 
-\begin{align*}
-    \begin{array}{c}
-      \fsynAbsP
-      \\\\
-      \fsynTopP
-      \\\\
-      \fsynRAsyncTransP
-      \\\\
-      \fsynCaseP
-      \\\\
-      \fsynMuLP
-      \\\\
-      \fsynUnboxP
-      \\\\
-      \fsynLAsyncTransP
-      \\\\
-      \fsynFocusRP
-      \,
-      \fsynFocusLP
-      \\\\
-      \fsynConP
-    \\\\
-      \fsynBoxP
-    \end{array}
-    \end{align*}
-    
-    \begin{figure}[h]
+  \begin{figure}[H]
     \begin{align*}
-    \begin{array}{c}
-      \fsynMuRP
-      \,
-      \fsynRSyncTransP
-      \\\\
-      \fsynAppP
-      \\\\
-      \fsynVarP
-      \\\\
-      \fsynDefP
-      \\\\
-      \fsynLSyncTransP
-      \end{array}
-      \end{align*}
-      \caption{Focusing synthesis calculus for \textsc{GrLang}}
-    \end{figure}
+      {\footnotesize{
+  \begin{array}{c}
+      \fsynAbsP
+      \\[1.25em]
+      \fsynTopP
+      \\[1.25em]
+      \fsynRAsyncTransP
+    \end{array}
+      }}
+    \end{align*}
+    \caption{Right Async rules of the focused fully graded synthesis calculus}
+    \label{fig:focus-graded-right-async}
+  \end{figure}
 
-\section{Evaluation}
+\begin{figure}[H]
+  \begin{align*}
+  {\footnotesize{
+\hspace{-4em}\begin{array}{c}
+      \fsynCaseP
+      \\[1.25em]
+      \fsynMuLP
+      \\[1.25em]
+      \fsynUnboxP
+      \\[1.25em]
+      \fsynLAsyncTransP
+  \end{array}
+  }}
+  \end{align*}
+  \caption{Left Async rules of the focused fully graded synthesis calculus}
+  \label{fig:focus-graded-left-async}
+\end{figure}
+
+\begin{figure}[H]
+  \begin{align*}
+    {\footnotesize{
+\begin{array}{c}
+      \fsynFocusRP
+      \\[1.25em]
+      \fsynFocusLP
+  \end{array}
+    }}
+  \end{align*}
+  \caption{Focus rules of the focused fully graded synthesis calculus}
+  \label{fig:focus-graded-focus}
+\end{figure}
+
+\begin{figure}[H]
+  \begin{align*}
+    {\footnotesize{
+\begin{array}{c}
+      \fsynConP
+      \\[1.25em]
+      \fsynBoxP
+      \\[1.25em]
+      \fsynMuRP
+      \\[1.25em]
+      \fsynRSyncTransP
+  \end{array}
+    }}
+  \end{align*}
+  \caption{Right Sync rules of the focused fully graded synthesis calculus}
+  \label{fig:focus-graded-right-sync}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{align*}
+    {\footnotesize{
+\hspace{-3em}\begin{array}{c}
+      \fsynAppP
+      \\[1.25em]
+      \fsynVarP
+      \\[1.25em]
+      \fsynDefP
+      \\[1.25em]
+      \fsynLSyncTransP
+  \end{array}
+    }}
+  \end{align*}
+  \caption{Left Sync, Var, and Def rules of the focused fully graded synthesis calculus}
+  \label{fig:focus-graded-left-sync}
+\end{figure}
+
+
+\section{Evaluating the Synthesis Calculus}
 \label{section:graded-base-evaluation}
 
-In evaluating our approach and tool, we made the following hypotheses:
+In evaluating our fully graded synthesis approach and tool, we made the following hypotheses:
 \begin{enumerate}
 \item[H1.] (\textbf{Expressivity; less consultation}) The use of grades in synthesis results in a synthesised program
   that is more likely to have the behaviour desired by the user; the user needs to request
@@ -1198,15 +1137,17 @@ In evaluating our approach and tool, we made the following hypotheses:
 
 \subsection{Methodology}
 %
-To evaluate our approach, we collected a suite of benchmarks
-comprising graded type signatures for common transformations on data
-structures such as lists, streams, booleans, option (`maybe')
-types, unary natural numbers, and binary trees. We draw many of these
-from the benchmark suite of the \textsc{Myth} synthesis
-tool~\citep{oseraMYTH1}.  Benchmarks are divided into classes based
-on the main data type, with an additional category of miscellaneous
-programs. The type schemes for the full suite of benchmarks can be found
-in Appendix~\ref{sec:benchmark-problems}.
+To evaluate our approach, we collected a suite of benchmarks comprising graded
+type signatures for common transformations on data structures such as lists,
+streams, booleans, option (`maybe') types, unary natural numbers, and binary
+trees. We draw many of these from the benchmark suite of the \textsc{Myth}
+synthesis tool~\citep{oseraMYTH1}.  Benchmarks are divided into classes based on
+the main data type, with an additional category of miscellaneous programs. The
+type schemes for the full suite of benchmarks can be found in
+Table~\ref{tab:problems} while~\ref{tab:datatypes} lists the data types used by the 
+benchmarking problems. The complete synthesised programs, including examples
+used and synthesis contexts can be found in Section~\ref{sec:graded-benchmarks}
+of Appendix~\ref{appendix:benchmarks}. 
 
 To compare, in various ways, our grade-and-type-directed
 synthesis to traditional type-directed synthesis, each benchmark
@@ -1226,7 +1167,7 @@ retries $N$ needed to arrive at a well-resourced answer by
 type checking the output programs against
 the original graded type signature, retrying if the program is not well-typed
 (essentially, not well-resourced). This provides a means to check whether a program
-may be as intended without requiring input from a user. In each
+may be as intended without requiring user input. In each
 case we also compared whether the resulting programs from synthesis via graded-and-type directed
 vs. type-directed with retries (on non-well-resourced outputs) were equivalent.
 
@@ -1248,8 +1189,8 @@ is likely to be largely uninformative due to differences in
 implementation approach obscuring any meaningful comparison. Thus, we
 instead compare timings for the graded approach and de-graded approach
 within Granule. We also record the number of search paths taken (over
-all retries) to assess the level of pruning in the graded vs
-non-graded case.
+all retries) to assess the level of pruning in graded vs
+non-graded.
 
 % In which
 % case, for each benchmark we need a model solution against which we can compare.
@@ -1270,17 +1211,17 @@ the mean after 10 trials for timing data. Benchmarking was carried out using
 version 4.12.1 of Z3 on an M1 MacBook Air with 16 GB of RAM.
 A timeout limit of 10 seconds was set for synthesis.
 
-\subsection{Results and analysis}
+\subsection{Results and Analysis}
 
 
-Table~\ref{tab:results} records the results comparing grade-and-type
+Table~\ref{tab:results-graded} records the results comparing grade-and-type
 synthesis vs. the Cartesian (de-graded) type-directed synthesis.  The
 left column gives the benchmark name, number of top-level definitions
 in scope that can be used as components (size of the synthesis
 context) labelled $\textsc{Ctxt}$, and the minimum number of examples
 needed (\#/Exs) to synthesise the Graded and Cartesian programs. In
 the Cartesian setting, where grade information is not available, if we
-forgo type-checking a candidate program against the original graded
+forgo type checking a candidate program against the original graded
 type then additional input-output examples are required to provide a
 strong enough specification such that the correct program is
 synthesised (see H3). The number of additional examples is given in
@@ -1290,48 +1231,51 @@ examples to synthesise a program in the Cartesian setting.
 Each subsequent results column records: whether a program was synthesised
 successfully \success{} or not \fail{} (due to timeout or no solution found),
 the mean synthesis time ($\mu{}T$) or if timeout occurred, and
-the number branching paths (Paths) explored in the synthesis search space.
+the number branching paths (Paths) explored in the search space.
 
-The first results column (Graded) contains the results for graded synthesis.
-The second results column (Cartesian + Graded type-check) contains the
-results for synthesising a program in the Cartesian (de-graded) setting, using
-the same examples set as the Graded column, and recording the number of retries
-(consultations of the type-checker) \textsc{N} needed to reach a well-resourced program.
-In all cases, this resulting program in the Cartesian column was equivalent to that generated by
-the graded synthesis, none of which needed any retries (i.e., implicitly $N = 0$ for
-graded synthesis). H1 is confirmed by the fact that $N$ is greater than $0$ in
-29 out of 46 benchmarks (60\%), i.e., the Cartesian case does not synthesis the
-correct program first time and needs multiple retries to reach a well-resource
-program, with a mean of $19.60$ retries and a median of $4$ retries.
+The first results column (Graded) contains the results for graded synthesis. The
+second results column (Cartesian + Graded type-check) contains the results for
+synthesising a program in the Cartesian (de-graded) setting, using the same
+examples set as the Graded column, and recording the number of retries
+(consultations of the type-checker) \textsc{N} needed to reach a well-resourced
+program. In all cases, this resulting program in the Cartesian column was
+equivalent to that generated by the graded synthesis, none of which needed any
+retries (i.e., implicitly $N = 0$ for graded synthesis). H1 is confirmed by the
+fact that $N$ is greater than $0$ in 29 out of 46 benchmarks (60\%), i.e., the
+Cartesian case does not synthesis the correct program first time and needs
+multiple retries to reach a well-resource program, with a mean of $19.60$
+retries and a median of $4$ retries.
 
-For each row, we highlight the column which synthesised a result the
-fastest in $\highlight{\text{blue}}$. The results show that in $17$ of the $46$ benchmarks (37\%)
-the graded approach out-performed non-graded synthesis. This contradicts
+For each row, we highlight the column which synthesised a result the fastest in
+$\highlight{\text{yellow}}$. The results show that in $17$ of the $46$ benchmarks
+(37\%) the graded approach out-performed non-graded synthesis. This contradicts
 hypothesis 3 somewhat: whilst type-directed synthesis often requires multiple
 retries (versus no retries) it still outperforms the graded equivalent. This
-appears to be due to the cost of our SMT solving procedure which must first compile
-a first-order theorem on grades into the SMT-lib file format, start up Z3, and then run the solver.
-Considerable amounts of system overhead are incurred in this procedure. A more
-efficient implementation calling Z3 directly (e.g., via a dynamic library call) may
-give more favourable results here. However, H3 is still somewhat supported: the cases in
-which the graded does outperform the Cartesian are those which involve
-considerable complexity in their use of grades, such as \granin{stutter},
-\granin{inc}, and \granin{bind} for lists, as well as \granin{sum} for both
-lists and trees. In each of these cases, the Cartesian column is significantly
-slower, even timing out for \granin{stutter}; this shows the power of the graded
-approach. Furthermore, we highlight the column with the smallest number of synthesis paths explored in 
-$\newhighlight{\text{yellow}}$, observing that the number of paths in the graded case
-is always the same or less than that those in the Cartesian+graded type check case (apart from Tree stutter). 
+appears to be due to the cost of our SMT solving procedure which must first
+compile a first-order theorem on grades into the SMT-lib file format, start up
+Z3, and then run the solver. Considerable amounts of system overhead are
+incurred in this procedure. A more efficient implementation calling Z3 directly
+(e.g., via a dynamic library call) may give more favourable results here.
+However, H3 is still somewhat supported: the cases in which the graded does
+outperform the Cartesian are those which involve considerable complexity in
+their use of grades, such as \granin{stutter}, \granin{inc}, and \granin{bind}
+for lists, as well as \granin{sum} for both lists and trees. In each of these
+cases, the Cartesian column is significantly slower, even timing out for
+\granin{stutter}; this shows the power of the graded approach. Furthermore, we
+highlight the column with the smallest number of synthesis paths explored in
+$\newhighlight{\text{blue}}$, observing that the number of paths in the graded
+case is always the same or less than that those in the Cartesian+graded type
+check case (apart from Tree stutter). 
 
-Interestingly the paths explored are sometimes the same because we use backtracking
-search in the Cartesian+Graded type check case where, if an output program fails to
-type check against the graded type signature, the search backtracks rather than
-starting again.
+Interestingly the paths explored are sometimes the same because we use
+backtracking search in the Cartesian+Graded type check case where, if an output
+program fails to type check against the graded type signature, the search
+backtracks rather than starting again.
 
-Confirming H2, we find that for the non-graded setting without graded type-checking,
-further examples are required to synthesise the same program as the graded in
-$20$ out of $46$ (43\%) cases. In these cases, an average of $1.25$ additional
-examples was required.
+Confirming H2, we find that for the non-graded setting without graded
+type checking, further examples are required to synthesise the same program as
+the graded in $20$ out of $46$ (43\%) cases. In these cases, an average of
+$1.25$ additional examples was required.
 
 \begin{table}[H]
     \begin{center}
@@ -1357,6 +1301,7 @@ examples was required.
         \end{tabular}
     \end{center}
 \caption{Data types used in synthesis benchmarking problems}
+\label{tab:datatypes}
 \end{table}
 
 \label{app:list-of-types}
@@ -1364,7 +1309,7 @@ examples was required.
                 {\footnotesize{
                 \begin{center}
                 \setlength{\tabcolsep}{0.3em}
-                \scalebox{1}{
+                \scalebox{0.9}{
                 \begin{tabular}{p{1.25em}c|l}
                 \hline \multicolumn{2}{c}{{Problem}} & \multicolumn{1}{|c}{Type Scheme} \\ \hline
                     \hline \multirow{19}{*}{{\rotatebox{90}{\textbf{List}}}} &
@@ -1424,7 +1369,6 @@ examples was required.
                 \end{center}}}
                 \caption{Type schemes for synthesis benchmarking results}
                 \label{tab:problems}
-                \vspace{-2.5em}
                 \end{table}
 
 
@@ -1729,7 +1673,7 @@ examples was required.
                 \end{tabular}}
                 \end{center}}}
                 \caption{Results. $\mu{T}$ in \emph{ms} to 2 d.p. with standard sample error in brackets}
-                \label{tab:results}
+                \label{tab:results-graded}
                 \vspace{-2.5em}
                 \end{table}
 
@@ -1791,13 +1735,14 @@ spec
 stutter = ?
 \end{granule}
 %
-This is a function which takes a list of values of type \granin{a}, where each element in the list is explicitly graded by
-\granin{2}, indicating that each element must be used twice. The return type of
-\granin{stutter} is a list of type \granin{a}. The argument list itself
-must be used at least once with potential usage extending up to infinity,
-suggesting that some recursion will be necessary in the program. This is further
-emphasised by the \granin{spec}, which states that we can use the definition of
-\granin{stutter} inside the function body in an unrestricted way. From this, we synthesise the program:
+This is a function which takes a list of values of type \granin{a}, where each
+element in the list is explicitly graded by \granin{2}, indicating that each
+element must be used twice. The return type of \granin{stutter} is a list of
+type \granin{a}. The argument list itself must be used at least once with
+potential usage extending up to infinity, suggesting that some recursion will be
+necessary in the program. This is further emphasised by the \granin{spec}, which
+states that we can use the definition of \granin{stutter} inside the function
+body in an unrestricted way. From this, we synthesise:
 %
 \begin{granule}
 stutter Nil = Nil;
@@ -1819,7 +1764,7 @@ stutter (Node y [v] u) = ((Node (stutter y)) (v, v)) (stutter u)
 Lastly, we compare between the number of examples required by Granule (using grades)
 and the \textsc{Myth} program synthesis tool (based on pruning by examples).
 We take the cases from our benchmark set which have an equivalent in the \textsc{Myth} benchmark suite~\citep{oseraMYTH1}.
-Table \ref{tab:example-comp} shows the number of input-output examples used in Granule,
+Table \ref{tab:example-comp} shows the number of examples used in Granule,
 and the number required for the equivalent \textsc{Myth} case. In both Granule and \textsc{Myth} this number represents
 the minimal number of examples required to synthesise the correct program.
 
@@ -1859,7 +1804,6 @@ the minimal number of examples required to synthesise the correct program.
 \vspace{0.5em}
 \caption{Number of examples needed for synthesis, comparing Granule vs. \textsc{Myth}}
 \label{tab:example-comp}
-\vspace{-2.5em}
 \end{table}
 
 
@@ -1869,44 +1813,108 @@ program in synthesis. The disparity in the number of examples required is quite 
 Granule. This shows the pruning power of graded information in synthesis, confirming H2.
 
 
-\section{Synthesis of Linear Haskell programs}
+\section{Synthesis of Linear Haskell Programs}
 \label{sec:linear-haskell}
 
-As part of a growing trend of resourceful types being added to more mainstream languages,
-Haskell has introduced support for linear types as of GHC 9, using an underlying
-graded type system which can be enabled as a language extension of GHC's existing type
-system~\citep{DBLP:journals/pacmpl/BernardyBNJS18} (the \haskin{LinearType} extension). This system is closely related to Granule, but limited only to one semiring for its grades.
-This however presents an exciting opportunity: can we leverage our tool to synthesise (linear) Haskell programs?
+As part of a growing trend of resourceful types being added to more mainstream
+languages, Haskell has introduced support for linear types as of GHC 9, using an
+underlying graded type system which can be enabled as a language extension of
+GHC's existing type system~\citep{DBLP:journals/pacmpl/BernardyBNJS18} (the
+\haskin{LinearType} extension). This system is closely related to Granule, but
+limited only to one semiring for its grades. This however presents an exciting
+opportunity: can we leverage our tool to synthesise (linear) Haskell programs?
 
-Like Granule, grades in Linear Haskell can be expressed as ``multiplicities'' on function types: \haskin{a \%r -> b}.
-The multiplicity $r$ can be either $1$ or $\omega$ (or polymorphic), with $1$
-denoting linear usage (also written as \haskin{'One}) and $\omega$ for
-(\haskin{'Many}) unrestricted usage. Likewise, in Granule, we can model linear
-types using the $0$-$1$-$\omega$ semiring (see example \ref{example:01omega}) \citep{hughes:lirmm-03271465}.
+Like Granule, grades in Linear Haskell can be expressed as ``multiplicities'' on
+function types: \haskin{a \%r -> b}. The multiplicity $r$ can be either $1$ or
+$\omega$ (or polymorphic), with $1$ denoting linear usage (also written as
+\haskin{'One}) and $\omega$ for (\haskin{'Many}) unrestricted usage. Likewise,
+in Granule, we can model linear types using the $0$-$1$-$\omega$ semiring
+\citep{hughes:lirmm-03271465}.
 
 Synthesising Linear Haskell programs then simply becomes a task of parsing a
 Haskell type into a Granule equivalent, synthesising a term from this, and
-compiling the synthesised term back into Haskell. The close syntactic correspondence between
-Granule and Haskell makes this translation straightforward.
+compiling the synthesised term back into Haskell. The close syntactic
+correspondence between Granule and Haskell makes this translation
+straightforward.
 
-Our implementation includes a prototype synthesis tool using this approach.
-A synthesis problem takes the form of a Linear Haskell program with a hole, e.g.
+Our implementation includes a prototype synthesis tool using this approach. A
+synthesis problem takes the form of a Linear Haskell program with a hole, e.g.
 \begin{haskell}
 {-# LANGUAGE LinearTypes #-}
 swap :: (a, b) %One -> (b, a)
 swap = _
 \end{haskell}
-We invoke the synthesis tool with \haskin{gr --linear-haskell swap.hs} which produces:
+We invoke the tool with \haskin{gr --linear-haskell swap.hs} producing:
 \begin{haskell}
 swap (z, y) = (y, z)
 \end{haskell}
 %
-Users may make use of lists, tuples, \haskin{Maybe} and \haskin{Either} data types from Haskell's prelude, as well
-as user-defined ADTs. Further integration of the tool, as well as support for additional Haskell features
-such as GADTs is left as future work.
+Haskell tuples are converted into a Granule data type, generated based on the
+tuple's arity. This data type is given unique name based on this size, e.g.
+\granin{,4} for a tuple of arity 4. Using the special character \granin{,} in
+the constructor name prevents name clashes with other in-scope data
+constructors, as this character would not be permitted in a typical user-defined
+constructor. 
+
+Users may make use of lists, tuples, \haskin{Maybe} and \haskin{Either} data
+types from Haskell's prelude, as well as user-defined ADTs. Further integration
+of the tool, as well as support for additional Haskell features such as GADTs is
+left as future work.
+
+This tool can be especially useful as a programming aid when writing linear
+versions of Haskell libraries. To conclude this section, we showcase some of the
+programs synthesised via our Linear Haskell tool with the goal of writing a
+Linear Haskell library for Haskell's \haskin{Maybe} data type. 
+
+\vspace{1em}
+\begin{haskell}
+{-# LANGUAGE LinearTypes #-}
+
+maybe :: b %Many -> (a %One -> b) %Many -> (Maybe a) %One -> b
+maybe x y Nothing = x
+maybe x y (Just u) = y u
+
+bind :: Maybe a %One -> (a %One -> Maybe b) %Many -> Maybe b
+bind Nothing y = Nothing
+bind (Just z) y = y z
+
+map :: (a %One -> b) %Many -> Maybe a %One -> Maybe b
+map x Nothing = Nothing
+map x (Just z) = Just (x z)
+
+maybeToList :: Maybe a %One -> [a]
+maybeToList Nothing = []
+maybeToList (Just y) = [y]
+
+fromMaybe :: Maybe a %One -> a %Many -> a
+fromMaybe Nothing y = y
+fromMaybe (Just z) y = z
+
+\end{haskell}
 
 
 \section{Conclusion}
 \label{section:graded-base-conclusion}
 
-In this chapter we presented a program synthesis tool for 
+In this chapter we presented a synthesis calculus for a feature-rich type system
+based on the fully graded $\lambda$-calculus of section~\ref{sec:graded-base},
+which complements our graded linear system of Chapter~\ref{chapter:core} to
+allow us to synthesise programs for the major approaches to graded type systems.
+We found through our experimental evaluation that synthesising programs in this
+calculus requires the exploration of fewer synthesis paths when using the
+information provided by grades to prune the search space of candidate programs.
+In terms of pure speed, un-graded type-directed program synthesis outperformed
+our implementation, largely due to the overhead of discharging constraints to an
+SMT solver. 
+
+This discrepancy in speed necessitates that our synthesis tool seek a more
+efficient means of interfacing with the solver. However, the theoretical
+advantage of grade-based pruning remains clear: the search space was the same or
+reduced in all but one of our benchmarking examples in
+Table~\ref{tab:results-graded}. In the next chapter, we conclude our synthesis
+journey with some future directions that this work might take, including how to
+improve interaction with the solver. 
+
+
+
+% Emphasise point about fewer paths 

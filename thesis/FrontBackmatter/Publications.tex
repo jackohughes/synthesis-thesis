@@ -6,9 +6,23 @@
 
 In this thesis, the content of some chapters is formed from
 previously published papers:
-\begin{refsection}[ownpubs]
-    \small
-    \nocite{*} % is local to to the enclosing refsection
-    \printbibliography[heading=none]
-\end{refsection}
+\begin{itemize}
+    \item \citet{DBLP:conf/lopstr/HughesO20} Resourceful Program Synthesis from
+    Graded Linear Types. In Logic-Based Program Synthesis and Transformation -
+    30th International Symposium, pp. 151-170. 
+    
+    This paper adapts the resource management techniques of previous work for
+    Linear Logic proof search to graded types, and presents two synthesis
+    calculi based on these approaches. This paper constitutes the majority of
+    Chapter~\ref{chapter:core}, where a program synthesis tool for a linear and
+    graded type system is introduced. 
 
+    \item \citet{DBLP:journals/corr/abs-2112-14966} Deriving Distributive Laws
+    for Graded Linear Types. In 6th edition of the International Workshop on
+    Linearity and of the 4th edition of the International Workshop on Trends in
+    Linear Logic and its Applications. 
+
+    The majority of Chapter~\ref{chapter:deriving}, which discusses an approach
+    for automatically deriving certain graded programs in Granule as an
+    alternative to synthesis, is derived from this paper. 
+\end{itemize}

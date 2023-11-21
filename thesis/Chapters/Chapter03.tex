@@ -1,20 +1,20 @@
-\chapter{A core synthesis calculus}
+\chapter{A Core Synthesis Calculus}
 \label{chapter:core}
 We begin our first exploration into program synthesis with a system for the
-graded linear $\lambda$-calculus of section~\ref{sec:linear-base}. The primary
+graded linear $\lambda$-calculus of Section~\ref{sec:linear-base}. The primary
 aim of this chapter is to introduce the core concepts of type-directed program
 synthesis in a resourceful setting, in particular, the problem of
-\textit{resource mangement}. We therefore prioritise simplicity over
+\textit{resource management}. We therefore prioritise simplicity over
 expressivity for our target language, with the core typing calculus of
-section~\ref{sec:linear-base} forming an ideal candidate.
+Section~\ref{sec:linear-base} forming an ideal candidate.
 
-As mentioned in chapter~\ref{chapter:intro}, type-directed program synthesis can
+As mentioned in Chapter~\ref{chapter:intro}, type-directed program synthesis can
 be framed as an inversion of type checking. In type checking, we have a
 judgement of the form: 
 \begin{align*}
     \Gamma \vdash t : A {\small{\tag{type checking}}}
 \end{align*}
-whch states that under some context of assumptions $\Gamma$ we can assign the
+which states that under some context of assumptions $\Gamma$ we can assign the
 program term $t$ the type $A$. Here, $\Gamma$ and $t$ constitute the ``inputs''
 to the judgement, while the type $A$ forms the ``output''. Synthesis inverts
 this judgement form, leaving us with a \textit{synthesis judgement} form:
@@ -36,15 +36,14 @@ that the assumptions in $\Gamma$ are used according to their resource
 constraints in the synthesised term $t$? I.e. if $x : A$ is a linear assumption in $\Gamma$
 that is used in some way to construct $t$, then the synthesis algorithm must synthesise 
 a $t$ which uses $x$ exactly once. Likewise, if $x :_r A$ is a graded assumption, then 
-it must be used in $t$ in a way which satisifise its grade $r$.
+it must be used in $t$ in a way which satisfies its grade $r$.
 
 This problem has been explored before in the context of automated theorem
 proving for linear logic, and has been termed the \textit{resource management
 problem}. We describe this problem in detail in
-section~\ref{sec:resource-management} and propose two candidate solutions,
+Section~\ref{sec:resource-management} and propose two candidate solutions,
 basing our approach on the \textit{input-output context management} model
-described by Hodas and Miller~\cite{HODAS1994327}, and further developed by
-Cervesato et al.~\cite{CERVESATO2000133}. 
+described by~\citet{HODAS1994327}, and further developed by~\citet{CERVESATO2000133}. 
 
 The challenges posed by ensuring the well-resourcedness of synthesised programs
 are most exemplified by the inclusion in our target language of multiplicative
@@ -52,18 +51,18 @@ conjunction, and additive disjunction. Therefore, prior to fully describing the
 problem of resource management and our proposed solutions, we first expand our
 target language with multiplicative product ($\otimes$), and unit types ($1$),
 as well as disjunctive sum types ($\oplus$). These extensions are detailed in
-section~\ref{sec:linear-base-calculus}, which will be the target language of the
+Section~\ref{sec:linear-base-calculus}, which will be the target language of the
 synthesis calculi of this chapter. As well as helping to conceptualise the
-challenges posed by resourceful program synthesis, these have the added benefit
+challenges posed by program synthesis in a resourceful setting, these have the added benefit
 of allowing the synthesis of more expressive programs, without introducing
-uneccessary complexity at this stage.
+unnecessary complexity at this stage.
 
 Having outlined both a suitable target language and two approaches to dealing
 with the issue of resource management, we then present two synthesis calculi in
-section~\ref{sec:linear-base-synthesis} as augmented inversions of the typing
-rules. Each calculus is based on a one of the proposed solutions to the resource
+Section~\ref{sec:linear-base-synthesis} as augmented inversions of the typing
+rules. Each calculus is based on a one of our proposed solutions to the resource
 management problem, which we then evaluate and contrast against each other in
-section~\ref{sec:linear-base-evaluation}. 
+Section~\ref{sec:linear-base-evaluation}. 
 
 Both calculi are implemented as part of a synthesis tool for
 Granule~\footnote{The exact implementation of the rules as they stand is
@@ -71,8 +70,8 @@ deprecated, but may be found in Granule release v0.7.8.0:
 https://github.com/granule-project/granule/releases/tag/v0.7.8.0}. The
 implementation is a fairly direct translation of the synthesis calculi into
 Haskell. We thus elide the details of the implementation, focusing only on an
-important optimisation technique in section~\ref{sec:linear-base-focusing}:
-focusing. Focusing removes much of the uneccessary non-determinism 
+important optimisation technique in Section~\ref{sec:linear-base-focusing}:
+focusing. Focusing removes much of the unnecessary non-determinism 
 present in our synthesis rules by fixing an ordering on
 the application of rules. We present the two \textit{focused} forms of our original
 synthesis calculi which comprise the basis of our Granule implementation.
@@ -99,16 +98,15 @@ types; for sum types, $\textbf{case}$ is used to distinguish the constructors.
 
 \begin{figure}[H]
 \begin{align*}
-\hspace{-0.5em}
   \begin{array}{c}
 \inferrule*[right = Pair]
   {[[ G1 |- t1 : A ]] \\ [[ G2 |- t2 : B ]]}
   {[[ G1 + G2 |- pair t1 t2 : Tup A B]]}
-\\[0.9em]
+\\[1.25em]
 \inferrule*[right = LetPair]
   {[[ G1  |- t1 : Tup A B ]] \;\; [[ G2, x1 : A, x2 : B |- t2 : C ]]}
   {[[ G1 + G2 |- letpair x1 x2 = t1 in t2 : C  ]]}
-\\[0.9em]
+\\[1.25em]
 \inferrule*[right = Inl]
   {[[ G |- t : A ]]}
   {[[ G |- inl t : Sum A B ]]}
@@ -116,11 +114,11 @@ types; for sum types, $\textbf{case}$ is used to distinguish the constructors.
 \inferrule*[right = Inr]
   {[[ G |- t : B ]]}
   {[[ G |- inr t : Sum A B]]}
-\\[0.9em]
+\\[1.25em]
 \inferrule*[right = Case]
   {[[ G1 |- t1 : Sum A B ]] \\ [[ G2, x1 : A |- t2 : C]] \\ [[ G3, x2 : B |- t3 : C]]}
     {\Gamma + (\Gamma_{2} \sqcup \Gamma_{3}) \vdash\ \textbf{case} \ t_{1}\ \textbf{of}\ \textbf{inl}\ x_{1} \rightarrow t_{2};\ \textbf{inr}\ x_{2} \rightarrow t_{3} : C }
-\\[0.9em]
+\\[1.25em]
 \inferrule*[right = 1]
  {\quad}{[[ . |- () : Unit ]]}
 \;\;\;
@@ -137,7 +135,7 @@ types; for sum types, $\textbf{case}$ is used to distinguish the constructors.
 Figure~\ref{fig:typing-prod-sum-unit} gives the typing rules.  Rules for
 multiplicative products (pairs) and additive coproducts (sums) are routine,
 where pair introduction ($\textsc{Pair}$) adds the contexts used to type the
-pair's constituent subterms. Pair elimination ($\textsc{LetPair}$) binds a
+pair's constituent sub-terms. Pair elimination ($\textsc{LetPair}$) binds a
 pair's components to two linear variables in the scope of the body $[[t2]]$. The
 $\textsc{Inl}$ and $\textsc{Inr}$ rules handle the typing of constructors for
 the sum type $[[Sum A B]]$. Elimination of sums ($\textsc{Case}$) takes the
@@ -148,10 +146,9 @@ In the typing of $\mathbf{case}$ expressions, the \emph{least-upper bound} of
   the two contexts used to type each branch is used, defined:
 
 \begin{definition}[Partial least-upper bounds of
-  contexts]\label{def:context-lub} For all $[[ G1 ]]$, $[[ G2 ]]$:
+  contexts]\label{def:context-lub} For all $[[ G1 ]]$, $[[ G2 ]]$, $[[G1]] \sqcup [[G2]] =$
 \begin{align*}
 \label{def:lub}
-[[G1]] \sqcup [[G2]] =
 %%
 \left\{\begin{matrix}
 \begin{array}{lll}
@@ -185,11 +182,11 @@ uses a linear variable, then the other branch must also use it to maintain
 linearity overall, otherwise the upper-bound of the two contexts for these
 branches is not defined.
 
- With these extensions in place, we now have the capacity to write more
- idiomatic functional programs in our target language. As a demonstration of
- this, and to showcase how graded modalities interact with these new type
- extensions, we provide two further examples of different graded modalities
- which complement these new types.
+With these extensions in place, we now have the capacity to write more 
+idiomatic functional programs in our target language. As a demonstration of 
+this, and to showcase how graded modalities interact with these new type 
+extensions, we provide two further examples of different graded modalities 
+which complement these new types.
 
 \begin{example}%[Intervals]
 \label{exm:or3}
@@ -230,36 +227,46 @@ and $[[ Private ]]$ security values, picking the left one to pass to a
 continuation expecting a $[[ Public ]]$ input:
 %
 \begin{align*}
-\textit{noLeak} & : [[ (Tup {[] Public A} {[] Private A}) -> {({[]
-                  Public (Tup A Unit)} -> B) -> B} ]] \\
+\textit{noLeak} & : [[ (Tup {[] Public A} {[] Private A}) -o {({[]
+                  Public (Tup A Unit)} -o B) -o B} ]] \\
 \textit{noLeak} & = \lambda z . \lambda u . \textbf{let}\ \textlangle x',\ y' \textrangle\ =\ z\ \textbf{in}\ \\
                 & \;\;\;\;\;\;\;\;\;\;\; \textbf{let}\ [x]\ =\ x'\ \textbf{in}\ \\ 
                 & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; \textbf{let}\ [y]\ =\ y'\ \textbf{in}\ u\ [(x,\ ())]
 \end{align*}
 \end{example}
 
+\subsection{Metatheory}
+Finally, the admissibility of substitution is a key result that holds
+for this language~\citep{DBLP:journals/pacmpl/OrchardLE19}, which is
+leveraged in soundness of the synthesis calculi.
+%
+\begin{restatable}[Admissibility of substitution]{lemma}{linearSubst}
+Let $[[ D |- t' : A]]$, then:
+\label{lemma:substitution}
+\begin{itemize}[leftmargin=1em]
+\item (Linear) \hspace{0.04em} If $[[ {G, x : A}
+    ,, { G' } |- t : B]]$ then $[[ G + D + G' |-
+[ t' / x ] t : B ]]$
+\item (Graded) If $[[ {G, x : [A] r} ,, { G' } |- t : B]]$
+then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
+\end{itemize}
+\end{restatable}
+
 
 \section{The Resource Management Problem}
 \label{sec:resource-management}
 
-In chapter~\ref{chapter:intro} we considered a synthesis rule for pairs and
+In Chapter~\ref{chapter:intro} we considered a synthesis rule for pairs and
 highlighted how graded types could be use to control the number of times
 assumptions are used in the synthesised term. 
-
-% As we touched on when discussing this rule, synthesis in a linear or graded
-% context needs to handle the problem of \emph{resource
-% management}~\cite{harlandpym,CERVESATO2000133}: how do we give a resourceful
-% accounting to the context during synthesis so that we respect its constraints.
-% Before explicating our synthesis approach, we give an overview of the resource
-% management problem here.
 
 Chapter~\ref{chapter:intro} considered (Cartesian) product types
 $\times$, but in our target language we use the multiplicative
 product of linear types, given in Figure~\ref{fig:typing-prod-sum-unit}%
-Each subterm is typed by a different context $[[ G1 ]]$ and $[[ G2 ]]$ which are
+Each sub-term is typed by a different context $[[ G1 ]]$ and $[[ G2 ]]$ which are
 then combined via \emph{disjoint} union: the pair cannot be formed if variables
 are shared between $[[ G1 ]]$ and $[[ G2 ]]$. This prevents the structural
-behaviour of \emph{contraction} (where a variable appears in multiple subterms).
+behaviour of \emph{contraction} (where a variable appears in multiple sub-terms).
 Na\"{i}vely inverting this typing rule into a synthesis rule yields:
 %
 \begin{align*}
@@ -272,10 +279,10 @@ when considered from an algorithmic perspective. Reading `clockwise' starting
 from the bottom-left, given some context $[[ G ]]$ and a goal $A \otimes B$, we
 have to split the context into disjoint subparts $[[ G1 ]]$ and $[[ G2 ]]$ such
 that $[[ G ]] = [[ G1 , G2 ]]$ in order to pass the $[[ G1 ]]$ and $[[ G2 ]]$ to
-the subgoals for $A$ and $B$. For a context of size $n$ there are $2^n$ possible
-such partitions! This quickly becomes intractable. Instead, Hodas and Miller
-developed a technique for linear logic programming~\cite{HODAS1994327}, refined
-by Cervasto et al.~\cite{CERVESATO2000133}, where proof search for linear logic
+the sub-goals for $A$ and $B$. For a context of size $n$ there are $2^n$ possible
+such partitions! This quickly becomes intractable. Instead,~\cite{HODAS1994327} 
+developed a technique for linear logic programming, refined
+by~\citet{CERVESATO2000133}, where proof search for linear logic
 has both an \emph{input context} of available resources and an \emph{output
 context} of the remaining resources, which we write as judgements of the form
 $[[ G |- A =>- t | G' ]]$ for input context $[[ G ]]$ and output context $[[ G'
@@ -297,36 +304,22 @@ contexts between the premises. For example, starting with a context $[[ x : A, y
 \end{align}
 %
 Thus this approach neatly avoids the problem of having to split the input
-context, and facilitates efficient proof search for linear types. 
-We extend this input-output context management model to 
-graded types to graded types to facilitate the synthesis of
-programs in Granule. We  
+context, and facilitates efficient proof search for linear types. We extend this
+input-output context management model to graded types to graded types to
+facilitate the synthesis of programs in Granule. We  
 term the above approach \textit{subtractive} resource management (in a style
-similar to \textit{left-over} type-checking for linear type
-systems~\cite{allais2018typing,zalakain2020pi}). 
+similar to \textit{left-over} type checking for linear type
+systems~\citep{allais2018typing,zalakain2020pi}). 
 
 Graded type systems, as we consider them here, have typing contexts in which
-free-variables are assigned a type, and a grade. In a graded setting, the subtractive
-approach is problematic as there is not necessarily a notion of actual
-subtraction for grades. Consider a version of the above example for
+free-variables are assigned a type, and a grade. In a graded setting, the
+subtractive approach is problematic as there is not necessarily a notion of
+actual subtraction for grades. Consider a version of the above example for
 subtractively synthesising a pair, but now for a context with some grades $r$
-and $s$ on the input variables. Using a variable to synthesise a subterm now
+and $s$ on the input variables. Using a variable to synthesise a sub-term now
 does not result in that variable being left out of the output context. Instead a
 new grade must be assigned in the output context that relates to the first by
 means of an additional constraint describing that some usage took place:
-
-% (usually drawn from some
-% semiring structure parameterising the calculus). 
-% A useful example is the
-% semiring of natural numbers which is used to describe exactly how many times an
-% assumption can be used (in contrast to linear assumptions which must be used
-% exactly once). For example, the context $[[ x : [A] 2, y : [B] 0 ]]$ explains
-% that $x$ must be used twice but $y$ must be used not at all. The literature
-% contains many other examples of semirings for tracking other properties in this
-% way, such as security
-% labels~\cite{DBLP:journals/pacmpl/OrchardLE19,DBLP:conf/icfp/GaboardiKOBU16,DBLP:journals/pacmpl/AbelB20},
-% intervals of usage~\cite{DBLP:journals/pacmpl/OrchardLE19}, or hardware
-% schedules~\cite{DBLP:conf/esop/GhicaS14}. 
 %
 \begin{align}
 \tag{\footnotesize{example}}
@@ -345,14 +338,14 @@ above are satisfied with $r' = 0$ and $s' = 0$. In a general setting, this
 subtractive approach to synthesis for graded types requires solving many such
 existential equations over semirings, which also introduces a new source of
 non-determinism is there is more than one solution. These constraints can be
-discharged via an off-the-shelf SMT solver, such as Z3~\cite{z3}. Such calls to an 
+discharged via an off-the-shelf SMT solver, such as Z3~\citep{z3}. Such calls to an 
 external solver are costly, however, and thus efficiency of resource management is 
 a key concern. 
 
 We propose a dual approach to the subtractive: the \emph{additive} resource
 management scheme. In the additive approach, output contexts describe what was
 \emph{used} not what was is \emph{left}. In the case of synthesising a term with
-multiple subterms (like pairs), the output context from each premise is then
+multiple sub-terms (like pairs), the output context from each premise is then
 added together using the semiring addition operation applied pointwise on
 contexts to produce the final output in the conclusion. For pairs this looks
 like:
@@ -377,7 +370,7 @@ usage that is within the grades given by $[[ G ]]$, i.e., that the synthesised
 terms are \emph{well-resourced}.
 
 Both the subtractive and additive approaches avoid having to split the incoming
-context $[[ G ]]$ into two prior to synthesising subterms. 
+context $[[ G ]]$ into two prior to synthesising sub-terms. 
 
 We adapt the input-output context management model of linear logic synthesis to
 graded types, pruning the search space via the quantitative constraints of
@@ -385,25 +378,25 @@ grades. We implement synthesis calculi based on both the additive and
 subtractive approaches, evaluating their performance on a set of benchmarking
 synthesis problems. 
 \subsection{Related Work}
-Before Hodas and Miller~\cite{HODAS1994327}, the problem of resource
-non-determinism was first identified by Harland and Pym~\cite{harlandpym}. 
+Before Hodas and Miller, the problem of resource
+non-determinism was first identified by~\citet{harlandpym}. 
 Their solution delays splitting of contexts at a multiplicative connective. 
 They later explored the implementation details of this approach, proposing a 
 solution where proof search is formulated in terms of constraints on 
 propositions. Propositions which occur in the conclusion of a multiplicative 
 connective are assigned a Boolean expression whose solution Constraints 
 generated during the proof search, with a solution to these constituting a 
-valid proof~\cite{harlandpym}. The logic programming language 
-Lygon~\cite{lygon} implements this approach. 
+valid proof. The logic programming language 
+Lygon~\citep{lygon} implements this approach. 
 
 Our approach to synthesis implements a \textit{backward} style of proof search:
-starting from the goal, recursively search for solutions to subgoals. In
+starting from the goal, recursively search for solutions to sub-goals. In
 contrast to this, \textit{forward} reasoning approaches attempt to reach the
-goal by building subgoals from previously proved subgoals until the overall goal
-is proved. Pfenning and Chaudhuri consider forward approaches to proof search in
-linear logic using the \textit{inverse method}~\cite{DEGTYAREV2001179} where the
-issue of resource non-determinism that is typical to backward approaches is
-absent~\cite{10.1007/11532231_6,10.1007/11538363_15}.
+goal by building sub-goals from previously proved sub-goals until the overall
+goal is proved.~\citet{10.1007/11532231_6,10.1007/11538363_15} consider forward
+approaches to proof search in linear logic using the \textit{inverse
+method}~\citep{DEGTYAREV2001179} where the issue of resource non-determinism
+that is typical to backward approaches is absent.
 
 
 \section{The Synthesis Calculi}
@@ -415,44 +408,45 @@ cut-free sequent calculus, with
 \textit{left} and \textit{right} rules for each type constructor. Right rules
 synthesise an introduction form for the goal type. Left rules
 eliminate (deconstruct) assumptions so that they may be
-used inductively to synthesise subterms. Each type in the
+used inductively to synthesise sub-terms. Each type in the
 core language has right and left
 rules corresponding to its constructors and destructors respectively.
 
 
 \begin{figure}[H]
-\begin{align*}
-% \hspace{-0.5em}
-  \begin{array}{c}
+\begin{gather*}
+{\footnotesize{
+  \hspace{-3em}\begin{array}{c}
     \subLinVar
-    \\[0.5em]
+    \;\;\;
     \subGrVar
-    \\[0.5em]
+    \\[1.25em]
     \subAbs
-    \\[0.5em]
+    \\[1.25em]
     \subApp
-    \\[0.5em]
+    \\[1.25em]
     \subDer
-    \\[0.5em]
+    \\[1.25em]
     \subBox
-    \\[0.5em]
+    \\[1.25em]
     \subUnbox
-    \\[0.5em]
+    \\[1.25em]
     \subPairIntro
-    \\[0.5em]
+    \\[1.25em]
     \subPairElim
-    \\[0.5em]
+    \\[1.25em]
     \subSumIntroL
-    \\[0.5em]
+    \;\;\;
     \subSumIntroR
-    \\[0.5em]
+    \\[1.25em]
     \subSumElim
-    \\[0.5em]
+    \\[1.25em]
     \subUnitIntro
-    \\[0.5em]
+    \;\;\;
     \subUnitElim
   \end{array}
-\end{align*}
+}}
+\end{gather*}
 \caption{Collected rules of the subtractive synthesis calculus}
 \label{fig:sub-rules}
   \end{figure}
@@ -462,10 +456,10 @@ rules corresponding to its constructors and destructors respectively.
 \subsection{Subtractive Resource Management}
 \label{subsec:subtractive}
   Our subtractive approach follows the philosophy of earlier work on
-  linear logic proof search~\cite{HODAS1994327,CERVESATO2000133},
+  linear logic proof search~\citep{HODAS1994327,CERVESATO2000133},
   structuring synthesis rules around an input context of the available
   resources and an output context of the remaining resources that
-  can be used to synthesise subsequent subterms. Synthesis rules
+  can be used to synthesise subsequent sub-terms. Synthesis rules
   are read bottom-up, with judgments $\Gamma \vdash A \Rightarrow^{-} t\ |\ \Delta$
   meaning from the \emph{goal type} $[[A]]$ we can synthesise a term $[[t]]$ using
   assumptions in $[[G]]$, with output context $[[D]]$. We describe
@@ -475,8 +469,8 @@ rules corresponding to its constructors and destructors respectively.
 Variable terms can be synthesised from assumptions in $\Gamma$ by rules:
   \begin{align*}
     \begin{array}{c}
-  \subLinVar
-  \\[0.5em]
+  \hspace{-3em}\subLinVar
+  \;\;\;
   \subGrVar
     \end{array}
   \end{align*}
@@ -534,7 +528,7 @@ The left-rule for linear function types then synthesises applications
 (as in~\cite{HODAS1994327}):
 %
   \begin{align*}
-    \subApp
+    \hspace{-1em}\subApp
     \end{align*}
 %
   %The left rule equivalent of $\textsc{R}\multimap^{-}$ for
@@ -561,9 +555,11 @@ assumption of function type? Rather than duplicating every left rule
 for both linear and graded assumptions, we mirror the
 dereliction typing rule (converting a linear assumption to graded) as:
 %
-  \begin{align*}
+  \begin{gather*}
+    {\small{
     \subDer
-    \end{align*}
+    }}
+    \end{gather*}
 %
 Dereliction captures the ability to reuse a graded assumption being
 considered in a left rule. A fresh linear assumption $[[y]]$ is generated that
@@ -572,7 +568,7 @@ linearly in the subsequent synthesis of $[[t]]$. The output context of this prem
 original grade $r$.
 
 One may observe that the $\subDerName$ rule makes the presence of the
-$\subGrVarName$ rule admissable. Synthesising the usage of a graded variable can
+$\subGrVarName$ rule admissible. Synthesising the usage of a graded variable can
 instead be achieved through the use of dereliction on the graded assumption,
 followed by the $\subLinVarName$. Nonetheless, we find the inclusion of
 $\subGrVarName$ useful as an explanatory tool and optimisation in the
@@ -598,10 +594,9 @@ $[[ [ t ] ]]$ if we can synthesise the `unpromoted' $[[t]]$ from $[[A]]$:
   yielding the variable usage information about $[[ t ]]$:
  %
   \begin{definition}[Context subtraction]\label{def:contextSub}
-  For all $[[ G1 ]], [[ G2 ]]$ where $ [[G2]] \subseteq [[G1]]$:
+  For all $[[ G1 ]], [[ G2 ]]$ where $ [[G2]] \subseteq [[G1]]$, $[[G1 - G2]] =$
 \begin{align*}
-[[G1 - G2]] =
-\left\{\!\begin{matrix}
+\hspace{-2em}\left\{\!\begin{matrix}
 \begin{array}{lll}
 % Base case
 [[G1]]
@@ -678,23 +673,32 @@ present in the premise's output context $[[ D ]]$.
 \begin{align*}
 \begin{array}{c}
   \subPairIntro
-\\[0.75em]
+\\[1.25em]
   \subPairElim
 \end{array}
 \end{align*}
 \subsubsection{Sums}
+The introduction rules for sum types, \subSumIntroLname\ and \subSumIntroRname, are straightforward:
+\begin{align*}
+  \subSumIntroL
+\;\;\;
+  \subSumIntroR
+\end{align*}
 The \subSumElimName\ rule synthesises the left and
 right branches of a case statement that may use resources
-differently. The output context therefore takes the \textit{greatest
+differently:
+\begin{align*}
+\begin{array}{c}
+\hspace{-3em}{\small{\subSumElim}}
+\end{array}
+\end{align*}
+The output context therefore takes the \textit{greatest
 lower bound} ($\sqcap$) of $[[ D1 ]]$ and $[[ D2 ]]$, given by definition~\ref{def:context-glb},
-
 \begin{definition}[Partial greatest-lower bounds of
   contexts]\label{def:context-glb}
-For all $[[ G1 ]]$, $[[ G2 ]]$:
+For all $[[ G1 ]]$, $[[ G2 ]], [[G1]] \sqcap [[G2]] =$
 \begin{align*}
 \label{def:lub}
-[[G1]] \sqcap [[G2]] =
-%%
 \left\{\begin{matrix}
 \begin{array}{lll}
 %% Both empty case
@@ -723,15 +727,6 @@ and $[[s]]$ if it exists, derived from $\sqsubseteq$.
 \end{definition}
 %
 %
-\begin{align*}
-\begin{array}{c}
-  \subSumIntroL
-\;\;
-  \subSumIntroR
-\\[0.75em]
-{\small{\!\!\subSumElim}}
-\end{array}
-\end{align*}
 
 As an example of $\sqcap$, consider the semiring of intervals over natural numbers and two
 judgements that could be used as premises for the (\subSumElimName) rule:
@@ -778,42 +773,44 @@ i.e. $[[ t ]]$ has type $[[ A ]]$
 under context $[[ G - D ]]$,
 that contains just those linear and
 graded variables with grades reflecting their use in $[[ t ]]$.
-Appendix~\ref{sec:linear-proofs} provides the proof.
 \end{restatable}
+The proof of soundness can be found in Section~\ref{proof:linear-sub-sound} of Appendix~\ref{appendix:proofs}
 
 
 \begin{figure}[H]
-\begin{align*}
-\begin{array}{c}
+{\footnotesize{
+\begin{gather*}
+\hspace{-3em}\begin{array}{c}
   \addLinVar
-\\[0.5em]
+  \;\;\;
   \addGrVar
-\\[0.5em]
+\\[1.25em]
   \addDer
-\\[0.5em]
+\\[1.25em]
   \addAbs
-\\[0.5em]
+\\[1.25em]
   \addApp
-\\[0.5em]
+\\[1.25em]
   \addBox
-  \\[0.5em]
+\\[1.25em]
   \addUnbox
-\\[0.5em]
+\\[1.25em]
   \addPairIntro
-\\[0.5em]
+\\[1.25em]
   \addPairElim
-\\[0.5em]
+\\[1.25em]
   \addSumIntroL
-\\[0.5em]
+\;\;\;
   \addSumIntroR
-\\[0.5em]
+\\[1.25em]
   \addSumElim
-\\[0.5em]
+\\[1.25em]
   \addUnitIntro
-\\[0.5em]
+\;\;\;
   \addUnitElim
       \end{array}
-  \end{align*}
+  \end{gather*}
+}}
 \caption{Collected rules of the additive synthesis calculus}
 \label{fig:add-rules}
   \end{figure}
@@ -835,8 +832,8 @@ a term, rather than which assumptions are still available. Additive
 %
 \begin{align*}
   \begin{array}{c}
-  \addLinVar
-  \\[0.5em]
+  \hspace{-3em}\addLinVar
+  \;\;\;
   \addGrVar
   \end{array}
   \end{align*}
@@ -881,13 +878,13 @@ our assumptions are used in $[[ [t] ]]$:
 \end{align*}
 
 \subsubsection{Functions}
-Right and left rules for $\multimap$ have a similar shape to the
+Synthesis rules for $\multimap$ have a similar shape to the
 subtractive calculus:
 %
 \begin{align*}
 \begin{array}{c}
 \addAbs
-\\[0.8em]
+\\[1.25em]
 \addApp
 \end{array}
 \end{align*}
@@ -922,7 +919,7 @@ appear in the output context of the premise, ensuring it is used. The final
 context therefore adds to $[[ D ]]$ an assumption of $[[x]]$ graded by
 $1$, accounting for this use of $[[ x ]]$ (temporarily renamed to
 $y$).
-As with the subtractive case, $\addDerName$ makes $\addGrVarName$ admissable. 
+As with the subtractive case, $\addDerName$ makes $\addGrVarName$ admissible. 
 
 \subsubsection{Products}
 The right rule for products \addPairIntroName\ follows the same structure as its
@@ -944,11 +941,11 @@ the premise's output contexts (see definition~\ref{def:context-lub}). Otherwise,
 the right and left rules for synthesising programs from sum types are straightforward.
 \begin{align*}
 \begin{array}{c}
-  \addSumIntroL
-  \\[0.5em]
+  \hspace{-2em}\addSumIntroL
+  \;\;\;
   \addSumIntroR
-\\[0.8em]
-{\small{\!\!\addSumElim}}
+\\[1.25em]
+\hspace{-2em}{\footnotesize{\!\!\addSumElim}}
 \end{array}
   \end{align*}
 
@@ -957,8 +954,8 @@ As in the subtractive approach, the right and left rules for unit types, are
 as expected.
 \begin{align*}
 \begin{array}{c}
-  \addUnitIntro
-  \\[0.5em]
+  \hspace{-0.5em}\addUnitIntro
+  \;\;\;
   \addUnitElim
 \end{array}
   \end{align*}
@@ -972,7 +969,6 @@ as expected.
 \begin{align*}
 [[ G |- A =>+ t ; D ]] \quad \implies \quad [[ D |- t : A ]]
 \end{align*}
-Appendix~\ref{sec:soundness-proofs} gives the proof.
 \end{restatable}
 Thus, the synthesised term $[[ t ]]$ is well-typed
 at $[[ A ]]$ using only the assumptions $[[ D ]]$.
@@ -980,6 +976,8 @@ at $[[ A ]]$ using only the assumptions $[[ D ]]$.
 subset of $[[G]]$.
 i.e., synthesised terms are well typed at the type from which they
 were synthesised.
+The proof of soundness can be found in Section~\ref{proof:linear-add-sound} of
+Appendix~\ref{appendix:proofs}
 
 \subsubsection{Additive pruning}
 %
@@ -1019,8 +1017,9 @@ The \addAppName\ rule is similarly adjusted:
 \begin{align*}
 [[ G |- A =>+ t ; D ]] \quad \implies \quad [[ D |- t : A ]]
 \end{align*}
-Appendix~\ref{sec:soundness-proofs} gives the proof.
 \end{restatable}
+The proof of soundness can be found in Section~\ref{sec:add-pruning-sound} of
+Appendix~\ref{appendix:proofs}
 
 
 \section{Post-Synthesis Refactoring}
@@ -1039,7 +1038,7 @@ bind the function's arguments, with the sub-term of the innermost abstraction
 containing the function body, e.g.
 
 \begin{granule}
-pair : forall {a b : Type} . a -> b -> (a, b)
+pair : forall { a b : Type } . a -> b -> (a, b)
 pair = \x -> \y -> (x, y)
 \end{granule}
 
@@ -1050,39 +1049,42 @@ transforms them into equation-level patterns with the innermost abstraction
 body forming the equation body:
 
 \begin{granule}
-pair : forall {a b : Type} . a -> b -> (a, b)
+pair : forall { a b : Type } . a -> b -> (a, b)
 pair x y = (x, y)
 \end{granule}
-
-Note that in Granule code \granin{->} is equivalent to the linear function arrow
-$\multimap$.
 
 \subsection{Unboxing}
 An unboxing term is synthesised via the $\Box_{\textsc{L}}$ rule as a case statement
 which pattern matches over a box pattern, yielding an assumption with the
 grade's usage. Such terms can also be refactored both into function equations
 and to avoid nested let bindings. For example, we may write the $k$
-combinator example above using an explicit graded modality:
+combinator using an explicit graded modality:
 
 \begin{granule}
-k : forall {a b : Type} . a -> b [0] -> a
+k : forall { a b : Type } . a -> b [0] -> a
 k x y = let [z] = y in x
 \end{granule}
 which we can then refactor into
 \begin{granule}
-k : forall {a b : Type} . a -> b [0] -> a
+k : forall { a b : Type } . a -> b [0] -> a
 k x [z] = z
 \end{granule}
 This procedure included programs which perform a nested unboxing, refactoring:
 \begin{granule}
-comp : forall {k : Coeffect, n m : k, a : Type, b : Type, c : Type} .
-       (a [m] -> b) [n] -> (b [n] -> c) -> a [n * m] -> c
+comp : forall {k : Coeffect, n m : k, a b c : Type} 
+     . (a [m] -> b) [n] 
+     -> (b [n] -> c) 
+     -> a [n * m] 
+     -> c
 comp x y z = let [u] = x in let [v] = z in y [ u [v] ]
 \end{granule}
 into:
 \begin{granule}
-comp : forall {k : Coeffect, n m : k, a : Type, b : Type, c : Type} .
-       (a [m] -> b) [n] -> (b [n] -> c) -> a [n * m] -> c
+comp : forall {k : Coeffect, n m : k, a b c : Type}
+     . (a [m] -> b) [n] 
+     -> (b [n] -> c) 
+     -> a [n * m] 
+     -> c
 comp [u] y [v] = y [ u [v] ]
 \end{granule}
 
@@ -1090,7 +1092,7 @@ comp [u] y [v] = y [ u [v] ]
 \label{sec:linear-base-focusing}
 
 The additive and subtractive calculi presented in
-sections~\ref{subsec:subtractive} and~\ref{subsec:additive} provide the
+Sections~\ref{subsec:subtractive} and~\ref{subsec:additive} provide the
 foundations for the implementations of a synthesis tool for Granule programs.
 Implementing the rules as they currently stand, however, would yield a highly
 inefficient tool. In their current form, the rules of both calculi exhibit a
@@ -1102,10 +1104,10 @@ can be applied.
 % %     x : (A \otimes B) \otimes (C \otimes D) \vdash (D \otimes C) \otimes (B \otimes A) \Rightarrow^{+}\ ? \mid\ ?
 %     x :_{0 .. 5} A \otimes B \vdash A \multimap (A \otimes B) \Rightarrow^{+}\ ?\ |\ ? 
 % \end{align*}
-% Here $x$ is a linear assumption containg a pair of pairs. To reach the goal, $x$ needs to be 
+% Here $x$ is a linear assumption containing a pair of pairs. To reach the goal, $x$ needs to be 
 % broken down into its constituent parts using the \addPairElimName rule, and then reconstructed 
 % using the \addPairIntroName rule. The exact order in which these rules are applied is irrelevant: the 
-% final synthesised terms will be behaviourlly equivalent: 
+% final synthesised terms will be behaviourally equivalent: 
 % \begin{align*}
 % \inferrule*[right=\addPairElimName] 
 %   {\inferrule*[right=\addPairElimName]
@@ -1127,7 +1129,7 @@ can be applied.
 
 This leads to us exploring a large number of redundant search branches: something which can
 be avoided through the application of a technique from linear logic proof theory
-called \textit{focusing}~\cite{focusing}. Focusing is based on the observation
+called \textit{focusing}~\citep{focusing}. Focusing is based on the observation
 that some of the synthesis rules are invertible, i.e. whenever the conclusion of
 the rule is derivable, then so are its premises. In other words, the order in
 which we apply invertible rules doesn't matter. By fixing a particular ordering
@@ -1144,17 +1146,16 @@ synthesis judgement with an additional input context $\Omega$:
 Unlike $\Gamma$ and $\Delta$, $\Omega$ is an \textit{ordered} context, which 
 behaves like a stack.
 
-Using the terminology of Andreoli, we refer to rules that are invertible as
-\textit{asynchronous} and rules that are not as
-\textit{synchronous}. The intuition is that of asynchronous communication: 
-asynchronous rules can be applied eagerly, while the non-invertible synchronous
-rules require us to \textit{focus} on a particular part of the judgement: either
-on the assumption (if we are in an elimination rule) or on the goal (for an
-introduction rule). When focusing we apply a chain of synchronous rules, until
-we either reach a position where no rules may be applied (at which point the
-branch terminates), we have synthesised a term for our goal, or we have exposed
-an asynchronous connective at which point we switch back to applying
-asynchronous rules.
+Using the terminology of~\citet{focusing}, we refer to rules that are invertible
+as \textit{asynchronous} and rules that are not as \textit{synchronous}. The
+intuition is that of asynchronous communication: asynchronous rules can be
+applied eagerly, while the non-invertible synchronous rules require us to
+\textit{focus} on a particular part of the judgement: either on the assumption
+(if we are in an elimination rule) or on the goal (for an introduction rule).
+When focusing we apply a chain of synchronous rules, until we either reach a
+position where no rules may be applied (at which point the branch terminates),
+we have synthesised a term for our goal, or we have exposed an asynchronous
+connective at which point we switch back to applying asynchronous rules.
 
 We divide our synthesis rules into four categories, each with their own
 judgement form, which refines the focusing judgement above with an arrow
@@ -1193,17 +1194,19 @@ rules when $\Omega$ is empty.
 In addition to the focused forms of the original synthesis calculi, each
 calculus has a set of rules which determine which part of the synthesis
 judgement will be focused on: the \textsc{Focus} rules. These rules are given by
-Figures~\ref{fig:focus-sub-focus}, and ~\ref{fig:focus-add-focus} for the
+Figures~\ref{fig:focus-sub-focus}, and~\ref{fig:focus-add-focus} for the
 subtractive and additive calculi, respectively.
 
 
 \begin{figure}[H]
   \begin{align*}
+    {\footnotesize{
 \begin{array}{c}
   \fSubAbsRuleNoLabel
-  \\[0.5em]
+  \\[1.25em]
   \fSubRAsyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Right Async rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-right-async}
@@ -1211,19 +1214,21 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
-\begin{array}{c}
+    {\footnotesize{
+\hspace{-3.5em}\begin{array}{c}
   \fSubPairElimRuleNoLabel
-  \\[0.5em]
+  \\[1.25em]
   \fSubSumElimRule
-  \\[0.5em]
+  \\[1.25em]
   \fSubUnboxRule
-  \\[0.5em]
+  \\[1.25em]
   \fSubUnitElimRule
-  \\[0.5em]
+  \\[1.25em]
   \fSubDerRule
-  \\[0.5em]
+  \\[1.25em]
   \fSubLAsyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Left Async rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-left-async}
@@ -1231,11 +1236,14 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
+    {\footnotesize{
 \begin{array}{c}
   \fSubFocusRRuleNoLabel
-  \\[0.5em]
+  \;\;\;
+  % \\[1.25em]
   \fSubFocusLRule
   \end{array}
+    }}
   \end{align*}
   \caption{Focus rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-focus}
@@ -1243,19 +1251,21 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
+    {\footnotesize{
 \begin{array}{c}
 \fSubPairIntroRuleNoLabel
-  \\[0.5em]
+  \\[1.25em]
   \fSubSumIntroRuleR
   \,
   \fSubSumIntroRuleL
-  \\[0.5em]
+  \\[1.25em]
   \fSubBoxRule
-  \\[0.5em]
+  \\[1.25em]
   \fSubUnitIntroRule
   \,
   \fSubRSyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Right Sync rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-right-sync}
@@ -1263,15 +1273,17 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
+    {\footnotesize{
 \begin{array}{c}
   \fSubAppRuleNoLabel
-  \\[0.5em]
+  \\[1.25em]
   \fSubLinVarRule
   \,
   \fSubGrVarRule
-  \\[0.5em]
+  \\[1.25em]
   \fSubLSyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Left Sync and Var rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-left-sync}
@@ -1279,11 +1291,13 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
-\begin{array}{c}
+    {\footnotesize{
+\hspace{-2em}\begin{array}{c}
   \fAddAbsRuleNoLabel
-  \\[0.5em]
+  \;\;\;
   \fAddRAsyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Right Async rules of the focused additive synthesis calculus}
   \label{fig:focus-add-right-async}
@@ -1291,19 +1305,21 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
-\begin{array}{c}
+    {\footnotesize{
+\hspace{-3em}\begin{array}{c}
   \fAddPairElimRuleNoLabel
-  \\[0.5em]
+  \\[1.25em]
   \fAddSumElimRule
-  \\[0.5em]
+  \\[1.25em]
   \fAddUnboxRule
-  \\[0.5em]
+  \\[1.25em]
   \fAddDerRule
-  \\[0.5em]
+  \\[1.25em]
   \fAddUnitElimRule
-  \\[0.5em]
+  \\[1.25em]
   \fAddLAsyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Left Async rules of the focused additive synthesis calculus}
   \label{fig:focus-add-left-async}
@@ -1311,11 +1327,13 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
+    {\footnotesize{
 \begin{array}{c}
   \fAddFocusRRuleNoLabel
-  \\[0.5em]
+  \\[1.25em]
   \fAddFocusLRule
   \end{array}
+    }}
   \end{align*}
   \caption{Focus rules of the focused additive synthesis calculus}
   \label{fig:focus-add-focus}
@@ -1323,19 +1341,21 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
+    {\footnotesize{
 \begin{array}{c}
   \fAddPairIntroRuleNoLabel
-  \\[0.5em]
+  \\[1.25em]
   \fAddSumIntroRuleL
   \,
   \fAddSumIntroRuleR
-  \\[0.5em]
+  \\[1.25em]
   \fAddBoxRule
   \,
   \fAddUnitIntroRule
-  \\[0.5em]
+  \\[1.25em]
   \fAddRSyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Right Sync rules of the focused additive synthesis calculus}
   \label{fig:focus-add-right-sync}
@@ -1343,15 +1363,17 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
-\begin{array}{c}
+    {\footnotesize{
+\hspace{-2em}\begin{array}{c}
   \fAddAppRule
-  \\[0.5em]
+  \\[1.25em]
   \fAddLinVarRule
-  \,
+  \;\;\;
   \fAddGrVarRule
-  \\[0.5em]
+  \\[1.25em]
   \fAddLSyncTransitionRule
   \end{array}
+    }}
   \end{align*}
   \caption{Left Sync and Var rules of the focused additive synthesis calculus}
   \label{fig:focus-add-left-sync}
@@ -1359,18 +1381,20 @@ subtractive and additive calculi, respectively.
 
 \begin{figure}[H]
   \begin{align*}
+    {\footnotesize{
 \begin{array}{c}
 \fAddAltAppRule
-  \\[0.5em]
+  \\[1.25em]
 \fAddAltPairIntroRule
   \end{array}
+    }}
   \end{align*}
   \caption{Rules of the focused additive pruning synthesis calculus}
   \label{fig:focus-add-pruning}
 \end{figure}
 
 One way to view focusing is in terms of a finite state machine, such as
-figure~\ref{fig:focusingFSM}. States comprise the four phases of focusing, plus
+Figure~\ref{fig:focusingFSM}. States comprise the four phases of focusing, plus
 two additional states, \textsc{Focus}, and \textsc{Var}. Edges are then the
 synthesis rules that direct the transition between focusing phases. The
 transitions between these focusing phases are handled by dedicated focusing
@@ -1381,32 +1405,13 @@ $\Downarrow{R}$ rule deals with the transition from a right synchronous phase
 back to a right asynchronous phase, with the $\Downarrow{L}$ rule likewise
 transitioning to a left asynchronous phase. Depending on the current phase of
 focusing, these rules consider the goal type, the assumption currently being
-focused on's type, as well as the size of $\Omega$, to decide whether to
+focused on's type, as well as the size of $\Omega$, to decide when to
 transition between focusing phases. 
 
 This focused approach to synthesis ensures that we are restricted to generating
 programs in $\beta$-normal form, which eliminates a class of redundant programs
 for which behaviourally equivalent $\beta$-normal forms can be synthesised in
 less steps.
-
-\begin{restatable}[Soundness of focusing ]{lemma}{linearBaseFocusingSoundness}
-  For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$:
-  \begin{align*}
-  \begin{array}{lll}
-   1.\ Right\ Async: & [[ G ; O |- A async => t ; D ]] \quad &\implies \quad [[ G ,, O |- A => t ; D ]]\\
-   2.\ Left\ Async: & [[ G ; O async |- B => t ; D ]] \quad &\implies \quad [[ G ,, O |- B => t ; D ]]\\
-   3.\ Right\ Sync: & [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ G |- A => t ; D ]]\\
-   4.\ Left\ Sync: & [[ G ; {x : A} sync |- B => t ; D ]] \quad &\implies \quad [[ G, x : A |- B => t ; D ]]\\
-   5.\ Focus\ Right: & [[ G ]] ; \emptyset \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ G |- B => t ; D ]]\\
-   6.\ Focus\ Left: & [[ G, x : A]] ; \emptyset \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ G, x : A |- B => t ; D ]]
-  \end{array}
-  \end{align*}
-i.e. $[[ t ]]$ has type $[[ A ]]$
-under context $[[ D ]]$,
-which contains assumptions with grades reflecting their use in $[[ t ]]$.
-The appendix provides the proof.
-Appendix~\ref{sec:soundness-proofs} provides the proof.
-  \end{restatable}
 
 \tikzset{
 ->, % makes the edges directed
@@ -1418,7 +1423,7 @@ initial text=$ $, % sets the text that appears on the start arrow
 \begin{figure}[H] % ’ht’ tells LaTeX to place the figure ’here’ or at the top of the page
 \centering 
 
-\scalebox{0.85}{
+\scalebox{0.80}{
 \begin{tikzpicture}[every text node part/.style={align=center}]
 \node[state, initial, draw] (RA) {\textsc{Right Async} \\ $ \Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow t\ |\ \Delta $};
 \node[state] at (10,  0) (LA) { \textsc{Left Async} \\ $\Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta $};
@@ -1439,7 +1444,7 @@ initial text=$ $, % sets the text that appears on the start arrow
 (LS) edge[below, bend right] node{$\multimap_{\textsc{L}}$} (RS)
 (LS) edge[loop below] node{$\multimap_{\textsc{L}}$} (LS)
 (RS) edge[loop below] node{$\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, \\ $1_\textsc{R}$, $\Box_{\textsc{R}}$} (RS)
-(LS) edge[below, bend left] node{\ \ \ $\textsc{LinVar}$, \\ \ \ \ $\textsc{GrVar}$ } (V)
+(LS) edge[below, bend left] node{\\[0.1em] \ \ \ $\textsc{LinVar}$, \\ \ \ \ $\textsc{GrVar}$ } (V)
 ;
 \end{tikzpicture}
 }
@@ -1447,8 +1452,79 @@ initial text=$ $, % sets the text that appears on the start arrow
 \label{fig:focusingFSM}
 \end{figure}
 
+We conclude with three key results: that applying focusing is sound for the
+subtractive (Lemma~\ref{lemma:fSubSynthSound}) and additive
+(Lemma~\ref{lemma:fAddSynthSound}), and additive pruning
+(Lemma~\ref{lemma:fAddPruningSynthSound}) synthesis calculi. The proofs are
+contained in Sections~\ref{proof:focusSubSound},~\ref{proof:focusAddSound},
+and~\ref{proof:focusAddPruningSound} of Appendix~\ref{appendix:proofs},
+respectively.
 
-\section{Evaluating the Resource Management Schemes}
+\begin{restatable}[Soundness of focusing for subtractive synthesis]{lemma}{focusSoundSub}
+  \label{lemma:fSubSynthSound}
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+then:
+\begin{align*}
+  {\footnotesize{
+\begin{array}{lll}
+ 1.\ Right\ Async: & [[ G ; O |- A async =>- t ; D ]] \quad &\implies \quad [[ G , O |- A =>- t ; D ]]\\
+ 2.\ Left\ Async: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G , O |- C =>- t ; D ]]\\
+ 3.\ Right\ Sync: & [[ G ; . |- A sync =>- t ; D ]] \quad &\implies \quad [[ G |- A =>- t ; D ]]\\
+ 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>- t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>- t ; D ]]\\
+ 5.\ Focus\ Right: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]\\
+ 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]
+\end{array}
+  }}
+\end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$,
+which contains assumptions with grades reflecting their use in $[[ t ]]$.
+\end{restatable}
+
+\begin{restatable}[Soundness of focusing for additive synthesis]{lemma}{focusSoundAdd}
+  \label{lemma:fAddSynthSound}
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+then:
+\begin{align*}
+  {\footnotesize{
+\begin{array}{lll}
+ 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G , O |- A =>+ t ; D ]]\\
+ 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G , O |- C =>+ t ; D ]]\\
+ 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
+ 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
+ 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
+ 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
+\end{array}
+  }}
+\end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$,
+which contains assumptions with grades reflecting their use in $[[ t ]]$.
+\end{restatable}
+
+\begin{restatable}[Soundness of focusing for additive pruning synthesis]{lemma}{focusSoundAddPruning}
+\label{lemma:fAddPruningSynthSound}
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+then:
+\begin{align*}
+  {\footnotesize{
+\begin{array}{lll}
+ 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G , O |- A =>+ t ; D ]]\\
+ 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G , O |- C =>+ t ; D ]]\\
+ 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
+ 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
+ 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
+ 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
+\end{array}
+  }}
+\end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$,
+which contains assumptions with grades reflecting their use in $[[ t ]]$.
+\end{restatable}
+
+
+\section{Evaluating the Synthesis Calculi}
 \label{sec:linear-base-evaluation}
 
 \newcommand{\stderr}[1]{\textcolor{gray}{${#1}$}} % \pm{#1}
@@ -1464,16 +1540,16 @@ relative performance of the additive versus subtractive approaches:
 \item[H1.] (\textbf{Solving; Additive requires less}) Additive synthesis should make fewer calls to the solver, with lower
 complexity theorems (fewer quantifiers). Dually,
 subtractive synthesis makes more calls to the solver with
-higher complexity theorems (more quantifiers);
+higher complexity theorems.
 
-\item[H2.] (\textbf{Paths; Subtractive explores fewer}) For complex problems, additive synthesis will
+\item[H2.] (\textbf{Paths; Subtractive explores fewer}) For complex problems, additive will
 explore more paths as it cannot tell whether a variable is not
 well-resourced until closing a binder; additive pruning and subtractive will
 explore fewer paths as they can fail sooner.
 
-\item[H3.] (\textbf{Performance; additive faster on simpler examples}) A corollary of the above two: simple examples will
-likely be faster in additive mode, but more complex examples will be
-faster in subtractive mode.
+\item[H3.] (\textbf{Performance; additive faster on simpler examples}) A
+corollary of the above two: simple examples will likely be faster in additive
+mode, but more complex examples will be faster in subtractive.
 \end{enumerate}
 
 \subsection{Methodology}
@@ -1487,17 +1563,15 @@ ADTs, from which we define a core sum type to use here.
 
 Constraints on resource usage are handled via Granule's existing
 symbolic engine, which compiles constraints on grades (for various semirings)
-to the SMT-lib format for Z3~\cite{z3}.
+to the SMT-lib format for Z3~\citep{z3}.
 %In the case of graded variable synthesis in the subtractive
 %scheme, the kind of the assumption's grade (i.e., what semiring it
 %belongs to) is inferred using Granule's type
 %checker, which is used to generate an existential variable representing
 %the remaining available usage of the graded assumption.
-We use the LogicT
-monad for backtracking search~\cite{logict}
-and the Scrap Your Reprinter library for
-splicing synthesised code into syntactic ``holes'',
-preserving the rest of the program text~\cite{clarke2017scrap}.
+We use the LogicT monad for backtracking search~\citep{logict} and the Scrap
+Your Reprinter library for splicing synthesised code into syntactic ``holes''
+(represented by \granin{?} in Granule), preserving the rest of the program text~\citep{clarke2017scrap}.
 
 To evaluate our synthesis tool we developed a suite of benchmarks comprising
 Granule type schemes for a variety of operations using linear and graded modal
@@ -1511,12 +1585,12 @@ types. We divide our benchmarks into several classes of problem:
 
 \item \textbf{Comp}: various translations of function composition
 into linear logic: multiplicative, call-by-value and
-call-by-name using $!$~\cite{girard1987linear}, I/O using $!$~\cite{liang2009focusing},
+call-by-name using $!$~\citep{girard1987linear}, I/O using $!$~\citep{liang2009focusing},
 and coKleisli composition over $\mathbb{N}$ and arbitrary semirings:
 e.g. $\forall r, s \in \mathcal{R}$:
 %
 \begin{equation*}
-\textit{comp-}\textit{coK}_{\mathcal{R}} : [[ {[] r ({[] s A} -> B)} -> {({[] r B} -> C) -> {{[] {r * s} A} -> C}} ]]
+\textit{comp-}\textit{coK}_{\mathcal{R}} : [[ {[] r ({[] s A} -o B)} -o {({[] r B} -o C) -o {{[] {r * s} A} -o C}} ]]
 \end{equation*}
 %
 \item \textbf{Dist}: distributive laws of various graded
@@ -1525,10 +1599,10 @@ e.g., $\forall r \in \mathbb{N}$, or
 $\forall r \in \mathcal{R}$ in any semiring, or $r = [[ Intrv 0 Inf ]]$:
 %
 \begin{equation*}
-\textit{pull}_\oplus : [[ (Sum {[] r A} {[] r B}) -> [] r (Sum A B) ]]
+\textit{pull}_\oplus : [[ (Sum {[] r A} {[] r B}) -o [] r (Sum A B) ]]
 \end{equation*}
 \begin{equation*}
-\textit{push}_\multimap : [[ {[] r (A -> B)} -> {{[] r A} -> [] r B} ]]
+\textit{push}_\multimap : [[ {[] r (A -o B)} -o {{[] r A} -o [] r B} ]]
 \end{equation*}
 %
 %% data type and vice vera as our second class of programs. In the latter case, we have programs
@@ -1539,40 +1613,30 @@ $\forall r \in \mathcal{R}$ in any semiring, or $r = [[ Intrv 0 Inf ]]$:
 %further work (see section \ref{sec:futurework}).
 
 \item \textbf{Vec}: map operations on
-vectors of fixed size encoded as products, e.g.:
-%
-\begin{equation*}
-\!\!
-\textit{vmap}_5 : [[ {[] 5 (A -> B)} -> {(Tup (Tup (Tup (Tup A A) A) A) A) -> (Tup (Tup (Tup (Tup B B) B) B) B)} ]]
-\end{equation*}
+fixed size vectors encoded as products, e.g.:
+\begin{align*}
+\begin{array}{rl}
+\textit{vmap}_5 :& [[ {[] 5 (A -o B)} ]] \\ \multimap & [[(Tup (Tup (Tup (Tup A A) A) A) A) ]] \\ \multimap & [[ (Tup (Tup (Tup (Tup B B) B) B) B) ]]
+\end{array}
+\end{align*}
 %
 
-\item \textbf{Misc}: includes Example~\ref{exm:security}
-  (information-flow security) and  functions which must share or split resources
-between graded modalities, e.g.:
+\item \textbf{Misc}: includes Example~\ref{exm:security} (information-flow
+  security) and functions which must share resources between graded
+  modalities, e.g.:
 %one problem requires two graded values (the first two parameters)
 %to be shared between two applications of a function given as the third input:
 %
-\begin{equation*}
-\!\!
-\textit{share}: [[ {{[] 4 A} -> {{[] 6 A} -> {[] 2 {({(Tup {(Tup {(Tup {(Tup A A)} A)} A)} A)} ->
-    B)} }}} -> {(Tup B B)}  ]]
-\end{equation*}
+\begin{align*}
+\begin{array}{rl}
+\textit{share} :& [[ {[] 4 A}]] \\ \multimap & [[ [] 6 A ]] \\ \multimap & [[ [] 2 ((Tup (Tup (Tup (Tup A A) A) A) A) -o B)]] \\ \multimap & [[ (Tup B B) ]]
+\end{array}
+\end{align*}
 %
 \end{itemize}
-%
-Figure~\ref{fig:list-of-types} provides the complete list of type schemes for
-these synthesis problems (32 in total). Note that $\Box A$ is used as 
-shorthand for $\square_{0...\infty} A$ (graded modality with indices drawn
-from intervals over $\mathbb{N} \cup \infty$) 
 
-We found that Z3 is highly variable in its solving time, so timing
-measurements are computed as the mean of 20 trials. We used
-Z3 version 4.8.8 on a Linux laptop with an Intel i7-8665u @ 4.8 Ghz
-and 16 Gb of RAM.
-
-{\small{
-\begin{figure}
+\begin{table}
+\scalebox{0.85}{\parbox{.5\linewidth}{%
 \begin{align*}
 \hspace{-2em}
 \setlength{\arraycolsep}{0.2em}
@@ -1588,7 +1652,6 @@ and 16 Gb of RAM.
 & k : \forall a, b . & a \multimap \Box_0 b \multimap a \\
 & i : \forall a . & a \multimap a \\ \hline
 \textbf{Comp} & \\ \hline
-\text{mult} & \circ : \forall a, b, c . & (a \multimap b) \multimap (b \multimap c) \multimap (a \multimap c) \\
 \text{0/1} & \circ_{I/O} :\forall a, b, c . & \Box (\Box a \multimap \Box b) \multimap \Box (\Box b \multimap \Box c) \multimap \Box (\Box a \multimap c) \\
 \text{CBN} & \circ_{\textsc{cbn}} : \forall a, b, c . & \Box (\Box a \multimap b) \multimap \Box (\Box b \multimap c) \multimap \Box a \multimap c \\
 \text{CBV} & \circ_{\textsc{cbv}} : \forall a, b, c . & \Box (\Box a \multimap \Box b) \multimap \Box (\Box b \multimap \Box c) \multimap \Box \Box a \multimap \Box c\\
@@ -1596,6 +1659,7 @@ and 16 Gb of RAM.
 \forall \mathcal{R}, r, s \in \mathcal{R}, a, b, c . &
       \Box_r (\Box_s a \multimap b) \multimap (\Box_r b \multimap c) \multimap \Box_{r \cdot s} a \multimap c
 \\
+\text{mult} & \circ : \forall a, b, c . & (a \multimap b) \multimap (b \multimap c) \multimap (a \multimap c) \\
 \text{coK-$\mathbb{N}$} & \circ_{\mathbb{N}} :
 \forall r, s \in \mathbb{N}, a, b, c . &
       \Box_r (\Box_s a \multimap b) \multimap (\Box_r b \multimap c) \multimap \Box_{r \cdot s} a \multimap c
@@ -1639,21 +1703,35 @@ Exm.~\ref{exm:security}
 & \multicolumn{2}{l}{\textit{noLeak} : \forall a, b . (\Box_{[[ Public ]]} a \otimes \Box_{[[ Private]]} a) \multimap (\Box_{[[ Public ]]}(a \otimes 1) \multimap b) \multimap b }
 \end{array}
 \end{align*}
-\label{fig:list-of-types}
-\caption{List of benchmark synthesis problems}
-\end{figure}
 }}
+\caption{List of benchmark synthesis problems}
+\label{fig:list-of-types}
+\end{table}
+% }
+%
+Table~\ref{fig:list-of-types} provides the complete list of Granule type schemes
+used for these synthesis problems (32 in total). Note that these are type
+schemes which quantify over type variables ($a$, and $b$), however, we simply
+treat each type variable as a logical atom, unifiable only with itself.
+Chapter~\ref{chapter:extended} provides a proper treatment of synthesis from
+Rank-1 polymorphic type schemes. Note also that $\Box A$ is used as shorthand
+for $\square_{0...\infty} A$ (graded modality with indices drawn from intervals
+over $\mathbb{N} \cup \infty$). The compete synthesised program code for the
+benchmarking problems can be found in Section~\ref{sec:linear-benchmarks} of
+Appendix~\ref{appendix:benchmarks}
 
 
+We found that Z3 is highly variable in its solving time, so timing
+measurements are computed as the mean of 20 trials. We used
+Z3 version 4.8.8 on a Linux laptop with an Intel i7-8665u @ 4.8 Ghz
+and 16 Gb of RAM.
 
 
-
-\subsection{Results and analysis}
+\subsection{Results and Analysis}
 %
 For each synthesis problem, we recorded whether synthesis
 was successful or not (denoted $\success$ or \fail), the mean
-total synthesis time ($\mu{T}$), the mean total time spent by
-the SMT solver ($\mu\textsc{smt}$), and the number of
+total synthesis time ($\mu{T}$), and the number of
 calls made to the SMT solver (\textsc{N}).
 Table~\ref{tab:results} summarises the results with the fastest case for each
 benchmark highlighted.
@@ -1667,6 +1745,7 @@ We set a timeout of 120 seconds.
 {\small{
 \begin{center}
 \setlength{\tabcolsep}{0.3em}
+\scalebox{0.9}{
 % this is wide enough to show 4 modes worth of data
 \begin{tabular}{p{2.5em}r|p{0.75em}rr|p{0.5em}rr|p{0.5em}rr}
  & & \multicolumn{3}{c|}{Additive}&\multicolumn{3}{c|}{Additive (pruning)}&\multicolumn{3}{c|}{Subtractive}\\ \hline
@@ -1729,54 +1808,52 @@ We set a timeout of 120 seconds.
 & share                     & \success{} & 292.02 (\stderr{ 11.37}) &  44       & \success{} & {\highlight{$100.85 (\stderr{  2.44})$}} &   6       & \success{} & 193.33 (\stderr{  4.46}) &  17      \\ % SmtT/T = 94.3058504587738%, 97.15508002763923%, 99.19701142373343%
 & Exm.~\ref{exm:security}                 & \success{} &   {\highlight{$8.09 (\stderr{  0.46})$}} &   2       & \success{} &  26.03 (\stderr{  1.21}) &   2       & \success{} & 284.76 (\stderr{  0.31}) &   3      \\ % SmtT/T = 96.70245619318075%, 99.14227225428877%, 99.83905641669199%
 \end{tabular}
+}
 \end{center}}}
 
 \caption{Results. $\mu{T}$ in \emph{ms} to 2 d.p.
 with standard sample error in brackets}
 \label{tab:results}
-\vspace{-2.5em}
 \end{table}
 
 
 
 \subsubsection{Additive versus subtractive}
-As expected, the additive approach generally synthesises programs faster
-than the subtractive. Our first hypothesis (that the additive approach in general
+As expected, the additive approach generally synthesises programs faster than
+the subtractive. Our first hypothesis (that the additive approach in general
 makes fewer calls to the SMT solver) holds for almost all benchmarks, with the
-subtractive approach often far exceeding the number made by the additive. This is explained by
-the difference in graded variable synthesis between approaches. In the
-additive, a constant grade $1$ is given for graded assumptions in the output
-context, whereas in the subtractive, a fresh grade
-variable is created with a constraint on its usage which
-is checked immediately. As the
-total synthesis time is almost entirely spent in the SMT solver (more than 90\%), solving constraints is by far the most costly part of synthesis
-leading to the additive approach synthesising most examples in a shorter amount of time.
+subtractive approach often far exceeding the number made by the additive. This
+is explained by the difference in graded variable synthesis between approaches.
+In the additive, a constant grade $1$ is given for graded assumptions in the
+output context, whereas in the subtractive, a fresh grade variable is created
+with a constraint on its usage which is checked immediately. As the total
+synthesis time is almost entirely spent in the SMT solver (more than 90\%),
+solving constraints is by far the most costly part of synthesis leading to the
+additive approach synthesising most examples in a shorter amount of time.
 
-Graded variable synthesis in the subtractive case also results
-in several examples failing to synthesise. In some cases, e.g.,
-the first three \textit{comp} benchmarks, the subtractive approach
-times-out as synthesis diverges with constraints growing in size
-due to the maximality condition and absorbing behaviour of
-$[[ Intrv 0 Inf ]]$ interval. In the case of $\textit{coK-$\mathcal{R}$}$
-and $\textit{coK-$\mathbb{N}$}$, the generated constraints
-have the form $\forall r. \exists s. r \sqsupseteq s + 1 $ which
-is not valid $\forall r \in \mathbb{N}$ (e.g., when $r = 0$),
-which suggests that the subtractive approach does not work well for
-polymorphic grades. As further work, we are
-considering an alternate rule for synthesising promotion with
-constraints of the form $\exists s . s = s' * r$, i.e.,
-a multiplicative inverse constraint.
+Graded variable synthesis in the subtractive case also results in several
+examples failing to synthesise. In some cases, e.g., the first three
+\textit{comp} benchmarks, the subtractive approach times-out as synthesis
+diverges with constraints growing in size due to the maximality condition and
+absorbing behaviour of $[[ Intrv 0 Inf ]]$ interval. In the case of
+$\textit{coK-$\mathcal{R}$}$ and $\textit{coK-$\mathbb{N}$}$, the generated
+constraints have the form $\forall r. \exists s. r \sqsupseteq s + 1 $ which is
+not valid $\forall r \in \mathbb{N}$ (e.g., when $r = 0$), which suggests that
+the subtractive approach does not work well for polymorphic grades. As further
+work, we are considering an alternate rule for synthesising promotion with
+constraints of the form $\exists s . s = s' * r$, i.e., a multiplicative inverse
+constraint.
 %solving approach cannot tell this holds for all semirings. Indeed, it
 %is false for $\ma
 %which is not satisfiable for all semirings, including \textsc{N}, causing examples
 %with arbitrary \textsc{N} grades to also fail.
 
-In more complex examples we see evidence to support
-our second hypothesis. The \textit{share} problem requires a lot
-of graded variable synthesis which is problematic for the additive
-approach, for the reasons described in the second hypothesis. In contrast, the subtractive approach
-performs better, with $\mu{T} = 193.3\textit{ms}$ as opposed to additive's
-$292.02\textit{ms}$. However, additive pruning outperforms both.
+In more complex examples we see evidence to support our second hypothesis. The
+\textit{share} problem requires a lot of graded variable synthesis which is
+problematic for the additive approach, for the reasons described in the second
+hypothesis. In contrast, the subtractive approach performs better, with $\mu{T}
+= 193.3\textit{ms}$ as opposed to additive's $292.02\textit{ms}$. However,
+additive pruning outperforms both.
 
 % Not as important
 Notably, on examples which are purely linear such as \textit{andElim} from
@@ -1796,7 +1873,7 @@ complex examples which involve synthesising many graded variables (e.g. \textit{
 especially powerful, performing better than the subtractive
 approach. However, additive pruning failed to synthesis two
  examples which are polymorphic in their grade
- ($\otimes$-$\mathbb{N}$) and in the semiring/graded-modality ($\otimes$-$\mathcal{R}$).
+ ($\otimes$-$\mathbb{N}$) and in the semiring ($\otimes$-$\mathcal{R}$).
 
 
 Overall, the additive approach outperforms the subtractive and is successful at
@@ -1816,8 +1893,8 @@ based on the graded linear $\lambda$-calculus.
 
 Going forward, however, we focus primarily on the additive resource management
 scheme, using this as the basis for our more feature-rich fully-graded synthesis
-calculus in chapter~\ref{chapter:extended}.  
-The evaluation in section~\ref{sec:linear-base-evaluation} showed that the
+calculus in Chapter~\ref{chapter:extended}.  
+The evaluation in Section~\ref{sec:linear-base-evaluation} showed that the
 additive approach generally yields smaller and simpler theorems than the
 subtractive, requiring less time to solve. Theorem proving becomes even more
 prevalent in synthesis for a fully graded typing calculus - potentially every
@@ -1825,14 +1902,14 @@ rule introduces new constraints that require solving, thus the speed at which
 this can be carried out is especially important.
 
 While the tool presented in this chapter allows users to synthesise a
-considerable subset of Granule programs, it is still fairly limited in its
+considerable subset of Granule programs, our language is still limited in its
 expressivity. Data types comprise only product, sum, and unit types, while
 synthesis of recursive function defintions or functions which make use of other
-in-scope values such as top-level definitions are not permitted.
-One notable limitation of our calculi is the inability to
-synthesise programs which perform a deep pattern match over a graded data type.
+in-scope values such as top-level definitions is not permitted. One notable
+limitation of our typing calculi is the inability to express (and therefore
+synthesise) programs which perform a deep pattern match over a graded data type.
 A clear example of this can be found in the synthesis of programs which
-distribute a graded modality over a data type. Consider a classic example of a 
+distribute a graded modality over a data type. Consider a classic example of a
 distributive program, \textit{push}:
 \begin{align*}
   push: \Box_r(A \otimes B) \multimap \Box_r A \otimes \Box_r B
@@ -1842,9 +1919,9 @@ B$), and distributes $r$ over the constituent elements of the product
 $A$ and $B$. Given this goal type, how would we go about synthesising a program
 in our tool? 
 
-We instatiate the \addAbsName\ rule at this type,
-building a partial synthesis derivation. Although we use the additive scheme
-for this example, the exact same situation arises in the subtractive.
+We instatiate the \addAbsName\ rule at this type, building a partial synthesis
+derivation. Although we use the additive scheme for this example, the exact same
+situation arises in the subtractive.
 \begin{align*}
     \inferrule*[right=\addUnboxName]
       { x_2 :_r A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ |\ ? }
@@ -1872,11 +1949,10 @@ exhibit this distributive behaviour are not derivable in our calculi.
 
 In the following chapter, we present an alternative approach to generating
 programs which exhibit this distributive behaviour using a generic programming
-methodology. The approach we present in chapter~\ref{chapter:deriving} is not
+methodology. The approach we present in Chapter~\ref{chapter:deriving} is not
 type-directed program synthesis, per se. This approach complements the calculi
-presented here and in~\ref{chapter:extended}, providing users with a means to
-automatically generate programs purely from a type for a common class 
-of graded programs. In describing this mechanism, we also begin to
-enhance our language with more advanced features such
-pattern matching, and recursion, further laying the foundations for
-chapter~\ref{chapter:extended}.
+presented here and in Chapter~\ref{chapter:extended}, providing users with a
+means to automatically generate programs purely from a type for a common class
+of graded programs. In describing this mechanism, we also begin to enhance our
+language with more advanced features such pattern matching, and recursion,
+further laying the foundations for Chapter~\ref{chapter:extended}.

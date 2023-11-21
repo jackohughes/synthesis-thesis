@@ -32,11 +32,12 @@
     \WarningFilter{scrreprt}{Usage of package `titlesec'}
     %\WarningFilter{scrreprt}{Activating an ugly workaround}
     \WarningFilter{titlesec}{Non standard sectioning command detected}
-\documentclass[ twoside,openright,titlepage,numbers=noenddot,%1headlines,
+\documentclass[ openright,titlepage,numbers=noenddot,%1headlines,
                 headinclude,footinclude,cleardoublepage=empty,abstract=on,
-                BCOR=5mm,paper=a4,fontsize=12pt
+                BCOR=5mm,paper=a4,fontsize=11pt
                 ]{scrreprt}
 
+%twoside
 %********************************************************************
 % Note: Make all your adjustments in here
 %*******************************************************
@@ -44,6 +45,11 @@
 \input{granule-ott}
 \input{Preamble/Names.tex}
 \input{Preamble/Preamble-ottput}
+
+% % \bibliographystyle{ACM-Reference-Format}
+% \citestyle{authoryear}   %% For author/year citations
+\usepackage{natbib}
+\bibliographystyle{unsrtnat}
 
 \usepackage{amssymb}
 \usepackage{amsthm}
@@ -56,7 +62,7 @@
 \usepackage{hyperref}
 \usepackage{float}
 \usepackage{caption}
-\usepackage{subcaption}
+% \usepackage{natbib}
 \usepackage[tableposition = top]{caption}
 \usepackage{booktabs}
 
@@ -86,8 +92,8 @@
 %********************************************************************
 % Bibliographies
 %*******************************************************
-\addbibresource{Bibliography.bib}
-\addbibresource[label=ownpubs]{JHughes_Publications.bib}
+% \addbibresource{Bibliography.bib}
+% \addbibresource[label=ownpubs]{JHughes_Publications.bib}
 %********************************************************************
 % Hyphenation
 %*******************************************************
@@ -127,9 +133,6 @@
 \cleardoublepage
 \part{Program Synthesis from Linear and Graded Types}\label{pt:dissertation}
 \include{Chapters/Chapter01-ottput}
-% \cleardoublepage
-% \ctparttext{}
-% \part{The Showcase}\label{pt:showcase}
 \include{Chapters/Chapter02-ottput}
 \include{Chapters/Chapter03-ottput}
 \include{Chapters/Chapter04-ottput}
@@ -146,6 +149,7 @@
 %\renewcommand{\thechapter}{\alph{chapter}}
 \cleardoublepage
 \part{Appendix}
+\include{Appendix/Benchmarks}
 \include{Appendix/Proofs-ottput}
 %********************************************************************
 % Other Stuff in the Back

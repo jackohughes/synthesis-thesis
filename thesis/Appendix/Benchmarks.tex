@@ -1,0 +1,1209 @@
+\chapter{Benchmarking Suites}
+\label{appendix:benchmarks}
+
+\section{Synthesised Programs for the Graded Linear Synthesis Calculi}
+\label{sec:linear-benchmarks}
+This section includes the synthesised programs fro the benchmarking problems in
+Section~\ref{sec:linear-base-evaluation}. 
+
+\subsection{Hilbert}
+\begin{enumerate}
+\item $\otimes$-Intro:
+\begin{granule}
+and : forall a b . a -> b -> (a, b)
+and x y = (x, y)
+\end{granule}
+\item $\otimes$-Elim: \\ 
+\begin{granule}
+and1 : forall a b .  (a, b [0]) -> a
+and1 (y, [u]) = y
+    
+and2 : forall a b . (a [0], b) -> b
+and2 ([u], z) = z
+\end{granule}
+\item $\oplus$-Intro: 
+\begin{granule}
+data Either a b = Left a | Right b
+
+or1 : forall a b . a -> Either a b
+or1 x = Left x
+
+or2 : forall a b . b -> Either a b
+or2 x = Right x
+\end{granule}
+\item $\oplus$-Elim: 
+\begin{granule}
+data Either a b = Left a | Right b
+
+or3 : forall a b c 
+    . (a -> c) [0..1] 
+    -> (b -> c) [0..1] 
+    -> (Either a b) 
+    -> c
+or3 [u] [v] (Right x6) = v x6;
+or3 [u] [v] (Left x5) = u x5
+\end{granule}
+\item SKI: 
+\begin{granule}
+s : forall a b c  
+  . (a -> (b -> c)) 
+  -> (a -> b) 
+  -> a [2] 
+  -> c
+s x y [u] = (x u) (y u)
+    
+k : forall a b . a -> b [0..1] -> a
+k x [z] = x
+    
+i : forall a . a -> a
+i x = x
+\end{granule}
+\end{enumerate}
+
+
+\subsection{Comp}
+\begin{enumerate}
+\item 0/1: 
+\begin{granule}
+comp-01 : forall a b c  
+        . (a [] -> b []) [] 
+        -> (b [] -> c []) [] 
+        -> (a [] -> c) []
+comp-01 [z] [u] = 
+    [\v -> 
+        let [w] = v in 
+        let [q] = z [w] in 
+        let [x9] = u [q] in 
+        let [x11] = z [w] in x9]
+\end{granule}
+\item CBN: 
+\begin{granule}
+comp-cbn : forall a b c  
+         . (a [] -> b) [] 
+         -> (b [] -> c) [] -> a [] -> c
+comp-cbn [u] [w] [v] = w [u [v]]
+\end{granule}
+\item CBV: 
+\begin{granule}
+comp-cbv : forall a b c  . 
+         (a [] -> b []) [] 
+         -> (b [] -> c []) [] 
+         -> (a [] -> c []) []
+comp-cbv [z] [u] = 
+    [\v -> 
+        (\ [w] -> 
+            [(\ [q] -> q) (u [(\ [x9] -> x9) (z [w])])]) v]
+\end{granule}
+\item coK-$\mathcal{R}$:
+\begin{granule}
+compGen : forall {k : Coeffect, n m : k, a b c : Type} 
+        . (a [m] -> b) [n] 
+        -> (b [n] -> c) 
+        -> a [n * m] 
+        -> c
+compGen [u] y [v] = y [u [v]]
+\end{granule}
+\item coK-$\mathbb{N}$:
+\begin{granule}
+compNat : forall {n m : Nat, a b c : Type} 
+     . (a [m] -> b) [n] 
+     -> (b [n] -> c) 
+     -> a [n * m] 
+     -> c
+compNat [u] y [v] = y [u [v]]
+\end{granule}
+\item mult:
+\begin{granule}
+mult : forall a b c  
+     . (a -> b) 
+     -> (b -> c) 
+     -> a 
+     -> c
+mult x y z = y (x z)
+\end{granule}
+\end{enumerate}
+
+
+
+\subsection{Dist}
+\begin{enumerate}
+\item $\otimes$-!:
+\begin{granule}
+pull : forall a b . (a [], b []) -> (a, b) []
+pull ([u], [v]) = [(u, v)]
+\end{granule}
+\item $\otimes$-$\mathbb{N}$:
+\begin{granule}
+pull : forall {a b : Type, n : Nat} 
+     . (a [n], b [n]) 
+     -> (a, b) [n]
+pull ([u], [v]) = [(u, v)]
+\end{granule}
+\item $\otimes$-$\mathcal{R}$:
+\begin{granule}
+pull : forall {a b : Type, k : Coeffect, c : k} 
+     . (a [c], b [c]) 
+     -> (a, b) [c]
+pull ([u], [v]) = [(u, v)]
+\end{granule}
+\item $\oplus$-!:
+\begin{granule}
+data Either a b = Left a | Right b
+
+pull : forall a b 
+     . Either (a []) (b []) 
+     -> (Either a b) []
+pull (Right [v]) = [Right v];
+pull (Left [z]) = [Left z]
+\end{granule}
+\item $\oplus$-$\mathbb{N}$:
+\begin{granule}
+data Either a b = Left a | Right b
+
+pull : forall {a b : Type, n : Nat} 
+     . Either (a [n]) (b [n]) 
+     -> (Either a b) [n]
+pull (Right [v]) = [Right v];
+pull (Left [z]) = [Left z]
+\end{granule}
+\item $\oplus$-$\mathcal{R}$:
+\begin{granule}
+data Either a b = Left a | Right b
+
+pull : forall {a b : Type, k : Coeffect, c : k} 
+     . Either (a [c]) (b [c]) 
+     -> (Either a b) [c]
+pull (Right [v]) = [Right v];
+pull (Left [z]) = [Left z]
+\end{granule}
+\item $\multimap$-!:
+\begin{granule}
+push : forall a b  
+     . (a -> b) [] 
+     -> a [] 
+     -> b []
+push [z] [u] = [z u]
+\end{granule}
+\item $\multimap$-$\mathbb{N}$:
+\begin{granule}
+push : forall {a b : Type, c : Nat}
+     . (a -> b) [c] 
+     -> a [c] 
+     -> b [c]
+push [z] [u] = [z u]
+\end{granule}
+\item $\multimap$-$\mathcal{R}$:
+\begin{granule}
+push : forall {a b : Type, k : Coeffect, c : k} 
+     . (a -> b) [c] 
+     -> a [c] 
+     -> b [c]
+push [z] [u] = [z u]
+\end{granule}
+\end{enumerate}
+
+\subsection{Vec}
+\begin{enumerate}
+\item vec5:
+\begin{granule}
+vec5 : forall a b  
+     . (a -> b) [5] 
+     -> ((((a, a), a), a), a) 
+     -> ((((b, b), b), b), b)
+vec5 [z] ((((x9, x10), x8), x6), x4) = 
+    ((((z x9, z x8), z x6), z x4), z x10)
+\end{granule}
+\item vec10:
+\begin{granule}
+vec10 : forall a b 
+      . (a -> b) [10] 
+      -> (((((((((a, a), a), a), a), a), a), a), a), a)
+      -> (((((((((b, b), b), b), b), b), b), b), b), b)
+vec10 [z] (((((((((x19, x20), x18), x16), x14), x12), x10), x8), p), v) = 
+    (((((((((z x20, z v), z p), z x8), z x10), z x12), z x14), z x16), z x18), z x19)
+\end{granule}
+\item vec15:
+\begin{granule}
+vec15 : forall a b 
+      . (a -> b) [15] 
+      -> ((((((((((((((a, a), a), a), a), a), a), a), a), a), a), a), a), a), a)
+      -> ((((((((((((((b, b), b), b), b), b), b), b), b), b), b), b), b), b), b)
+vec15 [z] ((((((((((((((x29, x30), x28), x26), x24), x22), x20), x18), x16), x14), x12), x10), x8), p), v) = 
+    ((((((((((((((z x30, z v), z p), z x8), z x10), z x12), z x14), z x16), z x18), z x20), z x22), z x24), z x26), z x28), z x29)
+\end{granule}
+\item vec20:
+\begin{granule}
+vec20 : forall a b 
+      . (a -> b) [20] 
+      -> (((((((((((((((((((a, a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a)
+      -> (((((((((((((((((((b, b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b)
+vec20 [z] (((((((((((((((((((x39, x40), x38), x36), x34), x32), x30), x28), x26), x24), x22), x20), x18), x16), x14), x12), x10), x8), p), v) = 
+    (((((((((((((((((((z x40, z v), z p), z x8), z x10), z x12), z x14), z x16), z x18), z x20), z x22), z x24), z x26), z x28), z x30), z x32), z x34), z x36), z x38), z x39)
+\end{granule}
+\end{enumerate}
+
+\subsection{Misc}
+\begin{enumerate}
+\item split$\oplus$:
+\begin{granule}
+data Either a b where Left a | Right b
+
+splitPlus : forall a b c 
+          . b [2..3] 
+          -> Either a c 
+          -> Either (a, b [2..2]) (c, b [3..3])
+splitPlus [z] (Right x4) = Right (x4, [z]);
+splitPlus [z] (Left x3) = Left (x3, [z])
+\end{granule}
+\item split$\otimes$:
+\begin{granule}
+splitPair : forall a  
+          . (a -> a -> a) [0..2] 
+          -> a [10..10] 
+          -> (a [2..2], a [6..6])
+splitPair [z] [u] = ([(z u) u], [u])
+\end{granule}
+\item share:
+\begin{granule}
+share : forall a 
+      . (a -> a -> a) [0..2] 
+      -> a [10..10] 
+      -> (a [2..2], a [6..6])
+share [z] [u] = ([(z u) u], [u])
+\end{granule}
+\item Exm.~\ref{exm:security}:
+\begin{granule}
+dontLeak : forall a b 
+         . (a [Public], a [Private]) 
+         -> ((a, ()) [Public] -> b)
+         -> b
+dontLeak ([w], [v]) y = y [(w, ())]
+\end{granule}
+\end{enumerate}
+
+\section{Synthesised Programs for the Fully Graded Synthesis Calculus}
+\label{sec:graded-benchmarks}
+This section includes the synthesised programs, their synthesis contexts, and
+examples used for the benchmarking problems in
+Section~\ref{section:graded-base-evaluation}. The context of each synthesised
+program is listed by the program's \granin{spec}. If the program has no
+\granin{spec}, then synthesis is occurring in an empty context.
+
+For each program we list the examples required to synthesise the correct result
+in the Graded case, and the additional examples required to synthesise the same
+program without grades (i.e. in the Cartesian setting). See 
+Section~\ref{section:graded-base-evaluation} for further details.
+
+\subsection{List}
+\begin{enumerate}
+\item append: 
+\begin{granule}
+language GradedBase
+
+data List a = Nil | Cons a (List a)
+    
+append : forall a 
+       . (List a) %1 
+       -> a %1 
+       -> List a
+append x y = (Cons y) x
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+append (Cons 1 Nil) 2 = (Cons 2 (Cons 1 Nil));
+\end{granule}
+\item concat:
+\begin{granule}
+language GradedBase 
+
+data List a = Cons a (List a) | Nil
+    
+concat : forall a 
+       . (List a) %1..Inf 
+       -> (List a) %1..Inf 
+       ->  List a
+spec 
+    concat %0..Inf
+concat Nil y = y;
+concat (Cons z u) y = (Cons z) ((concat u) y)
+\end{granule}
+with no Graded examples and Cartesian examples(s):
+\begin{granule}
+concat (Cons 0 Nil) Nil = (Cons 0 Nil);                                                                        
+concat (Cons 0 Nil) (Cons 1 Nil) = (Cons 0 (Cons 1 Nil));                                                       
+concat (Cons 0 (Cons 1 (Cons 2 Nil))) (Cons 3 (Cons 4 Nil)) = Cons 0 (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil))));
+\end{granule}
+\item empty: 
+\begin{granule}
+language GradedBase
+
+data List a = Nil | Cons a (List a) 
+
+empty : forall a b . () -> List a
+empty () = Nil
+\end{granule}
+\item snoc: 
+\begin{granule}
+language GradedBase
+
+data List a = Nil | Cons a (List a)
+
+data N = S N | Z
+
+snoc : forall a 
+     . (List a) %1..Inf 
+     -> a %1..Inf 
+     -> List a
+spec 
+    snoc %0..Inf
+snoc x y = 
+    (case x of
+      Nil -> (Cons y) x;
+      Cons z u -> (Cons z) ((snoc u) y))
+\end{granule}
+with Graded example(s):
+\begin{granule}
+snoc (Cons Z Nil) (S Z) = (Cons Z (Cons (S Z) Nil));
+\end{granule}
+\item drop: 
+\begin{granule}
+language GradedBase
+
+data List a = Cons a (List a) | Nil
+    
+data N = S N | Z
+        
+drop : forall a . N %0..Inf -> List (a) %0..Inf -> List a
+spec 
+    drop % 0..Inf
+drop x y = 
+    (case y of
+        Nil -> 
+    (case x of
+        Z -> y;
+        S z -> (drop z) y);
+        Cons p q -> 
+    (case x of
+        Z -> q;
+        S x8 -> q))
+\end{granule}
+with Graded example(s): 
+\begin{granule}
+drop (S Z) (Cons (S Z) (Cons Z Nil)) = Cons Z Nil; 
+\end{granule}
+\item flatten: 
+\begin{granule}
+language GradedBase 
+
+data List a = Cons a (List a) | Nil
+    
+append : forall {a : Type} 
+       . (List a) %1..Inf 
+       -> (List a) %1..Inf 
+       ->  List a
+append Nil y = y;
+append (Cons z u) y = (Cons z) ((append u) y)
+    
+flatten : forall a . (List (List a)) %0..Inf -> (List a)
+spec 
+    flatten % 0..Inf , append %0..Inf
+flatten Nil = (append Nil) Nil;
+flatten (Cons u v) = (append u) (flatten v)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+flatten (Cons (Cons 1 Nil) (Cons (Cons 1 Nil) Nil)) = Cons 1 (Cons 1 Nil);
+\end{granule}
+\item bind: 
+\begin{granule}
+language GradedBase
+
+data List a = Nil | Cons a (List a) 
+
+data N = S N | Z
+
+data Bool = True | False; 
+
+append : forall {a : Type} 
+       . (List a) %1..Inf 
+       -> (List a) %1..Inf 
+       ->  List a
+append Nil y = y;
+append (Cons z u) y = (Cons z) ((append u) y)
+
+concat : forall a . (List (List a)) %1..Inf -> (List a)
+concat Nil = Nil;
+concat (Cons u v) = (append u) (concat v)
+
+map : forall a b 
+    . (a %1..Inf -> b) %0..Inf 
+    -> List a %1..Inf 
+    -> List b
+map x Nil = Nil;
+map x (Cons z u) = (Cons (x z)) ((map x) u)
+
+isEven : N %1..Inf -> List N  
+isEven Z = Nil;
+isEven (S Z) = Cons (S Z) Nil;
+isEven (S (S z)) = concat (Cons (isEven z) Nil)
+
+bind : forall a b 
+     . List a %1..Inf 
+     -> (a %1..Inf -> List b) %0..Inf 
+     -> List b
+spec 
+    map %1..Inf, concat %1..Inf
+bind x y = concat ((map (\w -> w)) x)
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+bind (Cons Z Nil) isEven = Nil;
+bind (Cons (S Z) Nil) isEven = (Cons (S Z) Nil);
+\end{granule}
+\item return: 
+\begin{granule}
+language GradedBase
+
+data List a =  Cons a (List a) | Nil 
+
+return : forall { a b : Type} . a -> List a
+return x = (Cons x) Nil
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+return 1 = Cons 1 Nil;
+\end{granule}
+\item inc: 
+\begin{granule}
+language GradedBase
+
+data List a = Cons a (List a) | Nil
+    
+data N = S N | Z
+    
+map : (List N) %1..Inf 
+    -> (N %1..Inf -> N) %0..Inf 
+    -> (List N)
+map Nil f = Nil; 
+map (Cons x xs) f = (Cons (f x) (map xs f))
+    
+inc : forall a . (List N) %1..Inf -> (List N)
+spec
+    map %1..Inf
+inc x = (map x) (\u -> S u)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+inc (Cons (S Z) Nil) = (Cons (S (S Z)) Nil);
+\end{granule}
+\item head:
+\begin{granule}
+language GradedBase
+
+data List a = Cons a (List a) | Nil 
+    
+head : forall a . (List a) %0..1 -> a %0..1 -> a
+head Nil y = y;
+head (Cons z u) y = z
+\end{granule}
+with Graded example(s):
+\begin{granule}
+head (Cons 1 (Cons 2 Nil)) 2 = 1;
+\end{granule}
+\item tail:
+\begin{granule}
+language GradedBase
+
+data List a = Cons a (List a) | Nil 
+
+tail : forall a . List a %0..1 -> List a
+tail Nil = Nil;
+tail (Cons y z) = z
+\end{granule}
+with Graded example(s):
+\begin{granule}
+tail (Cons 1 (Cons 2 Nil)) = Cons 2 Nil;
+\end{granule}
+\item last: 
+\begin{granule}
+language GradedBase
+
+data List a = Cons a (List a) | Nil
+    
+data Maybe a = Just a | Nothing    
+    
+last : forall a . (List a) %0..Inf -> Maybe a 
+spec
+    last %0..Inf
+last Nil = Nothing;
+last (Cons y z) = 
+    (case z of
+        Nil -> last z;
+        Cons v w -> Just v)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+last (Cons 1 (Cons 2 Nil)) = Just 2;
+\end{granule}
+and Cartesian example(s):
+\begin{granule}
+last (Cons 1 Nil) = Just 1;
+\end{granule}
+\item length: 
+\begin{granule}
+language GradedBase 
+
+data List a = Cons a (List a) | Nil 
+    
+data N = S N | Z
+    
+length : forall a . List a %0..Inf -> N 
+spec
+    length %0..Inf
+length Nil = Z;
+length (Cons y z) = S (length z)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+length (Cons 1 (Cons 1 Nil)) = S (S Z);
+\end{granule}
+\item map: 
+\begin{granule}
+language GradedBase
+
+data List a = Nil | Cons a (List a) 
+    
+data Bool = True | False; 
+    
+neg : Bool %1..Inf -> Bool 
+neg True = False;
+neg False = True 
+    
+map : forall a b 
+    . (a % 1..Inf -> b) %0..Inf 
+    -> List a %1..Inf 
+    -> List b
+spec 
+    map % 0..Inf
+map x Nil = Nil;
+map x (Cons z u) = (Cons (x z)) ((map x) u)
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+map neg (Cons True Nil) = Cons False Nil;
+\end{granule}
+\item replicate5: 
+\begin{granule}
+language GradedBase
+
+data List a =  Cons a (List a) | Nil 
+
+replicate5 : forall { a : Type} . a %5 -> List a 
+replicate5 x = (Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) Nil))))
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+replicate5 1 = Cons 1 (Cons 1 (Cons 1 (Cons 1 (Cons 1 Nil))));
+\end{granule}
+\item replicate10: 
+\begin{granule}
+language GradedBase
+
+data List a =  Cons a (List a) | Nil 
+
+replicate10 : forall { a : Type} . a %10 -> List a 
+replicate10 x = (Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) Nil)))))))))
+\end{granule}
+with no Graded examples and Cartesian example(s);
+\begin{granule}
+replicate10 1 = (Cons 1 (Cons 1 (Cons 1 (Cons 1 (Cons 1 (Cons 1 (Cons 1 (Cons 1 (Cons 1 (Cons 1 Nil))))))))));
+\end{granule}
+\item replicateN: 
+\begin{granule}
+language GradedBase
+
+data List a =  Cons a (List a) | Nil 
+
+data N = S N | Z
+    
+replicateN : forall a 
+           . N %0..Inf 
+           -> a %0..Inf 
+           -> List a
+spec
+    replicateN % 0..Inf
+replicateN Z y = Nil;
+replicateN (S z) y = (Cons y) ((replicateN z) y)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+replicateN (S (S Z)) 2 = (Cons 2 (Cons 2 Nil));
+\end{granule}
+\item stutter:
+\begin{granule}
+language GradedBase
+
+data List a = Cons a (List a) | Nil
+
+stutter : forall a . List (a [2]) %1..Inf -> List a
+spec
+    stutter % 0..Inf
+stutter Nil = Nil;
+stutter (Cons [u] z) = (Cons u) ((Cons u) (stutter z))
+\end{granule}
+\item sum:
+\begin{granule}
+language GradedBase 
+
+data N = S N | Z 
+
+data List a = Cons a (List a) | Nil 
+
+fold : List N %0..Inf 
+     -> (N % 1..Inf 
+     -> N % 1..Inf -> N) %0..Inf 
+     -> N %0..Inf -> N 
+fold Nil f acc = acc;
+fold (Cons x xs) f acc =  fold xs f (f acc x)
+
+add : N %1..Inf -> N %1..Inf -> N
+add Z n2 = n2; 
+add (S n1) n2 = S (add n1 n2)
+
+sum : List N %0..Inf -> N 
+spec 
+    fold %0..Inf, add %0..Inf
+sum x = ((fold x) (\p -> \q -> (add p) q)) ((add Z) Z)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+sum (Cons (S Z) (Cons (S Z) Nil)) = (S (S Z));
+\end{granule}
+and Cartesian example(s):
+\begin{granule}
+sum (Cons (S Z) (Cons (S Z) (Cons (S Z) Nil))) = (S (S (S Z)));
+\end{granule}
+\end{enumerate}
+\subsection{Stream}
+\begin{enumerate}
+\item build: 
+\begin{granule}
+language CBN 
+language GradedBase
+
+data Stream a = Next a (Stream a) 
+
+ones : () %1..1 -> Stream Int
+ones () = Next 1 (ones ())
+
+head : forall a . Stream a %0..1 -> a 
+head (Next x xs) = x
+
+build : forall a . a %1..1 -> (Stream a) %1..1 -> Stream a
+build x y = (Next x) y
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+head (build 2 (ones ())) = 2;
+\end{granule}
+\item map: 
+\begin{granule}
+language CBN
+language GradedBase 
+
+data Stream a = Next a (Stream a) 
+
+data Bool = True | False
+
+trues : () %1..Inf -> Stream Bool
+trues () = Next True (trues ())
+
+neg : Bool %1..Inf -> Bool
+neg True = False; 
+neg False = True
+
+head : forall a . Stream a %0..Inf -> a 
+head (Next x xs) = x
+
+map : forall a b 
+    . Stream a %1..Inf 
+    -> (a %1..Inf -> b) %1..Inf 
+    -> Stream b
+spec 
+    map % 1..Inf
+map (Next z u) y = (Next (y z)) ((map_stream u) y)
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+head (map_stream (trues ()) neg) = False;
+\end{granule}
+\item take1: 
+\begin{granule}
+language CBN 
+language GradedBase 
+    
+data Stream a = Next a (Stream a) 
+
+data Bool = True | False
+    
+ones : () %1..1 -> Stream Int
+ones () = Next 1 (ones ())
+    
+head : forall a . (Stream a) %0..1 -> a
+head (Next x _) = x
+    
+take1 : forall a . Stream a %0..1 -> a 
+take1 (Next y z) = y
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+take1 (Next 2 (ones ())) = 2;
+\end{granule}
+\item take2: 
+\begin{granule}
+language CBN 
+language GradedBase 
+
+data Stream a = Next a (Stream a) 
+data Bool = True | False
+
+ones : () %1..1 -> Stream Int
+ones () = Next 1 (ones ())
+
+head : forall a . (Stream a) %0..1 -> a
+head (Next x _) = x
+
+take2 : forall a . Stream a %0..1 -> (a, a)
+take2 (Next y (Next u v)) = (u, y)
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+take2 (Next 2 (ones ())) = (2, 1);
+\end{granule}
+\item take3: 
+\begin{granule}
+language CBN 
+language GradedBase 
+
+data Stream a = Next a (Stream a) 
+
+data Bool = True | False
+
+ones : () %1..1 -> Stream Int
+ones () = Next 1 (ones ())
+
+head : forall a . (Stream a) %0..1 -> a
+head (Next x _) = x
+
+take3 : forall a . Stream a %0..1 -> (a, (a, a))
+take3 (Next y (Next u (Next w p))) = (y, (w, u))
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+take3 (Next 3 (Next 2 (ones ()))) = (3, (2, 1));
+\end{granule}
+\end{enumerate}
+\subsection{Bool}
+\begin{enumerate}
+\item neg: 
+\begin{granule}
+language GradedBase
+
+data Bool = True | False
+
+neg : Bool %1 -> Bool
+neg True = False;
+neg False = True
+\end{granule}
+with Graded example(s):
+\begin{granule}
+neg True = False;
+neg False = True;
+\end{granule}
+\item and: 
+\begin{granule}
+language GradedBase
+
+data Bool = True | False
+
+and : Bool %1 -> Bool %1 -> Bool
+and True True = True;
+and False True = False;
+and True False = False;
+and False False = False
+\end{granule}
+with Graded example(s):
+\begin{granule}
+and True True = True;
+and False True = False;
+and True False = False;
+and False False = False;
+\end{granule}
+\item impl: 
+\begin{granule}
+language GradedBase
+
+data Bool = True | False
+
+impl : Bool %1 -> Bool %1 -> Bool
+impl True True = True;
+impl True False = False;
+impl False True = True;
+impl False False = True
+\end{granule}
+with Graded example(s):
+\begin{granule}
+impl True True = True;
+impl True False = False;
+impl False True = True;
+impl False False = True;
+\end{granule}
+\item or: 
+\begin{granule}
+language GradedBase
+
+data Bool = True | False
+
+or : Bool %1 -> Bool %1 -> Bool
+or True True = True;
+or False True = True;
+or True False = True;
+or False False = False
+\end{granule}
+with Graded example(s):
+\begin{granule}
+or True True = True;
+or False True = True;
+or True False = True;
+or False False = False
+\end{granule}
+\item xor: 
+\begin{granule}
+language GradedBase
+
+data Bool = True | False
+
+xor : Bool %1 -> Bool %1 -> Bool
+xor True True = False;
+xor False True = True;
+xor True False = True;
+xor False False = False
+\end{granule}
+with Graded example(s):
+\begin{granule}
+xor True True = False;
+xor False True = True;
+xor True False = True;
+xor False False = False
+\end{granule}
+\end{enumerate}
+\subsection{Maybe}
+\begin{enumerate}
+\item bind: 
+\begin{granule}
+language GradedBase
+
+data Maybe a = Just a | Nothing
+
+data N = S N | Z
+
+data Bool = True | False; 
+
+isEven : N %1..Inf -> Maybe N  
+isEven Z = Nothing;
+isEven (S Z) = Just (S Z);
+isEven (S (S z)) = 
+    case isEven z of 
+        Nothing -> Nothing;
+        Just (S Z) -> Just (S Z)
+
+bind : forall a b 
+     . Maybe a %1..1 
+     -> (a %1..1 -> Maybe b) %0..1 
+     -> Maybe b
+bind Nothing y = Nothing;
+bind (Just z) y = y z
+\end{granule}
+with no Graded example(s) and Cartesian example(s):
+\begin{granule}
+bind (Just (S Z)) isEven = Just (S Z);
+\end{granule}
+\item fromMaybe: 
+\begin{granule}
+language GradedBase
+
+data Maybe a = Nothing | Just a
+
+fromMaybe : forall a . Maybe a %(1..1) -> a %(0..1) -> a
+fromMaybe Nothing y = y;
+fromMaybe (Just z) y = z
+\end{granule}
+with no Graded example(s) and Cartesian example(s):
+\begin{granule}
+fromMaybe  Nothing 1 = 1;
+fromMaybe (Just 1) 2 = 1;
+\end{granule}
+\item return: 
+\begin{granule}
+language GradedBase
+
+data Maybe a = Nothing | Just a
+
+return : forall a . a -> Maybe a
+return x = Just x
+\end{granule}
+\item isJust: 
+\begin{granule}
+language GradedBase
+
+data Maybe a = Just a | Nothing 
+
+data Bool = True | False 
+
+isJust : forall a . (Maybe a) %0..1 -> Bool
+isJust Nothing = False;
+isJust (Just y) = True
+\end{granule}
+with Graded example(s):
+\begin{granule}
+isJust (Just 1) = True;
+isJust Nothing = False;
+\end{granule}
+\item isNothing: 
+\begin{granule}
+language GradedBase
+
+data Maybe a = Just a | Nothing 
+    
+data Bool = True | False 
+    
+isNothing : forall a . (Maybe a) %0..1 -> Bool
+isNothing Nothing = True;
+isNothing (Just y) = False
+\end{granule}
+with Graded example(s):
+\begin{granule}
+isNothing (Just 1) = False;
+isNothing Nothing = True;
+\end{granule}
+\item map: 
+\begin{granule}
+language GradedBase
+
+data Maybe a = Nothing | Just a
+
+data N = S N | Z
+data Bool = True | False
+
+isOne : N %0..1 -> Bool 
+isOne (S Z) = True;
+isOne _ = False
+
+map : forall a b 
+    . (a -> b) %(0..1) 
+    -> (Maybe a) %(1..1) 
+    -> Maybe b
+map x Nothing = Nothing;
+map x (Just z) = Just (x z)
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+map isOne (Just (S Z)) = Just True;
+\end{granule}
+\item mplus: 
+\begin{granule}
+language GradedBase
+
+data Maybe a = Nothing | Just a
+
+mplus : forall a b 
+      . Maybe a %(0..1) 
+      -> Maybe b %(0..1) 
+      -> Maybe (a, b)
+mplus Nothing Nothing = Nothing;
+mplus (Just z) Nothing = Nothing;
+mplus Nothing (Just v) = Nothing;
+mplus (Just w) (Just v) = Just (w, v)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+mplus (Just 1) (Just 2) = Just (1, 2);
+\end{granule}
+\end{enumerate}
+\subsection{Nat}
+\begin{enumerate}
+\item isEven: 
+\begin{granule}
+language GradedBase 
+
+data N = S N | Z
+
+data Bool = True | False
+
+isEven : N %1..Inf -> Bool  
+spec 
+    isEven % 0..Inf
+isEven Z = True;
+isEven (S Z) = False;
+isEven (S (S z)) = isEven z
+\end{granule}
+with Graded example(s):
+\begin{granule}
+isEven (S (S Z)) = True;
+isEven (S (S (S Z))) = False;
+\end{granule}
+\item pred: 
+\begin{granule}
+language GradedBase 
+
+data N = S N | Z
+
+pred : N %1 -> N 
+pred Z = Z;
+pred (S y) = y
+\end{granule}
+with Graded example(s):
+\begin{granule}
+pred (S (S Z)) = (S Z);
+\end{granule}
+\item succ: 
+\begin{granule}
+language GradedBase 
+
+data N = S N | Z
+
+succ : N %1 -> N 
+succ x = S x
+\end{granule}
+with Graded example(s):
+\begin{granule}
+succ Z = (S Z);
+\end{granule}
+\item sum: 
+\begin{granule}
+language GradedBase 
+
+data N = S N | Z
+
+sum : N %1..Inf -> N %1..Inf -> N
+spec 
+    sum % 0..Inf
+sum Z y = y;
+sum (S z) y = S ((sum z) y)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+sum (S Z) (S Z) = (S (S Z));
+\end{granule}
+and Cartesian example(s):
+\begin{granule}
+sum (S Z) Z = (S Z); 
+sum (S (S (S (S Z)))) (S (S Z)) = (S (S (S (S (S (S Z))))));
+\end{granule}
+\end{enumerate}
+\subsection{Tree}
+\begin{enumerate}
+\item map: 
+\begin{granule}
+language GradedBase
+
+data Tree a = Leaf | Node (Tree a) a (Tree a)
+
+data Bool = True | False
+
+neg : Bool %1..Inf -> Bool
+neg True = False; 
+neg False = True
+
+map : forall a b 
+    . Tree a %1..Inf 
+    -> (a %1..Inf -> b) %0..Inf 
+    -> Tree b
+spec
+    map %0..Inf
+map Leaf y = Leaf;
+map (Node z u v) y = ((Node ((map z) y)) (y u)) ((map v) y)
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+map (Node Leaf True Leaf) neg = (Node Leaf False Leaf);
+\end{granule}
+\item sutter: 
+\begin{granule}
+language GradedBase
+
+data Tree a = Leaf | Node (Tree a) a (Tree a)
+
+stutter : forall a b . Tree (a [2]) %1..Inf -> Tree (a, a)
+spec
+    stutter %0..Inf
+stutter Leaf = Leaf;
+stutter (Node y [v] u) = ((Node (stutter y)) (v, v)) (stutter u)
+\end{granule}
+with no Graded examples and Cartesian example(s):
+\begin{granule}
+stutter (Node Leaf [1] Leaf) = (Node Leaf (1, 1) Leaf);
+\end{granule}
+\item sum: 
+\begin{granule}
+language GradedBase
+
+data N = S N | Z
+:W
+data Tree a = Leaf | Node (Tree a) a (Tree a)
+
+add : N %1..Inf -> N %1..Inf -> N
+add Z y = y;
+add (S z) y = S ((add z) y)
+
+fold : Tree N %0..Inf 
+     -> (N %1..Inf -> N %1..Inf -> N) %0..Inf
+     -> N %0..Inf
+     -> N 
+fold Leaf f acc = acc;
+fold (Node l x r) f acc = 
+    fold l f (f x (fold r f acc))
+
+sum : forall a . Tree N %0..Inf -> N
+spec 
+    fold %1..Inf, add %1..Inf
+sum x = (add Z) (((fold x) (\p -> \q -> (add p) q)) Z)
+\end{granule}
+with Graded example(s):
+\begin{granule}
+sum Leaf = Z;
+sum (Node Leaf (S (S Z)) Leaf) = (S (S Z));
+sum (Node (Node Leaf (S Z) (Node Leaf (S Z) Leaf)) (S (S Z)) Leaf) = (S (S (S (S Z))));
+\end{granule}
+\end{enumerate}
+\subsection{Misc}
+\begin{enumerate}
+\item compose: 
+\begin{granule}
+language GradedBase
+
+comp : forall {k : Coeffect, n m : k, a b c : Type} 
+     . (a %m -> b) %n 
+     -> (b %n -> c) %(1 : k) 
+     -> a %(n * m) 
+     -> c
+comp x y z = y (x z)
+\end{granule}
+\item copy: 
+\begin{granule}
+language GradedBase
+
+copy : forall a . a %2 -> (a, a)
+copy x = (x, x)
+\end{granule}
+\item push:
+\begin{granule}
+language GradedBase
+
+push : forall {a b : Type, k : Coeffect, c : k} 
+     . (a -> b) %c 
+     -> a %c 
+     -> b [c]
+push x y = [x y]
+\end{granule}
+\end{enumerate}

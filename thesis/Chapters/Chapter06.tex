@@ -7,7 +7,7 @@ type systems' properties to build two efficient synthesis tools, targeting two
 common flavours of graded type system. In summary, in our work we have succeeded
 in: 
 \begin{itemize}
-    \item Building several core calculi for a two varities of quantitative type
+    \item Building several core calculi for a two varieties of quantitative type
           systems, encompassing the major approaches in the literature, with
           both styles differing in expressivity and imposing unique
           requirements. 
@@ -18,8 +18,7 @@ in:
           reducing the program synthesis search space.  
     \item Showing that programs require fewer examples than in a purely
           example-driven synthesis setting, such as \textsc{MYTH}. 
-    \item Providing an alternative approach to generating a class of distributive 
-          graded programs, based on a generic programming methodology. 
+    \item Providing an alternative approach to generating graded combinators, based on a generic programming methodology. 
     \item Adapting our synthesis technique to Linear Haskell, showing the
           viability of our framework as a foundation for building synthesis
           tools for other quantitative type systems. 
@@ -67,7 +66,7 @@ i.e., $r$ must overapproximate one use of $x$ plus the future use of
 $x$ given by the existential $s$.
 
 Our comparative evaluation of the additive and subtractive schemes in
-section~\ref{section:evaluation} showed that these, and other associated
+Section~\ref{sec:linear-base-evaluation} showed that these, and other associated
 constraints from the subtractive approach, are larger, typically more complex,
 and are discharged more frequently than their counterparts in the additive
 system (every time a variable usage is being considered in the above case).
@@ -78,25 +77,26 @@ grades, influenced our decision to adopt the additive scheme, especially as we
 considered much more complex programs than in the calculi of
 Chapter~\ref{chapter:core}, e.g., targeting recursion.
 
+
 \subsection{SMT Solving}
 Related to the above, there is scope for improving the interaction between the
 synthesis tool and the SMT solver, to make synthesis more efficient. Both
 evaluations showed that the bulk of synthesis time is spent solving constraints
 in the SMT solver. Making this interaction more streamlined is therefore
 particularly appealing. One approach would be to run an ``online'' SMT solving
-procedure. This would reduce the overhead of discharching constraints to the
+procedure. This would reduce the overhead of discharging constraints to the
 solver by eliminating the need to re-solve already solved constraints. 
 
 Alternatively, one could imagine implementing custom solvers for the more
 commonly used semirings. From our lists of benchmarking examples in
-Figures~\ref{} and Figure~\ref{}, we can see the natural number, and intervals
-over the natural numbers semirings appear frequently. 
+Tables~\ref{fig:list-of-types} and~\ref{tab:problems}, we can see the natural
+number, and intervals over the natural numbers semirings appear frequently, more
+than any other semiring. An SMT solver which focuses purely on solving in these
+semirings, sacrificing the generality provided by solvers such as Z3~\cite{z3},
+may be a worthwhile avenue of exploration. 
 
-\subsection{Semiring-based Pruning}
-One area left mostly unexplored, but which 
 
-
-\subsection{Genrealised Algebraic Data Types}
+\subsection{Generalised Algebraic Data Types}
 A logical next step is to incorporate GADTs (Generalised ADTs),
 i.e., indexed types,  into the synthesis algorithm.
 Granule provides support for user-defined GADTs, and the interaction
@@ -132,17 +132,19 @@ vmap f (Cons x xs) = Cons (f x) (vmap f xs)
 \end{granule}
 The latter type not only provides us with a greater opportunity to prune
 grade-violating programs, its type is also much more descriptive of the user's intent.
-Adapting our approach to GADTs is future work, and mostly consists in extending
-the typing for \textbf{case} to handle GADT specialisation.
+Adapting our approach to GADTs is future work, and mostly consists of extending
+the typing for our synthesis rule for \textbf{case} statements to handle GADT specialisation.
 
 GADTs are sometimes referred to as \emph{lightweight} dependent types. Dependent
 type systems allow arbitrary program properties to be expressed and verified
-during type checking, with types being indexed by arbitary program terms.
-Several works have endeavored to integrate fully-dependent types into a
-quantiative setting such as~\cite{}. The latter of these, \textsc{GERTY}, is
-based on Granule and has a prototype implementation, making it a particularly
-appealing target for experminting with the synthesis in a fully-dependent graded
-setting, using the foundations laid by the work in this thesis.
+during type checking, with types being indexed by arbitrary program terms.
+Several works have endeavoured to integrate fully-dependent types into a
+quantitative setting~\citep{DBLP:journals/pacmpl/ChoudhuryEEW21,
+10.1145/3607862, McBride2016, 10.1145/2676726.2676969}. One such
+examples,~\citet{DBLP:conf/esop/MoonEO21}'s \textsc{GERTY}, is based on Granule
+and has a prototype implementation, making it a particularly appealing target
+for experimenting with the synthesis in a fully-dependent graded setting, using
+the foundations laid by the work in this thesis.
 
 
 \subsection{Large Language Models}
@@ -155,3 +157,22 @@ by grades). Future approaches may combine both LLM approaches with deductive
 approaches, where the logical engine of the deductive approach can guide
 prediction. Exploring this is further work and a general opportunity and
 challenge for the deductive synthesis community.
+
+
+\section{Final Remarks}
+Type-directed program synthesis has been long been an attractive field in
+computer science partially due to the potential it offers: the ability to write
+programs that are correct by construction, with significant help from the
+computer. 
+
+We feel that type-directed program synthesis complements linear and graded types
+very well: as richer types further constrain the number of possible inhabitants,
+theoretically there is less work to be done by the computer to identify the
+program which behaves according to the user's intent.
+
+Programming with linear and graded types can require significantly more
+forethought than standard functional programming, and programs which seem
+correct at first glance to a user might actually be resource-violating. Our hope
+is that the tools developed in this work may be useful in reducing this
+cognitive overhead, and that the ideas we have developed may be useful to those
+in both the program synthesis, and the quantitative types communities.

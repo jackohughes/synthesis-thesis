@@ -11,11 +11,31 @@
 
 \chapter*{Abstract}
 A type-directed program synthesis tool can leverage the information provided by
-resourceful types (linear and graded types) to prune ill-resourced programs from
-the search space of candidate programs. Therefore, barring any other
-specification information, a synthesise tool will synthesise a target program
-(if one exists) more quickly when given a type specification which includes
-resourceful types than when given an equivalent non-resourceful type.
+types to prune ill-resourced programs from the search space of candidate
+programs. Graded type systems are a class of \textit{resourceful} type system
+for fine-grained quantitative reasoning about data-flow in programs. Tracing
+their roots from Linear types, the use of resource annotations (or
+\textit{grades}) on data, allows a programmer to express structural or semantic
+properties of their program at the type level. Such systems have become
+increasingly popular in recent years, mainly for the expressive power that they
+offer to programmers --- judicious use of grades in type specifications
+significantly reduces the number of typeable programs. These additional
+constraints on types lend themselves naturally to type-directed program
+synthesis, where this information can be exploited to constrain the search space
+of programs even further than in standard type systems. We present an approach
+to program synthesis for linear and graded type systems, where grades form an
+arbitrary pre-ordered semiring. Harnessing this grade information in synthesis
+is non-trivial, and we explore the issues involved in designing and implementing
+a resource-aware program synthesis tool, culminating in an efficient and
+expressive program synthesis tool for the research programming language Granule,
+which uses a graded type system. We show that by harnessing grades in synthesis,
+the majority of our benchmarking synthesis problems (many of which involve
+recursive functions over recursive ADTs) require less exploration of the
+synthesis search space than a purely type-driven approach and with fewer needed
+input-output examples. Our type-and-graded-directed approach is demonstrated in
+the Granule but we also adapt it for synthesising Haskell programs using GHC's
+linear types extension, demonstrating the versatility of our approach to
+resourceful program synthesis. 
 
 
 \vfill
