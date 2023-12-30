@@ -53,24 +53,23 @@ application of typing rules. The application of these rules forms a tree
 structure known as a \textit{typing derivation}.
 
 \section{Linear and Substructural Logics}
-Linear logic was introduced as a way of being more descriptive
-about the properties of a derivation in intuitionistic logic. In type systems
-such as STLC, the properties of
-\textit{weakening}, \textit{contraction}, and \textit{exchange} are assumed
+Linear logic allows one to be more descriptive about the properties of a
+derivation in intuitionistic logic. In type systems such as STLC, the properties
+of \textit{weakening}, \textit{contraction}, and \textit{exchange} are assumed
 implicitly. These are typing rules which are \textit{structural} as they
 determine how the context may be used rather than being directed by the syntax.
 Weakening is a rule which allows terms that are not needed in a typing
 derivation to be discarded. Contraction works as a dual to weakening, allowing
 an assumption in the context to be used more than once. Finally, exchange allows
-assumptions in a context to arbitrarily re-ordered. The rules themselves are provided
-by Figure~\ref{fig:substructural}.
+assumptions in a context to arbitrarily re-ordered. The rules themselves are
+provided by Figure~\ref{fig:substructural}.
 
 \begin{figure}[H]
   \begin{gather*}
   \begin{array}{c}
     \inferrule*[right=Weakening]{\Gamma \vdash t : B}{\Gamma, x : A \vdash t : B}
     \;\;\;\;
-    \inferrule*[right=Contraction]{\Gamma, x : A, y : A \vdash t : B}{\Gamma, x : A \vdash t : B}
+    \inferrule*[right=Contraction]{\Gamma, x : A, y : A \vdash t : B}{\Gamma, x : A \vdash [x/y] t : B}
     \\[0.9em]
     \inferrule*[right=Exchange]{\Gamma_{1}, y : B, x : A, \Gamma_{2} \vdash t : C} {\Gamma_{1}, x : A, y : B, \Gamma_{2} \vdash t : C}
     \end{array}
@@ -80,24 +79,26 @@ by Figure~\ref{fig:substructural}.
 \end{figure}
 
 Linear logic is thus known as a \textit{substructural} logic because it lacks
-the weakening and contraction rules, while permitting exchange. The disallowance
-of these rules means that in order to construct a typing derivation, each
-assumption must be used exactly once: arbitrarily copying or discarding values
-is disallowed, excluding a vast number of programs from being typeable. 
+the weakening and contraction rules, while permitting exchange. The exclusion
+and inadmissibility of these rules means that in order to construct a typing
+derivation, each assumption must be used exactly once: arbitrarily copying or
+discarding hypotheses is disallowed, excluding a vast number of programs from being
+typeable. 
 
 As one can imagine, the different combinations of permitted structural rules
 yields various other substructural logics. Affine logic permits
 exchange and weakening, but disallows contraction, resulting in system where
 values may be used \emph{at most}  once. Relevant logic only disallows
-weakening (\emph{at least} once), while Ordered logic disallows all
-three (values must be used exactly once and in order).
+weakening (hypotheses can be used \emph{at least} once), while Ordered logic disallows all
+three (hypotheses must be used exactly once and in order).
 
 \subsection{The Linear $\lambda$-Calculus}
 \label{sec:linear-lambda-calc}
-By only permitting the exchange structural rule, we can integrate
-linear logic into STLC, yielding a \emph{linear}
-$\lambda-$calculus. This provides us with a foundation for programming with
-substructural logics, which we will later refine with graded types. 
+Our focus is on the implication fragment of linear logic. By permitting only the
+exchange structural rule, we can integrate linear logic into STLC, yielding a
+\emph{linear} $\lambda-$calculus. This provides us with a foundation for
+programming with substructural logics, which we will later refine with graded
+types. 
 
 The types of the linear $\lambda$-calculus are given by the grammar: 
 \begin{align*}
@@ -105,10 +106,26 @@ The types of the linear $\lambda$-calculus are given by the grammar:
          [[ A ]] \multimap [[ B ]]
   {\small{\tag{types}}}
 \end{align*}
-Like STLC, we have one type: the function type. Here, however, our function type
-is a \emph{linear} function arrow (denoted by $\multimap$).\footnote{Although
-Granule code uses $\rightarrow$ syntax rather than $\multimap$ for linear
-functions for the sake of familiarity with standard functional languages}.
+Like STLC, we have one type former: the function type. Here, however, our function type
+is a \emph{linear} function arrow (denoted by $\multimap$).
+
+%\footnote{Although
+%Granule code uses $\rightarrow$ syntax rather than $\multimap$ for linear
+%functions for the sake of familiarity with standard functional languages}
+
+
+Typing judgments are of the form $[[ G |- t : A ]]$, where $[[ G ]]$ ranges over
+contexts of assumptions:
+\begin{equation*}
+  [[ G ]] ::= \emptyset
+  \mid [[ G , x : A ]]
+\tag{contexts}
+\end{equation*}
+
+Thus, a context may be empty $\emptyset$, or extended with a linear assumption $[[
+x : A ]]$. Throughout, comma denotes disjoint context concatenation as well as 
+context extension. We treat contexts as unordered lists, thus making the exchange 
+rule admissible. 
 
 The syntax of terms is the same as STLC, given by:
 
@@ -119,18 +136,10 @@ The syntax of terms is the same as STLC, given by:
     \mid [[ t1 t2 ]]
   {\small{\tag{terms}}}
 \end{align*}
+That is, a term is either a linear variable usage $x$, an abstraction which binds a
+linear variable $x$ in the term $t$, or an application of the argument $t1$ to $t2$. 
 
-Typing judgments are of the form $[[ G |- t : A ]]$, where $[[ G ]]$ ranges over
-contexts of assumptions:
-\begin{equation*}
-  [[ G ]] ::= \emptyset
-  \mid [[ G , x : A ]]
-\tag{contexts}
-\end{equation*}
-Thus, a context may be empty $\emptyset$, extended with a linear assumption $[[
-x : A ]]$. Throughout, comma denotes disjoint context concatenation.
-
-\begin{figure}[H]
+\begin{figure}[t]
 \begin{gather*}
     \begin{array}{c}
 \inferrule*[right = Var]
@@ -151,15 +160,16 @@ x : A ]]$. Throughout, comma denotes disjoint context concatenation.
 \caption{Typing rules for the linear $\lambda$-calculus}
 \label{fig:lin-lambda-calc}
 \end{figure}
-Figure~\ref{fig:lin-lambda-calc} defines the typing rules. Linear variables are
-typed in a singleton context (\textsc{Var}). Abstraction (\textsc{Abs}) binds a
-fresh linear variable which is used to type the premise. Application
-(\textsc{App}) combines the usages across both premises through the use of
-\textit{context addition}~\eqref{def:contextAdd}. Context addition provides an analogue to
-contraction, combining contexts that have come from typing multiple sub-terms in
-a rule. Context addition, written $[[ G1 + G2]]$, is undefined if $[[ G1 ]]$ and
-$[[ G2 ]]$ overlap in their assumptions, i.e. a linear assumption may not appear in both 
-sides of the addition. 
+Figure~\ref{fig:lin-lambda-calc} relates the terms to their types via typing
+rules. Linear variables are typed in a singleton context (\textsc{Var}).
+Abstraction (\textsc{Abs}) binds a linear variable which is used to type the
+premise. Application (\textsc{App}) combines the usages across both premises
+through the use of \textit{context addition}~\eqref{def:contextAdd}. Context
+addition provides an analogue to contraction, combining contexts that have come
+from typing multiple sub-terms in a rule. Context addition, written $[[ G1 +
+G2]]$, is undefined if $[[ G1 ]]$ and $[[ G2 ]]$ overlap in their assumptions,
+i.e. a linear assumption may not appear in both sides of the addition. This is 
+equivalent to concatenation on disjoint contexts.
 \begin{definition}[Linear context addition]\label{def:contextAddLin}
   \begin{align*}
       \setlength{\arraycolsep}{0.1em}
@@ -176,6 +186,28 @@ sides of the addition.
 This leaves us with a very simple resourceful typing calculus, which serves as
 the building block for further refinement.
 
+An example of a program typeable in this calculus is the combinator for function
+composition: 
+\begin{align*}
+  \tag{well-typed}
+\begin{array}{ll}
+    f : (A \rightarrow B) \rightarrow (B \rightarrow C) \Rightarrow A \Rightarrow C &
+    \\
+    f = \lambda x. \lambda y. \lambda z. y\ (x\ z) &
+\end{array}  
+\end{align*}
+Here, each argument is used exactly once in body of the innermost lambda, satisfying 
+linearity. In contrast, the $K$ combinator from SKI combinatory logic is not typeable:
+\begin{align*}
+  \tag{ill-typed}
+\begin{array}{ll}
+    k : A \rightarrow B \rightarrow A &
+    \\
+    k = \lambda x. \lambda y. x &
+\end{array}  
+\end{align*}
+as $y$ is discarded in the body of the abstraction, violating linearity.
+
 \section{From Linearity to Grades}
 
 Now that we have seen the linear $\lambda$-calculus itself, we are ready to
@@ -184,19 +216,23 @@ define a graded type system. We now present two calculi, each based on the
 differing view of graded types mentioned at the top of this chapter. The first
 directly follows from the calculus in~\ref{sec:linear-lambda-calc}, merely
 extending it with a \emph{graded modal type}. The second reflects the other
-approach to graded type systems, where we do away with the underlying linear
-structure. 
+approach to graded type systems where instead of the underlying linear
+structure, grades are introduced via the function type. 
 
 \subsection{The Graded Linear $\lambda$-calculus}
 \label{sec:linear-base}
 We now define a core type system, based on the linear $\lambda$-calculus of
 section~\ref{sec:linear-lambda-calc}, extended with a graded modal type. This
 calculus is equivalent to the core calculus of Granule,
-\textsc{GrMini}~\citep{DBLP:journals/pacmpl/OrchardLE19}. Granule's full type
-system extends this graded linear core with polymorphism, algebraic data types,
-indexed types, pattern matching, and recursion. We refer to the system in this
-section as the \textit{graded linear $\lambda$-calculus}, reflecting the
-underlying linear structure of the system.
+\textsc{GrMini}~\citep{DBLP:journals/pacmpl/OrchardLE19}, as well as the calculi
+of~\citet{brunel2014core} and~\citet{DBLP:conf/icfp/GaboardiKOBU16} (minus
+graded monads). We refer to the system in this section as the \textit{graded
+linear $\lambda$-calculus}, reflecting the underlying linear structure of the
+system.
+
+% Granule's full type
+% system extends this graded linear core with polymorphism, algebraic data types,
+% indexed types, pattern matching, and recursion.
 
 This system forms the basis of the target language for our synthesis tool in
 Chapter~\ref{chapter:core}, although we extend it with some basic types for 
@@ -211,27 +247,12 @@ The types of the graded linear $\lambda$-calculus are given by:
 \end{align*}
 where the type $\Box_{r} A$ is an indexed family of type operators where $r$ is
 a \textit{grade} ranging over the elements of a pre-ordered semiring
-$({\mathcal{R}}, {*}, {1}, {+}, {0}, {\sqsubseteq})$ parametrising the calculus
-(where $\ast$ and $+$ are monotonic with respect to the pre-order
-$\sqsubseteq$). 
-The syntax of terms provides the elimination and introduction
-forms:
-\begin{align*}
-\hspace{-0.8em} [[ t ]] ::= \;
-       & [[ x ]]
-  \mid [[ \x . t ]]
-  \mid [[ t1 t2 ]]
-  \mid [[ [t] ]]
-  \mid [[ let [ x ] = t1 in t2 ]]
-{\small{\tag{terms}}}
-\end{align*}
-In addition the the terms of the linear $\lambda$-calculus, we also have the
-construct $[[ [t] ]]$ which introduces a graded modal type $[[ [] r A
-]]$ by `promoting' a term $t$ to the graded modality, and it's dual $[[ let [x] = t1
-in t2 ]]$ eliminates a graded modal value $[[ t1 ]]$, binding a graded variable $x$
-in scope of $[[ t2 ]]$. The typing rules relate these terms to types.
+$({\mathcal{R}}, \cdot, {1}, {+}, {0}, {\sqsubseteq})$ parametrising the
+calculus (where $\cdot$ and $+$ are monotonic operations (which may be partial)
+with respect to the pre-order $\sqsubseteq$). 
 
-As before, typing judgments are of the form $[[ G |- t : A ]]$, where $[[ G ]]$ ranges over contexts:
+As before, typing judgments are of the form $[[ G |- t : A ]]$, where $[[ G ]]$
+ranges over contexts:
 \begin{equation*}
   [[ G ]] ::= \emptyset
   \mid [[ G , x : A ]]
@@ -248,7 +269,8 @@ grading. As with the linear $\lambda$-calculus, context
 addition~\eqref{def:contextAdd} combines the contexts used to provide multiple
 sub-terms. However, our new definition includes an extra case for dealing with
 graded assumptions appearing in both contexts, which are combined
-via the semiring $+$ of their grades.
+via the semiring $+$ of their grades. Note that this is again a partial definition
+where addition may be undefined.
 
 \begin{definition}[Graded linear context addition]\label{def:contextAdd}
 
@@ -260,22 +282,23 @@ via the semiring $+$ of their grades.
     [[ (G, x : A) + G' ]] & = [[ (G + G'), x : A ]] \quad \text{iff} \,\; x
     \not\in | [[ G' ]] | \\
     [[ G + (G', x : A) ]] & = [[ (G + G'), x : A ]] \quad \text{iff} \,\; x \not\in | [[ G]] | \\
+    [[ (G, x : [ A ] r) + G' ]] &= [[ (G + G'), x : [A ] r ]] \quad \text{iff} \,\; x \not\in | [[ G']] | \\
+    [[ G + (G', x : [ A ] r) ]]  &= [[ (G + G'), x : [ A ] r ]] \quad \text{iff} \,\; x \not\in | [[ G]] | \\
     [[ (G, x : [ A ] r) + (G', x : [ A ] s) ]] & = [[ (G + G'), x : [ A ] (r + s) ]]
     \end{array}
   \end{gather*}
 
 Note that this is a declarative specification of context addition. Graded
 assumptions may appear in any position in $\Gamma$ and $\Gamma'$ as witnessed by
-the algorithmic specification where for all $[[ G1 ]], [[ G2 ]]$
-  \emph{context addition} is defined
-as follows by ordered cases matching inductively on the structure of
-$[[ G2 ]]$, where $[[G1 + G2]] = $
+the algorithmic specification where for all $[[ G1 ]], [[ G2 ]]$ context
+addition is defined as follows by ordered cases matching inductively on the
+structure of $[[ G2 ]]$, where $[[G1 + G2]] = $
 \begin{align*}
 \left\{\begin{matrix}
     \begin{array}{ll}
     [[G1]] &
-     [[G2]] = \emptyset
-             \\
+     [[G2]] = \emptyset \\
+     ([[ G1 ]] + [[ G2' ]]), [[ x : [ A ] r ]]  & [[ G2 ]] = [[ G2', x : [ A ] r ]]\ \wedge\ [[ x : [A] r ]] \notin [[ G1 ]] \\ 
       (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
 [[ G2]] = [[G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']]  \\
  ([[G1]] + [[G2']]), [[x : A]] & [[G2]] = [[G2', x : A]]\ \wedge\  [[x
@@ -284,6 +307,28 @@ $[[ G2 ]]$, where $[[G1 + G2]] = $
   \end{matrix}\right.
 \end{align*}
 \end{definition}
+For example, the context addition of $x :_4 A, y :_3 B$ and $x :_2 A, y :_5 B$
+would yield a context $x :_6 A, y :_8 B$ (using the definition of $+$ from the
+natural numbers semiring). However, the context addition of $x : A, y :_2 B$ and
+$x : A, y :_3 B$ is undefined, as the linear assumption $x$ is present in both
+sides of the addition.
+
+The terms of the language are given by:
+\begin{align*}
+\hspace{-0.8em} [[ t ]] ::= \;
+       & [[ x ]]
+  \mid [[ \x . t ]]
+  \mid [[ t1 t2 ]]
+  \mid [[ [t] ]]
+  \mid [[ let [ x ] = t1 in t2 ]]
+{\small{\tag{terms}}}
+\end{align*}
+In addition to the the terms of the linear $\lambda$-calculus, we also have the
+construct $[[ [t] ]]$ which introduces a graded modal type $[[ [] r A
+]]$ by `promoting' a term $t$ to the graded modality, and it's dual $[[ let [x] = t1
+in t2 ]]$ eliminates a graded modal value $[[ t1 ]]$, binding a graded variable $x$
+in scope of $[[ t2 ]]$. The typing rules relate these terms to types.
+
 
 \begin{figure}[H]
 \hspace{-0.5em}
@@ -332,32 +377,63 @@ $[[ G2 ]]$, where $[[G1 + G2]] = $
 
 
 Figure~\ref{fig:typing} gives the typing rules. The $\textsc{Weak}$ rule
-captures weakening of assumptions graded by $0$ (where $[[ [ D , 0 ] ]]$ denotes
-a context containing only graded assumptions graded by $0$). Context addition
-and \textsc{Weak} together therefore provide the rules of substructural rules of
-contraction and weakening. Dereliction ($\textsc{Der}$), allows a linear
-assumption to be converted to a graded assumption with grade $1$. Grade
-approximation is captured by the $\textsc{Approx}$ rule, which allows a grade
-$s$ to be converted to another grade $r$, providing that $r$
-\textit{approximates} $s$, where the relation $\sqsubseteq$ is the pre-order
-provided with the semiring. This relation is occasionally lifted pointwise to
-contexts: we write $[[ G <<= G' ]]$ to mean that $[[ G' ]]$ overapproximates $[[
-G ]]$ meaning that for all $[[ (x : [A] r) ]] \in [[ G ]]$ then $[[ (x : [A] r')
-]] \in [[ G' ]]$ and $[[ r <<= r' ]]$.
+captures weakening of assumptions graded by $0$, where $[[ [ D , 0 ] ]]$ denotes
+a context containing only graded assumptions graded by $0$, a predicate on
+contexts given by Definition~\ref{def:zeroedContexts}: 
+\begin{definition}
+  \label{def:zeroedContexts}
+  For all contexts $[[ G ]]$,   
+\begin{align*}
+    \emptyset = \emptyset
+    \qquad\qquad
+    [[ G, x : [A] r  ]] = [[ [ G, 0 ] ]], [[ x : [ A ] r ]] \text{iff} r \sqsubseteq 0
+    \qquad\qquad
+   [[ G, x : A ]] =\ \perp
+\end{align*}
+\end{definition}
 
-Introduction and elimination of the graded modality
-is provided by the $\textsc{Pr}$ and $\textsc{Let}$ rules respectively. The
-$\textsc{Pr}$ rule propagates the grade $r$ to the assumptions through
-\emph{scalar multiplication} of $[[G]]$ by $r$ where every assumption in $[[ G
-]]$ must already be graded (written $[[ [ G ] ]]$ in the rule\footnote{$[[ [ G ]
-]]$ here can be thought of as a partial operation on contexts, equivalent to the
-identity when $[[ G ]]$ consists solely of graded assumptions, and undefined if it does not.}), given by Definition~\ref{def:scalar}.
+Context addition and \textsc{Weak} together therefore provide the rules of
+substructural rules of contraction and weakening for graded variables.
+Dereliction ($\textsc{Der}$), allows a linear assumption to be converted to a
+graded assumption with grade $1$. 
+
+We allow grade \textit{approximation} via their resource algebras through the
+application of the $\textsc{Approx}$ rule. A grade $s$ may be converted to
+another grade $r$, providing that $r$ \textit{approximates} $s$, where the
+relation $\sqsubseteq$ is the pre-order provided with the semiring. This
+relation is occasionally lifted pointwise to contexts: we write $[[ G <<= G' ]]$
+to mean that $[[ G' ]]$ overapproximates $[[ G ]]$ meaning that for all $[[ (x :
+[A] r) ]] \in [[ G ]]$ then $[[ (x : [A] r') ]] \in [[ G' ]]$ and $[[ r <<= r'
+]]$. This relation ignores linear assumptions in $[[G]]$ and $[[G']]$.
+
+Introduction and elimination of the graded modality is provided by the
+$\textsc{Pr}$ and $\textsc{Let}$ rules respectively. The $\textsc{Pr}$ rule
+propagates the grade $r$ to the assumptions through \emph{scalar multiplication}
+of $[[G]]$ by $r$ where every assumption in $[[ G ]]$ must already be graded.
+Definition~\ref{def:gradedContext} defines a predicate on $[[ G ]]$ in the form
+of a partial operation which ensures that $[[ G ]]$ contain only graded
+variables (written $[[ [ G ] ]]$):
+\begin{definition}[Solely graded contexts]
+  \label{def:gradedContext}
+For all contexts $[[ G ]]$, $ [[ [G] ]]$ is defined:
+\begin{align*}
+    \emptyset = \emptyset
+    \qquad\qquad
+    [[ G, x : [A] r  ]] = [[ [ G ] ]], [[ x : [ A ] r ]]
+    \qquad\qquad
+   [[ G, x : A ]] =\ \perp
+\end{align*}
+When an assumption in $[[ [G] ]]$ is graded, the identity is returned, otherwise 
+(i.e. if an assumption is linear) the operation is undefined.
+\end{definition}
+Scalar multiplication is then given by:
+Definition~\ref{def:scalar}.
 %
 %
 \begin{definition}[Scalar context multiplication]
   \label{def:scalar}
- A context which consists solely of graded assumptions can be multiplied by a
- semiring grade $r \in \mathcal{R}$
+ A context which consists solely of graded assumptions, i.e. $[[ [G] ]]$, can be
+ multiplied by a semiring grade $r \in \mathcal{R}$
 \begin{align*}
    [[ r * . ]] = \emptyset
     \qquad\qquad
@@ -386,21 +462,30 @@ by the semiring of natural numbers.
 s & : [[ (A -o (B -o C)) -o {(A -o B) -o ({[] 2 A} -o C)} ]] \\
 s & = [[ \x . {\y . {\z' . {let [ z ] = z' in {(x z) (y z)}}}} ]]
 \end{align*}
-The graded modal value $z'$ captures the `capability' for a value
+The graded modal value $z'$ captures the capability for a value
 of type $A$ to be used twice. This capability is made available by eliminating
 $\Box$ (via \textbf{let}) to the variable $z$, which has
-grade $2$ in the scope of the body.
+grade $2$ in the scope of the body. 
+% The corresponding type derivation for 
+% this term is:
+% \begin{align*}
+%   \inferrule*[]
+%     {}
+%     {}
+% \end{align*}
 \end{example}
 
 \subsection{The Fully Graded $\lambda$-calculus}
 \label{sec:graded-base}
+As mentioned before, 
+
 We now define a core calculus for a fully graded type system, where grades
 permeate the entire program, drawing from the coeffect calculus of
 \citet{petricek2014coeffects}, Quantitative Type Theory (QTT) by
 \citet{McBride2016} and refined further by \citet{quantitative-type-theory}
 (although we omit dependent types from our language), the calculus of
 \citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type
-theories~\citep{quantitative-type-theory,DBLP:conf/esop/MoonEO21}. Similar
+theories,such as~\citet{DBLP:conf/esop/MoonEO21}. Similar
 systems also form the basis of the core of the linear types extension to
 Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}. We
 refer to this system as the \textit{fully graded $\lambda$-calculus}.
@@ -414,9 +499,23 @@ The syntax of types is given by:
 \end{align*}
 where the function arrow $[[ A ^ r -> B ]]$ annotates the input type with a
 \emph{grade} $[[ r ]]$ which is again drawn from a pre-ordered semiring
-$(\mathcal{R}, {\ast}, {1}, {+}, {0}, \sqsubseteq)$ parametrising the calculus.
+$(\mathcal{R}, {\cdot}, {1}, {+}, {0}, \sqsubseteq)$ parametrising the calculus.
 The graded necessity modality $[[ [] r A ]]$ is similarly annotated by the grade
 $[[ r ]]$ being an element of the semiring. 
+
+Typing judgements have
+the same form as Section~\ref{sec:linear-base}, however, variable contexts are
+instead given by: 
+\begin{equation*}
+  [[ D ]], [[ G ]] ::= \emptyset
+  \mid [[ G , x : [ A ] r ]]
+\tag{\textit{contexts}}
+\end{equation*}
+That is, a context may be empty $\emptyset$ or extended with a \textit{graded}
+assumption $ [[ x : [A] r ]]$, which must be used in a way which adheres to the
+constraints of the grade $[[ r ]]$. Note that we no longer include linear
+assumptions as part of our contexts. As before, structural exchange is
+permitted, allowing a context to be arbitrarily reordered. 
 
 The syntax of terms is given as:
 %
@@ -431,20 +530,8 @@ The syntax of terms is given as:
 {\small{\tag{\textit{terms} }}}
 \end{align*}
 %
-Terms comprise the $\lambda$-calculus, extended with the \textit{promotion}
-construct [t] as seen in Section~\ref{sec:linear-base}. Typing judgements have
-the same form as Section~\ref{sec:linear-base}, however, variable contexts are
-instead given by: 
-\begin{equation*}
-  [[ D ]], [[ G ]] ::= \emptyset
-  \mid [[ G , x : [ A ] r ]]
-\tag{\textit{contexts}}
-\end{equation*}
-That is, a context may be empty $\emptyset$ or extended with a \textit{graded}
-assumption $ [[ x : [A] r ]]$, which must be used in a way which adheres to the
-constraints of the grade $[[ r ]]$. As before, structural exchange is permitted,
-allowing a context to be arbitrarily reordered. 
-
+As before, terms comprise the $\lambda$-calculus, extended with the \textit{promotion}
+construct [t] as seen in Section~\ref{sec:linear-base}. 
 
 \begin{figure}[H]
 \hspace{-0.5em}
@@ -478,7 +565,7 @@ the syntax with reference to their static semantics.
 
 Variables (rule \textsc{Var}) are typed in a context where the variable $x$ has
 grade $1$ denoting its single usage here. All other variable assumptions are
-given the grade of the $0$ semiring element (providing \emph{weakening}), using
+given the grade of the $0$ semiring element (providing weakening), using
 \textit{scalar multiplication} of contexts by a grade, re-using
 Definition~\ref{def:scalar} from Section~\ref{sec:linear-base}.
 
@@ -488,23 +575,55 @@ which may be used in the body $[[t]]$ according to grade $[[ r ]]$. Application
 again (\textsc{App}) makes use of context addition to combine the contexts used to
 type the two sub-terms in the premises of the application rule:
 
-\begin{definition}[Graded context addition]\label{def:contextAddGraded}
-For all $[[ G1 ]], [[ G2 ]]$ \emph{graded context addition} is defined
-as follows by ordered cases matching inductively on the structure of
-$[[ G2 ]]$, where $[[G1 + G2]] = $
+% \begin{definition}[Graded context addition]\label{def:contextAddGraded}
+% For all $[[ G1 ]], [[ G2 ]]$ \emph{graded context addition} is defined
+% as follows by ordered cases matching inductively on the structure of
+% $[[ G2 ]]$, where $[[G1 + G2]] = $
+% \begin{gather*}
+% \left\{\begin{matrix}
+%     \begin{array}{ll}
+%     [[G1]] &
+%     [[G2]] = \emptyset
+%              \\
+%       (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
+% [[ G2]] = [[ G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']] \\
+%  [[ (G1 + G2'), x : [A] s ]] & [[ G2 ]] = [[ G2' , x : [A] s ]] \wedge [[ x ]] \not\in \mathsf{dom}([[ G1 ]])
+% \end{array}
+%   \end{matrix}\right.
+% \end{gather*}
+% \end{definition}
+
+\begin{definition}[Graded context addition]\label{def:contextAdd}
+
 \begin{gather*}
+    \setlength{\arraycolsep}{0.1em}
+    \begin{array}{rl}
+        [[ G + . ]] & = [[ G ]] \\ 
+        [[ . + G ]] & = [[ G ]] \\
+    [[ (G, x : [ A ] r) + G' ]] &= [[ (G + G'), x : [A ] r ]] \quad \text{iff} \,\; x \not\in | [[ G']] | \\
+    [[ G + (G', x : [ A ] r) ]]  &= [[ (G + G'), x : [ A ] r ]] \quad \text{iff} \,\; x \not\in | [[ G]] | \\
+    [[ (G, x : [ A ] r) + (G', x : [ A ] s) ]] & = [[ (G + G'), x : [ A ] (r + s) ]]
+    \end{array}
+  \end{gather*}
+
+As in the linear graded case, we also provide the algorithmic definition of graded context addition, where graded
+assumptions may appear in any position in $\Gamma$ and $\Gamma'$ as witnessed by
+the algorithmic specification where for all $[[ G1 ]], [[ G2 ]]$ context
+addition is defined as follows by ordered cases matching inductively on the
+structure of $[[ G2 ]]$, where $[[G1 + G2]] = $
+\begin{align*}
 \left\{\begin{matrix}
     \begin{array}{ll}
     [[G1]] &
-    [[G2]] = \emptyset
-             \\
+     [[G2]] = \emptyset \\
+     ([[ G1 ]] + [[ G2' ]]), [[ x : [ A ] r ]]  & [[ G2 ]] = [[ G2', x : [ A ] r ]]\ \wedge\ [[ x : [A] r ]] \notin [[ G1 ]] \\ 
       (([[G1']], [[G1'']]) + [[G2']]), [[x : [A] (r + s)]] \; &
-[[ G2]] = [[ G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']] \\
- [[ (G1 + G2'), x : [A] s ]] & [[ G2 ]] = [[ G2' , x : [A] s ]] \wedge [[ x ]] \not\in \mathsf{dom}([[ G1 ]])
+[[ G2]] = [[G2', x : [A] s]] \wedge [[G1]] = [[ G1',x : [A] r]],[[G1'']]      
 \end{array}
   \end{matrix}\right.
-\end{gather*}
+\end{align*}
 \end{definition}
+
 Note that~\ref{def:contextAddGraded} differs only from
 ~\ref{def:contextAdd}, in that the former need not consider linear
 assumptions.
@@ -512,9 +631,10 @@ assumptions.
 Explicit introduction of graded modalities is achieved via the rule for
 promotion (\textsc{Pr}). This rule is almost identical to that
 of~\ref{sec:linear-base} with the only difference being here $[[ G ]]$ is known
-to always contain only graded assumptions. Explicit unboxing
-(\textsc{Let$\Box$}), and approximation (\textsc{Approx}) are likewise identical
-to the calculus of~\ref{sec:linear-base}.   
+to always contain only graded assumptions, so the predicate $[[ [G] ]]$ is not
+needed. Explicit unboxing (\textsc{Let$\Box$}), and approximation
+(\textsc{Approx}) are likewise identical to the calculus
+of~\ref{sec:linear-base}.   
 
 
 \section{Two Typing Calculi}
@@ -530,7 +650,7 @@ tools which target both systems. As we have seen, systems based on both
 approaches are in frequent use today, and both pose their unique challenges in
 designing a synthesis tool, which makes favouring a particular approach
 difficult to justify. Furthermore, the target programming language Granule of
-our implementations includes both approaches.~\footnote{As of Granule v0.9.3.0}
+our implementations includes both approaches.\footnote{As of Granule v0.9.3.0}
 
 By this point we are in a strong position to tackle the problem of program
 synthesis, beginning with a simple introduction to the core issues at the heart
