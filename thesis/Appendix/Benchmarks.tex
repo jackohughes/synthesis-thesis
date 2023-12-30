@@ -112,14 +112,14 @@ compNat : forall {n m : Nat, a b c : Type}
      -> c
 compNat [u] y [v] = y [u [v]]
 \end{granule}
-\item mult:
+\item lin:
 \begin{granule}
-mult : forall a b c  
+lin : forall a b c  
      . (a -> b) 
      -> (b -> c) 
      -> a 
      -> c
-mult x y z = y (x z)
+lin x y z = y (x z)
 \end{granule}
 \end{enumerate}
 

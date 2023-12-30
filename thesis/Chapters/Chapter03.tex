@@ -122,7 +122,7 @@ types; for sum types, $\textbf{case}$ is used to distinguish the constructors.
 \inferrule*[right = 1]
  {\quad}{[[ . |- () : Unit ]]}
 \;\;\;
-\inferrule*[right = Let$1$]
+\inferrule*[right = LetUnit]
  {[[G1 |- t1 : Unit ]] \quad [[ G2 |- t2 : A ]]}
  {[[ G1 + G2 |- let () = t1 in t2 : A ]]}
 \end{array}
