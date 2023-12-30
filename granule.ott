@@ -188,7 +188,7 @@ A, B, C, E, W, T {{ tex C }} :: 'Type_' ::= {{com Types}}
   | [] { c : B } A :: :: BoxTy {{ com Box with coeffect type }} {{ tex \Box_{\textcolor{coeffectColor}{[[c]] : [[ B ]]} } [[A]] }}
   | Int :: :: Int {{ com Integers }}  {{ tex \mathsf{Int} }}
   | Char :: :: Char {{ com Characters }}  {{ tex \mathsf{Char} }}
-  | Unit :: :: Unit {{ com unit }} {{ tex \mathsf{1} }}
+  | Unit :: :: Unit {{ com unit }} {{ tex \mathsf{Unit} }}
   | Prod :: :: Product {{ com Products }} {{ tex \otimes }}
   | Coprod :: :: Coproduct {{ com CoProducts }} {{ tex \oplus }}
   | Bool :: :: Bool {{ com Bool }} {{ tex \mathbb{B} }}
