@@ -16,17 +16,30 @@ distinct lineages:
   \item Systems where a graded modal type operator introduces and eliminates
         graded modalities above some existing type system. This is the default
         approach of Granule, where the underlying type system is linear, and
-        grade modalities are introduced and eliminated via the $\Box$ modal type
-        operator.
+        grade modalities are introduced and eliminated via a family of $\Box$
+        modal type operators. We refer to these as ``graded linear'' or ``linear
+        base'' systems.
   \item Systems where grades permeate the program, and are introduced via
         annotations on function arrows. This is the approach taken by Linear
         Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}, where grades (or
-        ``multiplicities'') are specified using the \granin{\%} operator. 
+        ``multiplicities'') are specified using the \granin{\%} operator. We
+        refer to these as ``fully graded'' or ``graded base'' systems.
 \end{itemize}  
 These two different styles to graded types mirror the dual development of effect
-systems and graded monadic systems in the literature. In the latter case, the
-two were eventually found to be equivalent, while the same treatment for the
-former remains ongoing work. 
+systems and graded monadic systems in the literature
+(see~\citet{10.1145/601775.601776}). In the latter case, the two were eventually
+found to be equivalent, while the same treatment for the former remains ongoing
+work. 
+
+The remainder of this chapter formally defines these calculi, starting with the
+linear $\lambda$-calculus in Section~\ref{sec:linear-lambda-calc}. Following
+this, in Section~\ref{sec:graded-linear} we extend the linear $\lambda$-calculus
+with a graded modal type (Section~\ref{sec:linear-base}) before presenting the
+fully graded $\lambda$-calculus (Section~\ref{sec:graded-base}), before finally
+outlining our approach to how we use these calculi in synthesis in
+Section~\ref{sec:two-typing}. Throughout, we include examples of programs
+typeable in their respective calculi as Granule code, providing a gentle
+introduction to Granule syntax. 
 
 \section{Terminology}
 Throughout this thesis we will tend towards using a \textit{types-and-programs}
@@ -38,8 +51,8 @@ The functional programming languages we discuss are presented as typed
 calculi given by sets of \textit{types}, \textit{terms} (programs), and \textit{typing
  rules} that relate a term to its type. The most well-known typed
 calculus is the simply-typed $\lambda$-calculus (STLC), which corresponds to
-intuitionistic logic. We assume familiarity with STLC, and 
-couch our explanation of linear and graded types in this context.
+the implication fragment of intuitionistic logic. We assume familiarity with STLC, and 
+use this to facilitate our explanation of linear and graded types.
 
 A \textit{judgment} defines the typing relation between a type and a term based on a
 \textit{context}. In STLC, judgments have the
@@ -128,9 +141,8 @@ context extension. We treat contexts as unordered lists, thus making the exchang
 rule admissible. 
 
 The syntax of terms is the same as STLC, given by:
-
 \begin{align*}
-  \hspace{-0.8em} [[ t ]] ::= \;
+  [[ t ]] ::= \;
          & [[ x ]]
     \mid [[ \x . t ]]
     \mid [[ t1 t2 ]]
@@ -225,8 +237,14 @@ We now define a core type system, based on the linear $\lambda$-calculus of
 section~\ref{sec:linear-lambda-calc}, extended with a graded modal type. This
 calculus is equivalent to the core calculus of Granule,
 \textsc{GrMini}~\citep{DBLP:journals/pacmpl/OrchardLE19}, as well as the calculi
-of~\citet{brunel2014core} and~\citet{DBLP:conf/icfp/GaboardiKOBU16} (minus
-graded monads). We refer to the system in this section as the \textit{graded
+of~\citet{brunel2014core},~\citet{DBLP:conf/esop/GhicaS14},~\citet{coeffects-thesis},~\citet{petricek2014coeffects},
+and ~\citet{DBLP:conf/icfp/GaboardiKOBU16} (minus graded monads). Similar
+approaches have been used in more specialised systems such as the linear
+dependent type system of~\citet{Lago_2012}, and the work
+of~\citet{gaboardi2013linear}, which uses grades to capture and enforce
+properties of differential privacy.
+
+We refer to the system in this section as the \textit{graded
 linear $\lambda$-calculus}, reflecting the underlying linear structure of the
 system.
 
@@ -240,7 +258,7 @@ increased expressivity.
 
 The types of the graded linear $\lambda$-calculus are given by:
 \begin{align*}
-\hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+[[ A ]] , [[ B ]] & ::=
        [[ A ]] \multimap [[ B ]]
   \mid [[ [] r A ]]
 {\small{\tag{types}}}
@@ -315,7 +333,7 @@ sides of the addition.
 
 The terms of the language are given by:
 \begin{align*}
-\hspace{-0.8em} [[ t ]] ::= \;
+[[ t ]] ::= \;
        & [[ x ]]
   \mid [[ \x . t ]]
   \mid [[ t1 t2 ]]
@@ -330,7 +348,7 @@ in t2 ]]$ eliminates a graded modal value $[[ t1 ]]$, binding a graded variable 
 in scope of $[[ t2 ]]$. The typing rules relate these terms to types.
 
 
-\begin{figure}[H]
+\begin{figure}[t]
 \hspace{-0.5em}
 \begin{align*}
 \hspace{-0.5em}
@@ -452,7 +470,7 @@ by the semiring of natural numbers.
 %SKI
 \begin{example}
 \label{ex:s-comb}
-  The natural number semiring with discrete ordering $(\mathbb{N}, \ast, 1, +,
+  The natural number semiring with discrete ordering $(\mathbb{N}, \cdot, 1, +,
   0, \equiv)$ provides a graded modality that counts exactly how many times
   non-linear values are used. As an example, the \emph{S} combinator from
   the SKI system of combinatory logic is typed and defined:
@@ -477,22 +495,23 @@ grade $2$ in the scope of the body.
 
 \subsection{The Fully Graded $\lambda$-calculus}
 \label{sec:graded-base}
-As mentioned before, 
+As mentioned before, the second style of graded cacluli that we consider are
+\emph{fully graded} systems, such as those used in practical systems today. For
+example, this is the approach taken by Idris
+2~\citep{DBLP:journals/corr/abs-2104-00480} and the linear types extension to
+Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}.
 
-We now define a core calculus for a fully graded type system, where grades
-permeate the entire program, drawing from the coeffect calculus of
+We now define a core calculus for such a type system, where grades permeate the
+entire program, drawing from the coeffect calculus of
 \citet{petricek2014coeffects}, Quantitative Type Theory (QTT) by
-\citet{McBride2016} and refined further by \citet{quantitative-type-theory}
-(although we omit dependent types from our language), the calculus of
-\citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type
-theories,such as~\citet{DBLP:conf/esop/MoonEO21}. Similar
-systems also form the basis of the core of the linear types extension to
-Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}. We
-refer to this system as the \textit{fully graded $\lambda$-calculus}.
+\citet{McBride2016} and refined further by \citet{quantitative-type-theory}, the calculus of
+\citet{DBLP:journals/pacmpl/AbelB20}, and other graded dependent type theories,
+such as~\citet{DBLP:conf/esop/MoonEO21} (although we omit dependent types from our language). We refer to this system as the
+\textit{fully graded $\lambda$-calculus}.
 
 The syntax of types is given by:
 \begin{align*}
-\hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+[[ A ]] , [[ B ]] & ::=
        [[ A ^ r -> B ]]
   \mid [[ [] r A ]]
 {\small{\tag{\textit{types}}}}
@@ -520,7 +539,7 @@ permitted, allowing a context to be arbitrarily reordered.
 The syntax of terms is given as:
 %
 \begin{align*}
-\hspace{-0.8em} [[ t ]] ::= \;
+[[ t ]] ::= \;
        & [[ x ]]
   \mid [[ \x ^ c . t ]]
   \mid [[ t1 t2 ]]
@@ -533,7 +552,7 @@ The syntax of terms is given as:
 As before, terms comprise the $\lambda$-calculus, extended with the \textit{promotion}
 construct [t] as seen in Section~\ref{sec:linear-base}. 
 
-\begin{figure}[H]
+\begin{figure}[t]
 \hspace{-0.5em}
 \begin{align*}
 \hspace{-0.5em}
@@ -593,7 +612,7 @@ type the two sub-terms in the premises of the application rule:
 % \end{gather*}
 % \end{definition}
 
-\begin{definition}[Graded context addition]\label{def:contextAdd}
+\begin{definition}[Graded context addition]\label{def:contextAddGraded}
 
 \begin{gather*}
     \setlength{\arraycolsep}{0.1em}
@@ -624,9 +643,34 @@ structure of $[[ G2 ]]$, where $[[G1 + G2]] = $
 \end{align*}
 \end{definition}
 
-Note that~\ref{def:contextAddGraded} differs only from
-~\ref{def:contextAdd}, in that the former need not consider linear
-assumptions.
+Note that Definition~\ref{def:contextAddGraded} differs only from~\ref{def:contextAdd}, in
+that the former need not consider linear assumptions.
+
+As an example of the \textsc{App} rule, consider the following typing derivation for 
+a program of type $(A^3 \rightarrow B)^1 \rightarrow A^3 \rightarrow B$: 
+\begin{align*}
+  \inferrule*[right=\textsc{Abs}]{
+  \inferrule*[right=\textsc{Abs}]{
+  \inferrule*[right=\textsc{App}]
+    {\inferrule*[right=\textsc{Var}]
+      {\quad}
+      {x :_1 A^3 \rightarrow B \vdash x : A^3 \rightarrow B} \\ 
+    \inferrule*[right=\textsc{Var}, rightskip=3em]
+      {\quad}
+      {y :_1 A \vdash y : A}}
+    { x :_1 A^3 \rightarrow B + 3 \cdot y :_1 : A  \rightarrow B \vdash x\ y : B }
+  }
+  {x :_1 A^3 \rightarrow B \vdash \lambda y . x\ y : A^3 \rightarrow B}}
+  {\emptyset \vdash \lambda x . \lambda y . x\ y : (A^3 \rightarrow B)^1 \rightarrow A^3 \rightarrow B }
+\end{align*}
+This program binds a function $x$ of type $A^3 \rightarrow B$ with grade 1, i.e.
+it consumes its input according to a grade of 3 and the function itself can be
+used once. The application of $y$ to $x$ satisfied this grade usage, as $y$ has
+a grade of $3$. In the \textsc{App} rule, we type a single use of $y$ in the
+second premise via the \textsc{Var} rule, and then scale this usage by the grade
+3 on the function arrow of $x$, satisfying the grade $y$ was bound with in the
+\textsc{Abs} rule.
+
 
 Explicit introduction of graded modalities is achieved via the rule for
 promotion (\textsc{Pr}). This rule is almost identical to that
@@ -636,23 +680,99 @@ needed. Explicit unboxing (\textsc{Let$\Box$}), and approximation
 (\textsc{Approx}) are likewise identical to the calculus
 of~\ref{sec:linear-base}.   
 
+\begin{example}
+We now consider the Granule programs shown in
+Examples~\ref{example:linear-granule},~\ref{ex:s-comb} (pages~\pageref{example:linear-granule},~\pageref{k-example}), 
+and~\ref{example:graded-granule} (page~\pageref{example:graded-granule}) but written instead in this fully graded style.
+The combinator for linear function composition is written: 
+\begin{align*}
+comp & : (A^1 \rightarrow B)^1 \rightarrow (B^1 \rightarrow C)^1 \rightarrow A^1 \rightarrow C \\
+comp & = \lambda x . \lambda y . \lambda z = y\ (x\ z)
+\end{align*}
+and in Granule as: 
+\begin{granule}
+language GradedBase 
+
+comp : forall { a b c : Type } . (a %1 -> b) %1 -> (b %1 -> c) %1 -> a %1 -> c
+comp x y z = y (x z)
+\end{granule}
+To do so, we enable the \granin{GradedBase} language extension in Granule.
+Grades are written on function arrows using \granin{\%} (in the same way that
+\emph{multiplicity} annotations are written in Linear Haskell). We elide this
+enabling of the language extension in code examples henceforth. Omitting a grade
+annotation defaults to a grade of $1$. So this function may also be written
+without any annotations with the same meaning. Note that at the term level, we
+do not need to unbox values graded by a function arrow to use them in according
+to their grades. However, we may make explicit use of graded modalities which
+does necessitate unboxing. Thus, the graded coKleisli version of function
+composition from Example~\ref{example:graded-granule} can be written as:  
+\begin{align*}
+\textit{comp-}\textit{coK}_{\mathcal{R}} & : \Box_r (A^s \rightarrow B)^r \rightarrow (B^r \rightarrow C)^1 \rightarrow \Box_{r \cdot s} A \rightarrow C \\
+\textit{comp-}\textit{coK}_{\mathcal{R}} & = \lambda x . \lambda y . \lambda z . \textbf{let}[v] = z\ \textbf{in}\ y\ [x\ [ v ] ]
+\end{align*}
+with the equivalent Granule code: 
+\begin{granule}
+compCoK : forall {k : Semiring, r s : k, a b c : Type} 
+     . (a %s -> b) %r
+     -> (b %r -> c) 
+     -> a [r * s] 
+     -> c
+compCoK x y z = let [v] = z in y  [ u [v] ]
+\end{granule}
+leveraging the fact that omitting a grade annotation in the type yields a $1$
+grade. Likewise, the \emph{S} and \emph{K} combinators can be typed and written as: 
+\begin{align*}
+s & : (A^1 \rightarrow (B^1 \rightarrow C))^1 \rightarrow (A^1 \rightarrow B)^1 \rightarrow (A^2 \rightarrow C) \\
+s & = \lambda x . \lambda y . \lambda z . (x\ z)\ (y\ z)\\
+\\
+k & : A^1 \rightarrow B^0 \rightarrow A \\
+k & = \lambda x . \lambda y . x 
+\end{align*}
+with Granule equivalents:
+\begin{granule}
+s : forall { a b c : Type } 
+  . (a -> (b -> c)) -> (a -> b) -> (a %2 -> c)
+s x y z = (x z) (y z)
+
+k : forall { a b : Type } . a -> b %0 -> a
+k x y = x 
+\end{granule}
+\end{example}
+
+
 
 \section{Two Typing Calculi}
+\label{sec:two-typing}
 Having outlined the two lineages of graded type systems, we are left with the
 question: what approach should we use as the basis of a target language for a
 program synthesis tool? Both systems embed properties for reasoning about
 program structure into the language, however, they differ in how this
 information is expressed, as shown by the variance in typing and syntax between
-Sections ~\ref{sec:linear-base} and ~\ref{sec:graded-base}. 
+Sections~\ref{sec:linear-base} and~\ref{sec:graded-base}. 
 
 Rather than focus entirely on one approach, we opt to instead build synthesis
-tools which target both systems. As we have seen, systems based on both
-approaches are in frequent use today, and both pose their unique challenges in
-designing a synthesis tool, which makes favouring a particular approach
-difficult to justify. Furthermore, the target programming language Granule of
-our implementations includes both approaches.\footnote{As of Granule v0.9.3.0}
+tools which target both systems. Our approach to synthesis is rooted in the
+techniques for resource management in automated theorem proving for linear
+logic~\citep{HODAS1994327, CERVESATO2000133}. Therefore, natural starting point
+is the design of a synthesis calculus which targets the graded linear
+$\lambda$-calculus, where we build upon the existing proof search literature to
+accommodate for graded modal types. To do so we extend graded linear
+$\lambda$-calculus with some other useful types to make our language more
+practical, such as linear multiplicative products $\otimes$, additive sums
+$\oplus$, and a $\mathsf{Unit}$ type.
+
+In Chapter~\ref{chapter:extended} we then pivot to a synthesis calculi for a
+language derived from the fully graded $\lambda$-calculus, as this is the
+approach that is most commonly in use by practical systems
+today~\citep{DBLP:journals/corr/abs-2104-00480,
+DBLP:journals/pacmpl/BernardyBNJS18}. In doing so, we also extend our fully graded
+$\lambda$-calculus with recursive ADTs, recursive function definitions, and
+polymorphism. As we have seen, systems based on both approaches are in use
+today, and both pose their unique challenges in designing a synthesis tool.
+Furthermore, the target programming language Granule of our implementations
+includes both approaches.\footnote{As of Granule v0.9.3.0}
 
 By this point we are in a strong position to tackle the problem of program
 synthesis, beginning with a simple introduction to the core issues at the heart
 of resourceful program synthesis in the next chapter, using our graded linear
-$\lambda$-calculus. 
+$\lambda$-calculus, extended with some simple types 
