@@ -198,30 +198,51 @@ equivalent to concatenation on disjoint contexts.
 This leaves us with a very simple resourceful typing calculus, which serves as
 the building block for further refinement.
 
+\begin{example}
+  \label{example:linear-granule}
 An example of a program typeable in this calculus is the combinator for function
 composition: 
 \begin{align*}
-  \tag{well-typed}
 \begin{array}{ll}
-    f : (A \rightarrow B) \rightarrow (B \rightarrow C) \Rightarrow A \Rightarrow C &
+    comp: (A \multimap B) \multimap (B \multimap C) \multimap A \multimap C &
     \\
-    f = \lambda x. \lambda y. \lambda z. y\ (x\ z) &
+    comp = \lambda x. \lambda y. \lambda z. y\ (x\ z) &
 \end{array}  
 \end{align*}
 Here, each argument is used exactly once in body of the innermost lambda, satisfying 
-linearity. In contrast, the $K$ combinator from SKI combinatory logic is not typeable:
+linearity. In Granule code, the above program may be written as:
+\begin{granule}
+comp : forall { a b c : Type } . (a -> b) -> (b -> c) -> a -> c
+comp x y z = y (x z)
+\end{granule}
+Note that Granule code uses $\rightarrow$ syntax rather than $\multimap$ for
+linear functions for the sake of familiarity with standard functional languages.
+Granule features ML style polymorphism, thus top level definitions are annotated
+with type schemes which quantify over kind-annotated type variables.
+% Granule has ML style polymorphism (Rank-1 polymorphism), thus we quantify over 
+
+In contrast, the \emph{K} combinator from SKI combinatory logic is not typeable:
+\label{k-example}
 \begin{align*}
   \tag{ill-typed}
 \begin{array}{ll}
-    k : A \rightarrow B \rightarrow A &
+    k : A \multimap B \multimap A &
     \\
     k = \lambda x. \lambda y. x &
 \end{array}  
 \end{align*}
-as $y$ is discarded in the body of the abstraction, violating linearity.
+as $y$ is discarded in the body of the abstraction, violating linearity. Again, 
+in Granule we could try to write this program as:
+\begin{granule}
+k : forall { a b : Type } . a -> b -> a
+k x y = x
+\end{granule}
+However, this will fail to type check, due to the aforementioned violation of
+linearity.
+\end{example}
 
 \section{From Linearity to Grades}
-
+\label{sec:graded-linear}
 Now that we have seen the linear $\lambda$-calculus itself, we are ready to
 generalise the notion of data as a resource inside a program, and formally
 define a graded type system. We now present two calculi, each based on the
@@ -484,6 +505,51 @@ The graded modal value $z'$ captures the capability for a value
 of type $A$ to be used twice. This capability is made available by eliminating
 $\Box$ (via \textbf{let}) to the variable $z$, which has
 grade $2$ in the scope of the body. 
+The Granule code equivalent of this program is:
+\begin{granule}
+s : forall { a b c : Type } 
+  . (a -> (b -> c)) -> (a -> b) -> (a [2] -> c)
+s x y z' = let [z] = z' in (x z) (y z)
+\end{granule}
+Likewise, we can now correctly type and write the \emph{K} combinator from
+Section~\ref{sec:linear-lambda-calc} as 
+\begin{align*}
+k & : [[ {A -o [] 0 B} -o A ]] \\
+k & = [[ \x . \ y' . {let [ y ] = y' in x }]]
+\end{align*}
+with the equivalent Granule code:
+\begin{granule}
+k : forall { a b : Type } . a -> b [0] -> a
+k x y' = let [y] = y' in x
+\end{granule}
+\end{example}
+\begin{example}
+\label{example:graded-granule}
+While our calculus in Figure~\ref{fig:typing} is parametrised by a semiring
+making grades monomorphic, in Granule code we may be explicitly polymorphic in
+the grades used by quantifying over the semiring. For example, we can then write
+a graded version of \granin{comp} from Section~\ref{sec:linear-lambda-calc}
+(i.e. coKleisli composition) as: 
+\begin{align*}
+\textit{comp-}\textit{coK}_{\mathcal{R}} & : \Box_r (\Box_s A \multimap B) \multimap (\Box_r B \multimap C) \multimap \Box_{r \cdot s} A \multimap C \\
+\textit{comp-}\textit{coK}_{\mathcal{R}} & = \lambda x . \lambda y . \lambda z . \textbf{let}[u] = x\ \textbf{in}\ \textbf{let}[v] = z\ \textbf{in}\ y\ [u\ [ v ] ]
+\end{align*}
+which we can write as a Granule program which is polymorphic with respect to
+grades as well as types:
+\begin{granule}
+compCoK : forall {k : Semiring, r s : k, a b c : Type} 
+     . (a [s] -> b) [r] 
+     -> (b [r] -> c) 
+     -> a [r * s] 
+     -> c
+compCoK x y z = let [u] = x in let [v] = z in y  [ u [v] ]
+\end{granule}
+The type scheme for \granin{compCoK} quantifies over grade variables \granin{r}
+and \granin{s} which are annotated with the kind \granin{Semiring}. The grades
+must then be used in the type in a polymorphic way.
+
+
+
 % The corresponding type derivation for 
 % this term is:
 % \begin{align*}
@@ -625,11 +691,11 @@ type the two sub-terms in the premises of the application rule:
     \end{array}
   \end{gather*}
 
-As in the linear graded case, we also provide the algorithmic definition of graded context addition, where graded
-assumptions may appear in any position in $\Gamma$ and $\Gamma'$ as witnessed by
-the algorithmic specification where for all $[[ G1 ]], [[ G2 ]]$ context
-addition is defined as follows by ordered cases matching inductively on the
-structure of $[[ G2 ]]$, where $[[G1 + G2]] = $
+As in the linear graded case, we also provide the algorithmic definition of
+graded context addition, where graded assumptions may appear in any position in
+$\Gamma$ and $\Gamma'$ as witnessed by the algorithmic specification where for
+all $[[ G1 ]], [[ G2 ]]$ context addition is defined as follows by ordered cases
+matching inductively on the structure of $[[ G2 ]]$, where $[[G1 + G2]] = $
 \begin{align*}
 \left\{\begin{matrix}
     \begin{array}{ll}
