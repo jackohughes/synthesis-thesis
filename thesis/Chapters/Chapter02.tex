@@ -419,15 +419,19 @@ Figure~\ref{fig:typing} gives the typing rules. The $\textsc{Weak}$ rule
 captures weakening of assumptions graded by $0$, where $[[ [ D , 0 ] ]]$ denotes
 a context containing only graded assumptions graded by $0$, a predicate on
 contexts given by Definition~\ref{def:zeroedContexts}: 
-\begin{definition}
+\begin{definition}[Zeroed graded contexts]
   \label{def:zeroedContexts}
-  For all contexts $[[ G ]]$,   
+  For all contexts $[[ G ]]$, $ [[ [ G, 0 ] ]]$ is defined:
 \begin{align*}
-    \emptyset = \emptyset
-    \qquad\qquad
-    [[ G, x : [A] r  ]] = [[ [ G, 0 ] ]], [[ x : [ A ] r ]] \text{iff} r \sqsubseteq 0
-    \qquad\qquad
-   [[ G, x : A ]] =\ \perp
+  % \begin{array}{c}
+    \hspace{-0.9em}
+    [ \emptyset ]_0 = \emptyset
+    \qquad
+    [[ [ {G, x : [A] r} ] ]]_0 = [[ [ G, 0 ] ]], [[ {x : [ A ] r} ]] \quad \text{iff}\ r \sqsupseteq 0
+    % \\
+    \qquad
+   [[ [ G, x : A ] ]]_0 =\ \perp
+  % \end{array}
 \end{align*}
 \end{definition}
 
@@ -456,11 +460,11 @@ variables (written $[[ [ G ] ]]$):
   \label{def:gradedContext}
 For all contexts $[[ G ]]$, $ [[ [G] ]]$ is defined:
 \begin{align*}
-    \emptyset = \emptyset
+    [ \emptyset ] = \emptyset
     \qquad\qquad
-    [[ G, x : [A] r  ]] = [[ [ G ] ]], [[ x : [ A ] r ]]
+    [[ [ G, x : [A] r ]  ]] = [[ [ G ] ]], [[ x : [ A ] r ]]
     \qquad\qquad
-   [[ G, x : A ]] =\ \perp
+   [[ [ G, x : A ] ]] =\ \perp
 \end{align*}
 When an assumption in $[[ [G] ]]$ is graded, the identity is returned, otherwise 
 (i.e. if an assumption is linear) the operation is undefined.
