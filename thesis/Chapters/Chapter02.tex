@@ -5,13 +5,13 @@ to formally define our target languages. We take
 this chapter as an opportunity to do so, and to examine more closely some
 of the properties of these linear and graded systems. 
 
-Since \citet{girard1987linear}'s original work on Linear Logic,
-the development of type systems which convey additional information about the
-program's structure has evolved into a distinct paradigm, culminating in recent
-years with the notion of \textit{graded types}. Approaches to graded type
-systems run the gamut, incorporating a wide range of effect and coeffect
-systems, however, they can typically be distilled into two categories, with
-distinct lineages: 
+Since \citet{girard1987linear}'s original work on Linear Logic, the development
+of type systems which convey additional information about the program's
+structure has evolved into a distinct paradigm, culminating in recent years with
+the notion of \textit{graded types}. Approaches to graded type systems run the
+gamut, incorporating a wide range of \emph{effect} and \emph{coeffect} systems,
+however, they can typically be distilled into two categories, with distinct
+lineages: 
 \begin{itemize}
   \item Systems where a graded modal type operator introduces and eliminates
         graded modalities above some existing type system. This is the default
@@ -258,7 +258,7 @@ We now define a core type system, based on the linear $\lambda$-calculus of
 section~\ref{sec:linear-lambda-calc}, extended with a graded modal type. This
 calculus is equivalent to the core calculus of Granule,
 \textsc{GrMini}~\citep{DBLP:journals/pacmpl/OrchardLE19}, as well as the calculi
-of~\citet{brunel2014core},~\citet{DBLP:conf/esop/GhicaS14},~\citet{coeffects-thesis},~\citet{petricek2014coeffects},
+of~\citet{DBLP:conf/esop/BrunelGMZ14},~\citet{DBLP:conf/esop/GhicaS14},~\citet{coeffects-thesis},~\citet{petricek2014coeffects},
 and ~\citet{DBLP:conf/icfp/GaboardiKOBU16} (minus graded monads). Similar
 approaches have been used in more specialised systems such as the linear
 dependent type system of~\citet{Lago_2012}, and the work
@@ -809,6 +809,34 @@ k x y = x
 \end{granule}
 \end{example}
 
+\subsection{Operational Semantics}
+\label{sec:op-sem}
+We briefly present the reduction rules for an operational semantics for our
+calculi~\citep{tale-of-two-calculi}. Note that the rules are identical for both the graded linear and fully
+graded systems! Figure~\ref{fig:opsem} collects the rules.
+\begin{figure}[H]
+% \hspace{-0.5em}
+\begin{align*}
+\hspace{1.5em}
+\begin{array}{c}
+\opsemBeta{}
+\;\;\;
+\opsemApp{}
+\\[1.25em]
+\opsemBoxBeta{}
+\\[1.25em]
+\opsemLet{}
+\end{array}
+\end{align*}
+\vspace{-0.5em}
+\caption{Reduction rules for the linear graded and fully graded $\lambda$-calculi}
+\label{fig:opsem}
+\vspace{-0.5em}
+ \end{figure}
+ The rules are fairly straightforward and we do not rely on them heavily in
+ subsequent chapters, instead providing them for completeness and to give an
+ intuition of the dynamic behaviour of our calculi. 
+
 
 
 \section{Two Typing Calculi}
@@ -823,13 +851,13 @@ Sections~\ref{sec:linear-base} and~\ref{sec:graded-base}.
 Rather than focus entirely on one approach, we opt to instead build synthesis
 tools which target both systems. Our approach to synthesis is rooted in the
 techniques for resource management in automated theorem proving for linear
-logic~\citep{HODAS1994327, CERVESATO2000133}. Therefore, natural starting point
-is the design of a synthesis calculus which targets the graded linear
-$\lambda$-calculus, where we build upon the existing proof search literature to
-accommodate for graded modal types. To do so we extend graded linear
-$\lambda$-calculus with some other useful types to make our language more
-practical, such as linear multiplicative products $\otimes$, additive sums
-$\oplus$, and a $\mathsf{Unit}$ type.
+logic~\citep{HODAS1994327, CERVESATO2000133}. Therefore,
+Chapter~\ref{chapter:core} uses the graded linear $\lambda$-calculus as a
+natural starting point for the design of a synthesis calculus, where we build
+upon the existing proof search literature to accommodate for graded modal types.
+To do so we extend graded linear $\lambda$-calculus with some other useful types
+to make our language more practical, such as linear multiplicative products
+$\otimes$, additive sums $\oplus$, and a $\mathsf{Unit}$ type.
 
 In Chapter~\ref{chapter:extended} we then pivot to a synthesis calculi for a
 language derived from the fully graded $\lambda$-calculus, as this is the
@@ -841,6 +869,11 @@ polymorphism. As we have seen, systems based on both approaches are in use
 today, and both pose their unique challenges in designing a synthesis tool.
 Furthermore, the target programming language Granule of our implementations
 includes both approaches.\footnote{As of Granule v0.9.3.0}
+
+Lastly, we remark that substitution is admissible in each of the calculi. Rather
+than provide the details at this point, we present the lemmas for
+both of the calculi once we have extended them with the additional types
+mentioned above in their respective chapters.
 
 By this point we are in a strong position to tackle the problem of program
 synthesis, beginning with a simple introduction to the core issues at the heart

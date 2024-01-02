@@ -674,6 +674,26 @@ formula :: 'formula_' ::=
 defns
   Judgements :: '' ::=
 
+defn
+t ~> t' :: :: OpSemanticsLinear :: 'SemLin'
+{{ tex [[ t ]] \leadsto [[ t' ]] }}
+{{ com Small-step operational semantics for linear base }}
+by
+
+--------------------------------- :: beta
+(\x . t2) t1 ~> [ t1 / x ] t2
+
+t1 ~> t1'
+------------------------ :: congApp
+t1 t2 ~> t1' t2
+
+------------------------------------------ :: boxBeta
+let [x] = [t1] in t2 ~> [ t1 / x ] t2
+
+t1 ~> t1'
+------------------------------------------- :: congLet
+let [x] = t1 in t2 ~> let [x] = t1' in t2
+
 
 defn
 G |- t : A :: :: checkMiniDecl :: 'Ty'
