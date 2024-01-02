@@ -182,7 +182,27 @@ graded types for side
 \emph{effects}~\citep{DBLP:journals/corr/OrchardPM14,DBLP:conf/popl/Katsumata14},
 which we do not consider here.
 
-DISCUSSION OF GRADED LINEAR VS GRADED GOES HERE
+We can divide these graded coeffect systems into two main classes, which we
+refer to as ``linear graded'' (or \emph{linear base}) and ``fully graded'' (or
+\emph{graded base}) throughout. The first are those which trace their origins to
+linear logic, refining an existing non-graded type system with graded modal
+types. The functional programming language Granule is one such system. Granule
+is based on an underlying linear type system, with graded modal types introduced
+and eliminated explicitly, through a family of indexed modal operators $\Box_r$.
+For instance, $\Box_2 A \multimap B$ represents the type of a linear function
+where the argument type is a graded modal type, graded by $2$. By ``unboxing''
+the modality, we obtain a value which can be used twice inside the body of the
+function. This system is the default basis of
+Granule~\citep{DBLP:journals/pacmpl/OrchardLE19}. The second approach does away
+with this linear basis, embedding graded modalities into the function types à la
+Idris 2~\citep{DBLP:journals/corr/abs-2104-00480}, McBride's
+QTT~\citep{McBride2016,quantitative-type-theory}, the core of Linear
+Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}, and the unified graded
+modal calculus of \citep{DBLP:journals/pacmpl/AbelB20}. In these systems, grades
+are expressed as annotations function arrows, i.e. $A^2 \rightarrow B$ expresses
+a similar idea as before, where $A$ is an argument type graded by $2$. However,
+in these systems, we do not need to do any unboxing to be able to use the value
+of type $A$ according to its grade in the body of the function.
 
 As graded type systems develop into fully fledged programming languages such as
 Idris 2~\citep{DBLP:journals/corr/abs-2104-00480}, and as traditionally non
@@ -198,25 +218,23 @@ works lay the foundations for our approach here, however, graded types
 pose an entirely new set of challenges and integrating them into these existing
 approaches is complex.
 
-For this work, we consider Granule~\citep{DBLP:journals/pacmpl/OrchardLE19} to be
-an ideal candidate for the target language of a program synthesis tool for
-graded type systems. Granule is a functional programming language which combines
-linear a type system at its core with indexed data types. On top of this, graded
-modalities are integrated both as graded comonads and graded monads. For this
-work, we forgo the treatment of Granule's indexed types in synthesis, leaving
+For this work, we consider Granule~\citep{DBLP:journals/pacmpl/OrchardLE19} to
+be an ideal candidate for the target language of a program synthesis tool for
+graded type systems. As mentioned, Granule is a functional programming language
+which combines a linear type system at its core with indexed data types. On top
+of this, graded modalities are integrated both as graded comonads and graded
+monads. We forgo the treatment of Granule's indexed types in synthesis, leaving
 this as future work. Instead we focus on building a synthesis tool for Granule,
 which unlocks the expressivity held by graded comonads for use inside the
 synthesis algorithm itself.
 
 Granule also provides a language extension, known as \emph{GradedBase}, which
 does away with this linear type system as its foundation. Instead, grades
-permeate the type system à la ~\citet{petricek2014coeffects}. This
-reflects a common approach to graded type systems, giving us a programming
-language which is capable of giving a broad representation of graded type
-systems. This will factor heavily into the design of our calculi, and we
-structure the rest of the thesis with this in mind.
-
-
+permeate the type system à la~\citet{petricek2014coeffects} and other graded
+base systems. This extension provides us with a language capable of giving a
+broad representation of graded type systems. This will factor heavily into the
+design of our calculi, and we structure the rest of the thesis with this in
+mind.
 
 \section{Contributions}
 Linear and graded types provide a rich specification of program behaviour, which
@@ -287,16 +305,7 @@ This dissertation is structured into six chapters. In the next chapter,
 Chapter~\ref{chapter:background}, the theoretical background of linear and
 graded types is laid out. In doing so, we introduce two core calculi with simple
 types and grades, which demonstrate the two major lineages of resourceful type
-systems. The first is a language based on an underlying non-graded type system
-(in this case a linear type system), with graded modal types introduced and
-eliminated explicitly. This system is the default basis of
-Granule~\citep{DBLP:journals/pacmpl/OrchardLE19}, the target language of our
-implementation. The second calculus does away with this linear basis, embedding
-graded modalities into the function types à la Idris 2 and Linear Haskell,
-McBride's QTT~\citep{McBride2016,quantitative-type-theory}, the core of Linear
-Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}, and the unified graded
-modal calculus of \citep{DBLP:journals/pacmpl/AbelB20}. This system is also 
-present in Granule in the form of an optional language extension.
+systems; linear base and graded base.
 
 The rest of the dissertation is structured such that synthesis calculi for both
 of these systems are defined and presented, minimising any redundancy in the
@@ -314,7 +323,7 @@ the two. Thus, we adopt the following structure:
         a linear $\lambda$-calculus extended with graded modal types which
         tackle the problem in different ways. To better illustrate and test the
         practicality of the synthesis calculi, we extend the language with
-        multiplicative conjunction (product types $\otimes$ and unit $1$) and
+        multiplicative conjunction (product types $\otimes$ and unit $\mathsf{Unit}$) and
         additive disjunction (sum types $\otimes$). These calculi are then
         implemented targeting default Granule. We produce a comparative
         evaluation of the implemented synthesis tool, contrasting the efficiency
@@ -358,15 +367,14 @@ Table~\ref{table:chapter-calculi} summarises the structure of the thesis by chap
 to the variants of resourceful calculi we consider.
 \begin{table}[H]
 \begin{align*}
-\hspace{-2em}
 \setlength{\arraycolsep}{0.2em}
 \begin{array}{r|c|c}
-      & \text{ Graded} + \text{Linear } & \text{ Graded}\\
+      & \text{ Linear} + \text{Graded } & \text{ Graded}\\
       \hline
-      \text{Chapter~\ref{chapter:background}} & \multimap,\ \Box_r & \rightarrow,\ \Box_r \\
+      \text{Chapter~\ref{chapter:background}} & \multimap,\ \Box_r & \rightarrow \\
       \text{Chapter~\ref{chapter:core}} & \multimap,\ \Box_r,\ \otimes,\ \oplus,\ \mathsf{Unit} &  \\
       \text{Chapter~\ref{chapter:deriving}} & \multimap,\ \Box_r,\ \text{ADTs} & \\
-      \text{Chapter~\ref{chapter:extended}} & & \rightarrow,\ \Box_r,\ \text{ADTs},\ \text{Recursion}
+      \text{Chapter~\ref{chapter:extended}} & & \rightarrow,\ \text{ADTs},\ \text{Recursion}
 \end{array}
 \end{align*}
 \caption{Typing calculi per chapter}
@@ -387,27 +395,34 @@ previously published papers:
     Graded Linear Types. In Logic-Based Program Synthesis and Transformation -
     30th International Symposium, pp. 151-170. 
     
-    This paper adapts the resource management techniques of previous work for
-    Linear Logic proof search to graded types, and presents two synthesis
-    calculi based on these approaches. This paper constitutes a large part of
-    Chapter~\ref{chapter:core}, where a program synthesis tool for a linear and
-    graded type system is introduced. 
+    This paper builds on the resource management techniques of previous work for
+    Linear Logic proof search to graded types. It presents two synthesis
+    calculi based on these approaches, and evaluates them against each other 
+    using a suite of benchmarks of Granule programs. 
+    
+    This paper constitutes a large part of Chapter~\ref{chapter:core}, where a
+    program synthesis tool for a linear graded type system is introduced. 
 
     \item \citet{DBLP:journals/corr/abs-2112-14966} Deriving Distributive Laws
     for Graded Linear Types. In 6th edition of the International Workshop on
     Linearity and of the 4th edition of the International Workshop on Trends in
     Linear Logic and its Applications. 
 
-    The majority of Chapter~\ref{chapter:deriving}, which discusses an approach
-    for automatically deriving certain graded programs in Granule as an
-    alternative to synthesis, is derived from this paper. 
-    
+    The majority of Chapter~\ref{chapter:deriving} is derived from this paper,
+    which discusses an approach for automatically deriving certain classes of
+    graded programs in Granule as an alternative to search-based synthesis. The
+    focus is on deriving distributive laws of graded programs in Granule, but
+    also considers deriving other useful structural combinators. The core
+    contribution of this work is a tool in the vein of Haskell's Generic Type
+    Deriving mechanism~\citep{generic-deriving}, which is implemented as part of
+    the Granule compiler.
+
     \item \citet{hughes:lirmm-03271465} Linear Exponentials as Graded Modal
     Types. In In 5th International Workshop on Trends in Linear Logic and
     Applications.  
 
-    In Chapter~\ref{chapter:background} and subsequently, we make reference to the 
-    disparity between Granule's $\Box$ modality and Linear Logic's !, and how ! can 
-    be recovered in Granule through the use of a grade-level operator defined 
-    in this paper.  
+    In Chapter~\ref{chapter:core} and subsequently, we make reference to
+    the disparity between Granule's $\Box$ modality and Linear Logic's !, and
+    how ! can be recovered in Granule through the use of a grade-level operator
+    defined in this paper.  
 \end{itemize}
