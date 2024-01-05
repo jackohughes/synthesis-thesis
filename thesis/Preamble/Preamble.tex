@@ -76,7 +76,7 @@
   keywordstyle = [4]\bfseries\color{effectColor},
   keywords     = [4]{pure},%{IO,
                           %Open,Read,IOExcept,Close,Write,ReadWrite},
-  numbers=left,
+  numbers=none,
   numberstyle=\tiny\color{gray}
   % morekeywords = [4]{<,>},
   % % % universals
@@ -125,7 +125,7 @@
   % % % Data Constructors
   % % keywordstyle = [7]\color{purple!40!black},%Mahogany!70!WildStrawberry},
   % % keywords = [7]{Some, None, Nil, NilL, Cons, ConsL, ReadMode, S, Z},
-  numbers=left,
+  numbers=none,
   numberstyle=\tiny\color{gray}
   % morekeywords = [4]{<,>},
   % % % universals
@@ -170,7 +170,7 @@
   % % % Data Constructors
   % % keywordstyle = [7]\color{purple!40!black},%Mahogany!70!WildStrawberry},
   % % keywords = [7]{Some, None, Nil, NilL, Cons, ConsL, ReadMode, S, Z},
-  numbers=left,
+  numbers=none,
   numberstyle=\tiny\color{gray}
   % morekeywords = [4]{<,>},
   % % % universals
@@ -306,6 +306,10 @@
 % \newcommand{\highlight}[1]{%
 % {\setlength{\fboxsep}{0pt}\colorbox{SkyBlue!50}{$\displaystyle#1$}}}
 
+
+\newcommand{\rulehighlight}[1]{%
+{\setlength{\fboxsep}{0pt}\colorbox{yellow!50}{$\displaystyle#1$}}}
+
 \newcommand{\newhighlight}[1]{%
 {\setlength{\fboxsep}{0pt}\colorbox{SkyBlue!50}{$\displaystyle#1$}}}
 % {\setlength{\fboxsep}{0pt}\colorbox{Periwinkle!50}{$\displaystyle#1$}}}
@@ -416,11 +420,16 @@
     {[[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G |- A =>+ t2 ; D2 ]]}{[[G, x1 : A -o B |- C =>+
     [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
     }
+\newcommand*{\addPruneAppHighlight}{
+\inferrule*[right=\addPruningAppName]
+  {\Gamma, x_2 : B \vdash C \Rightarrow^{\pm} t_1 \mid \Delta_1, x_2 : B \\ \rulehighlight{\Gamma - \Delta_1} \vdash A \Rightarrow^{\pm} t_2 \mid \Delta_2}
+  {\Gamma, x_1 : A \multimap B \vdash C \Rightarrow^{\pm} [ (x_1\ t_2) / x_2 ] \mid (\Delta_1 + \Delta_2), x_1 : A \multimap B }
+}
 \newcommand*{\addPruneApp}{
 \inferrule*[right=\addPruningAppName]
-    {[[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G - D1 |- A =>+ t2 ; D2 ]]}{[[G, x1 : A -o B |- C =>+
-    [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
-}
+  {\Gamma, x_2 : B \vdash C \Rightarrow^{\pm} t_1 \mid \Delta_1, x_2 : B \\ \Gamma - \Delta_1 \vdash \Rightarrow^{\pm} t_2 \mid \Delta_2}
+  {\Gamma, x_1 : A \multimap B \vdash C \Rightarrow^{\pm} [ (x_1\ t_2) / x_2 ] \mid (\Delta_1 + \Delta_2), x_1 : A \multimap B }
+  }
   \newcommand*{\addDer}{
 \inferrule*[right=\addDerName]
 { [[ G, x : [A]s, y : A |- B =>+ t ; D, y : A ]] }
@@ -441,10 +450,15 @@
     {[[G |- A =>+ t1 ; D1]] \\ [[G |- B =>+ t2 ; D2]]}
     {[[G |- Tup A B =>+ pair t1 t2 ; D1 + D2]]}
     }
+  \newcommand*{\addPrunePairIntroHighlight}{
+    \inferrule*[right=\addPruningPairIntroName]
+    { \Gamma \vdash A \Rightarrow^{\pm} t_1 \mid \Delta_1 \\  \rulehighlight{\Gamma - \Delta_1} \vdash B \Rightarrow^{\pm} t_2 \mid \Delta_2}
+    { \Gamma \vdash A \otimes B \Rightarrow^{\pm} (t_1, t_2) \mid \Delta_1 + \Delta_2}
+    }
   \newcommand*{\addPrunePairIntro}{
     \inferrule*[right=\addPruningPairIntroName]
-    {[[G |- A =>+ t1 ; D1]] \\ [[G - D1 |- B =>+ t2 ; D2]]}
-    {[[G |- Tup A B =>+ pair t1 t2 ; D1 + D2]]}
+    { \Gamma \vdash A \Rightarrow^{\pm} t_1 \mid \Delta_1 \\ \Gamma - \Delta_1 \vdash B \Rightarrow^{\pm} t_2 \mid \Delta_2}
+    { \Gamma \vdash A \otimes B \Rightarrow^{\pm} (t_1, t_2) \mid \Delta_1 + \Delta_2}
     }
   \newcommand*{\addPairElim}{
     \inferrule*[right=\addPairElimName]
@@ -735,15 +749,15 @@
 
 \newcommand*{\fAddAltAppRule}{
     \inferrule*[right=\fAddAltAppName]
-    {[[G ; x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G - D1 ; . |- A =>+ t2 ; D2
-      ]]}{[[G ; x1 : A -o B |- C =>+
-    [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
+  {\Gamma;  x_2 : B \Downarrow\ \vdash C \Rightarrow^{\pm} t_1 \mid \Delta_1, x_2 : B \\ \Gamma - \Delta_1 ; \emptyset \vdash A \Downarrow\ \Rightarrow^{\pm} t_2 \mid \Delta_2}
+  {\Gamma; x_1 : A \multimap B \Downarrow\ \vdash C \Rightarrow^{\pm} [ (x_1\ t_2) / x_2 ] \mid (\Delta_1 + \Delta_2), x_1 : A \multimap B }
 }
+
 \newcommand*{\fAddAltPairIntroRule}{
     \inferrule*[right=\fAddAltPairIntroName]
-    {[[G ; . |- A =>+ t1 ; D1]] \\ [[G - D1 ; . |- B =>+ t2 ; D2]]}
-    {[[G ; . |- Tup A B =>+ pair t1 t2 ; D1 + D2]]}
-}
+    { \Gamma ; \emptyset \vdash A \Downarrow \ \Rightarrow^{\pm} t_1 \mid \Delta_1 \\ \Gamma - \Delta_1 \vdash B \Downarrow \ \Rightarrow^{\pm} t_2 \mid \Delta_2}
+    { \Gamma ; \emptyset \vdash A \otimes B \Downarrow \ \Rightarrow^{\pm} (t_1, t_2) \mid \Delta_1 + \Delta_2}
+    }
 
 
 % GRADED BASE SYNTHESIS RULES
