@@ -58,33 +58,41 @@ The challenges posed by ensuring the well-resourcedness of synthesised programs
 are most illustrated by the inclusion in our target language of multiplicative
 conjunction, and additive disjunction. Therefore, prior to fully describing the
 problem of resource management and our proposed solutions, we first expand our
-target language with multiplicative product ($\otimes$), and unit types ($\mathsf{Unit}$),
-as well as disjunctive sum types ($\oplus$). These extensions are detailed in
-Section~\ref{sec:linear-base-calculus}, which will be the target language of the
-synthesis calculi of this chapter. As well as helping to conceptualise the
-challenges posed by program synthesis in a resourceful setting, these have the added benefit
-of allowing the synthesis of more expressive programs, without introducing
-unnecessary complexity at this stage.
+target language with multiplicative product ($\otimes$), and unit types
+($\mathsf{Unit}$), as well as disjunctive sum types ($\oplus$). These extensions
+are detailed in Section~\ref{sec:linear-base-calculus}, which will be the target
+language of the synthesis calculi of this chapter. As well as helping to
+conceptualise the challenges posed by program synthesis in a resourceful
+setting, these have the added benefit of allowing the synthesis of more
+expressive programs, without introducing unnecessary complexity at this stage.
 
 Having outlined both a suitable target language and two approaches to dealing
 with the issue of resource management, we then present two synthesis calculi in
 Section~\ref{sec:linear-base-synthesis} as augmented inversions of the typing
 rules. Each calculus is based on a one of our proposed solutions to the resource
-management problem, which we then evaluate and contrast against each other in
-Section~\ref{sec:linear-base-evaluation}. 
+management problem.  
 
 Both calculi are implemented as part of a synthesis tool for
 Granule.\footnote{The exact implementation of the rules as they stand is
 deprecated, but may be found in Granule release v0.7.8.0:
 https://github.com/granule-project/granule/releases/tag/v0.7.8.0} The calculi
-are turned into an algorithm using Haskell. For the most part, we elide the
-details of the implementation, however, we provide a brief outline  
-and describe an important optimisation technique in
-Section~\ref{sec:linear-base-focusing}: focusing. Focusing removes much of the
-unnecessary non-determinism present in our synthesis rules by fixing an ordering
-on the application of rules. We present the two \textit{focused} forms of our
-original synthesis calculi in section~\ref{sec:linear-base-focusing}, which
-form the basis of our Granule implementation.
+are turned into an algorithm using Haskell. In order to do so, we apply an
+important technique from proof search literature to our calculi:
+\emph{focusing}~\citep{focusing}. Focusing removes much of the unnecessary
+non-determinism present in our synthesis rules by fixing an ordering on the
+application of rules. We present the two \textit{focused} forms of our original
+synthesis calculi in Section~\ref{sec:linear-base-focusing}, which form the
+basis of our Granule implementation. Following this, we provide some details of
+the implementation in Section~\ref{sec:linear-base-implementation}
+
+Each synthesis calculus implementation is then evaluated and contrasted against
+each other in Section~\ref{sec:linear-base-evaluation}, which measures the
+synthesis calculi on a suite of simple Granule benchmark programs. Finally we
+conclude with a discussion of related work in
+Section~\ref{sec:linear-base-related}, and highlight some limitations of our
+system in Section~\ref{sec:linear-base-conclusion}, showing how we intend to
+proceed in subsequent chapters to address these.
+
 
 \section{A Core Target Language}
 \label{sec:linear-base-calculus}
@@ -112,9 +120,14 @@ following two grammars:
 \\ \mid \; & [[ inl t ]] \mid [[ inr t ]] \mid \textbf{case} \ t_{1}\ \textbf{of}\ \textbf{inl}\ x_{1} \rightarrow t_{2};\ \textbf{inr}\ x_{2} \rightarrow t_{3}
 {\small{\tag{terms}}}
 \end{align*}
-We use the syntax $()$ for the inhabitant of  the multiplicative unit $[[ Unit ]]$.
-Pattern matching via a $\textbf{let}$ is used to eliminate products and unit
-types; for sum types, $\textbf{case}$ is used to distinguish the constructors.
+Type formers comprise the graded linear $\lambda$-calculus of
+Section~\ref{sec:linear-base}, extended with multiplicative products
+($\otimes$), additive coproducts ($\oplus$), and multiplicative units $[[ Unit
+]]$.
+
+We use the syntax $()$ for the inhabitant of $[[ Unit ]]$. Pattern matching via
+a $\textbf{let}$ is used to eliminate products and unit types; for sum types,
+$\textbf{case}$ is used to distinguish the constructors.
 
 \begin{figure}[t]
 \begin{align*}
@@ -262,9 +275,10 @@ expecting a $[[ Public ]]$ input:
 \end{example}
 
 \subsection{Metatheory}
-Finally, the admissibility of substitution is a key result that holds
-for this language~\citep{DBLP:journals/pacmpl/OrchardLE19}, which is
-leveraged in soundness of the synthesis calculi.
+Finally, as hinted at on page~\ref{ref:substitution} of
+Chapter~\ref{chapter:background}, the admissibility of substitution is a key
+result that holds for this language~\citep{DBLP:journals/pacmpl/OrchardLE19},
+which is leveraged in soundness of the synthesis calculi.
 %
 \begin{restatable}[Admissibility of substitution]{lemma}{linearSubst}
 Let $[[ D |- t' : A]]$, then:
@@ -420,27 +434,6 @@ grades. It is not immediately apparent which approach has better performance,
 thus we implement synthesis calculi based on both the additive and subtractive
 approaches, evaluating their performance on a set of benchmarking synthesis
 problems. 
-
-\subsection{Related Work}
-Before Hodas and Miller, the problem of resource
-non-determinism was first identified by~\citet{harlandpym}. 
-Their solution delays splitting of contexts at a multiplicative connective. 
-They later explored the implementation details of this approach, proposing a 
-solution where proof search is formulated in terms of constraints on 
-propositions. Propositions which occur in the conclusion of a multiplicative 
-connective are assigned a Boolean expression whose solution Constraints 
-generated during the proof search, with a solution to these constituting a 
-valid proof. The logic programming language 
-Lygon~\citep{lygon} implements this approach. 
-
-Our approach to synthesis implements a \textit{backward} style of proof search:
-starting from the goal, recursively search for solutions to sub-goals. In
-contrast to this, \textit{forward} reasoning approaches attempt to reach the
-goal by building sub-goals from previously proved sub-goals until the overall
-goal is proved.~\citet{10.1007/11532231_6,10.1007/11538363_15} consider forward
-approaches to proof search in linear logic using the \textit{inverse
-method}~\citep{DEGTYAREV2001179} where the issue of resource non-determinism
-that is typical to backward approaches is absent.
 
 
 \section{The Synthesis Calculi}
@@ -785,7 +778,6 @@ lower bound} ($\sqcap$) of $[[ D1 ]]$ and $[[ D2 ]]$, given by definition~\ref{d
   contexts]\label{def:context-glb}
 For all $[[ G1 ]]$, $[[ G2 ]], [[G1]] \sqcap [[G2]] =$
 \begin{align*}
-\label{def:lub}
 \left\{\begin{matrix}
 \begin{array}{lll}
 %% Both empty case
@@ -812,13 +804,17 @@ For all $[[ G1 ]]$, $[[ G2 ]], [[G1]] \sqcap [[G2]] =$
 where $r\!\sqcap\!s$ is the greatest-lower bound of grades $[[r]]$
 and $[[s]]$ if it exists, derived from the pre-order $\sqsubseteq$. If 
 the greatest lower bound of two grades does not exist, then the operation fails, 
-terminating the branch of synthesis.
+terminating the branch of synthesis. 
 \end{definition}
 %
 %
 
-As an example of $\sqcap$, consider the semiring of intervals over natural numbers and two
-judgements that could be used as premises for the (\subSumElimName) rule:
+This operation is the dual to least-upper bound
+(Definition~\ref{def:context-lub}) operation used in the typing rule for
+$\textsc{Case}$, as here we are subtracting usages rather than adding them. As
+an example of $\sqcap$, consider the semiring of intervals over natural numbers
+and two judgements that could be used as premises for the (\subSumElimName)
+rule:
 %
 \begin{align*}
 & [[ G, y : [A'] Intrv 0 5, x2 : A |- C =>- t1 ; y : [A'] Intrv 2 5 ]] \\
@@ -977,18 +973,18 @@ subtractive calculus:
 \end{array}
 \end{align*}
 %
-Synthesising an abstraction (\addAbsName) requires that $[[x : A]]$ is in
-the output context of the premise, ensuring that linearity is preserved.
-Likewise for application (\addAppName), the output
-context of the first premise must contain the linearly bound $[[x2 :
-B]]$ and the final output context must contain the assumption being used in the
-application $[[ x1 : A -o B ]]$. This output context computes the \emph{context
-addition} (Def.~\ref{def:contextAdd} on page\pageref{def:contextAdd}) of both output contexts of the premises $[[D1 + D2]]$. If $[[D1]]$
-describes how assumptions were used in $[[t1]]$ and $[[D2]]$ respectively for
-$[[t2]]$, then the addition of these two contexts describes the usage of
-assumptions for the entire subprogram. Recall, context addition
-ensures that a linear assumption may not appear in both $[[D1]]$ and
-$[[D2]]$, preventing us from synthesising terms that violate linearity.
+Synthesising an abstraction (\addAbsName) requires that $[[x : A]]$ is in the
+output context of the premise, ensuring that linearity is preserved. Likewise
+for application (\addAppName), the output context of the first premise must
+contain the linearly bound $[[x2 : B]]$ and the final output context must
+contain the assumption being used in the application $[[ x1 : A -o B ]]$. This
+output context computes the \emph{context addition} (Def.~\ref{def:contextAdd}
+on page\pageref{def:contextAdd}) of both output contexts of the premises $[[D1 +
+D2]]$. If $[[D1]]$ describes how assumptions were used in $[[t1]]$ and $[[D2]]$
+respectively for $[[t2]]$, then the addition of these two contexts describes the
+usage of assumptions for the entire subprogram. Recall, context addition ensures
+that a linear assumption may not appear in both $[[D1]]$ and $[[D2]]$,
+preventing us from synthesising terms that violate linearity.
 
 
 
@@ -1168,24 +1164,25 @@ can be applied.
 % \end{align*}
 
 
-This leads to us exploring a large number of redundant search branches: something which can
-be avoided through the application of a technique from linear logic proof theory
-called \textit{focusing}~\citep{focusing}. Focusing is based on the observation
-that some of the synthesis rules are invertible, i.e. whenever the conclusion of
-the rule is derivable, then so are its premises. In other words, the order in
-which we apply invertible rules doesn't matter. By fixing a particular ordering
-on the application of these rules, we eliminate much of the non-determinism that
-arises from trying branches which differ only in the order in which invertible
-rules are applied. 
+This leads to us exploring a large number of redundant search branches:
+something which can be avoided through the application of a technique from
+linear logic proof theory called \textit{focusing}~\citep{focusing}. Focusing is
+based on the observation that some of the synthesis rules are invertible, i.e.
+whenever the conclusion of the rule is derivable, then so are its premises. In
+other words, the order in which we apply invertible rules doesn't matter. By
+fixing a particular ordering on the application of these rules, we eliminate
+much of the non-determinism that arises from trying branches which differ only
+in the order in which invertible rules are applied. 
 
-We take our both of our calculi and apply this focusing technique to them,
+We take both of our calculi and apply this focusing technique to them,
 yielding two \textit{focusing} calculi. To do so, we augment our previous
 synthesis judgement with an additional input context $\Omega$:
 \begin{align*}
 \Gamma ; \Omega \vdash [[ A ]] \Rightarrow [[t ]]\ |\ \Delta
 \end{align*}
-Unlike $\Gamma$ and $\Delta$, $\Omega$ is an \textit{ordered} context, which 
-behaves like a stack.
+Unlike $\Gamma$ and $\Delta$, $\Omega$ is an \textit{ordered} context, which
+behaves like a stack. Assumptions with types that can be broken down further are
+then bound into $\Omega$. 
 
 Using the terminology of~\citet{focusing}, we refer to rules that are invertible
 as \textit{asynchronous} and rules that are not as \textit{synchronous}. The
@@ -1193,11 +1190,13 @@ intuition is that of asynchronous communication: asynchronous rules can be
 applied eagerly, while the non-invertible synchronous rules require us to
 \textit{focus} on a particular part of the judgement: either on the assumption
 (if we are in an elimination rule) or on the goal (for an introduction rule).
-When focusing we apply a chain of synchronous rules, until we either reach a
-position where no rules may be applied (at which point the branch terminates),
-we have synthesised a term for our goal, or we have exposed an asynchronous
-connective at which point we switch back to applying asynchronous rules.
-
+When focusing we apply a chain of synchronous rules until:
+\begin{itemize}
+  \item We reach a position where no rules may be applied (at which point the branch terminates).
+  \item We have synthesised a term for our goal.
+  \item We have exposed an asynchronous connective at which point we switch
+\end{itemize}
+  back to applying asynchronous rules.
 We divide our synthesis rules into four categories, each with their own
 judgement form, which refines the focusing judgement above with an arrow
 indicating which part of the judgement is currently in focus. An $\Uparrow$
@@ -1207,9 +1206,9 @@ are focusing on the left or right:
 \begin{enumerate}
   \item Right Async: $\multimap_{\textsc{R}}$ rule with the judgement:
         \begin{align*}\Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow t\ |\ \Delta \end{align*}
-        \item Left Async:  $\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, $1_{\textsc{L}}$, $\textsc{Der}$, and $\Box_{\textsc{L}}$ rules with the judgement:
+        \item Left Async:  $\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, $\mathsf{Unit}_{\textsc{L}}$, $\textsc{Der}$, and $\Box_{\textsc{L}}$ rules with the judgement:
         \begin{align*}\Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta \end{align*}
-        \item Right Sync:  $\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, $1_{\textsc{R}}$, and $\Box_{\textsc{R}}$ rules with the judgement:
+        \item Right Sync:  $\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, $\mathsf{Unit}_{\textsc{R}}$, and $\Box_{\textsc{R}}$ rules with the judgement:
         \begin{align*}\Gamma ; \Omega \vdash A \Downarrow\ \Rightarrow t\ |\ \Delta \end{align*}
         \item Left Sync:   $\multimap_{\textsc{L}}$ rule with the judgement:
         \begin{align*}\Gamma ; \Omega \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta \end{align*}
@@ -1223,14 +1222,14 @@ additive, divided into focusing phases. The focusing rules for the additive prun
 calculus are identical to the additive calculus, save for the $\otimes^{+}_{\textsc{R}}$ and 
 $\multimap^{+}_{\textsc{L}}$ rules, which are given in Figure~\ref{fig:focus-add-pruning}.
 
-For the most part, the translation from
-non-focused to focused rules is straightforward. The most notable change occurs
-in rules in which assumptions are bound. In the cases where a fresh assumption's
-type falls into the Left Async category (i.e. $\otimes$, $\oplus$, etc.), then it is bound in the
-ordered context $\Omega$ instead of $\Gamma$. Left Async rules 
-operate on assumptions in $\Omega$, rather than $\Gamma$. This results in invertible elimination rules
+For the most part, the translation from non-focused to focused rules is
+straightforward. The most notable change occurs in rules in which assumptions
+are bound. In the cases where a fresh assumption's type falls into the Left
+Async category (i.e. $\otimes$, $\oplus$, etc.), then it is bound in the ordered
+context $\Omega$ instead of $\Gamma$. Left Async rules operate on assumptions in
+$\Omega$, rather than $\Gamma$. This results in invertible elimination rules
 being applied as fully as possible before \textit{focusing} on non-invertible
-rules when $\Omega$ is empty.
+rules when $\Omega$ is empty.  
 
 In addition to the focused forms of the original synthesis calculi, each
 calculus has a set of rules which determine which part of the synthesis
@@ -1434,7 +1433,7 @@ subtractive and additive calculi, respectively.
   \label{fig:focus-add-pruning}
 \end{figure}
 
-One way to view focusing is in terms of a finite state machine, such as
+One way to view focusing is in terms of a finite state machine given in
 Figure~\ref{fig:focusingFSM}. States comprise the four phases of focusing, plus
 two additional states, \textsc{Focus}, and \textsc{Var}. Edges are then the
 synthesis rules that direct the transition between focusing phases. The
@@ -1446,8 +1445,8 @@ $\Downarrow{R}$ rule deals with the transition from a right synchronous phase
 back to a right asynchronous phase, with the $\Downarrow{L}$ rule likewise
 transitioning to a left asynchronous phase. Depending on the current phase of
 focusing, these rules consider the goal type, the assumption currently being
-focused on's type, as well as the size of $\Omega$, to decide when to
-transition between focusing phases. 
+focused on's type, as well as the size of $\Omega$, to decide when to transition
+between focusing phases. 
 
 This focused approach to synthesis ensures that we are restricted to generating
 programs in $\beta$-normal form, which eliminates a class of redundant programs
@@ -1474,9 +1473,9 @@ initial text=$ $, % sets the text that appears on the start arrow
 \node[state, accepting] at (5, -12) (V) { \textsc{Var} \\ $\Gamma ; [[ x : A ]] \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta $};
 \draw (RA) edge[loop above] node{$\multimap_{\textsc{R}}$} (RA)
 (RA) edge[above, bend left] node{$\Uparrow_{\textsc{R}}$} (LA)
-(LA) edge[loop above] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \\ $1_\textsc{L}$, $\textsc{Der}$, \\ $\Box_{\textsc{L}}$, $\Uparrow_{\textsc{L}}$ } (LA)
+(LA) edge[loop above] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \\ $\mathsf{Unit}_\textsc{L}$, $\textsc{Der}$, \\ $\Box_{\textsc{L}}$, $\Uparrow_{\textsc{L}}$ } (LA)
 % (LA) edge[loop right] node{$\Uparrow_{L}$} (LA)
-(LA) edge[left, bend right] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \ \ \ \\ $1_\textsc{L}$, $\textsc{Der}$, \ \ \ \ \\ $\Box_{\textsc{L}}$, $\Uparrow_\textsc{L}$ \ \ \ \ \\  } (F)
+(LA) edge[left, bend right] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \ \ \ \\ $\mathsf{Unit}_\textsc{L}$, $\textsc{Der}$, \ \ \ \ \\ $\Box_{\textsc{L}}$, $\Uparrow_\textsc{L}$ \ \ \ \ \\  } (F)
 % (LA) edge[right, bend left] node{$\Uparrow_{L}$} (F)
 (F) edge[below, bend right] node{\ \ \ \  $\textsc{F}_{\textsc{R}}$} (RS)
 (RS) edge[left, bend left] node{$\Downarrow_{\textsc{L}}$} (RA)
@@ -1484,7 +1483,7 @@ initial text=$ $, % sets the text that appears on the start arrow
 (LS) edge[right, bend right] node{$\Downarrow_{\textsc{L}}$} (LA)
 (LS) edge[below, bend right] node{$\multimap_{\textsc{L}}$} (RS)
 (LS) edge[loop below] node{$\multimap_{\textsc{L}}$} (LS)
-(RS) edge[loop below] node{$\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, \\ $1_\textsc{R}$, $\Box_{\textsc{R}}$} (RS)
+(RS) edge[loop below] node{$\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, \\ $\mathsf{Unit}_\textsc{R}$, $\Box_{\textsc{R}}$} (RS)
 (LS) edge[below, bend left] node{\\[0.1em] \ \ \ $\textsc{LinVar}$, \\ \ \ \ $\textsc{GrVar}$ } (V)
 ;
 \end{tikzpicture}
@@ -1508,12 +1507,12 @@ then:
 \begin{align*}
   {\footnotesize{
 \begin{array}{lll}
- 1.\ Right\ Async: & [[ G ; O |- A async =>- t ; D ]] \quad &\implies \quad [[ G , O |- A =>- t ; D ]]\\
- 2.\ Left\ Async: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G , O |- C =>- t ; D ]]\\
- 3.\ Right\ Sync: & [[ G ; . |- A sync =>- t ; D ]] \quad &\implies \quad [[ G |- A =>- t ; D ]]\\
- 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>- t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>- t ; D ]]\\
- 5.\ Focus\ Right: & [[ G ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]\\
- 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>- t ; D ]] \quad &\implies \quad [[ G |- C =>- t ; D ]]
+ 1.\ \text{Right Async:} & [[ G ; O |- A async =>- t ; D ]] \quad &\iff \quad [[ G , O |- A =>- t ; D ]]\\
+ 2.\ \text{Left Async:} & [[ G ; O async |- C =>- t ; D ]] \quad &\iff \quad [[ G , O |- C =>- t ; D ]]\\
+ 3.\ \text{Right Sync:} & [[ G ; . |- A sync =>- t ; D ]] \quad &\iff \quad [[ G |- A =>- t ; D ]]\\
+ 4.\ \text{Left Sync:} & [[ G ; {x : A }sync |- C =>- t ; D ]] \quad &\iff \quad [[ G, x : A |- C =>- t ; D ]]\\
+ 5.\ \text{Focus Right:} & [[ G ; O async |- C =>- t ; D ]] \quad &\iff \quad [[ G |- C =>- t ; D ]]\\
+ 6.\ \text{Focus Left:} & [[ G, x : A ; O async |- C =>- t ; D ]] \quad &\iff \quad [[ G |- C =>- t ; D ]]
 \end{array}
   }}
 \end{align*}
@@ -1529,12 +1528,12 @@ then:
 \begin{align*}
   {\footnotesize{
 \begin{array}{lll}
- 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G , O |- A =>+ t ; D ]]\\
- 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G , O |- C =>+ t ; D ]]\\
- 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
- 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
- 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
- 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
+ 1.\ \text{Right Async:} & [[ G ; O |- A async =>+ t ; D ]] \quad &\iff \quad [[ G , O |- A =>+ t ; D ]]\\
+ 2.\ \text{Left Async:} & [[ G ; O async |- C =>+ t ; D ]] \quad &\iff \quad [[ G , O |- C =>+ t ; D ]]\\
+ 3.\ \text{Right Sync:} & [[ G ; . |- A sync =>+ t ; D ]] \quad &\iff \quad [[ G |- A =>+ t ; D ]]\\
+ 4.\ \text{Left Sync:} & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\iff \quad [[ G, x : A |- C =>+ t ; D ]]\\
+ 5.\ \text{Focus Right:} & [[ G ; O async |- C =>+ t ; D ]] \quad &\iff \quad [[ G |- C =>+ t ; D ]]\\
+ 6.\ \text{Focus Left:} & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\iff \quad [[ G |- C =>+ t ; D ]]
 \end{array}
   }}
 \end{align*}
@@ -1550,12 +1549,12 @@ then:
 \begin{align*}
   {\footnotesize{
 \begin{array}{lll}
- 1.\ Right\ Async: & [[ G ; O |- A async =>+ t ; D ]] \quad &\implies \quad [[ G , O |- A =>+ t ; D ]]\\
- 2.\ Left\ Async: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G , O |- C =>+ t ; D ]]\\
- 3.\ Right\ Sync: & [[ G ; . |- A sync =>+ t ; D ]] \quad &\implies \quad [[ G |- A =>+ t ; D ]]\\
- 4.\ Left\ Sync: & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\implies \quad [[ G, x : A |- C =>+ t ; D ]]\\
- 5.\ Focus\ Right: & [[ G ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]\\
- 6.\ Focus\ Left: & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\implies \quad [[ G |- C =>+ t ; D ]]
+ 1.\ \text{Right Async:} & \Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G , O |- A =>+ t ; D ]]\\
+ 2.\ \text{Left Async:} & \Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G , O |- C =>+ t ; D ]]\\
+ 3.\ \text{Right Sync:} & \Gamma ; \emptyset \vdash A \Downarrow\ \Rightarrow^{+} t \mid \Delta  \quad &\iff \quad [[ G |- A =>+ t ; D ]]\\
+ 4.\ \text{Left Sync:} & \Gamma ; x : A \Downarrow\ \vdash  B \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G, x : A |- C =>+ t ; D ]]\\
+ 5.\ \text{Focus Right:} & \Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G |- C =>+ t ; D ]]\\
+ 6.\ \text{Focus Left:} & \Gamma, x : A ; \Omega \Uparrow\ \vdash B \Uparrow\ \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G |- B =>+ t ; D ]]
 \end{array}
   }}
 \end{align*}
@@ -1566,6 +1565,7 @@ which contains assumptions with grades reflecting their use in $[[ t ]]$.
 
 
 \section{Implementation}
+\label{sec:linear-base-implementation}
 We implemented our approach as a synthesis tool for Granule, integrated with its
 core tool. Granule features ML-style polymorphism (rank-1 polymorphism) but we
 do not address polymorphism here (Chapter~\ref{chapter:extended} offers a treatment of 
@@ -1641,7 +1641,7 @@ k x [z] = z
 \end{granule}
 This procedure includes programs which perform a nested unboxing, refactoring:
 \begin{granule}
-comp : forall {k : Coeffect, n m : k, a b c : Type} 
+comp : forall {k : Semiring, n m : k, a b c : Type} 
      . (a [m] -> b) [n] 
      -> (b [n] -> c) 
      -> a [n * m] 
@@ -1650,7 +1650,7 @@ comp x y z = let [u] = x in let [v] = z in y [ u [v] ]
 \end{granule}
 into:
 \begin{granule}
-comp : forall {k : Coeffect, n m : k, a b c : Type}
+comp : forall {k : Semiring, n m : k, a b c : Type}
      . (a [m] -> b) [n] 
      -> (b [n] -> c) 
      -> a [n * m] 
@@ -1996,6 +1996,24 @@ synthesising more examples, including ones polymorphic in grades and even the
 semiring itself. Given that the literature on linear logic theorem proving is
 typically subtractive, this is an interesting result. 
 
+\section{Related Work}
+\label{sec:linear-base-related}
+Before Hodas and Miller~\cite{HODAS1994327}, the problem of resource
+non-determinism was first identified by Harland and Pym~\cite{harlandpym}. Their
+solution delays splitting of contexts at a multiplicative connective. They later
+explored the implementation details of this approach, proposing a solution where
+proof search is formulated in terms of constraints on propositions. The logic
+programming language Lygon~\cite{lygon} implements this approach.
+
+Our approach to synthesis implements a \textit{backward} style of proof search:
+starting from the goal, recursively search for solutions to sub-goals. In
+contrast to this, \textit{forward} reasoning approaches attempt to reach the
+goal by building sub-goals from previously proved sub-goals until the overall
+goal is proved.~\citet{10.1007/11532231_6,10.1007/11538363_15} consider forward
+approaches to proof search in linear logic using the \textit{inverse
+method}~\citep{DEGTYAREV2001179} where the issue of resource non-determinism
+that is typical to backward approaches is absent.
+
 \section{Conclusion}
 \label{sec:linear-base-conclusion}
 
@@ -2029,44 +2047,61 @@ type. Consider an example of a distributive program, \textit{push}:
   push: \Box_r(A \otimes B) \multimap \Box_r A \otimes \Box_r B
 \end{align*}
 which takes a data type graded by $r$ (in this case the product type $A \otimes
-B$), and distributes $r$ over the constituent elements of the product
-$A$ and $B$. Given this goal type, how would we go about synthesising a program
-in our tool? 
+B$), and distributes $r$ over the constituent elements of the product $A$ and
+$B$. This example is representative of a common class of graded programs known
+as \emph{distribute laws}, however, we are unable to express such programs in
+our simplified language.
 
-We instatiate the \addAbsName\ rule at this type, building a partial synthesis
-derivation. Although we use the additive scheme for this example, the exact same
-situation arises in the subtractive.
-\begin{align*}
-    \inferrule*[right=\addUnboxName]
-      { x_2 :_r A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ |\ ? }
-      {\inferrule*[right=\addAbsName] {x_1 : \Box_r (A \otimes B) \vdash \Box_r A \otimes \Box_r B \Rightarrow\ \textbf{let}\ [x_2] = x_1\ \textbf{in}\ ?  \ |\ ?} 
-        {\emptyset \vdash \Box_r(A \otimes B) \multimap \Box_r A \otimes \Box_r B \Rightarrow \lambda x_1 . ? \ |\ ? }}
-\end{align*}
-After applying \addAbsName\ followed by \addUnboxName, we now have the graded
-assumption $x_2 :_r A \otimes B$ in our context which we must use to construct a
-term of type $\Box_r A \otimes \Box_r B$. We might expect that the path
-synthesis should take now would be to break $x_2$ down into two graded
-assumptions with types $A$ and $B$, promote these graded assumptions using the
-\addBoxName\ rule, before finally peforming a pair introduction to yield $\Box_r
-A \otimes \Box_r B$. However, in order to apply the pair elimination rule
-\addPairElimName\  
-and break our graded assumption into two, we must perform a dereliction on
-$x_2$, to yield a linear copy: 
-\begin{align*}
-  \inferrule*[right=\addDerName]
-      {x_2 :_r A \otimes B, x_3 : A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ }
-      { x_2 :_r A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ |\ ? }
-\end{align*}
-Clearly, this cannot lead us to the goal: the \addBoxName\ rule cannot promote
-terms using linear assumptions. Therefore, \textit{push} and other types which
-exhibit this distributive behaviour are not derivable in our calculi.
+In Granule, however, we can write the above as: 
+\begin{granule}
+push : forall {k : Semiring, r : k, a b : Type} . (a * b) [r] -> (a [r] * b [r])
+push [(x, y)] = ([x], [y])
+\end{granule}
+by pattern matching on both the graded modality and the product. The ability to
+perform this \emph{deep} pattern matching greatly increases the expressivity of
+our language, and allows us to both type and potentially synthesis much more
+interesting and realistic Granule programs.
 
 In the following chapter, we present an alternative approach to generating
 programs which exhibit this distributive behaviour using a generic programming
 methodology. The approach we present in Chapter~\ref{chapter:deriving} is not
-type-directed program synthesis, per se. This approach complements the calculi
-presented here and in Chapter~\ref{chapter:extended}, providing users with a
-means to automatically generate programs purely from a type for a common class
-of graded programs. In describing this mechanism, we also begin to enhance our
-language with more advanced features such pattern matching, and recursion,
-further laying the foundations for Chapter~\ref{chapter:extended}.
+type-directed program synthesis of the kind we have seen in this chapter, i.e.
+it is not based on enumerative search. This approach complements the synthesis
+calculi presented here and in Chapter~\ref{chapter:extended}, providing users
+with a means to automatically generate programs purely from a type for a common
+class of graded programs, as well as some useful structural combinators. In
+describing this mechanism, we begin to enhance our language with more advanced
+features such pattern matching and recursion, further laying the foundations for
+Chapter~\ref{chapter:extended}, and bringing our typing calculus closer in line
+with what can be expressed in Granule.  
+
+% Given this goal type, how would we go about synthesising a program
+% in our tool? 
+
+% We instatiate the \addAbsName\ rule at this type, building a partial synthesis
+% derivation. Although we use the additive scheme for this example, the exact same
+% situation arises in the subtractive.
+% \begin{align*}
+%     \inferrule*[right=\addUnboxName]
+%       { x_2 :_r A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ |\ ? }
+%       {\inferrule*[right=\addAbsName] {x_1 : \Box_r (A \otimes B) \vdash \Box_r A \otimes \Box_r B \Rightarrow\ \textbf{let}\ [x_2] = x_1\ \textbf{in}\ ?  \ |\ ?} 
+%         {\emptyset \vdash \Box_r(A \otimes B) \multimap \Box_r A \otimes \Box_r B \Rightarrow \lambda x_1 . ? \ |\ ? }}
+% \end{align*}
+% After applying \addAbsName\ followed by \addUnboxName, we now have the graded
+% assumption $x_2 :_r A \otimes B$ in our context which we must use to construct a
+% term of type $\Box_r A \otimes \Box_r B$. We might expect that the path
+% synthesis should take now would be to break $x_2$ down into two graded
+% assumptions with types $A$ and $B$, promote these graded assumptions using the
+% \addBoxName\ rule, before finally peforming a pair introduction to yield $\Box_r
+% A \otimes \Box_r B$. However, in order to apply the pair elimination rule
+% \addPairElimName\  
+% and break our graded assumption into two, we must perform a dereliction on
+% $x_2$, to yield a linear copy: 
+% \begin{align*}
+%   \inferrule*[right=\addDerName]
+%       {x_2 :_r A \otimes B, x_3 : A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ }
+%       { x_2 :_r A \otimes B \vdash \Box_r A \otimes \Box_r B \Rightarrow\ ?\ |\ ? }
+% \end{align*}
+% Clearly, this cannot lead us to the goal: the \addBoxName\ rule cannot promote
+% terms using linear assumptions. Therefore, \textit{push} and other types which
+% exhibit this distributive behaviour are not derivable in our calculi.
