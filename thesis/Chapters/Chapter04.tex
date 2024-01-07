@@ -2,12 +2,13 @@
 \label{chapter:deriving}
 Thus far we have considered program synthesis from the perspective of
 enumerative search, using our types to guide us and pruning the space of
-programs where possible. This approach yielding a synthesis tool which was
-highly expressive, allowing the synthesis of a program term for each syntactic
-form in our language. In this chapter we present an alternative approach, which
-targets a specific class of graded programs: graded \emph{distributive}
-combinators. We view this approach as a useful complement to the more powerful
-type-directed synthesis. 
+programs where possible. This approach yielded a synthesis tool which was highly
+expressive, allowing the synthesis of a program term for each syntactic form in
+our core calculus. In this chapter we present an alternative approach, which
+targets a specific class of graded programs: graded \emph{distributive} and
+structural combinators. We view this approach as a useful complement to the more
+powerful type-directed synthesis. Much of the content of this chapter is derived
+from~\citet{DBLP:journals/corr/abs-2112-14966}, our Linearity/TLLA 2020 paper. 
 
 When programming with graded modal types, we have observed there is often a need
 to `distribute' a graded modality over a type, and vice versa, in order to
@@ -16,7 +17,7 @@ compose programs. That is, we may find ourselves in possession of a $\Box_r
 needs to be passed to a pre-existing function (of our own codebase or a library)
 which requires a $\mathsf{F} (\Box_r \alpha)$ value, or perhaps vice versa. A
 \emph{distributive law} (in the categorical sense,
-e.g.,~\citet{street1972formal}) provides a conversion from one to the other. In
+due to~\citet{street1972formal}) provides a conversion from one to the other. In
 this chapter, we present a procedure to automatically synthesise these
 distributive operators, applying a generic programming
 methodology~\citep{hinze2000new} to compute these operations given the base type

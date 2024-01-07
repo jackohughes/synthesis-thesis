@@ -2014,11 +2014,289 @@ g : [[ (a -o b) ]] \multimap [[ {mu X . A} ]] \multimap [[ {{(mu X . A)} [ a /* 
 The following shows that the calculation of \emph{push}
 and \emph{pull} distributive laws is well-typed.
 
-\begin{proposition}
-\label{prop:soundness-pull}
-Type soundness of $\deriv{pull}{\tcF\ \overline{\alpha_i}} : \tcF\ (\overline{\Box_{r_i} \alpha_i})
-\rightarrow \Box_{\bigwedge^n_{i = 1} r_i} (\tcF\  \overline{\alpha_i})$.
-\end{proposition}
+% \begin{proposition}
+% \label{prop:soundness-pull}
+% Type soundness of $\deriv{pull}{\tcF\ \overline{\alpha_i}} : \tcF\ (\overline{\Box_{r_i} \alpha_i})
+% \rightarrow \Box_{\bigwedge^n_{i = 1} r_i} (\tcF\  \overline{\alpha_i})$.
+% \end{proposition}
+
+
+\pushSound*
+% \begin{proposition}
+% \label{prop:soundness-push}
+% Type soundness of $\deriv{push}{\tcF\ \overline{\alpha_i}}^{\Sigma} :
+% \deriv{push}{\tcF \overline{\alpha_i}}^{\Sigma} : \Box_{r} \tcF \overline{\alpha_i}
+%   \rightarrow  \tcF  (\overline{\Box_{r} \alpha_i})$.
+% \end{proposition}
+
+\begin{proof}
+  \
+\begin{itemize}
+\item $\deriv{push}{ [[ Unit ]]}^{\Sigma} : [[ {[] r Unit} -> Unit ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = [[ Unit ]]$).
+
+{\footnotesize{
+\begin{align*}
+  \inferrule*[right=case]
+   {
+    \inferrule*[right=con]
+         {\quad}{[[ . |- () : Unit ]]}
+    \quad
+    \inferrule*[right={[}pbox{]}]{
+     \inferrule*[right={[}pcon{]}]
+       {[[ | Unit | == 1 ]] }
+       {[[ r  |- () : Unit |> . ]]}
+     }{
+       [[ none |- [ () ] : Unit |> . ]]
+     }
+   }
+   {[[ z : [] r Unit |- case z of [ () ] -> () : Unit ]]}
+\end{align*}
+    }}
+
+%%%%% push rec var
+
+\item $\deriv{push}{ X }^{\Sigma} : [[ {[] r X} -> {X [ [] r ai /* ai ]} ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = X$).
+
+{\footnotesize{
+    \begin{align*}
+      \inferrule*[right=app]
+      {\inferrule*[right=lookup,leftskip=10em]
+      { X : [[ {[] r (mu X . A)} -o {(mu X . A) [ [] r ai /* ai ]} ]] \in [[ Sig ]]}
+      {[[ Sig |- {lookup Sig X} : {[] r (mu X . A)} -o {(mu X . A) [ [] r ai /* ai ]} ]]} \\
+      \inferrule*[right=var,rightskip=10em]{\quad}
+      {[[z : {[] r (mu X . A)} |- z : {[] r (mu X . A)} ]]}}{[[ Sig, z
+      : {[] r (mu X . A)} |- {lookup Sig X}  z : (mu X . A) [ [] r ai /* ai ] ]]}
+    \end{align*}
+    }}
+\item $\deriv{push}{ [[ aj ]] }^{\Sigma} : [[ {[] rj aj} -> [] rj aj ]]$
+ (i.e. $\tcF\ \overline{\alpha_i} = \alpha $).
+
+{\footnotesize{
+\begin{align*}
+\inferrule*[right=var]
+  {\quad}
+  {[[ z : {[] rj aj} |- z : {[] rj aj} ]]}
+\end{align*}
+    }}
+
+\item $\deriv{push}{ [[ Sum A B ]]}^{\Sigma} : [[ {[] r (Sum A B)} -> (Sum {{A} [ [] r ai /* ai ]} {{B} [ [] r ai /* ai ]}) ]]$
+
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub1}
+\inferrule*[right=Con]{\inferrule*[right=app]{ \inferrule*[right=push]{\quad}{[[ . |- pushP Sig A : {[] r A} -o {A [ [] r ai /* ai ]} ]] } \\ \inferrule*[right=Pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          x : A |- x : A ]]}}{[[
+       x : [ A ] 1 |- x : A ]]}}{[[ x : [
+      A ] r |- [ x ] : [] r A  ]]}}{[[ x : [ A ] r |- push Sig A ( [ x ] ) : {
+      A} [ [] r ai /* ai ]
+    ]]}}{[[ x : [ A ] r |- inr push Sig A ( [ x ] )  : Sum { {A} [ [] r ai /* ai ]}
+  {{B} [ [] r ai /* ai ]} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub2}
+\inferrule*[right=Con]{\inferrule*[right=app]{ \inferrule*[right=push]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai ]} ]] } \\ \inferrule*[right=Pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          y : B |- y : B ]]}}{[[
+       y : [ B ] 1 |- y : B ]]}}{[[ y : [
+      B ] r |- [ y ] : [] r B  ]]}}{[[ y : [ B ] r |- push Sig B ( [ y ] ) : {
+      B} [ [] r ai /* ai ]
+    ]]}}{[[ y : [ B ] r |- inr push Sig B ( [ y ] )  : Sum { {A} [ [] r ai /* ai ]}
+  {{B} [ [] r ai /* ai ]} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub3}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pcon{]}]{ \inferrule*[right={[}Pvar{]}]{\quad}{[[ r
+       |- x : A |> x : [ A ] r ]]} \\ [[ |Sum A B| > 1 ]] \Rightarrow [[ 1 <<= r ]]}{ [[ r |- inl ( x ) : Sum A B |> x :
+    [ A ] r  ]] }}{[[ none |- [ inl ( x ) ] : [] r {Sum A B} |> x :
+  [ A ] r ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-sum-sub4}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pcon{]}]{ \inferrule*[right={[}Pvar{]}]{\quad}{[[ r |- y : B |>  y : [ B ] r ]]} \\ [[ |Sum A B| > 1 ]] \Rightarrow [[ 1 <<= r ]]}{ [[ r  |- inr ( y ) : Sum A B |> y :
+    [ B ] r ]] }}{[[ none |- [ inr ( y ) ] : [] r {Sum A B} |> y :
+  [ B ] r ]]}
+\end{equation}
+    }
+
+
+{\footnotesize{
+\begin{align*}
+  \hspace{-7em}\inferrule*[right=Case]{
+    % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Sum A B |- z : Sum A B ]]} \\
+  \eqref{eq:push-deriv-sum-sub1} \\ \eqref{eq:push-deriv-sum-sub2} \\
+  \eqref{eq:push-deriv-sum-sub3} \\ \eqref{eq:push-deriv-sum-sub4}
+  }{[[ z : [] r (Sum A B) |- case z of [ inl ( x ) ] -> inl push Sig A ( [ x ] ) ;
+  [ inr ( y ) ] -> inr push Sig B ( [ y ] ) : Sum {{ A} [ [] r ai /* ai ]} {{
+  B} [ [] r ai /* ai ] } ]]}
+\end{align*}
+ }}
+
+\item $\deriv{push}{ [[ Tup A B ]]}^{\Sigma} : [[ {[] r (Tup A B)} -> (Tup {{
+    A} [ [] r ai /* ai ]} {{B} [ [] r ai /* ai ]}) ]]$
+
+\footnotesize{
+\begin{equation}
+  \label{eq:push-deriv-pair-sub4}
+  \inferrule*[right=app]{\inferrule*[right=push]{\quad}{ [[ . |- pushP Sig A : {[] r A} -o {A [ [] r ai /* ai ]}]]} \\ \inferrule*[right=pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          x : A |- x : A  ]]}}{[[
+        x : [ A ] 1 |- x : A ]]}}{[[ x : [ A ] r |- [ x ] : [] r
+      A ]]}}{[[ x : [ A ] r |- push Sig A ( [ x ] ) : {A} [ [] r ai /* ai ]  ]]}
+\end{equation}}
+
+\footnotesize{
+\begin{equation}
+  \label{eq:push-deriv-pair-sub5}
+  \inferrule*[right=app]{\inferrule*[right=push]{\quad}{ [[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai] }]]}\\ \inferrule*[right=pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          y : B |- y : B   ]]}}{[[
+        y : [ B ] 1 |- y : B ]]}}{[[ y : [ B ] r |- [ y ] : [] r
+      B ]]}}{[[ y : [ B ] r |-
+    push Sig B ( [ y ] ) : {B} [ [] r ai /* ai ]  ]]}
+\end{equation}}
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-pair-sub1}
+\inferrule*[right=Con]
+{ \eqref{eq:push-deriv-pair-sub4}
+  \\
+\eqref{eq:push-deriv-pair-sub5}
+  }
+{ [[ x : [ A ] r, y : [ B ] r |- pair {push Sig A ( [ x ] )} {push Sig B ( [ y ] )} : Tup
+  { {A} [ [] r ai /* ai ] } {  {B} [ [] r ai /* ai ] } ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-pair-sub2}
+\inferrule*[right={[}Pbox{]},rightskip=10em]{\inferrule*[right={[}PCon{]}]{\inferrule*[right={[}Pvar{]},leftskip=1em]{\quad}{[[
+  r  |- x : A |> x : [ A ] r ]]} \\
+\inferrule*[right={[}Pvar{]},rightskip=2em]{\quad}{[[ r  |- y : B |> y : [ B
+ ] r ]]} \\ |[[Tup A B]]| = 1 }{[[ r
+  |- Pair x y : Tup A B |> x : [ A ] r, y : [ B ] r ]]}}{[[ none |- [ Pair x y ] : [] r
+  {Tup A B} |> x : [ A ] r, y : [ B ] r ]]}
+\end{equation}
+   }
+
+\footnotesize{
+\begin{align*}
+  \inferrule*[right=Case]{
+  % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Tup A B |- z : Tup A B ]]} \\
+  \eqref{eq:push-deriv-pair-sub1} \\ \eqref{eq:push-deriv-pair-sub2}
+  }{[[ z : [] r (Tup A B) |- case z of [ Pair x y ] -> pair {
+  push Sig A ( [ x ] )}  {push Sig B ( [ y ] )} : Tup {{A} [ [] ri ai /* ai ]} {{
+  B} [ [] ri ai /* ai ]} ]]}
+\end{align*}
+    }
+
+\item $\deriv{push}{ [[ A -o B ]]}^{\Sigma} : [[ {[] r (A -o B)} -> ({{A} [ [] r ai /* ai ]}
+  -o {{B} [ [] ri ai /* ai ]}) ]]$
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub3}
+\inferrule*[right=app]{ \inferrule*[right=push, leftskip=10em]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai]} ]]} \\ \inferrule*[right=Pr, rightskip=15em]{\inferrule*[right=app]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+          f : {A -o B} |- f : A -o B ]]}}{ [[ f : [ { A
+      -o B }  ] 1 |- f : A -o B ]]} \\
+      \inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[ x : A  |- x : A
+          ]]}}{[[  x : [ A ] 1 |- x : A ]]}}{[[ f : [ { A
+      -o B } ] 1, x : [ A ] 1 |- f x : B
+    ]]}}{[[ f : [ {A -o B} ] r, x : [ A ]
+    {BigMeet ri} |- [ f x ] : {[] r {B }}]]}}
+{[[ f : [ {A -o B} ] r, x : [ A ] {BigMeet ri} |- push Sig B [ f x ] : {{B [ [] r ai /* ai ] } }  ]]}
+\end{equation}
+ }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub4}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pvar{]}]{\quad}{[[ {BigMeet ri} |- x : A |> x :
+    [ A ] {BigMeet ri}]]}}{[[none |- [ x ] : [] r
+  A |> x : [ A ] {BigMeet ri} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub1}
+\inferrule*[right=Case]{
+  \inferrule*[right=app]{\inferrule*[right=pull]{\quad}{[[ . |- pullP Sig A : A -o {[] {BigMeet ri} A} ]]} \\ \inferrule*[right=var]{\quad}{[[ y : { A } |- y : {A}
+      ]]}}{[[ y : { A } |- pull Sig A (y) : [] {BigMeet
+      ri} A ]]} \\
+  \eqref{eq:push-deriv-abs-sub3} \\ \eqref{eq:push-deriv-abs-sub4} }{[[ y : {A} , f : [ {A -o B} ] r |- case pull Sig A (y) of [
+  x ] -> push Sig B [ f x ] : {{B [ [] r ai /* ai ]}} ]]}
+\end{equation}
+    }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub2}
+\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pvar{]}]{\quad}{[[ r  |- f : (A -o B) |> f : [
+    {A -o B}] r ]]}}{[[ none |- [ f ] : [] r ( A -o B ) |> f : [ {A -o B} ] r  ]]}
+\end{equation}
+    }
+
+{\footnotesize{
+\begin{align*}
+\hspace{-5em}\inferrule*[right=abs]
+  {\inferrule*[right=Case]{
+ % \inferrule*[right=Var]{\quad}{[[ z : [] r (A -o B) |- z : [] r ( A -o B ) ]]}
+  \eqref{eq:push-deriv-abs-sub1} \\
+  \eqref{eq:push-deriv-abs-sub2}}{[[ z : [] r (A -o B), y : {  A }  |- case z
+  of [f] -> case pull Sig A (y)  of [ x
+  ] -> push Sig B [ f x ] : {B} [ [] r ai /* ai ] ]]}}
+{[[ z : [] r (A -o B) |- \ y . case z of [f] -> case pull Sig A (y) of [ x
+  ] -> push Sig B [ f x ] : {{A [ [] r ai /* ai ]}} -o {{B [ [] r ai /* ai ]}} ]]}
+\end{align*}
+    }}
+
+\item $\deriv{push}{ [[ mu X . A ]] }^{\Sigma} : [[( mu X . {[] r A} ) -> ( mu X
+    . { A [ [] ri ai /*
+  ai ] }) ]]$
+    (i.e. $\tcF\ \overline{\alpha_i} = [[ mu X . A ]]$).
+
+    \footnotesize{
+\begin{equation}
+\label{eq:pull-deriv-rec-sub1}
+      \inferrule*[right=app]{\inferrule*[right=var,leftskip=10em]{\quad}{[[ Sig, f
+      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}) |- f : {mu X . {[] r A}}
+                                 -o (mu X . { A [ [] r ai /* ai ]}) ]]}
+      \\ \inferrule*[right=var,rightskip=10em]{\quad}{[[ Sig, z : {mu X . {[]
+            r A}} |- z :
+      {mu X . {[] r A} } ]]}}{[[ Sig, f
+      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}), z : {mu X . {[] r
+          A}} |- f z : (mu X . {A [ [] r ai /* ai ]})  ]]}
+\end{equation}
+    }
+
+{\footnotesize{
+    \begin{align*}
+      \inferrule*[right=letrec]{ {\inferrule*[right=push,leftskip=10em]{\quad}{
+      [[ Sig |- push {Sig, recvar {{mu X . {[] r A }} -o (mu X . {A [ [] r ai /* ai ]})}}  A
+      nothing : {mu X . {[] r A}}
+      -o (mu X . {A [ [] r ai /* ai ]}) ]]} } \\
+      \eqref{eq:pull-deriv-rec-sub1}
+  }{[[ Sig, z : (mu X . {[] r A}) |- letrec f =
+      {push {Sig, recvar {{mu X . {[] r A }} -o (mu X . {A [ [] r ai
+      /* ai ]})}} A nothing} in {f z} : { mu X . {A [ [] r ai /* ai ] }}
+      ]]}
+      \end{align*}
+}}
+\end{itemize}
+\end{proof}
+
+\pullSound*
 
 \begin{proof}
   \
@@ -2315,280 +2593,6 @@ pair {pull Sig A (x)} {pull Sig B (y)} : Tup ([] {BigMeet ri} A) ([] {BigMeet ri
   }{[[ Sig, z : (mu X . A) [ ri ai /* ai ] |- letrec f
       = {pull {Sig, recvar {{mu X . {A [ [] ri ai /* ai ]}} -o {[]
       {BigMeet ri} (mu X . A)}}} A nothing} in {f z} : {[] {BigMeet ri} { mu X . A }}
-      ]]}
-      \end{align*}
-}}
-\end{itemize}
-\end{proof}
-
-\begin{proposition}
-\label{prop:soundness-push}
-Type soundness of $\deriv{push}{\tcF\ \overline{\alpha_i}}^{\Sigma} :
-\deriv{push}{\tcF \overline{\alpha_i}}^{\Sigma} : \Box_{r} \tcF \overline{\alpha_i}
-  \rightarrow  \tcF  (\overline{\Box_{r} \alpha_i})$.
-\end{proposition}
-
-\begin{proof}
-  \
-\begin{itemize}
-\item $\deriv{push}{ [[ Unit ]]}^{\Sigma} : [[ {[] r Unit} -> Unit ]]$
- (i.e. $\tcF\ \overline{\alpha_i} = [[ Unit ]]$).
-
-{\footnotesize{
-\begin{align*}
-  \inferrule*[right=case]
-   {
-    \inferrule*[right=con]
-         {\quad}{[[ . |- () : Unit ]]}
-    \quad
-    \inferrule*[right={[}pbox{]}]{
-     \inferrule*[right={[}pcon{]}]
-       {[[ | Unit | == 1 ]] }
-       {[[ r  |- () : Unit |> . ]]}
-     }{
-       [[ none |- [ () ] : Unit |> . ]]
-     }
-   }
-   {[[ z : [] r Unit |- case z of [ () ] -> () : Unit ]]}
-\end{align*}
-    }}
-
-%%%%% push rec var
-
-\item $\deriv{push}{ X }^{\Sigma} : [[ {[] r X} -> {X [ [] r ai /* ai ]} ]]$
- (i.e. $\tcF\ \overline{\alpha_i} = X$).
-
-{\footnotesize{
-    \begin{align*}
-      \inferrule*[right=app]
-      {\inferrule*[right=lookup,leftskip=10em]
-      { X : [[ {[] r (mu X . A)} -o {(mu X . A) [ [] r ai /* ai ]} ]] \in [[ Sig ]]}
-      {[[ Sig |- {lookup Sig X} : {[] r (mu X . A)} -o {(mu X . A) [ [] r ai /* ai ]} ]]} \\
-      \inferrule*[right=var,rightskip=10em]{\quad}
-      {[[z : {[] r (mu X . A)} |- z : {[] r (mu X . A)} ]]}}{[[ Sig, z
-      : {[] r (mu X . A)} |- {lookup Sig X}  z : (mu X . A) [ [] r ai /* ai ] ]]}
-    \end{align*}
-    }}
-\item $\deriv{push}{ [[ aj ]] }^{\Sigma} : [[ {[] rj aj} -> [] rj aj ]]$
- (i.e. $\tcF\ \overline{\alpha_i} = \alpha $).
-
-{\footnotesize{
-\begin{align*}
-\inferrule*[right=var]
-  {\quad}
-  {[[ z : {[] rj aj} |- z : {[] rj aj} ]]}
-\end{align*}
-    }}
-
-\item $\deriv{push}{ [[ Sum A B ]]}^{\Sigma} : [[ {[] r (Sum A B)} -> (Sum {{A} [ [] r ai /* ai ]} {{B} [ [] r ai /* ai ]}) ]]$
-
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-sum-sub1}
-\inferrule*[right=Con]{\inferrule*[right=app]{ \inferrule*[right=push]{\quad}{[[ . |- pushP Sig A : {[] r A} -o {A [ [] r ai /* ai ]} ]] } \\ \inferrule*[right=Pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
-          x : A |- x : A ]]}}{[[
-       x : [ A ] 1 |- x : A ]]}}{[[ x : [
-      A ] r |- [ x ] : [] r A  ]]}}{[[ x : [ A ] r |- push Sig A ( [ x ] ) : {
-      A} [ [] r ai /* ai ]
-    ]]}}{[[ x : [ A ] r |- inr push Sig A ( [ x ] )  : Sum { {A} [ [] r ai /* ai ]}
-  {{B} [ [] r ai /* ai ]} ]]}
-\end{equation}
-    }
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-sum-sub2}
-\inferrule*[right=Con]{\inferrule*[right=app]{ \inferrule*[right=push]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai ]} ]] } \\ \inferrule*[right=Pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
-          y : B |- y : B ]]}}{[[
-       y : [ B ] 1 |- y : B ]]}}{[[ y : [
-      B ] r |- [ y ] : [] r B  ]]}}{[[ y : [ B ] r |- push Sig B ( [ y ] ) : {
-      B} [ [] r ai /* ai ]
-    ]]}}{[[ y : [ B ] r |- inr push Sig B ( [ y ] )  : Sum { {A} [ [] r ai /* ai ]}
-  {{B} [ [] r ai /* ai ]} ]]}
-\end{equation}
-    }
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-sum-sub3}
-\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pcon{]}]{ \inferrule*[right={[}Pvar{]}]{\quad}{[[ r
-       |- x : A |> x : [ A ] r ]]} \\ [[ |Sum A B| > 1 ]] \Rightarrow [[ 1 <<= r ]]}{ [[ r |- inl ( x ) : Sum A B |> x :
-    [ A ] r  ]] }}{[[ none |- [ inl ( x ) ] : [] r {Sum A B} |> x :
-  [ A ] r ]]}
-\end{equation}
-    }
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-sum-sub4}
-\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pcon{]}]{ \inferrule*[right={[}Pvar{]}]{\quad}{[[ r |- y : B |>  y : [ B ] r ]]} \\ [[ |Sum A B| > 1 ]] \Rightarrow [[ 1 <<= r ]]}{ [[ r  |- inr ( y ) : Sum A B |> y :
-    [ B ] r ]] }}{[[ none |- [ inr ( y ) ] : [] r {Sum A B} |> y :
-  [ B ] r ]]}
-\end{equation}
-    }
-
-
-{\footnotesize{
-\begin{align*}
-  \hspace{-7em}\inferrule*[right=Case]{
-    % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Sum A B |- z : Sum A B ]]} \\
-  \eqref{eq:push-deriv-sum-sub1} \\ \eqref{eq:push-deriv-sum-sub2} \\
-  \eqref{eq:push-deriv-sum-sub3} \\ \eqref{eq:push-deriv-sum-sub4}
-  }{[[ z : [] r (Sum A B) |- case z of [ inl ( x ) ] -> inl push Sig A ( [ x ] ) ;
-  [ inr ( y ) ] -> inr push Sig B ( [ y ] ) : Sum {{ A} [ [] r ai /* ai ]} {{
-  B} [ [] r ai /* ai ] } ]]}
-\end{align*}
- }}
-
-\item $\deriv{push}{ [[ Tup A B ]]}^{\Sigma} : [[ {[] r (Tup A B)} -> (Tup {{
-    A} [ [] r ai /* ai ]} {{B} [ [] r ai /* ai ]}) ]]$
-
-\footnotesize{
-\begin{equation}
-  \label{eq:push-deriv-pair-sub4}
-  \inferrule*[right=app]{\inferrule*[right=push]{\quad}{ [[ . |- pushP Sig A : {[] r A} -o {A [ [] r ai /* ai ]}]]} \\ \inferrule*[right=pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
-          x : A |- x : A  ]]}}{[[
-        x : [ A ] 1 |- x : A ]]}}{[[ x : [ A ] r |- [ x ] : [] r
-      A ]]}}{[[ x : [ A ] r |- push Sig A ( [ x ] ) : {A} [ [] r ai /* ai ]  ]]}
-\end{equation}}
-
-\footnotesize{
-\begin{equation}
-  \label{eq:push-deriv-pair-sub5}
-  \inferrule*[right=app]{\inferrule*[right=push]{\quad}{ [[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai] }]]}\\ \inferrule*[right=pr]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
-          y : B |- y : B   ]]}}{[[
-        y : [ B ] 1 |- y : B ]]}}{[[ y : [ B ] r |- [ y ] : [] r
-      B ]]}}{[[ y : [ B ] r |-
-    push Sig B ( [ y ] ) : {B} [ [] r ai /* ai ]  ]]}
-\end{equation}}
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-pair-sub1}
-\inferrule*[right=Con]
-{ \eqref{eq:push-deriv-pair-sub4}
-  \\
-\eqref{eq:push-deriv-pair-sub5}
-  }
-{ [[ x : [ A ] r, y : [ B ] r |- pair {push Sig A ( [ x ] )} {push Sig B ( [ y ] )} : Tup
-  { {A} [ [] r ai /* ai ] } {  {B} [ [] r ai /* ai ] } ]]}
-\end{equation}
-    }
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-pair-sub2}
-\inferrule*[right={[}Pbox{]},rightskip=10em]{\inferrule*[right={[}PCon{]}]{\inferrule*[right={[}Pvar{]},leftskip=1em]{\quad}{[[
-  r  |- x : A |> x : [ A ] r ]]} \\
-\inferrule*[right={[}Pvar{]},rightskip=2em]{\quad}{[[ r  |- y : B |> y : [ B
- ] r ]]} \\ |[[Tup A B]]| = 1 }{[[ r
-  |- Pair x y : Tup A B |> x : [ A ] r, y : [ B ] r ]]}}{[[ none |- [ Pair x y ] : [] r
-  {Tup A B} |> x : [ A ] r, y : [ B ] r ]]}
-\end{equation}
-   }
-
-\footnotesize{
-\begin{align*}
-  \inferrule*[right=Case]{
-  % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Tup A B |- z : Tup A B ]]} \\
-  \eqref{eq:push-deriv-pair-sub1} \\ \eqref{eq:push-deriv-pair-sub2}
-  }{[[ z : [] r (Tup A B) |- case z of [ Pair x y ] -> pair {
-  push Sig A ( [ x ] )}  {push Sig B ( [ y ] )} : Tup {{A} [ [] ri ai /* ai ]} {{
-  B} [ [] ri ai /* ai ]} ]]}
-\end{align*}
-    }
-
-\item $\deriv{push}{ [[ A -o B ]]}^{\Sigma} : [[ {[] r (A -o B)} -> ({{A} [ [] r ai /* ai ]}
-  -o {{B} [ [] ri ai /* ai ]}) ]]$
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-abs-sub3}
-\inferrule*[right=app]{ \inferrule*[right=push, leftskip=10em]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai]} ]]} \\ \inferrule*[right=Pr, rightskip=15em]{\inferrule*[right=app]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
-          f : {A -o B} |- f : A -o B ]]}}{ [[ f : [ { A
-      -o B }  ] 1 |- f : A -o B ]]} \\
-      \inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[ x : A  |- x : A
-          ]]}}{[[  x : [ A ] 1 |- x : A ]]}}{[[ f : [ { A
-      -o B } ] 1, x : [ A ] 1 |- f x : B
-    ]]}}{[[ f : [ {A -o B} ] r, x : [ A ]
-    {BigMeet ri} |- [ f x ] : {[] r {B }}]]}}
-{[[ f : [ {A -o B} ] r, x : [ A ] {BigMeet ri} |- push Sig B [ f x ] : {{B [ [] r ai /* ai ] } }  ]]}
-\end{equation}
- }
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-abs-sub4}
-\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pvar{]}]{\quad}{[[ {BigMeet ri} |- x : A |> x :
-    [ A ] {BigMeet ri}]]}}{[[none |- [ x ] : [] r
-  A |> x : [ A ] {BigMeet ri} ]]}
-\end{equation}
-    }
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-abs-sub1}
-\inferrule*[right=Case]{
-  \inferrule*[right=app]{\inferrule*[right=pull]{\quad}{[[ . |- pullP Sig A : A -o {[] {BigMeet ri} A} ]]} \\ \inferrule*[right=var]{\quad}{[[ y : { A } |- y : {A}
-      ]]}}{[[ y : { A } |- pull Sig A (y) : [] {BigMeet
-      ri} A ]]} \\
-  \eqref{eq:push-deriv-abs-sub3} \\ \eqref{eq:push-deriv-abs-sub4} }{[[ y : {A} , f : [ {A -o B} ] r |- case pull Sig A (y) of [
-  x ] -> push Sig B [ f x ] : {{B [ [] r ai /* ai ]}} ]]}
-\end{equation}
-    }
-
-\footnotesize{
-\begin{equation}
-\label{eq:push-deriv-abs-sub2}
-\inferrule*[right={[}Pbox{]}]{\inferrule*[right={[}Pvar{]}]{\quad}{[[ r  |- f : (A -o B) |> f : [
-    {A -o B}] r ]]}}{[[ none |- [ f ] : [] r ( A -o B ) |> f : [ {A -o B} ] r  ]]}
-\end{equation}
-    }
-
-{\footnotesize{
-\begin{align*}
-\hspace{-5em}\inferrule*[right=abs]
-  {\inferrule*[right=Case]{
- % \inferrule*[right=Var]{\quad}{[[ z : [] r (A -o B) |- z : [] r ( A -o B ) ]]}
-  \eqref{eq:push-deriv-abs-sub1} \\
-  \eqref{eq:push-deriv-abs-sub2}}{[[ z : [] r (A -o B), y : {  A }  |- case z
-  of [f] -> case pull Sig A (y)  of [ x
-  ] -> push Sig B [ f x ] : {B} [ [] r ai /* ai ] ]]}}
-{[[ z : [] r (A -o B) |- \ y . case z of [f] -> case pull Sig A (y) of [ x
-  ] -> push Sig B [ f x ] : {{A [ [] r ai /* ai ]}} -o {{B [ [] r ai /* ai ]}} ]]}
-\end{align*}
-    }}
-
-\item $\deriv{push}{ [[ mu X . A ]] }^{\Sigma} : [[( mu X . {[] r A} ) -> ( mu X
-    . { A [ [] ri ai /*
-  ai ] }) ]]$
-    (i.e. $\tcF\ \overline{\alpha_i} = [[ mu X . A ]]$).
-
-    \footnotesize{
-\begin{equation}
-\label{eq:pull-deriv-rec-sub1}
-      \inferrule*[right=app]{\inferrule*[right=var,leftskip=10em]{\quad}{[[ Sig, f
-      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}) |- f : {mu X . {[] r A}}
-                                 -o (mu X . { A [ [] r ai /* ai ]}) ]]}
-      \\ \inferrule*[right=var,rightskip=10em]{\quad}{[[ Sig, z : {mu X . {[]
-            r A}} |- z :
-      {mu X . {[] r A} } ]]}}{[[ Sig, f
-      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}), z : {mu X . {[] r
-          A}} |- f z : (mu X . {A [ [] r ai /* ai ]})  ]]}
-\end{equation}
-    }
-
-{\footnotesize{
-    \begin{align*}
-      \inferrule*[right=letrec]{ {\inferrule*[right=push,leftskip=10em]{\quad}{
-      [[ Sig |- push {Sig, recvar {{mu X . {[] r A }} -o (mu X . {A [ [] r ai /* ai ]})}}  A
-      nothing : {mu X . {[] r A}}
-      -o (mu X . {A [ [] r ai /* ai ]}) ]]} } \\
-      \eqref{eq:pull-deriv-rec-sub1}
-  }{[[ Sig, z : (mu X . {[] r A}) |- letrec f =
-      {push {Sig, recvar {{mu X . {[] r A }} -o (mu X . {A [ [] r ai
-      /* ai ]})}} A nothing} in {f z} : { mu X . {A [ [] r ai /* ai ] }}
       ]]}
       \end{align*}
 }}

@@ -1,12 +1,19 @@
 \chapter{A Core Synthesis Calculus}
 \label{chapter:core}
-We begin our first exploration into program synthesis with a system for the
-graded linear $\lambda$-calculus of Section~\ref{sec:linear-base}. The primary
-aim of this chapter is to introduce the core concepts of type-directed program
-synthesis in a resourceful setting, in particular, the problem of
-\textit{resource management}. We therefore prioritise simplicity over
+We begin our first exploration into program synthesis with a synthesis system for the
+graded linear $\lambda$-calculus of Section~\ref{sec:linear-base}. %More about story and evaluation
+The primary aim of this chapter is to introduce the core concepts of
+type-directed program synthesis in a resourceful setting, in particular, the
+problem of \textit{resource management}. We therefore prioritise simplicity over
 expressivity for our target language, with the core typing calculus of
-Section~\ref{sec:linear-base} forming an ideal candidate.
+Section~\ref{sec:linear-base} forming an ideal candidate. Much of the work in
+this chapter is derived from~\citet{DBLP:conf/lopstr/HughesO20}. 
+
+In Chapter~\ref{chapter:intro} we posed the question ``how do we harness [linear
+and graded types] to make writing programs automatically easier?''. This chapter
+goes some way to providing an answer, by showing how we can  
+incorporate these types into the design of a synthesis tool, using resource
+constraints in synthesis to prune the search space of programs. 
 
 As mentioned in Chapter~\ref{chapter:intro}, type-directed program synthesis can
 be framed as an inversion of type checking. In type checking, we have a
@@ -15,41 +22,43 @@ judgement of the form:
     \Gamma \vdash t : A {\small{\tag{type checking}}}
 \end{align*}
 which states that under some context of assumptions $\Gamma$ we can assign the
-program term $t$ the type $A$. Here, $\Gamma$ and $t$ constitute the ``inputs''
-to the judgement, while the type $A$ forms the ``output''. Synthesis inverts
-this judgement form, leaving us with a \textit{synthesis judgement} form:
+program term $t$ the type $A$. Synthesis inverts this judgement form, leaving us
+with a \textit{synthesis judgement} form:
 \begin{align*}
     \Gamma \vdash A \Rightarrow t {\small{\tag{synthesis}}}
 \end{align*}
 which states that we can construct a program term $t$ from the type $A$, using
-the assumptions in $\Gamma$. As in type checking, $\Gamma$ forms an input to the
-judgement. However, $A$ and $t$ exchange roles: the former is now also an input,
-while the latter is the judgement's output. Program synthesis then becomes a
-task of inductively enumerating programs in a ``bottom-up'' starting from the
-goal type $A$: $A$ is broken into sub-goals, from which sub-terms are
-synthesised until the goal can not be broken into further sub-goals. At this
-point, we either synthesise a usage of a variable from $\Gamma$ if possible, or
-synthesis fails. This is the essence of type-directed program synthesis. 
+the assumptions in $\Gamma$. Program synthesis then becomes a task of
+inductively enumerating programs in a ``bottom-up'' starting from the goal type
+$A$: we break $A$ into sub-goals, from which sub-terms are synthesised until the
+goal cannot be broken into further sub-goals. At this point, we either
+synthesise a usage of a variable from $\Gamma$ if possible, or synthesis fails.
+This is the essence of type-directed program synthesis. 
 
 Resourceful types introduce another dimension to synthesis: how do we ensure
 that the assumptions in $\Gamma$ are used according to their resource
-constraints in the synthesised term $t$? I.e. if $x : A$ is a linear assumption in $\Gamma$
-that is used in some way to construct $t$, then the synthesis algorithm must synthesise 
-a $t$ which uses $x$ exactly once. Likewise, if $x :_r A$ is a graded assumption, then 
-it must be used in $t$ in a way which satisfies its grade $r$.
+constraints as described by grades in the synthesised term $t$? I.e. if $x : A$
+is a linear assumption in $\Gamma$ that is used in some way to construct $t$,
+then the synthesis algorithm must synthesise a $t$ which uses $x$ exactly once.
+Likewise, if $x :_r A$ is a graded assumption, then it must be used in $t$ in a
+way which satisfies its grade $r$.
 
+This issue of resource non-determinism has been encountered before in the
+context of automated theorem proving for linear logic, however, such . 
+ 
 This problem has been explored before in the context of automated theorem
 proving for linear logic, and has been termed the \textit{resource management
 problem}. We describe this problem in detail in
 Section~\ref{sec:resource-management} and propose two candidate solutions,
 basing our approach on the \textit{input-output context management} model
-described by~\citet{HODAS1994327}, and further developed by~\citet{CERVESATO2000133}. 
+described by~\citet{HODAS1994327}, and further developed
+by~\citet{CERVESATO2000133}. 
 
 The challenges posed by ensuring the well-resourcedness of synthesised programs
-are most exemplified by the inclusion in our target language of multiplicative
+are most illustrated by the inclusion in our target language of multiplicative
 conjunction, and additive disjunction. Therefore, prior to fully describing the
 problem of resource management and our proposed solutions, we first expand our
-target language with multiplicative product ($\otimes$), and unit types ($1$),
+target language with multiplicative product ($\otimes$), and unit types ($\mathsf{Unit}$),
 as well as disjunctive sum types ($\oplus$). These extensions are detailed in
 Section~\ref{sec:linear-base-calculus}, which will be the target language of the
 synthesis calculi of this chapter. As well as helping to conceptualise the
@@ -65,20 +74,31 @@ management problem, which we then evaluate and contrast against each other in
 Section~\ref{sec:linear-base-evaluation}. 
 
 Both calculi are implemented as part of a synthesis tool for
-Granule~\footnote{The exact implementation of the rules as they stand is
+Granule.\footnote{The exact implementation of the rules as they stand is
 deprecated, but may be found in Granule release v0.7.8.0:
-https://github.com/granule-project/granule/releases/tag/v0.7.8.0}. The
-implementation is a fairly direct translation of the synthesis calculi into
-Haskell. We thus elide the details of the implementation, focusing only on an
-important optimisation technique in Section~\ref{sec:linear-base-focusing}:
-focusing. Focusing removes much of the unnecessary non-determinism 
-present in our synthesis rules by fixing an ordering on
-the application of rules. We present the two \textit{focused} forms of our original
-synthesis calculi which comprise the basis of our Granule implementation.
+https://github.com/granule-project/granule/releases/tag/v0.7.8.0} The calculi
+are turned into an algorithm using Haskell. For the most part, we elide the
+details of the implementation, however, we provide a brief outline  
+and describe an important optimisation technique in
+Section~\ref{sec:linear-base-focusing}: focusing. Focusing removes much of the
+unnecessary non-determinism present in our synthesis rules by fixing an ordering
+on the application of rules. We present the two \textit{focused} forms of our
+original synthesis calculi in section~\ref{sec:linear-base-focusing}, which
+form the basis of our Granule implementation.
 
 \section{A Core Target Language}
 \label{sec:linear-base-calculus}
-The syntax for the full language is given by the following grammar:
+The syntax of types and terms for our extended language are given by the
+following two grammars:
+\begin{align*}
+  \hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
+         [[ A -o B ]]
+    \mid [[ A * B ]]
+    \mid [[ A + B ]]
+    \mid [[ Unit ]]
+    \mid [[ [] r A ]]
+  {\small{\tag{types}}}
+  \end{align*}
 \begin{align*}
 \hspace{-0.8em} [[ t ]] ::= \;
        & [[ x ]]
@@ -92,7 +112,7 @@ The syntax for the full language is given by the following grammar:
 \\ \mid \; & [[ inl t ]] \mid [[ inr t ]] \mid \textbf{case} \ t_{1}\ \textbf{of}\ \textbf{inl}\ x_{1} \rightarrow t_{2};\ \textbf{inr}\ x_{2} \rightarrow t_{3}
 {\small{\tag{terms}}}
 \end{align*}
-We use the syntax $()$ for the inhabitant of  the multiplicative unit $1$.
+We use the syntax $()$ for the inhabitant of  the multiplicative unit $[[ Unit ]]$.
 Pattern matching via a $\textbf{let}$ is used to eliminate products and unit
 types; for sum types, $\textbf{case}$ is used to distinguish the constructors.
 
@@ -139,10 +159,7 @@ pair's constituent sub-terms. Pair elimination ($\textsc{LetPair}$) binds a
 pair's components to two linear variables in the scope of the body $[[t2]]$. The
 $\textsc{Inl}$ and $\textsc{Inr}$ rules handle the typing of constructors for
 the sum type $[[Sum A B]]$. Elimination of sums ($\textsc{Case}$) takes the
-least upper bound (defined above) of the contexts used to type the two branches
-of the case.
-
-In the typing of $\mathbf{case}$ expressions, the \emph{least-upper bound} of
+\emph{least upper bound} of
   the two contexts used to type each branch is used, defined:
 
 \begin{definition}[Partial least-upper bounds of
@@ -157,10 +174,10 @@ In the typing of $\mathbf{case}$ expressions, the \emph{least-upper bound} of
   & [[ G1 ]] = \emptyset & \wedge \; [[ G2 ]] = \emptyset
 \\
 %
-%% Left empty
-(\emptyset \sqcup [[ G2' ]]), [[ x : [ A ] {lub 0 s} ]]
-  & [[ G1 ]] = \emptyset & \wedge \; [[G2]] = [[ G2',x : [A] s]]
-\\
+% %% Left empty
+% (\emptyset \sqcup [[ G2' ]]), [[ x : [ A ] {lub 0 s} ]]
+%   & [[ G1 ]] = \emptyset & \wedge \; [[G2]] = [[ G2',x : [A] s]]
+% \\
 %
 %% Left is left linear
 ([[G1']] \sqcup [[(G2',G2'')]]), [[x : A]]
@@ -192,16 +209,15 @@ which complement these new types.
 \label{exm:or3}
 Exact usage analysis is less useful when control-flow is involved, e.g.,
 eliminating sum types where each control-flow branch uses variables differently.
-The above $\mathbb{N}$-semiring can be imbued with a notion of
-\emph{approximation} via less-than-equal ordering, providing upper bounds. A
-more expressive semiring is that of natural number
-intervals~\cite{DBLP:journals/pacmpl/OrchardLE19}, given by pairs $\mathbb{N}
+The $\mathbb{N}$-semiring shown on page~\pageref{ex:s-comb} can be imbued with a
+notion of \emph{approximation} via less-than-equal ordering, providing upper
+bounds. A more expressive semiring is that of natural number
+intervals~\citep{DBLP:journals/pacmpl/OrchardLE19}, given by pairs $\mathbb{N}
 \times \mathbb{N}$ written $[[ Intrv r s ]]$ here for the lower-bound $r \in
-\mathbb{N}$ and upper-bound usage $s \in \mathbb{N}$ with $0 = 0 ... 0$
-and $1 = 1 ... 1$, addition and multiplication defined pointwise, and
-ordering $[[ Intrv r s ]] \sqsubseteq [[ Intrv r' s' ]] = [[ r' ]] \leq [[ r ]]
-\wedge [[ s ]] \leq [[ s' ]]$. Thus a coproduct elimination function can be
-written and typed:
+\mathbb{N}$ and upper-bound usage $s \in \mathbb{N}$ with $0 = 0 ... 0$ and $1 =
+1 ... 1$, addition and multiplication defined pointwise, and ordering $[[ Intrv
+r s ]] \sqsubseteq [[ Intrv r' s' ]] = [[ r' ]] \leq [[ r ]] \wedge [[ s ]] \leq
+[[ s' ]]$. Thus a coproduct elimination function can be written and typed:
 %
 \begin{align*}
 \oplus_e & : [[ {[] {Intrv 0 1} (A -o C)} -o {{[] {Intrv 0 1} (B -o C)} -o {(Sum A B) -o C}} ]] \\
@@ -213,23 +229,33 @@ written and typed:
 \end{align*}
 \end{example}
 
+Here, $\oplus_{0...1}$ takes two functions as arguments which each have a return
+type $C$ and are graded by the interval $0...1$, as well as a linear sum of type $A
+\oplus B$. The sum is eliminated via a \textbf{case} statement, where each branch 
+uses the appropriate argument function to form an application with type $C$. Despite 
+each branch only using one of the argument functions, the program is well-resourced thanks 
+to the interval grade $0...1$ giving us the ability to discard the irrelevant function.  
+
 \begin{example}%[Information flow]
 \label{exm:security}
 %
 Graded modalities can capture a form of information-flow security, tracking the
-flow of labelled data through a program~\cite{DBLP:journals/pacmpl/OrchardLE19},
-with a lattice-based semiring on $\mathcal{R} = \{[[ Irrelevant ]] \sqsubseteq
-[[ Private ]] \sqsubseteq  [[ Public ]]\}$ where $0 = [[ Irrelevant ]]$, $1 = [[
-Private ]]$, $+ = \sqcup$ and if $r = [[ Irrelevant ]]$ or $s = [[ Irrelevant
-]]$ then $[[r * s ]] = [[ Irrelevant ]]$ otherwise $[[ r * s ]] = \sqcup$. This
-allows the following well-typed program, eliminating a pair of $[[ Public ]]$
-and $[[ Private ]]$ security values, picking the left one to pass to a
-continuation expecting a $[[ Public ]]$ input:
+flow of labelled data through a
+program~\citep{DBLP:journals/pacmpl/OrchardLE19}, with a 2-point semiring of
+security levels where $\mathcal{L} = \{ \text{Hi}, \text{Lo} \}$ forms a set of
+abstract labels, denoting \emph{high} and \emph{low} security permissions
+respectively, with a lattice formed by the total order with $Lo \sqsubseteq Hi$.
+Multiplication is given by $\sqcup$, and addition by $\sqcap$, with $0$ = $\text{Hi}$
+and $1$ = $\text{Lo}$. 
+
+This allows the following well-typed program, eliminating a pair of $\text{Lo}$
+and $\text{Hi}$ security values, picking the left one to pass to a continuation
+expecting a $[[ Public ]]$ input:
 %
 \begin{align*}
 \textit{noLeak} & : [[ (Tup {[] Public A} {[] Private A}) -o {({[]
                   Public (Tup A Unit)} -o B) -o B} ]] \\
-\textit{noLeak} & = \lambda z . \lambda u . \textbf{let}\ \textlangle x',\ y' \textrangle\ =\ z\ \textbf{in}\ \\
+\textit{noLeak} & = \lambda z . \lambda u . \textbf{let}\ (x',\ y')\ =\ z\ \textbf{in}\ \\
                 & \;\;\;\;\;\;\;\;\;\;\; \textbf{let}\ [x]\ =\ x'\ \textbf{in}\ \\ 
                 & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; \textbf{let}\ [y]\ =\ y'\ \textbf{in}\ u\ [(x,\ ())]
 \end{align*}
@@ -245,9 +271,9 @@ Let $[[ D |- t' : A]]$, then:
 \label{lemma:substitution}
 \begin{itemize}[leftmargin=1em]
 \item (Linear) \hspace{0.04em} If $[[ {G, x : A}
-    ,, { G' } |- t : B]]$ then $[[ G + D + G' |-
+    , { G' } |- t : B]]$ then $[[ G + D + G' |-
 [ t' / x ] t : B ]]$
-\item (Graded) If $[[ {G, x : [A] r} ,, { G' } |- t : B]]$
+\item (Graded) If $[[ {G, x : [A] r} , { G' } |- t : B]]$
 then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
 \end{itemize}
 \end{restatable}
@@ -257,17 +283,23 @@ then $[[ G + (r * D) + G' |- [ t' / x ] t : B ]]$
 \label{sec:resource-management}
 
 In Chapter~\ref{chapter:intro} we considered a synthesis rule for pairs and
-highlighted how graded types could be use to control the number of times
+highlighted how graded types could be used to control the number of times
 assumptions are used in the synthesised term. 
 
-Chapter~\ref{chapter:intro} considered (Cartesian) product types
-$\times$, but in our target language we use the multiplicative
-product of linear types, given in Figure~\ref{fig:typing-prod-sum-unit}%
-Each sub-term is typed by a different context $[[ G1 ]]$ and $[[ G2 ]]$ which are
-then combined via \emph{disjoint} union: the pair cannot be formed if variables
-are shared between $[[ G1 ]]$ and $[[ G2 ]]$. This prevents the structural
-behaviour of \emph{contraction} (where a variable appears in multiple sub-terms).
-Na\"{i}vely inverting this typing rule into a synthesis rule yields:
+Chapter~\ref{chapter:intro} considered (Cartesian) product types $\times$, but
+in our target language we use the multiplicative product of linear types: 
+\begin{align*}
+\inferrule*[right = Pair]
+  {[[ G1 |- t1 : A ]] \\ [[ G2 |- t2 : B ]]}
+  {[[ G1 + G2 |- pair t1 t2 : Tup A B]]}
+\end{align*}
+Each sub-term is typed by a different
+context $[[ G1 ]]$ and $[[ G2 ]]$ which are then combined via context addition,
+which equates to \emph{disjoint union} when considering a solely linear setting:
+the pair cannot be formed if linear variables are shared between $[[ G1 ]]$ and
+$[[ G2 ]]$. This prevents the structural behaviour of \emph{contraction} (where
+a variable appears in multiple sub-terms). Na\"{i}vely inverting this typing
+rule into a synthesis rule yields:
 %
 \begin{align*}
   \inferrule*[Right=$\otimes_{\textsc{Intro}}$]{ \Gamma_1 \vdash [[ A ]] \Rightarrow [[ t1 ]] \\ \Gamma_2 \vdash [[ B ]] \Rightarrow [[ t2 ]]}{ \Gamma_1, \Gamma_2 \vdash [[ A ]] \otimes [[ B ]] \Rightarrow ([[ t1 ]],\ [[ t2 ]] )}
@@ -278,7 +310,7 @@ sufficient. However, this rule embeds a considerable amount of non-determinism
 when considered from an algorithmic perspective. Reading `clockwise' starting
 from the bottom-left, given some context $[[ G ]]$ and a goal $A \otimes B$, we
 have to split the context into disjoint subparts $[[ G1 ]]$ and $[[ G2 ]]$ such
-that $[[ G ]] = [[ G1 , G2 ]]$ in order to pass the $[[ G1 ]]$ and $[[ G2 ]]$ to
+that $[[ G ]] = [[ G1 , G2 ]]$ in order to pass $[[ G1 ]]$ and $[[ G2 ]]$ to
 the sub-goals for $A$ and $B$. For a context of size $n$ there are $2^n$ possible
 such partitions! This quickly becomes intractable. Instead,~\cite{HODAS1994327} 
 developed a technique for linear logic programming, refined
@@ -296,7 +328,13 @@ where the remaining resources after synthesising for $A$ the first term $[[ t1
 ]]$ are $[[ G2 ]]$ which are then passed as the resources for synthesising the
 second term $B$. There is an ordering implicit here in `threading through' the
 contexts between the premises. For example, starting with a context $[[ x : A, y
-: B ]]$, then this rule can be instantiated as:
+: B ]]$, and given the following rule for synthesising a variable usage:
+%
+\begin{align*}
+  \inferrule*[right=$\textsc{Var}$]{\quad}{\Gamma, x : A \vdash A \Rightarrow^{-} x \mid \Gamma}
+\end{align*}
+%
+then the $\otimes^{-}_\textsc{Intro}$ rule may be instantiated as:
 %
 \begin{align}
 \tag{\footnotesize{example}}
@@ -305,7 +343,7 @@ contexts between the premises. For example, starting with a context $[[ x : A, y
 %
 Thus this approach neatly avoids the problem of having to split the input
 context, and facilitates efficient proof search for linear types. We extend this
-input-output context management model to graded types to graded types to
+input-output context management model to the graded linear $\lambda$-calculus to
 facilitate the synthesis of programs in Granule. We  
 term the above approach \textit{subtractive} resource management (in a style
 similar to \textit{left-over} type checking for linear type
@@ -322,10 +360,14 @@ new grade must be assigned in the output context that relates to the first by
 means of an additional constraint describing that some usage took place:
 %
 \begin{align}
+\begin{array}{l}
 \tag{\footnotesize{example}}
 \!\!\!\!\!\inferrule*[right=$\otimes_{\textsc{Intro}}^{-}$]{
-\exists r' . r' + 1 = r \\ \!\!\!\! \exists s' . s' + 1 = s \\
-[[ x : [A] r, y : [B] s ]] \vdash [[ A ]] \Rightarrow^-\! [[x]] \ |\ [[ x : [A] r', y : [B] s ]] \\ \!\!\!\! [[ x : [A] r', y : [B] s ]] \vdash [[ B ]] \Rightarrow^-\! [[ y ]] \ | \ [[ x : [A] r', y : [B] s' ]]  }{ [[ x : [A] r, y : [B] s ]]  \vdash [[ A Prod B ]] \Rightarrow^- \![[ pair x y ]] \ | \ [[ x : [A] r', y : [B] s' ]]}\!\!\!
+\exists r' . r' + 1 = r \\ 
+\exists s' . s' + 1 = s \\\\
+[[ x : [A] r, y : [B] s ]] \vdash [[ A ]] \Rightarrow^-\! [[x]] \ |\ [[ x : [A] r', y : [B] s ]] \\ 
+[[ x : [A] r', y : [B] s ]] \vdash [[ B ]] \Rightarrow^-\! [[ y ]] \ | \ [[ x : [A] r', y : [B] s' ]]}{ [[ x : [A] r, y : [B] s ]]  \vdash [[ A Prod B ]] \Rightarrow^- \![[ pair x y ]] \ | \ [[ x : [A] r', y : [B] s' ]] }\!\!\!
+\end{array}
 \end{align}
 %
 In the first synthesis premise, $x$ has grade $r$ in the input context, $x$ is
@@ -337,7 +379,7 @@ For the natural numbers semiring, with $r = 1$ and $s = 1$ then the constraints
 above are satisfied with $r' = 0$ and $s' = 0$. In a general setting, this
 subtractive approach to synthesis for graded types requires solving many such
 existential equations over semirings, which also introduces a new source of
-non-determinism is there is more than one solution. These constraints can be
+non-determinism if there is more than one solution. These constraints can be
 discharged via an off-the-shelf SMT solver, such as Z3~\citep{z3}. Such calls to an 
 external solver are costly, however, and thus efficiency of resource management is 
 a key concern. 
@@ -374,9 +416,11 @@ context $[[ G ]]$ into two prior to synthesising sub-terms.
 
 We adapt the input-output context management model of linear logic synthesis to
 graded types, pruning the search space via the quantitative constraints of
-grades. We implement synthesis calculi based on both the additive and
-subtractive approaches, evaluating their performance on a set of benchmarking
-synthesis problems. 
+grades. It is not immediately apparent which approach has better performance,
+thus we implement synthesis calculi based on both the additive and subtractive
+approaches, evaluating their performance on a set of benchmarking synthesis
+problems. 
+
 \subsection{Related Work}
 Before Hodas and Miller, the problem of resource
 non-determinism was first identified by~\citet{harlandpym}. 
@@ -413,7 +457,7 @@ core language has right and left
 rules corresponding to its constructors and destructors respectively.
 
 
-\begin{figure}[H]
+\begin{figure}[t]
 \begin{gather*}
 {\footnotesize{
   \hspace{-3em}\begin{array}{c}
@@ -466,7 +510,8 @@ rules corresponding to its constructors and destructors respectively.
   the rules in turn to aid understanding. Figure~\ref{fig:sub-rules} collects the
   rules for reference.
   \subsubsection{Variables}
-Variable terms can be synthesised from assumptions in $\Gamma$ by rules:
+Variable terms can be synthesised from assumptions in the context of linear and
+graded assumptions $\Gamma$ by rules:
   \begin{align*}
     \begin{array}{c}
   \hspace{-3em}\subLinVar
@@ -479,7 +524,7 @@ On the left, a variable $[[x]]$ may be synthesised for the goal
 $[[ A ]]$ if a linear assumption $[[ x : A ]]$ is present
   in the input context. The input context without $[[x]]$ is then returned as
   the output context, since $x$ has been used. On the right,
-  we can synthesise a variable $x$ for $A$ we have a graded
+  we can synthesise a variable $x$ for $A$ if we have a graded
   assumption of $x$ matching the type. However, % to synthesise $[[ x ]]$
   %it may be the case that
   %using $x$ violates the constraints placed by the assumption's grade. For example,
@@ -489,26 +534,21 @@ $[[ A ]]$ if a linear assumption $[[ x : A ]]$ is present
   %graded variable $[[x]]$
 %  requires that $[[x]]$'s grade $r$ can be factored into some grade
 %  $s + 1$
-  the grading $[[ r ]]$ must permit $[[ x ]]$ to
-  be used once here. Therefore, the premise states that there exists
-  some grade $s$ such that grade $r$ approximates $s + 1$. The grade $s$
-  represents the use of $x$ in the rest of the synthesised term, and
-  thus $[[ x : [ A ] s ]]$ is in the output context. For the natural
-  numbers semiring, this constraint is satisfied by $s = r - 1$ whenever $r \neq
-  0$, e.g., if $r = 3$ then $s = 2$. For
-  intervals, the role of approximation is more apparent: if $r = [[
-  Intrv 0 3]]$ then this rule is satisfied by $s = [[ Intrv 0 2 ]]$
-  where $s + 1 = [[ Intrv 0 2 ]] + [[ Intrv 1 1 ]] = [[ Intrv 1 3 ]]
-  \sqsubseteq [[ Intrv 0 3 ]]$.
-  This is captured by the instantiation of a new
-  existential variable representing the new grade for $[[x]]$ in the output
-  context of the rule. In the natural numbers semiring, this could be done by
-  simply subtracting $1$ from the assumption's
-  existing grade $r$. However, as not all semirings have an
-  additive inverse, this is instead handled via a constraint on the new grade
-  $s$, requiring that $ r \sqsupseteq s + 1 $. In the implementation, the constraint is
-  discharged via an SMT solver, where an unsatisfiable result terminates
-  this branch of synthesis.
+  the grading $[[ r ]]$ must permit $[[ x ]]$ to be used once here. Therefore,
+  the premise states that there exists some grade $s$ such that grade $r$
+  approximates $s + 1$. The grade $s$ represents the use of $x$ in further
+  synthesis judgements, and thus $[[ x : [ A ] s ]]$ is in the output context.
+  For the natural numbers semiring, this constraint is satisfied by $s = r - 1$
+  whenever $r \neq 0$, e.g., if $r = 3$ then $s = 2$. For intervals, the role of
+  approximation is more apparent: if $r = [[ Intrv 0 3]]$ then this rule is
+  satisfied by $s = [[ Intrv 0 2 ]]$ where $s + 1 = [[ Intrv 0 2 ]] + [[ Intrv 1
+  1 ]] = [[ Intrv 1 3 ]] \sqsubseteq [[ Intrv 0 3 ]]$. In the natural numbers
+  semiring, this existential grade variable could be instantiated by simply
+  subtracting $1$ from the assumption's existing grade $r$. However, as not all
+  semirings have an additive inverse, this is instead handled via a constraint
+  on the new grade $s$, requiring that $ r \sqsupseteq s + 1 $. In the
+  implementation, the constraint is discharged via an SMT solver, where an
+  unsatisfiable result terminates this branch of synthesis.
 
   \subsubsection{Functions}
 In typing, $\lambda$-abstraction binds linear variables to introduce
@@ -541,12 +581,13 @@ The left-rule for linear function types then synthesises applications
 %  of type $[[A]]$ to this to obtain a value of type $[[B]]$ to use in the
   %synthesis of $[[t1]]$ from the goal type $[[C]]$.
   The first premise synthesises a term $[[t1]]$ for $[[C]]$ under the context
-  extended with a fresh linear assumption $[[x2
-  : B]]$, i.e., assuming the result of $[[ x1 ]]$. This produces an output context $[[D1]]$ that must not contain
-  $[[x2]]$, i.e., $[[x2]]$ is used by $[[t1]]$. The remaining
-  assumptions $[[D1]]$ provide the input context to
-  synthesise $[[t2]]$ of type $[[A]]$: the argument to the function $[[x1]]$. In the conclusion,
-  the application $[[x1 t2]]$ is substituted for $[[x2]]$ inside
+  extended with a fresh linear assumption $[[x2 : B]]$, i.e., assuming the
+  result of $[[ x1 ]]$. This produces an output context $[[D1]]$ that must not
+  contain $[[x2]]$, i.e., $[[x2]]$ is used by $[[t1]]$. The remaining
+  assumptions $[[D1]]$ provide the input context to synthesise $[[t2]]$ of type
+  $[[A]]$: the argument to the function $[[x1]]$. This structure corresponds to a
+  left-elimination rule of function types in sequent calculus. In the
+  conclusion, the application $[[x1 t2]]$ is substituted for $[[x2]]$ inside
   $[[t1]]$, and $[[D2]]$ is the output context.
 
 \subsubsection{Dereliction} Note that the above rule synthesises the application of a
@@ -561,18 +602,40 @@ dereliction typing rule (converting a linear assumption to graded) as:
     }}
     \end{gather*}
 %
-Dereliction captures the ability to reuse a graded assumption being
-considered in a left rule. A fresh linear assumption $[[y]]$ is generated that
-represents the graded assumption's use in a left rule, and must be used
-linearly in the subsequent synthesis of $[[t]]$. The output context of this premise then contains $[[x]]$ graded by $s'$, which reflects how $[[x]]$ was used in the synthesis of $[[t]]$, i.e. if $[[x]]$ was not used then $s' = s$. The premise $[[ exists s . r >= s + 1 ]]$ constrains the number of times dereliction can be applied so that it does not exceed $x$'s
+Dereliction captures the ability to reuse a graded assumption being considered
+in a left rule. A fresh linear assumption $[[y]]$ is generated that represents a
+use of the graded assumption $x$ when used in a left rule, and must be used
+linearly in the subsequent synthesis of $[[t]]$. As with the
+$\multimap^{-}_{\textsc{L}}$ rule, the use of $y$ is substituted for $x$ in the
+body of the synthesised term $t$. 
+
+The output context of the premise then contains $[[x]]$ graded by $s'$, which
+reflects how $[[x]]$ was used in the synthesis of $[[t]]$, i.e. if $[[x]]$ was
+not used then $s' = s$. The premise $[[ exists s . r >= s + 1 ]]$ constrains the
+number of times dereliction can be applied so that it does not exceed $x$'s
 original grade $r$.
 
 One may observe that the $\subDerName$ rule makes the presence of the
 $\subGrVarName$ rule admissible. Synthesising the usage of a graded variable can
 instead be achieved through the use of dereliction on the graded assumption,
-followed by the $\subLinVarName$. Nonetheless, we find the inclusion of
+followed by the $\subLinVarName$. For example, the following derivation for
+synthesising a value of type $A$ from a context with the graded assumption $x :_1
+A$ using $\subDerName$:
+\begin{align*}
+  \inferrule*[right=\subDerName]
+    {\inferrule*[right=\subLinVarName, leftskip=3.8em]{\quad}{x :_s A, y : A \vdash A \Rightarrow^- y \mid x :_s A} \\ y \notin x :_s A \\ \exists s . 1 \sqsupseteq s + 1}
+    {x :_1 A \vdash A \Rightarrow^{-} [x / y] y \mid x :_s A}
+\end{align*}
+is equivalent to using the $\subGrVarName$ rule (after applying the substitution in the $\subDerName$ rule's conclusion): 
+\begin{align*}
+  \inferrule*[right=\subGrVarName]
+      {\exists s . 1 \sqsupseteq s + 1}
+      { x :_1 A \vdash A \Rightarrow^{-} x \mid x :_s A}
+\end{align*}
+Nevertheless, we find the inclusion of
 $\subGrVarName$ useful as an explanatory tool and optimisation in the
 implementation of the calculus. 
+
 
   \subsubsection{Graded modalities}
   For a graded modal goal type $[[ [] r A ]]$, we synthesise a promotion
@@ -615,24 +678,15 @@ $[[ [ t ] ]]$ if we can synthesise the `unpromoted' $[[t]]$ from $[[A]]$:
 \end{align*}
 %
 \end{definition}
-As in graded variable synthesis, context subtraction existentially quantifies a
-variable $q$ to express the relationship
-between grades on the right being ``subtracted'' from those on the
-left. The last conjunct states
-$q$ is the greatest element (wrt.
-to the pre-order) satisfying this constraint, i.e., for all
-other $q' \in \mathcal{R}$ satisfying the subtraction constraint
-then $[[ q >= q']]$ e.g., if $r = [[ Intrv 2 3 ]]$
-and $s = [[ Intrv 0 1]]$ then $q = [[ Intrv 2 2 ]]$ instead of, say,
-$[[ Intrv 0 1]]$. This \emph{maximality} condition is
-important for soundness (that synthesised programs are well-typed).
-%, which does not satisfy
-%maximality.
-
-%There may be many such existentially quantified variables coming from
-%a subtraction, and we sometimes write $\exists \Sigma . [[ G1 - G2 ]]$
-%to denote the set $\Sigma$ of existential variables introduced by such
-%a context subtraction.
+Note that this is an algorithmic definition of context subtraction. As in graded
+variable synthesis, context subtraction existentially quantifies a variable $q$
+to express the relationship between grades on the right being ``subtracted''
+from those on the left. The last conjunct states $q$ is the greatest element
+(wrt. to the pre-order) satisfying this constraint, i.e., for all other $q' \in
+\mathcal{R}$ satisfying the subtraction constraint then $[[ q >= q']]$ e.g., if
+$r = [[ Intrv 2 3 ]]$ and $s = [[ Intrv 0 1]]$ then $q = [[ Intrv 2 2 ]]$
+instead of, say, $[[ Intrv 0 1]]$. This \emph{maximality} condition is important
+for soundness (i.e. that synthesised programs are well-typed); we discuss soundness further on page \pageref{soundness-ref}.
 
 Thus for \subBoxName, $[[ G - D ]]$ is multiplied by the goal type grade $r$ to obtain how these
   variables are used in $[[t]]$ after promotion. This is then subtracted from
@@ -641,7 +695,27 @@ Thus for \subBoxName, $[[ G - D ]]$ is multiplied by the goal type grade $r$ to 
   multiplication
   requires that $[[G - D]]$ contains only graded variables,
   preventing the incorrect use of linear variables from $[[G]]$ in
-  $[[t]]$.
+  $[[t]]$. For example, the synthesis derivation:
+\begin{align*}
+  \inferrule*[right=\subBoxName]
+    {\inferrule*[right=\subGrVarName]
+      {\exists s . 0...2 \sqsupset s + 1}
+      {x :_{0...2} A \vdash A \Rightarrow^- x \mid  x :_s A}
+    }
+    {x :_{0...2} \vdash \Box_0..1 \Rightarrow^- [ x ] \mid x :_{0...2} A - {0...1} \cdot (x :_{0...2} A - x :_s A)}
+\end{align*}
+would be valid. Here, the subtraction $x :_{0...2} A - x :_s A$ yields a grade
+variable $q_1$ with the constraint $\exists q_1 . {0...2} \sqsupseteq q_1 + {0...1}$
+and $q'_1$ with the maximality constraint $\forall q'_1 . {0...2} \sqsupseteq q'_1 +
+{0...1} \Rightarrow q_1 \sqsupseteq q'_1$, satisfied by $q_1 = {0...1}$, and $q'_1 = q_1$, as $s$ is 
+satisfied by $0...1$. Finally, 
+${0...1} \cdot x :_{q_1} A$ is subtracted from $x :_{0...2} A$ to obtain the left over usage: 
+${0...1} \cdot x :_{q_1} A$ is $x :_{q_1} A$, thus the subtraction yields a grade $q_2$ with 
+constraint $\exists q_2 . {0...2} \sqsupseteq q_2 + q_1 $ and $q'_2$ with maximality constraint 
+$\forall q'_2 . {0...2} \sqsupseteq q'_2 + q_1 \Rightarrow q_2 \sqsupseteq q'_2$, which is satisfied 
+by $q_2 = 0...1$; the final output grade for $x$ in the \subBoxName rule.
+
+
 
 Synthesis of graded modality elimination, is handled by the
   \subUnboxName\ left rule:
@@ -649,26 +723,39 @@ Synthesis of graded modality elimination, is handled by the
     \subUnbox
     \end{align*}
 %
-  Given an input context comprising $[[ G ]]$ and a linear
-  assumption $[[ x1 ]]$ of graded modal type, we can synthesise an unboxing of
-  $[[x1]]$ if we can synthesise a term $[[t]]$ under $[[G]]$
-  extended with a graded assumption $[[x2 : [A] r]]$. This returns an output
-  context that must contain $[[x2]]$ graded by $s$
-  with the constraint that $s$ must approximate $0$. This enforces
-  that $x_2$ has been used as much as stated by the grade $r$.
+  Given an input context comprising $[[ G ]]$ and a linear assumption $[[ x1 ]]$
+  of graded modal type, we can synthesise an unboxing of $[[x1]]$ if we can
+  synthesise a term $[[t]]$ under $[[G]]$ extended with a graded assumption
+  $[[x2 : [A] r]]$. This returns an output context that must contain $[[x2]]$
+  graded by $s$ with the constraint that $s$ must approximate $0$, as in the
+  following synthesis derivation where $x_1$ is an assumption with a graded
+  modality of grade $0$, i.e. it \emph{must} be discarded after unboxing:
+  \begin{align*}
+    \inferrule*[right=\subUnboxName]
+      {\inferrule*[right=\subLinVarName]
+        {\quad}
+        {y : A, x_2 :_0 A \vdash A \Rightarrow^- y \mid x_2 :_0 A}
+      \\ 0 \sqsubseteq 0}
+      {y : A, x_1 : \Box_0 A \vdash A \Rightarrow^- \textbf{let}\ [x_2] = x_1\ \textbf{in}\ y \mid \emptyset }
+  \end{align*} 
+  This enforces
+  that $x_2$ has been used as is permitted by the grade $r$.
+
+
 
 \subsubsection{Products}
 The right rule for products \subPairIntroName\ behaves similarly to the
-\subAppName\ rule, passing the entire input context $[[ G ]]$ to the first
-premise. This is in then used to synthesise the first sub-term of the pair
-$[[ t1 ]]$, yielding an output context $ [[ D1 ]]$, which is passed to the
-second premise. After synthesising the second sub-term $[[ t2 ]]$, the output
-context for this premise becomes the output context of the rule's conclusion.
+\subAppName\ rule, again synthesising two sub-terms, and passing the
+entire input context $[[ G ]]$ to the first premise. This is in then used to
+synthesise the first sub-term of the pair $[[ t1 ]]$, yielding an output context
+$ [[ D1 ]]$, which is passed to the second premise. After synthesising the
+second sub-term $[[ t2 ]]$, the output context for this premise becomes the
+output context of the rule's conclusion.
 
 The left rule equivalent \subPairElimName\  binds two assumptions
-$[[ x1 : A ]]$ $[[ x2 : B ]]$ in the premise, representing the constituent sides
-of the pair. As with \subAppName, we also ensure that these bound assumptions must not
-present in the premise's output context $[[ D ]]$.
+$[[ x1 : A ]]$ $[[ x2 : B ]]$ in the premise, representing the constituent parts
+of the pair. As with \subAppName, we also ensure that these bound assumptions must not be
+ present in the premise's output context $[[ D ]]$.
 
 \begin{align*}
 \begin{array}{c}
@@ -723,7 +810,9 @@ For all $[[ G1 ]]$, $[[ G2 ]], [[G1]] \sqcap [[G2]] =$
 \end{matrix}\right.
 \end{align*}
 where $r\!\sqcap\!s$ is the greatest-lower bound of grades $[[r]]$
-and $[[s]]$ if it exists, derived from $\sqsubseteq$.
+and $[[s]]$ if it exists, derived from the pre-order $\sqsubseteq$. If 
+the greatest lower bound of two grades does not exist, then the operation fails, 
+terminating the branch of synthesis.
 \end{definition}
 %
 %
@@ -740,8 +829,8 @@ where $t_1$ uses $y$ such that there are $2$-$5$ uses remaining
 and $t_2$ uses $y$ such that there are $3$-$4$
 uses left. To synthesise $\textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2}$
 the output context must be pessimistic about what resources are left,
-thus we take the greatest-lower bound yielding the interval $[
-2\dots4 ]$ here: we know $y$ can be used at least twice and at most
+thus we take the greatest-lower bound yielding the interval $
+2\dots4 $ here: we know $y$ can be used at least twice and at most
 $4$ times in the rest of the synthesised program.
 
 \subsubsection{Unit}
@@ -758,9 +847,11 @@ self-explanatory following the subtractive resource model:
 
 %
 
-This completes subtractive synthesis. We conclude
+\subsubsection{Soundness of Subtractive Synthesis}
+This completes subtractive synthesis calculus. We conclude
 with a key result, that synthesised terms are well-typed at the type from which they
 were synthesised:
+\label{soundness-ref}
 %
 \begin{restatable}[Subtractive synthesis soundness]{lemma}{subSynthSound}
 \label{lemma:subSynthSound}
@@ -774,7 +865,7 @@ under context $[[ G - D ]]$,
 that contains just those linear and
 graded variables with grades reflecting their use in $[[ t ]]$.
 \end{restatable}
-The proof of soundness can be found in Section~\ref{proof:linear-sub-sound} of Appendix~\ref{appendix:proofs}
+The proof of soundness can be found in Section~\ref{proof:linear-sub-sound} of Appendix~\ref{appendix:proofs}. 
 
 
 \begin{figure}[H]
@@ -821,11 +912,11 @@ We now present the dual to subtractive resource management --- the
 \emph{additive} approach.
 Additive synthesis also uses the input-output context approach, but where
 output contexts describe exactly which assumptions were used to synthesise
-a term, rather than which assumptions are still available. Additive
-   synthesis rules are read bottom-up, with $[[G |- A =>+ t; D]]$
+a term, rather than which assumptions are still available. As with subtractive, additive
+   synthesis rules are best read bottom-up, with $[[G |- A =>+ t; D]]$
   meaning that from the type $[[A]]$ we synthesise a term $[[t]]$ using
   exactly the assumptions $[[D]]$ that originate from the input
-  context $[[G]]$.
+  context $[[G]]$. The rules are collected in Figure~\ref{fig:add-rules}. 
 
   \subsubsection{Variables}
   We unpack the rules, starting with variables:
@@ -838,11 +929,9 @@ a term, rather than which assumptions are still available. Additive
   \end{array}
   \end{align*}
 %
-For a linear assumption, the output context contains
-just the variable that was synthesised. For a graded assumption $[[x : [A] r]]$, the output
-context contains the assumption graded by $1$. To synthesise a
-variable from a graded assumption, we must check that the use is
-compatible with the grade.
+For a linear assumption, the output context contains just the variable that was
+synthesised. For a graded assumption $[[x : [A] r]]$, the output context
+contains the assumption graded by $1$. 
 
 \subsubsection{Graded modalities}
 The subtractive approach handled the \textsc{GrVar$^{-}$}
@@ -855,15 +944,14 @@ assumptions are bound:
   \addUnbox
   \end{align*}
 %
-Here, $[[t]]$ is synthesised under a fresh graded assumption
-$[[ x2 : [A] r]]$. This produces an output context containing $[[x2]]$ with
-some grade $s$ that describes how $[[x2]]$ is used in $[[t]]$. An
-additional premise requires that the original grade $r$ approximates either $s$
-if $[[x2]]$ appears in $[[D]]$ or $0$ if it does not,
-ensuring that $[[x2]]$ has been used correctly. For the
-$\mathbb{N}$-semiring with equality as the ordering, this would
-ensure that a variable has been used exactly the number of times
-specified by the grade.
+Here, $[[t]]$ is synthesised under a fresh graded assumption $[[ x2 : [A] r]]$.
+This produces an output context containing $[[x2]]$ with some grade $s$ that
+describes how $[[x2]]$ is used in $[[t]]$ (if it was used at all). An additional
+premise requires that the original grade $r$ approximates either $s$ if $[[x2]]$
+appears in $[[D]]$ or $0$ if it does not, ensuring that $[[x2]]$ has been used
+correctly. For the $\mathbb{N}$-semiring with equality as the ordering, this
+would ensure that a variable has been used exactly the number of times specified
+by the grade.
 
 The synthesis of a promotion is considerably simpler in the additive
 approach. In subtractive resource management it was necessary to calculate how
@@ -895,7 +983,7 @@ Likewise for application (\addAppName), the output
 context of the first premise must contain the linearly bound $[[x2 :
 B]]$ and the final output context must contain the assumption being used in the
 application $[[ x1 : A -o B ]]$. This output context computes the \emph{context
-addition} (Def.~\ref{def:contextAdd}) of both output contexts of the premises $[[D1 + D2]]$. If $[[D1]]$
+addition} (Def.~\ref{def:contextAdd} on page\pageref{def:contextAdd}) of both output contexts of the premises $[[D1 + D2]]$. If $[[D1]]$
 describes how assumptions were used in $[[t1]]$ and $[[D2]]$ respectively for
 $[[t2]]$, then the addition of these two contexts describes the usage of
 assumptions for the entire subprogram. Recall, context addition
@@ -917,7 +1005,7 @@ match graded assumptions by giving a synthesising version of dereliction:
 The fresh linear assumption $[[ y : A ]]$ must
 appear in the output context of the premise, ensuring it is used. The final
 context therefore adds to $[[ D ]]$ an assumption of $[[x]]$ graded by
-$1$, accounting for this use of $[[ x ]]$ (temporarily renamed to
+$1$, accounting for this use of $[[ x ]]$ (which was temporarily renamed to
 $y$).
 As with the subtractive case, $\addDerName$ makes $\addGrVarName$ admissible. 
 
@@ -961,6 +1049,7 @@ as expected.
   \end{align*}
 
 
+  \subsubsection{Soundness of Additive Synthesis}
   Thus concludes the rules for additive synthesis. As with subtractive, we
   have prove that this calculus is sound.
   \begin{restatable}[Additive synthesis soundness]{lemma}{addSynthSound}
@@ -971,43 +1060,62 @@ as expected.
 \end{align*}
 \end{restatable}
 Thus, the synthesised term $[[ t ]]$ is well-typed
-at $[[ A ]]$ using only the assumptions $[[ D ]]$.
-, where $[[D]]$ is a
-subset of $[[G]]$.
+at $[[ A ]]$ using only the assumptions $[[ D ]]$ (where $[[D]]$ is a
+subset of $[[G]]$).
 i.e., synthesised terms are well typed at the type from which they
 were synthesised.
 The proof of soundness can be found in Section~\ref{proof:linear-add-sound} of
-Appendix~\ref{appendix:proofs}
+Appendix~\ref{appendix:proofs}.
 
 \subsubsection{Additive pruning}
 %
-As seen above, the additive approach delays checking
-whether a variable is used according to its linearity/grade
-until it is bound. We hypothesise that this can lead additive synthesis to explore
-many ultimately ill-typed (or \emph{ill-resourced})
-paths for too long. Subsequently, we define a ``pruning''
-variant of any additive rules with multiple sequenced
-premises. For \addPairIntroName\ this is:
+As seen above, the additive approach delays checking whether a variable is used
+according to its linearity/grade until it is bound, i.e. in the \addAbsName,
+\addAppName, \addDerName, and \addUnboxName\ rules. We hypothesise that this can
+lead additive synthesis to explore many ultimately ill-typed (or
+\emph{ill-resourced}) paths for too long. For example, say we have a partial
+synthesis derivation for synthesising a pair introduction form of type $A
+\otimes A$, but our context contains only one linear assumption of type $A$.
+Clearly we can use this assumption to synthesise a term for the left part of the
+pair: 
+\begin{align*}
+  \inferrule*[right=\addPairIntroName]
+    {\inferrule*[right=\addLinVarName]{\quad}{x : A \vdash A \Rightarrow^{+} x \mid x : A} \\ x : A \vdash A \Rightarrow^+\ ? \mid ?}
+    {x : A \vdash A \otimes A \Rightarrow^+ ? \mid ?}
+\end{align*}
+However, after synthesising the left part we no longer the available usage of
+$x$ to synthesise a term for right part of the pair. Currently,
+\addPairIntroName\ will allow the synthesis of the right part of the pair to
+take place using $x$, which will then be discarded when the context addition in the 
+rule's output context fails: 
+conclusion\begin{align*}
+  \tag{invalid}
+  \inferrule*[right=\addPairIntroName]
+    {\inferrule*[right=\addLinVarName]{\quad}{x : A \vdash A \Rightarrow^{+} x \mid x : A} \\ x : A \vdash A \Rightarrow^{+}\ x \mid x : A}
+    {x : A \vdash A \otimes A \Rightarrow^+ (x, x) \mid x : A + x : A}
+\end{align*}
+Subsequently, we define a ``pruning''
+variant of any additive rules with multiple sequenced premises. For
+\addPairIntroName\ this is:
 %
 \begin{align*}
   \begin{array}{c}
-    \addPrunePairIntro
+    \addPrunePairIntroHighlight
   \end{array}
 \end{align*}
 %
-Instead of passing $[[G]]$ to both
-premises, $[[G]]$ is the input only for
-the first premise. This premise outputs context $[[D1]]$ that
-is subtracted from $[[G]]$ to give the input context
-of the second premise. This provides an opportunity to
-terminate the current branch of synthesis early if $[[ G - D1
-]]$ does not contain the necessary resources to attempt the
-second premise.
-The \addAppName\ rule is similarly adjusted:
+Instead of passing $[[G]]$ to both premises, $[[G]]$ is the input only for the
+first premise. This premise outputs context $[[D1]]$ that is subtracted from
+$[[G]]$ (highlighted in $\rulehighlight{\text{yellow}}$) to give the input
+context of the second premise. This provides an opportunity to terminate the
+current branch of synthesis early if $[[ G - D1 ]]$ does not contain the
+necessary resources to attempt the second premise, based on
+Definition~\ref{def:contextSub} which may fail. The \addAppName\ rule is
+similarly adjusted:
 
 \begin{align*}
   \begin{array}{c}
-    \addPruneApp
+    \addPruneAppHighlight
   \end{array}
 \end{align*}
 
@@ -1015,78 +1123,11 @@ The \addAppName\ rule is similarly adjusted:
 \label{lemma:addPruningSynthSound} For all $[[ G ]]$ and $[[ A ]]$:
 %
 \begin{align*}
-[[ G |- A =>+ t ; D ]] \quad \implies \quad [[ D |- t : A ]]
+\Gamma \vdash A \Rightarrow^{\pm} t \mid \Delta \quad \implies \quad [[ D |- t : A ]]
 \end{align*}
 \end{restatable}
 The proof of soundness can be found in Section~\ref{sec:add-pruning-sound} of
 Appendix~\ref{appendix:proofs}
-
-
-\section{Post-Synthesis Refactoring}
-\label{sec:linear-base-refactoring}
-A synthesised term often contains some artefacts of the fact that it was
-constructed automatically. The structure of our synthesis rules means aspects of
-our synthesised programs are unrepresentative in some stylistic ways of the kind
-of programs functional programmers typically write. We consider two examples
-of these below using Granule code, and show how we apply a refactoring procedure to any synthesised
-term to rewrite them in a more idiomatic style. 
-
-\subsection{Abstractions}
-A function definition synthesised from a function type using the
-$\multimap_{\textsc{R}}$ will take the form of a sequence of nested abstractions which
-bind the function's arguments, with the sub-term of the innermost abstraction
-containing the function body, e.g.
-
-\begin{granule}
-pair : forall { a b : Type } . a -> b -> (a, b)
-pair = \x -> \y -> (x, y)
-\end{granule}
-
-In most cases, a programmer would write a function definition as a series of
-equations with the function arguments given as patterns. Our refactoring
-procedure collects the outermost abstractions of a synthesised term and
-transforms them into equation-level patterns with the innermost abstraction
-body forming the equation body:
-
-\begin{granule}
-pair : forall { a b : Type } . a -> b -> (a, b)
-pair x y = (x, y)
-\end{granule}
-
-\subsection{Unboxing}
-An unboxing term is synthesised via the $\Box_{\textsc{L}}$ rule as a case statement
-which pattern matches over a box pattern, yielding an assumption with the
-grade's usage. Such terms can also be refactored both into function equations
-and to avoid nested let bindings. For example, we may write the $k$
-combinator using an explicit graded modality:
-
-\begin{granule}
-k : forall { a b : Type } . a -> b [0] -> a
-k x y = let [z] = y in x
-\end{granule}
-which we can then refactor into
-\begin{granule}
-k : forall { a b : Type } . a -> b [0] -> a
-k x [z] = z
-\end{granule}
-This procedure included programs which perform a nested unboxing, refactoring:
-\begin{granule}
-comp : forall {k : Coeffect, n m : k, a b c : Type} 
-     . (a [m] -> b) [n] 
-     -> (b [n] -> c) 
-     -> a [n * m] 
-     -> c
-comp x y z = let [u] = x in let [v] = z in y [ u [v] ]
-\end{granule}
-into:
-\begin{granule}
-comp : forall {k : Coeffect, n m : k, a b c : Type}
-     . (a [m] -> b) [n] 
-     -> (b [n] -> c) 
-     -> a [n * m] 
-     -> c
-comp [u] y [v] = y [ u [v] ]
-\end{granule}
 
 \section{Focusing}
 \label{sec:linear-base-focusing}
@@ -1524,6 +1565,101 @@ which contains assumptions with grades reflecting their use in $[[ t ]]$.
 \end{restatable}
 
 
+\section{Implementation}
+We implemented our approach as a synthesis tool for Granule, integrated with its
+core tool. Granule features ML-style polymorphism (rank-1 polymorphism) but we
+do not address polymorphism here (Chapter~\ref{chapter:extended} offers a treatment of 
+synthesis of polymorphic programs). Instead, programs are synthesised from type
+schemes treating universal type variables as logical atoms. Multiplicative
+products are primitive in Granule, although additives coproducts are provided
+via ADTs, from which we define a core sum type to use defined: 
+\begin{granule}
+  data Either a b
+    = Left a 
+    | Right b
+\end{granule}
+Constraints on resource usage are handled via Granule's existing
+symbolic engine, which compiles constraints on grades (for various semirings)
+to the SMT-lib format for Z3~\citep{z3}.
+In the case of graded variable synthesis in the subtractive
+scheme, the kind of the assumption's grade (i.e., what semiring it
+belongs to) is inferred using Granule's type
+checker, which is used to generate an existential variable representing
+the remaining available usage of the graded assumption.
+
+We use the LogicT monad for backtracking search~\citep{logict} and the Scrap
+Your Reprinter library for splicing synthesised code into syntactic ``holes''
+(represented by \granin{?} in Granule), preserving the rest of the program
+text~\citep{clarke2017scrap}.
+
+\subsection{Post-Synthesis Refactoring}
+\label{sec:linear-base-refactoring}
+A synthesised term often contains some artefacts of the fact that it was
+constructed automatically. The structure of our synthesis rules means aspects of
+our synthesised programs are not representative in some stylistic ways of the
+kind of programs functional programmers typically write. We consider two
+examples of these below using Granule code, and show how we apply a refactoring
+procedure to any synthesised term to rewrite them in a more idiomatic style. 
+
+\subsubsection{Abstractions}
+A function definition synthesised from a function type using the
+$\multimap_{\textsc{R}}$ will take the form of a sequence of nested abstractions which
+bind the function's arguments, with the sub-term of the innermost abstraction
+containing the function body, e.g.
+
+\begin{granule}
+pair : forall { a b : Type } . a -> b -> (a, b)
+pair = \x -> \y -> (x, y)
+\end{granule}
+
+In most cases, a programmer would write a function definition as a series of
+equations with the function arguments given as patterns. Our refactoring
+procedure collects the outermost abstractions of a synthesised term and
+transforms them into equation-level patterns with the innermost abstraction
+body forming the equation body:
+
+\begin{granule}
+pair : forall { a b : Type } . a -> b -> (a, b)
+pair x y = (x, y)
+\end{granule}
+
+\subsubsection{Unboxing}
+An unboxing term is synthesised via the \subUnboxName\ abd \addUnboxName\ rules
+rule as a let expression which pattern matches over a box pattern, yielding an
+assumption with the grade's usage. Such terms can also be refactored both into
+function equations and to avoid nested let bindings. For example, we may write
+the $k$ combinator using an explicit graded modality:
+
+\begin{granule}
+k : forall { a b : Type } . a -> b [0] -> a
+k x y = let [z] = y in x
+\end{granule}
+which we can then refactor into
+\begin{granule}
+k : forall { a b : Type } . a -> b [0] -> a
+k x [z] = z
+\end{granule}
+This procedure includes programs which perform a nested unboxing, refactoring:
+\begin{granule}
+comp : forall {k : Coeffect, n m : k, a b c : Type} 
+     . (a [m] -> b) [n] 
+     -> (b [n] -> c) 
+     -> a [n * m] 
+     -> c
+comp x y z = let [u] = x in let [v] = z in y [ u [v] ]
+\end{granule}
+into:
+\begin{granule}
+comp : forall {k : Coeffect, n m : k, a b c : Type}
+     . (a [m] -> b) [n] 
+     -> (b [n] -> c) 
+     -> a [n * m] 
+     -> c
+comp [u] y [v] = y [ u [v] ]
+\end{granule}
+
+
+
 \section{Evaluating the Synthesis Calculi}
 \label{sec:linear-base-evaluation}
 
@@ -1553,25 +1689,6 @@ mode, but more complex examples will be faster in subtractive.
 \end{enumerate}
 
 \subsection{Methodology}
-We implemented our approach as a synthesis tool for
-Granule, integrated with its core tool. Granule features
-ML-style polymorphism (rank-0 quantification) but we do not address polymorphism here.
-Instead, programs are synthesised from type schemes treating universal
-type variables as logical atoms. Multiplicative products are
-primitive in Granule, although additives coproducts are provided via
-ADTs, from which we define a core sum type to use here.
-
-Constraints on resource usage are handled via Granule's existing
-symbolic engine, which compiles constraints on grades (for various semirings)
-to the SMT-lib format for Z3~\citep{z3}.
-%In the case of graded variable synthesis in the subtractive
-%scheme, the kind of the assumption's grade (i.e., what semiring it
-%belongs to) is inferred using Granule's type
-%checker, which is used to generate an existential variable representing
-%the remaining available usage of the graded assumption.
-We use the LogicT monad for backtracking search~\citep{logict} and the Scrap
-Your Reprinter library for splicing synthesised code into syntactic ``holes''
-(represented by \granin{?} in Granule), preserving the rest of the program text~\citep{clarke2017scrap}.
 
 To evaluate our synthesis tool we developed a suite of benchmarks comprising
 Granule type schemes for a variety of operations using linear and graded modal
@@ -1583,11 +1700,11 @@ types. We divide our benchmarks into several classes of problem:
   grades where needed (see, e.g., $S$ combinator in
   Example~\ref{ex:s-comb} or coproduct elimination in Example~\ref{exm:or3}).
 
-\item \textbf{Comp}: various translations of function composition
-into linear logic: multiplicative, call-by-value and
-call-by-name using $!$~\citep{girard1987linear}, I/O using $!$~\citep{liang2009focusing},
-and coKleisli composition over $\mathbb{N}$ and arbitrary semirings:
-e.g. $\forall r, s \in \mathcal{R}$:
+\item \textbf{Comp}: various translations of function composition into linear
+logic: multiplicative, call-by-value and call-by-name using
+$!$~\citep{girard1987linear}, 0/1 translation of intuitionistic logic using
+$!$~\citep{liang2009focusing}, and coKleisli composition over $\mathbb{N}$ and
+arbitrary semirings: e.g. $\forall r, s \in \mathcal{R}$:
 %
 \begin{equation*}
 \textit{comp-}\textit{coK}_{\mathcal{R}} : [[ {[] r ({[] s A} -o B)} -o {({[] r B} -o C) -o {{[] {r * s} A} -o C}} ]]
@@ -1644,7 +1761,7 @@ fixed size vectors encoded as products, e.g.:
 \textbf{Hilbert} & \\ \hline
 \text{$\otimes{}$Intro} & \otimes_i : \forall a , b . & a \multimap b \multimap (a \otimes b) \\
 \text{$\otimes{}$Elim} & \otimes_{e1} : \forall a , b . & (a \otimes \Box_0 b) \multimap a \\
-                       & \otimes_{e2} : \forall a , b . & () (\Box_0 a \otimes b) \multimap b \\
+                       & \otimes_{e2} : \forall a , b . & (\Box_0 a \otimes b) \multimap b \\
 \text{$\oplus{}$Intro} & \oplus_{i1} : \forall a , b . & a \multimap a \oplus b \\
                        & \oplus_{i2} : \forall a , b . & b \multimap a \oplus b \\
 \text{$\oplus{}$Elim}  & \oplus_{e} : \forall a , b, c . & \Box_{0...1}(a \multimap c) \multimap \Box_{0...1}(b \multimap c) \multimap (a \oplus b) \multimap c \\
@@ -1659,7 +1776,7 @@ fixed size vectors encoded as products, e.g.:
 \forall \mathcal{R}, r, s \in \mathcal{R}, a, b, c . &
       \Box_r (\Box_s a \multimap b) \multimap (\Box_r b \multimap c) \multimap \Box_{r \cdot s} a \multimap c
 \\
-\text{mult} & \circ : \forall a, b, c . & (a \multimap b) \multimap (b \multimap c) \multimap (a \multimap c) \\
+\text{lin} & \circ : \forall a, b, c . & (a \multimap b) \multimap (b \multimap c) \multimap (a \multimap c) \\
 \text{coK-$\mathbb{N}$} & \circ_{\mathbb{N}} :
 \forall r, s \in \mathbb{N}, a, b, c . &
       \Box_r (\Box_s a \multimap b) \multimap (\Box_r b \multimap c) \multimap \Box_{r \cdot s} a \multimap c
@@ -1716,7 +1833,7 @@ treat each type variable as a logical atom, unifiable only with itself.
 Chapter~\ref{chapter:extended} provides a proper treatment of synthesis from
 Rank-1 polymorphic type schemes. Note also that $\Box A$ is used as shorthand
 for $\square_{0...\infty} A$ (graded modality with indices drawn from intervals
-over $\mathbb{N} \cup \infty$). The compete synthesised program code for the
+over $\mathbb{N} \cup \{\infty$\}). The compete synthesised program code for the
 benchmarking problems can be found in Section~\ref{sec:linear-benchmarks} of
 Appendix~\ref{appendix:benchmarks}
 
@@ -1729,19 +1846,16 @@ and 16 Gb of RAM.
 
 \subsection{Results and Analysis}
 %
-For each synthesis problem, we recorded whether synthesis
-was successful or not (denoted $\success$ or \fail), the mean
-total synthesis time ($\mu{T}$), and the number of
-calls made to the SMT solver (\textsc{N}).
-Table~\ref{tab:results} summarises the results with the fastest case for each
-benchmark highlighted.
-For all benchmarks that used
-the SMT solver, the solver accounted for $91.73\%-99.98\%$
-of synthesis time, so we report only the mean
-total synthesis time $\mu{T}$. % as this gives a good proxy of the solver time.
-We set a timeout of 120 seconds.
+For each synthesis problem, we recorded whether synthesis was successful or not
+(denoted $\success$ or \fail), the mean total synthesis time ($\mu{T}$), and the
+number of calls made to the SMT solver (\textsc{N}). Table~\ref{tab:results}
+summarises the results with the fastest case for each benchmark highlighted. For
+all benchmarks that used the SMT solver, the solver accounted for
+$91.73\%-99.98\%$ of synthesis time, so we report only the mean total synthesis
+time $\mu{T}$, rather than showing the SMT solver time separately as this gives
+a good proxy of the solver time. We set a timeout of 120 seconds.
 
-\begin{table}[t]
+\begin{table}[H]
 {\small{
 \begin{center}
 \setlength{\tabcolsep}{0.3em}
@@ -1819,20 +1933,20 @@ with standard sample error in brackets}
 
 
 \subsubsection{Additive versus subtractive}
-As expected, the additive approach generally synthesises programs faster than
-the subtractive. Our first hypothesis (that the additive approach in general
-makes fewer calls to the SMT solver) holds for almost all benchmarks, with the
-subtractive approach often far exceeding the number made by the additive. This
-is explained by the difference in graded variable synthesis between approaches.
-In the additive, a constant grade $1$ is given for graded assumptions in the
-output context, whereas in the subtractive, a fresh grade variable is created
-with a constraint on its usage which is checked immediately. As the total
-synthesis time is almost entirely spent in the SMT solver (more than 90\%),
-solving constraints is by far the most costly part of synthesis leading to the
-additive approach synthesising most examples in a shorter amount of time.
+As conjectured in H1, the additive approach generally synthesises programs with
+fewer calls to the solver than subtractive. Our first hypothesis holds for
+almost all benchmarks, with the subtractive approach often far exceeding the
+number made by the additive. This is explained by the difference in graded
+variable synthesis between approaches. In the additive, a constant grade $1$ is
+given for graded assumptions in the output context, whereas in the subtractive,
+a fresh grade variable is created with a constraint on its usage which is
+checked immediately. As the total synthesis time is almost entirely spent in the
+SMT solver (more than 90\%), solving constraints is by far the most costly part
+of synthesis leading to the additive approach synthesising most examples in a
+shorter amount of time.
 
 Graded variable synthesis in the subtractive case also results in several
-examples failing to synthesise. In some cases, e.g., the first three
+examples failing to synthesise due to timeout. In some cases, e.g., the first three
 \textit{comp} benchmarks, the subtractive approach times-out as synthesis
 diverges with constraints growing in size due to the maximality condition and
 absorbing behaviour of $[[ Intrv 0 Inf ]]$ interval. In the case of
@@ -1850,9 +1964,10 @@ constraint.
 
 In more complex examples we see evidence to support our second hypothesis. The
 \textit{share} problem requires a lot of graded variable synthesis which is
-problematic for the additive approach, for the reasons described in the second
-hypothesis. In contrast, the subtractive approach performs better, with $\mu{T}
-= 193.3\textit{ms}$ as opposed to additive's $292.02\textit{ms}$. However,
+problematic for the additive approach, for the reason described in H2 that synthesis 
+may explore many paths which are incorrect in their eventual resource usage. In
+contrast, the subtractive approach performs better, with $\mu{T} =
+193.3\textit{ms}$ as opposed to additive's $292.02\textit{ms}$. However,
 additive pruning outperforms both.
 
 % Not as important
@@ -1861,7 +1976,7 @@ Hilbert's axioms or \textit{mult} for function composition, the subtractive
 approach generally performs better. Linear programs without graded modalities
 can be synthesised without the need to interface with Z3 at all, making the
 differences here somewhat negligible as solver time generally makes up for the
-vast proportion of total synthesis time.
+vast proportion of total synthesis time in the graded benchmarks.
 
 \subsubsection{Additive pruning}
 The pruning variant of additive synthesis (where subtraction
@@ -1879,8 +1994,7 @@ approach. However, additive pruning failed to synthesis two
 Overall, the additive approach outperforms the subtractive and is successful at
 synthesising more examples, including ones polymorphic in grades and even the
 semiring itself. Given that the literature on linear logic theorem proving is
-typically subtractive, this is an interesting result. Going forward, we will
-focus on the additive scheme. 
+typically subtractive, this is an interesting result. 
 
 \section{Conclusion}
 \label{sec:linear-base-conclusion}
@@ -1903,14 +2017,14 @@ this can be carried out is especially important.
 
 While the tool presented in this chapter allows users to synthesise a
 considerable subset of Granule programs, our language is still limited in its
-expressivity. Data types comprise only product, sum, and unit types, while
-synthesis of recursive function defintions or functions which make use of other
-in-scope values such as top-level definitions is not permitted. One notable
-limitation of our typing calculi is the inability to express (and therefore
-synthesise) programs which perform a deep pattern match over a graded data type.
-A clear example of this can be found in the synthesis of programs which
-distribute a graded modality over a data type. Consider a classic example of a
-distributive program, \textit{push}:
+expressivity when compared to the core of Granule. Data types comprise only
+product, sum, and unit types, while synthesis of recursive function defintions
+or functions which make use of other in-scope values such as top-level
+definitions is not permitted. One notable limitation of our typing calculi is
+the inability to express (and therefore synthesise) programs which perform a
+deep pattern match over a graded data type. A clear example of this can be found
+in the synthesis of programs which distribute a graded modality over a data
+type. Consider an example of a distributive program, \textit{push}:
 \begin{align*}
   push: \Box_r(A \otimes B) \multimap \Box_r A \otimes \Box_r B
 \end{align*}
