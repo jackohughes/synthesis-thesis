@@ -75,9 +75,20 @@
 
 \definecolor{mypink3}{cmyk}{0, 0.82, 0.98, 0.28}
 \newcommand{\maximal}[4]{\forall #2 . #3 \sqsupseteq #4 \implies #1 \sqsupseteq #2}
+\makeatletter
+\providecommand{\bigsqcap}{%
+  \mathop{%
+    \mathpalette\@updown\bigsqcup
+  }%
+}
+\newcommand*{\@updown}[2]{%
+  \rotatebox[origin=c]{180}{$\m@th#1#2$}%
+}
+\makeatother
+\makeatother
 
 \declaretheorem[name=Proposition,numberwithin=section]{prop}
-\theoremstyle{plain}% default
+\theoremstyle{definition}% default
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}{Proposition}
