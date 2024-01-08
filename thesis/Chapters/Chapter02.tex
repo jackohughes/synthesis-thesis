@@ -563,6 +563,35 @@ must then be used in the type in a polymorphic way.
 % \end{align*}
 \end{example}
 
+\begin{example}
+
+  \label{example:01omega}
+    The $!$ modality can be (almost) recovered via the \{$\mathsf{Zero}$,\
+    $\mathsf{One}$,\ $\omega$\} semiring. For this semiring, we define $+$ as $r
+    + s = r$ if $s = \mathsf{Zero}$, $r + s = s$ if $r = \mathsf{Zero}$,
+    otherwise $\omega$. Multiplication is $r \cdot \mathsf{Zero} = \mathsf{Zero}
+    \cdot r = \mathsf{Zero}$, $r \cdot \omega = \omega \cdot r = \omega$ (where
+    $r \neq \mathsf{Zero}$), and $r \cdot 1 = 1 \cdot r = r$. Ordering is
+    defined as $\mathsf{Zero} \sqsubseteq \omega$ and $\mathsf{One} \sqsubseteq
+    \omega$. This semiring allows us to express both linear and non-linear usage
+    of values, with a $\mathsf{One}$ grade indicating linear use,
+    $\mathsf{Zero}$ requires the value be discarded, and $\omega$ acting as
+    linear logic's ! and permitting unrestrained use. This is similar to Linear
+    Haskell's multiplicity annotations (although Linear Haskell has no
+    equivalent of a $\mathsf{Zero}$ grade, only having $\mathsf{One}$ and
+    $\mathsf{Many}$ annotations)~\citep{DBLP:journals/pacmpl/BernardyBNJS18}.
+    Using this semiring, we can write the \emph{K} combinator from
+    Example~\ref{ex:s-comb} above in Granule as:
+    \begin{granule}
+k : forall { a b : Type } . a [One] -> b [Zero] -> a
+k x' y' = let [x] = x' in let [y] = y' in x
+      \end{granule}
+  Note however that some additional restrictions are required on typing to get
+  exactly the behaviour of $!$ with respect to
+  products~\citep{hughes:lirmm-03271465}. This is an orthogonal discussion and
+  not relevant to the rest of this work.
+  \end{example}
+
 \subsection{The Fully Graded $\lambda$-calculus}
 \label{sec:graded-base}
 As mentioned before, the second style of graded cacluli that we consider are
