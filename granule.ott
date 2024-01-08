@@ -282,7 +282,7 @@ c, r, s, q :: 'Coeffect_' ::=
   | c1 \*/ c2 :: :: MultiJoin {{ com MultiJoin }} {{ tex [[ c1 ]] \sqcup ... \sqcup [[ c2 ]] }}
   | c1 = c2 :: :: CoeffEq {{ com CoeffEq }} {{ tex [[ c1 ]] = [[ c2 ]] }}
   | BigJoin c :: :: BigJoin {{ com BigJoin }} {{ tex \bigsqcup_1^n [[ c ]] }}
-  | BigMeet c :: :: BigMeet {{ com BigMeet }} {{ tex \bigwedge_{i = 1}^n [[ c ]] }}
+  | BigMeet c :: :: BigMeet {{ com BigMeet }} {{ tex \bigsqcap_1^n [[ c ]] }}
   | { c } :: M :: CoeffectGroupI {{ com Implicit grouping }} {{ tex [[ c ]] }}
   | ( c ) :: M :: CoeffectGroupE {{ com Explicit grouping }}
   | Flatten c1 A c2 B :: :: Flatten {{ com Flatten }}

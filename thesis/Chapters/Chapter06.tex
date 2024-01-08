@@ -4,24 +4,26 @@ In this dissertation, we have provided a framework for designing program
 synthesis tool based on linear and graded type systems, overcoming the
 challenges imposed by treating program values as resources, and leveraging the
 type systems' properties to build two efficient synthesis tools, targeting two
-common flavours of graded type system. In summary, in our work we have succeeded
-in: 
+common flavours of graded type system: the linear-base style and the graded-base
+style. In summary, in our work we have succeeded in: 
 \begin{itemize}
-    \item Building several core calculi for a two varieties of quantitative type
+    \item Building several core calculi for two varieties of quantitative type
           systems, encompassing the major approaches in the literature, with
           both styles differing in expressivity and imposing unique
           requirements. 
-    \item Implementing these synthesis calculi as tools for Granule, as fully integrated 
+    \item Implementing these synthesis calculi as tools for Granule, as fully
+          integrated 
           components of the Granule toolchain. 
     \item Evaluating each of these systems in a variety of criteria, our main
           result being that synthesis with graded types is an effective way of
           reducing the program synthesis search space.  
     \item Showing that programs require fewer examples than in a purely
           example-driven synthesis setting, such as \textsc{MYTH}. 
-    \item Providing an alternative approach to generating graded combinators, based on a generic programming methodology. 
-    \item Adapting our synthesis technique to Linear Haskell, showing the
-          viability of our framework as a foundation for building synthesis
-          tools for other quantitative type systems. 
+    \item Providing an alternative approach to generating graded combinators,
+    based on a generic programming methodology. 
+    \item Adapting our synthesis technique to Haskell, showing the viability of
+          our framework as a foundation for building synthesis tools for other
+          quantitative type systems in the real world.
     \item Proved the soundness of each of these systems, reasoning about the
           behavioural properties of our synthesis calculi. 
 \end{itemize}
@@ -31,10 +33,10 @@ is a feasible and effective approach to reducing the search space of a program
 synthesis task. The expressivity of linear and graded types in describing the
 static semantics of a program is highly valued by many programmers, so
 harnessing this expressivity in synthesis is a something that we find will be
-useful to programs in this context, allowing the synthesis of programs often without
-the need for additional specification such as examples.
+useful to programs in this context, allowing the synthesis of programs often
+without the need for additional specification such as examples.
 
-There remain many avenues for future exploration, which intend to pursue, and
+There remain many avenues for future exploration, which we intend to pursue, and
 hope that others will also find use in this approach when designing synthesis
 tools for their own type systems. 
 
@@ -97,14 +99,14 @@ may be a worthwhile avenue of exploration.
 
 
 \subsection{Generalised Algebraic Data Types}
-A logical next step is to incorporate GADTs (Generalised ADTs),
-i.e., indexed types,  into the synthesis algorithm.
-Granule provides support for user-defined GADTs, and the interaction
-between grades and type indices is a key contributor to Granule's expressive power~\citep{DBLP:journals/pacmpl/OrchardLE19}.
-Consider our list type benchmarks for example. In most cases, when we want to
-synthesise a recursive function definition which takes a list as input, we have
-to give the list a $0..\infty$ interval grade to account for potentially unlimited
-usage. Take for example the \granin{map} benchmark:
+A logical next step is to incorporate GADTs (Generalised ADTs), i.e., indexed
+types,  into the synthesis algorithm. Granule provides support for user-defined
+GADTs, and the interaction between grades and type indices is a key contributor
+to Granule's expressive power~\citep{DBLP:journals/pacmpl/OrchardLE19}. Consider
+our list type benchmarks for example. In most cases, when we want to synthesise
+a recursive function definition which takes a list as input, we have to give the
+list a $0..\infty$ interval grade to account for potentially unlimited usage.
+Take for example the \granin{map} benchmark:
 \begin{granule}
 map : forall a b . (a % 1..$\infty$ -> b) % 0..$\infty$ -> List a % 1..$\infty$ -> List b
 spec

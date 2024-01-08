@@ -30,7 +30,12 @@ Throughout, we refer to distributive laws of the form $\Box_r (\mathsf{F}
 \alpha) \rightarrow \mathsf{F} (\Box_r \alpha)$ as \emph{push} operations (as
 they `push' the graded modality inside the type constructor $\mathsf{F}$), and
 dually $\mathsf{F} (\Box_r \alpha) \rightarrow \Box_r (\mathsf{F} \alpha)$ as
-\emph{pull} operations (as they `pull' the graded modality outside $\mathsf{F}$).
+\emph{pull} operations (as they `pull' the graded modality outside
+$\mathsf{F}$). We have already encountered some examples of push and pull
+operations in Chapter~\ref{chapter:core}; our benchmarks showcased pull for 
+product and sum types (i.e. $\mathsf{F}$ = $\otimes$ and $\oplus$, respectively), and 
+push for linear function types ($\mathsf{F} = \multimap$). 
+
 
 As a standalone methodology for generating a common class of graded programs,
 this ``deriving mechanism'' serves as a complement to the synthesis calculi of
@@ -47,21 +52,23 @@ extend our graded linear $\lambda$-calculus of Section
 ~\ref{sec:linear-base} to incorporate data constructors and pattern matching, as well 
 as recursive data types. 
 
-This extended calculus is defined in Section~\ref{sec:der-calculus}
+We begin with a motivating example in Section~\ref{sec:motivating-example}
+before defining our extended calculus in Section~\ref{sec:der-calculus}
 providing an idealised, simply-typed subset of Granule with which we develop the
-core deriving mechanism. Section~\ref{sec:push-pull-deriv} gives the procedures for
-deriving \emph{push} and \emph{pull} operators for the calculus.
-Section~\ref{sec:implementation-der} describes the details of how these procedures
-are realised in the Granule language. We then provide examples of how several
-other structural combinators in Granule may be derived using this tool in
-Section~\ref{sec:deriving-other}. Finally, Section~\ref{sec:der-conclusion}
-discusses more related and future work.
+core deriving mechanism. Section~\ref{sec:push-pull-deriv} gives the procedures
+for deriving \emph{push} and \emph{pull} operators for the calculus.
+Section~\ref{sec:implementation-der} describes the details of how these
+procedures are realised in the Granule language. We then provide examples of how
+several other structural combinators in Granule may be derived using this tool
+in Section~\ref{sec:deriving-other}. Finally, Section~\ref{sec:deriving-related}
+discusses related work, while Section~\ref{sec:der-conclusion} highlights future
+work.
 
 We start with a motivating example typifying the kind of software engineering
 impedance problem that distributive laws solve. We do so in Granule code since
 it is the main vehicle for the developments here.
 
-\subsection{Motivating Example}
+\section{Motivating Example}
 \label{sec:motivating-example}
 
 Consider the situation of projecting the first element of a pair. In Granule,
@@ -74,13 +81,10 @@ fst (x, [y]) = x
 \end{granule}
 %
 Linearity is the default, so this represents a linear function applied to linear
-values. However, the second component of the pair has a \emph{graded modal
-type}, written \granin{b [0]}, which means that we can use the value ``inside''
-the graded modality $0$ times by first `unboxing' this capability via the
-pattern match \granin{[y]} which allows weakening to be applied in the body to
-discard \granin{y} of type \granin{b}. In calculus of
-Section~\ref{sec:der-calculus}, we denote `\granin{b [0]}' as the type
-$\Box_0 b$.
+values. However, the second component of the pair is graded, allowing weakening
+to be applied via unboxing in the body to discard \granin{y} of type \granin{b}.
+In graded linear $\lambda$-calculus of Section~\ref{sec:linear-base}, we denote `\granin{b [0]}' as the
+type $\Box_0 b$.
 
 The type for \granin{fst} is however somewhat restrictive: what if we are trying
 to use such a function with a value (call it \granin{myPair}) whose type is not
@@ -88,8 +92,7 @@ of the form \granin{(a, b [0])} but rather \granin{(a, b) [r]} for some grading
 term \granin{r} which permits weakening? Such a situation readily arises when we
 are composing functional code, say between libraries or between a library and
 user code. In this situation, \granin{fst myPair} is ill-typed. Instead, we
-could define a different first projection function for use with \granin{myPair :
-(a, b) [r]} as:
+could define a different first projection function for use with \granin{myPair} as:
 %
 \begin{granule}
 fst' : forall { a b : Type, s : Semiring, r : s } 
@@ -136,12 +139,12 @@ extract [x] = x
 extract (fst (pushPair myPair)) : a
 \end{granule}
 %
-The \granin{pushPair} function could be provided by the standard
-library, and thus we have not had to write any specialised combinators
-ourselves: we have applied supplied combinators to solve the problem.
+The \granin{pushPair} function could be provided by the standard library, and
+thus we have not had to write any specialised combinators ourselves: we have
+applied supplied combinators to solve the problem.
 
-Now imagine we have introduced some custom data type \granin{List}
-on which we have a \emph{map} function:
+Now imagine we have introduced some custom data type \granin{List} on which we
+have a \emph{map} function:
 %
 \begin{granule}
 data List a = Cons a (List a) | Nil
@@ -158,8 +161,9 @@ $\infty$ times. Imagine now we have a value \granin{myPairList : (List (a, b))
 \granin{(a, b [0])} and even with \granin{pushPair} we require \granin{(a, b)
 [r]}. \emph{We need another distributive law}, this time of the graded modality
 over the \granin{List} data type. Since \granin{List} was user-defined, we now
-have to roll our own \granin{pushList} operation, and so we are back to having
-to make specialised combinators for our data types.
+must roll our own \granin{pushList} operation with type \granin{List ((a, b)
+[r]) -> List (a [r], b [r])}, and so we are back to having to make specialised
+combinators for our data types.
 
 The crux of this chapter is that such distributive laws can be automatically
 calculated given the definition of a type. With our Granule implementation of
@@ -178,7 +182,8 @@ function is defined inductively over the structure of types, thus a programmer
 can introduce a new user-defined algebraic data type and have the implementation
 of the generic distributive law derived automatically. This reduces both the
 initial and future effort (e.g., if an ADT definition changes or new ADTs are
-introduced).
+introduced). Furthermore, this technique is much less expensive than a proof search 
+technique as no SMT solving on grade equations is required. 
 
 Dual to the above, there are situations where a programmer may wish to
 \emph{pull} a graded modality out of a structure. This is possible with a dual
@@ -213,7 +218,7 @@ Our approach also allows such operations to be generically derived.
 
 \section{Extending the Graded Linear-$\lambda$-Calculus}
 \label{sec:der-calculus}
-We define here a typing calculus which extends the graded linear
+We define here a calculus which extends the graded linear
 $\lambda$-calculus of ~\ref{sec:linear-base} with data constructors, pattern
 matching, and recursive data types. This language constitutes a simplified
 monomorphic subset of Granule. We include notions of data constructors and their
@@ -261,18 +266,30 @@ The full syntax of terms and types is given by:
                  \mid (,)
  {\small{\tag{data constructors}}}
  \end{align*}
+Terms comprise the graded linear $\lambda$-calculus of
+Section~\ref{sec:linear-base}, extended with data constructors, case statements
+for pattern matching over a scrutinee term, and standard recursive let bindings.
+Patterns may either be variable, wildcard, box, or constructor patterns. 
+A notable difference from Section~\ref{sec:linear-base} is that unboxing here
+takes place via case pattern matching, instead of a specialised let expression, i.e.
+$\textbf{let}\ [x] = y\ \textbf{in}\ t$ becomes $\textbf{case}\ y\ \textbf{of}\ [x] \mapsto t$
 %
-For the most part, typing follows the calculus defined in
-section~\ref{sec:linear-base-calculus}. Figure~\ref{fig:deriving-typing-rules} gives the additional rules.
-We briefly explain the extensions introduced for this chapter.
 
-\begin{figure}[H]
+The syntax of types is fairly straightforward. We make type variables explicit
+in our syntax via $\alpha$ to allow distributive laws to be derived on
+parametric types, and $X$ represents a set of recursion variables which are not
+exposed to the user. For the most part, typing follows the calculus defined in
+section~\ref{sec:linear-base-calculus}. Figure~\ref{fig:deriving-typing-rules}
+gives the additional rules. We briefly explain the extensions introduced for
+this chapter.
+
+\begin{figure}[t]
     \begin{align*}
       \begin{array}{c}
-    \inferrule*[right=Letrec]{[[G, x : A |- t1 : A ]] \\ [[G', x : A  |- t2 : B]] }
-    { [[ G + G' |- letrec x = t1 in t2 : B  ]]}
+    \inferrule*[right=Letrec]{[[G1, x : A |- t1 : A ]] \\ [[G2, x : A  |- t2 : B]] }
+    { [[ G1 + G2 |- letrec x = t1 in t2 : B  ]]}
 \\[1.25em]
-    \inferrule*[right=Con]{([[ C ]] : B_1 \multimap ... \multimap B_n \multimap A) \in \textsc{D}}
+    \inferrule*[right=Con]{([[ C ]] : B_1 \multimap ... \multimap B_n \multimap A) \in D}
               { \emptyset\ \vdash\ [[C]] : B_1 \multimap ... \multimap B_n \multimap A}
 \\[1.25em]
 \inferrule*[right=Case]
@@ -309,7 +326,7 @@ arising from being in an unboxing pattern and is syntactically defined as
 either:
 %
 \begin{align*}
-[[ CoeffInfo ]]\ ::= [[ none ]] \mid [[ r ]]
+?r ::= [[ none ]] \mid [[ r ]]
 \tag{enclosing grade}
 \end{align*}
 %
@@ -376,13 +393,13 @@ operation $|[[ A ]]|$ counts the number of data constructors
 for a type:
 %
 \begin{align*}
-  \begin{array}{c}
-|[[ Unit ]]| = 1 \;\;\;\;
-|[[ A -o B ]]| = 1 \;\;\;\,
-|[[ [] r A ]]| = |[[  A ]]| \\
-|[[ Sum A B ]]| = 2 (|A| + |B|) \;\;\;\;
-|[[ Tup A B ]]| = |A| |B| \\
-|[[ mu X . A ]]| = |A [ [[ mu X . A ]] / X ]|
+  \begin{array}{ll}
+|[[ Unit ]]| &= 1 \\
+|[[ A -o B ]]| &= 1 \\
+|[[ [] r A ]]| &= |[[  A ]]| \\
+|[[ Sum A B ]]| &= 2 (|A| + |B|) \\
+|[[ Tup A B ]]| &= |A| |B| \\
+|[[ mu X . A ]]| &= |A [ [[ mu X . A ]] / X ]|
   \end{array}
 \end{align*}
 %
@@ -398,11 +415,9 @@ permits weakening, captured via $[[ 0 <<= r ]]$ in rule \textsc{[Pwild]}.
 \section{Automatically Deriving \emph{push} and \emph{pull}}
 \label{sec:push-pull-deriv}
 Now that we have established the language, we describe the algorithmic
-calculation of distributive laws. Note that whilst our language is simply typed
-(monomorphic), it includes type variables (ranged over by $\alpha$) to enable
-the distributive laws to be derived on parametric types. In the implementation,
-these will really be polymorphic type variables, but the derivation procedure
-need only treat them as some additional syntactic type construct.
+calculation of distributive laws. Universal quantification over type variables
+($\alpha$) takes place implicitly prior to running the deriving mechanism, thus
+ type variables may be treated as logical atoms.
 
 %
 \subsection{Notation}
@@ -477,21 +492,29 @@ is defined by Figure~\ref{fig:push-interp}.
 %
 In the case of \emph{push} on a value of type $[[ Unit ]]$, we pattern match on
 the value, eliminating the graded modality via the unboxing pattern match and
-returning the unit value. For type variables, \emph{push} is simply the identity
-of the value, while for recursion variables we lookup the $X$'s binding in
-$\Sigma$ and apply it to the value. For sum and product types, \emph{push} works
-by pattern matching on the type's constructor(s) and then inductively applying
-\emph{push} to the boxed arguments, re-applying them to the constructor(s).
-Unlike \emph{pull} below, the \emph{push} operation can be derived for function
-types, with a contravariant use of \emph{pull}. For recursive types, we
-inductively apply \emph{push} to the value with a fresh recursion variable bound
-in $\Sigma$, representing a recursive application of push. There is no
-derivation of a distributive law for types which are themselves graded
-modalities.
+returning the unit value. For type variables $\alpha$, \emph{push} is simply the
+identity of the value, while for recursion variables $X$ we lookup the
+variables's binding in $\Sigma$ and apply it to the value $z$. For sum and
+product types, \emph{push} works by pattern matching on the type's
+constructor(s) and then inductively applying \emph{push} to the promoted
+arguments, re-applying them to the constructor(s). Unlike \emph{pull} below, the
+\emph{push} operation can be derived for function types, with a contravariant
+use of \emph{pull}. For recursive types, we inductively apply \emph{push} to the
+value with a fresh recursion variable bound in $\Sigma$, representing a
+recursive application of push. There is no derivation of a distributive law for
+types which are themselves graded modalities, as this would depend on the
+particular graded modalities being distributed
+(see~\citet{DBLP:conf/icfp/GaboardiKOBU16}). 
 
 Section~\ref{proof:deriving-type-soundness} in Appendix~\ref{appendix:proofs}
-gives the proof that $\deriv{pull}{A}$ is type sound, i.e., its derivations are
-well-typed.
+gives the proof that $\deriv{push}{A}$ is type sound, i.e., its derivations are
+well-typed: 
+
+\begin{restatable}[Type soundness of $\deriv{push}{\tcF\ \overline{\alpha_i}}^{\Sigma}$]{proposition}{pushSound}
+\label{prop:soundness-push}
+$\deriv{push}{\tcF \overline{\alpha_i}}^{\Sigma} : \Box_{r} \tcF \overline{\alpha_i}
+  \rightarrow  \tcF  (\overline{\Box_{r} \alpha_i})$
+\end{restatable}
 
 \subsection{Pull}
 We automatically
@@ -502,15 +525,13 @@ $\overline{\alpha_i}$
 as the operation:
 \begin{align*}
 \deriv{pull}{\tcF\ \overline{\alpha_i}} : \tcF\ (\overline{\Box_{r_i} \alpha_i})
-\multimap \Box_{\bigwedge^n_{i = 1} r_i} (\tcF\  \overline{\alpha_i})
+\multimap \Box_{\bigsqcap^n_{i = 1} r_i} (\tcF\  \overline{\alpha_i})
  \end{align*}
 Type constructor $\tcF$ here is applied to $n$ arguments each of the form
 $\Box_{r_i} \alpha_i$, i.e., each with a different grading of which the
-greatest-lower bound\footnote{The greatest-lower bound $\wedge$ is partial
-operation which can be defined in terms of the semiring's pre-order: $r \wedge s
-= t$ if $t \sqsubseteq r$, $t \sqsubseteq s$ and there exists no other $t'$
-where $t' \sqsubseteq r$ and $t' \sqsubseteq s$ and $t \sqsubseteq t'$.}
-$\bigwedge^n_{i = 1} r_i$ is the resulting grade (see \granin{pullPair} from
+greatest-lower bound $\bigsqcap^n_{i = 1} r_i$ (derived from the semiring's
+pre-order, as per Definition~\ref{def:context-glb} which lifts this operation to
+contexts) is the resulting grade (see \granin{pullPair} from
 Section~\ref{sec:motivating-example}).
 
 % (for recursion variables $\Sigma$):
@@ -553,15 +574,22 @@ is defined by Figure~\ref{fig:pull-interp}.
 Just like \emph{push}, we cannot apply \emph{pull} to graded modalities
 themselves. Unlike \emph{push}, we cannot apply \emph{pull} to function types.
 That is, we cannot derive a distributive law of the form $(\Box_r A \multimap
-\Box_r B) \multimap \Box_r (A \multimap B)$ since introducing the concluding
+\Box_r B) \multimap \Box_r (A \multimap B)$. This is because introducing the concluding
 $\Box_r$ would require the incoming function $(\Box_r A \multimap \Box_r B)$ to
 itself be inside $\Box_r$ due to the promotion rule (\textsc{pr}), which does
 not match the type scheme for \emph{pull}.
 
 The rest of the derivation above is similar but dual to that of \emph{push}.
 
-Section~\ref{proof:deriving-type-soundness} in Appendix~\ref{appendix:proofs} gives the proof that $\deriv{pull}{A}$ is type sound,
-i.e., its derivations are well-typed.
+Section~\ref{proof:deriving-type-soundness} in Appendix~\ref{appendix:proofs}
+gives the proof that $\deriv{pull}{A}$ is type sound, i.e., its derivations are
+well-typed:
+
+\begin{restatable}[Type soundness of $\deriv{pull}{\tcF\ \overline{\alpha_i}}$]{proposition}{pullSound}
+\label{prop:soundness-pull}
+ $\tcF\ (\overline{\Box_{r_i} \alpha_i})
+\rightarrow \Box_{\bigsqcap^n_{i = 1} r_i} (\tcF\  \overline{\alpha_i})$
+\end{restatable}
 
 \begin{example}
   \label{ex:push-fun}
@@ -593,18 +621,24 @@ i.e., its derivations are well-typed.
 \begin{remark}
 One might ponder whether linear logic's exponential $!
 A$~\citep{girard1987linear} is modelled by the graded necessity modality over
-$\mathbb{N}_{\infty}$ intervals, i.e., with $! A \triangleq \Box_{\textcolor{coeffectColor}{[[
-  IntervalSyn 0 Inf ]] }} A$. This is a reasonable assumption, but
-$\Box_{\textcolor{coeffectColor}{[[ IntervalSyn 0 Inf ]] }} A$ has a slightly different meaning to $! A$,
-exposed here: whilst $\deriv{push}{A \otimes B} : \Box_{\textcolor{coeffectColor}{[[
-  IntervalSyn 0 Inf ]]}} (A \otimes B) \multimap (\Box_{\textcolor{coeffectColor}{[[ IntervalSyn 0 Inf ]] }} A \otimes \Box_{\textcolor{coeffectColor}{[[ IntervalSyn 0 Inf ]]}} B)$
-is derivable in our language, linear logic does not permit $!(A \otimes B) \multimap
-(!A \otimes !B)$. Models of $!$ provide only a monoidal functor
+$\mathbb{N}_{\infty}$ intervals, i.e., with $! A \triangleq
+\Box_{\textcolor{coeffectColor}{[[ IntervalSyn 0 Inf ]] }} A$. This is a
+reasonable assumption, but $\Box_{\textcolor{coeffectColor}{[[ IntervalSyn 0 Inf
+]] }} A$ has a slightly different meaning to $! A$, exposed here: whilst
+$\deriv{push}{A \otimes B} : \Box_{\textcolor{coeffectColor}{[[ IntervalSyn 0
+Inf ]]}} (A \otimes B) \multimap (\Box_{\textcolor{coeffectColor}{[[ IntervalSyn
+0 Inf ]] }} A \otimes \Box_{\textcolor{coeffectColor}{[[ IntervalSyn 0 Inf ]]}}
+B)$ is derivable in our language, linear logic does not permit $!(A \otimes B)
+\multimap (!A \otimes !B)$. Models of $!$ provide only a monoidal functor
 structure which gives \emph{pull} for $\otimes$, but not
-\emph{push}~\citep{benton1992linear}. This structure can be recovered in Granule through
-the introduction of a partial type-level operation which selectively
-disallows \emph{push} for $\otimes$ in semirings which model the $!$
-modality of linear logic\footnote{The work in ~\citet{hughes:lirmm-03271465} arose as a result of this work.}.
+\emph{push}~\citep{benton1992linear}. This structure can be recovered in Granule
+through the introduction of a partial type-level operation which selectively
+disallows \emph{push} for $\otimes$ in semirings which model the $!$ modality of
+linear logic. An example of such a semiring is the \{$\mathsf{Zero}$,\
+$\mathsf{One}$,\ $\omega$\} semiring we encountered in
+Example~\ref{example:01omega} on page~\pageref{example:01omega}, which is
+intended to specifically mode linear logic's $!$ modality.\footnote{The work in
+~\citet{hughes:lirmm-03271465} arose as a result of this work.}
 \end{remark}
 
 The algorithmic definitions of `push' and `pull' can be leveraged
@@ -622,23 +656,11 @@ Before that, we study the algebraic behaviour of the derived distributive laws.
 %specifically that they yield distributive laws of endofunctors over
 %graded comonads. Proofs are given in Appendix~\ref{app:properties}.
 
-We consider here the properties of these derived operations.  Prima
-facie, the above \emph{push} and \emph{pull} operations are simply
-distributive laws between two (parametric) type constructors $\tcF$
-and $\Box_r$, the latter being the graded modality. However, both
-$\tcF$ and $\Box_r$ have additional structure. If the mathematical
-terminology of `distributive laws' is warranted, then such additional structure
-should be preserved by \emph{push} and \emph{pull} (e.g., as in how
-a distributive law between a monad and a comonad must preserve
-the behaviour of the monad and comonad operations after applying
-the distributive law~\citep{power2002combining}); we explain here the relevant
-additional structure and verify the distributive law properties.
-
 We note that these distributive laws are mutually inverse:
 
 \begin{restatable}[Pull is right inverse to push]{prop}{pushPullInverse}
   For all $n$-arity types $\tcF$ which do not contain function types,
-  then for type variables $(\alpha_i)_{i \in [1..n]}$
+  then for type variables $(\alpha_i)_{i \in 1 \leq i \leq n}$
   and for all grades $r \in \mathcal{R}$ where $[[1 <<= r]]$ if $|\tcF
     \overline{\alpha_i}| > 1$, then:
     %
@@ -652,7 +674,7 @@ We note that these distributive laws are mutually inverse:
 
 \begin{restatable}[Pull is left inverse to push]{prop}{pullPushInverse}
   For all $n$-arity types $\tcF$ which do not contain function types,
-  then for type variables $(\alpha_i)_{i \in [1..n]}$
+  then for type variables $(\alpha_i)_{i \in 1 \leq i \leq n}$
   and for all grades $r \in \mathcal{R}$ where $[[1 <<= r]]$ if $|\tcF
     \overline{\alpha_i}| > 1$, then:
   \begin{align*}
@@ -668,10 +690,16 @@ Section~\ref{proof:inverse-proofs} of Appendix~\ref{appendix:proofs} gives the
 proofs, leveraging an equational theory for our lanugage.
 
 Additional properties of these distributive laws can be found in
-\citet{DBLP:journals/corr/abs-2112-14966}. These include the naturality of
-\emph{push} and \emph{pull} (in a categorical sense), and their preservation of
-graded comonadic structure. We choose to omit this properties here both for
-brevity. 
+\citet{DBLP:journals/corr/abs-2112-14966}. Prima facie, the above \emph{push}
+and \emph{pull} operations are simply distributive laws between two (parametric)
+type constructors $\tcF$ and $\Box_r$, the latter being the graded modality.
+However, both $\tcF$ and $\Box_r$ have additional structure. If the mathematical
+terminology of `distributive laws' is warranted, then such additional structure
+should be preserved by \emph{push} and \emph{pull} (e.g., as in how a
+distributive law between a monad and a comonad must preserve the behaviour of
+the monad and comonad operations after applying the distributive
+law~\citep{power2002combining}). We choose to omit discussion of these
+properties here for brevity. 
 
 % Applying a mathematical perspective, $\Box_r$ is also an endofunctor with
 % its object mapping provided by the type constructor itself and its
@@ -839,10 +867,10 @@ The Granule type checker implements the algorithmic derivation of \emph{push}
  application (akin to that provided in GHC Haskell~\citep{eisenberg2016visible})
  on reserved names \granin{push} and \granin{pull}. Written \granin{push @T} or
  \granin{pull @T}, this signals to the compiler that we wish to derive the
- corresponding distributive laws at the type \granin{T}. For example, for the
- \granin{List : Type -> Type} data type from the standard library, we can write
- the expression \granin{push @List} which the type checker recognises as a
- function of type:
+ corresponding distributive laws at the type \granin{T} (where \granin{T} is an
+ n-ary type constructor). For example, for the \granin{List : Type -> Type} data
+ type from the standard library, we can write the expression \granin{push @List}
+ which the type checker recognises as a function of type:
 
  %
 \begin{granule}
@@ -864,8 +892,8 @@ push @List : forall { a : Type, s : Semiring, r : s }
  (generalized) ADTs.
  
  \subsection{Examples}
- At the start of this chapter, we motivated the crux of this work with a concrete
- example, which we can replay here in concrete Granule, using its type
+ Earlier, we motivated the crux of the work in this chapter with a concrete
+ example, which we can replay here in Granule, using its type
  application technique for triggering the automatic derivation of the
  distributive laws. Previously, we defined \granin{pushPair} by hand which can
  now be replaced with:
@@ -875,9 +903,8 @@ push @(,) : forall { a b : Type, s : Semiring, r : s }
           . (a, b) [r] -> (a [r], b [r])
 \end{granule}
  %
- Note that in Granule \granin{(,)} is an infix type constructor for products as
- well as terms. We could then replace the previous \granin{fst'}
- with:
+ Note that in Granule \granin{(,)} is an infix type constructor for product
+ types as well as terms. We can then replace the previous \granin{fst'} with:
  %
 \begin{granule}
 fst' : forall { a b : Type, r : Semiring } 
@@ -894,9 +921,12 @@ fst' = let [x'] = fst (push @(,) x) in x'
 extract (fst (push @(,) myPair)) : a
 \end{granule}
  %
- We already saw that we can then generalise this by applying
- this first projection inside of the list \\ \granin{myPairList : (List (a, b))
-   [r]} directly, using \granin{push @List}.
+ We already saw that we can then generalise this by applying this first
+ projection inside of the list directly using \granin{push @List}:
+\begin{granule}
+map (extract . fst . push @(,)) (push @List myPairList) : List a
+\end{granule}
+where \granin{myPairList : (List (a, b)) [r]}.   
  
  In a slightly more elaborate example, we can use the \granin{pull} combinator
  for pairs to implement a function that duplicates a pair (given that both elements
@@ -948,7 +978,7 @@ copyHead' xs = let [y] = head xs in (y, y)
  We can employ two idioms here:
  (i) take a value of type \granin{(Vec (n + 1) a) [0..2]} and
  split its modality in two: \granin{(Vec (n + 1) a) [2] [0..1]}
- (ii) then use \textit{push} on the inner graded modality
+ , and then (ii) use \textit{push} on the inner graded modality
  \granin{[2]} to get
  \granin{(Vec (n + 1) (a [2])) [0..1]}.
  
@@ -958,19 +988,19 @@ copyHead' xs = let [y] = head xs in (y, y)
 \begin{granule}
 copyHead : forall { a : Type, n : Nat } 
          . (Vec (n + 1) a) [0..2] -> (a, a)
-copyHead = copy . head . boxmap [push @Vec] . disject
+copyHead = copy . head . push@(->) [push @Vec] . disject
 \end{granule}
  %
- which employs combinators from the standard library and
- the derived distributive law, of type:
+ which employs the combinator \granin{disject} from the standard library and
+ two derived distributive laws, of type:
  %
 \begin{granule}
-boxmap    : forall { a b : Type, s : Semiring, r : s } 
-          . (a  -> b) [r] -> a [r] -> b [r]
 disject   : forall { a : Type, s : Semiring, n m : s }   
           . a [m * n] -> (a [n]) [m]
 push @Vec : forall { a : Type, n : Nat, s : Semiring, r : s } 
           . (Vec n a) [r] -> Vec n (a [r])
+push@(->) : forall { a b : Type, s : Semiring, r : s } 
+          . (a  -> b) [r] -> a [r] -> b [r]
 \end{granule}
  %
 
@@ -987,17 +1017,19 @@ for dropping, copying, and moving resources in Linear Haskell.
 \subsection{A Combinator for Weakening (``drop'')}
 \label{subsec:drop}
 
-%First, we consider a combinator for ``dropping,'' or consuming, values in
-%Granule.
-%
+First, we consider a combinator for ``dropping,'' or consuming, values in
+Granule: 
+\begin{align*}
+\deriv{drop}{\tcF \alpha} : \tcF \alpha \multimap \tcF \mathsf{Unit}
+\end{align*}
 The built-in type constants of Granule can be split into those which permit
 structural weakening $C^{\mathsf{w}}$ such as \granin{Int}, \granin{Char}, and those which do not $C^{\mathsf{l}}$ such as \granin{Handle}
 (file handles) and \granin{Chan} (concurrent channels). 
 
 \begin{figure*}
 \begin{align*}
-    \deriv{drop}{C^w}^\Sigma z & = \text{\granin{drop} $z$} \\
-    \deriv{drop}{1}^\Sigma z & = [[ case z of () -> () ]] \\
+    \deriv{drop}{C^\mathsf{w}}^\Sigma z & = \mathsf{drop}^{C^{\mathsf{w}}}\ z \\
+    \deriv{drop}{\mathsf{Unit}}^\Sigma z & = [[ case z of () -> () ]] \\
     \deriv{drop}{X}^\Sigma z & = \Sigma(X) z \\
     \deriv{drop}{A \oplus B}^\Sigma z & =
     \derCaseTwoShort{z}{\mathsf{inl}\ x}{\deriv{drop}{A}(x)}{\mathsf{inr}\ y}
@@ -1017,7 +1049,7 @@ structural weakening $C^{\mathsf{w}}$ such as \granin{Int}, \granin{Char}, and t
 Those that permit weakening contain non-abstract values that can in theory be
 systematically inspected in order to consume them. Granule provides a built-in
 implementation of \granin{drop} for $C^{\mathsf{w}}$ types, which is then used
-by the derivation procedure of \ref{fig:drop} to derive weakening on compound
+by the derivation procedure of Figure~\ref{fig:drop} to derive weakening on compound
 types. 
 
 Note we cannot use this procedure in a polymorphic context (over type variables
@@ -1032,32 +1064,33 @@ cannot be dropped like $C^{\mathsf{l}}$.
 \subsection{A Combinator for Copying ``shape''}
 
 The ``shape'' of values for a parametric data types $\tcF$ can be determined by
-a function $\mathit{shape} : \tcF A \rightarrow \tcF 1$, usually derived when
-$\tcF$ is a functor by mapping with $A \rightarrow 1$ (dropping
-elements)~\citep{jay1994shapely}. This provides a way of capturing the size,
-shape, and form of a data structure. Often when programming with data structures
-which must be used linearly, we may wish to reason about properties of the data
-structure (such as the length or ``shape'' of the structure) but we may not be
-able to drop the contained values. Instead, we wish to extract the shape but
-without consuming the original data structure itself.
+a function $\mathit{shape} : \tcF A \rightarrow \tcF \mathsf{Unit}$, usually
+derived when $\tcF$ is a functor by lifting a function $A \rightarrow
+\mathsf{Unit}$ (dropping elements)~\citep{jay1994shapely}. This provides a way
+of capturing the size, shape, and form of a data structure. Often when
+programming with data structures which must be used linearly, we may wish to
+reason about properties of the data structure (such as the length or ``shape''
+of the structure) but we may not be able to drop the contained values. Instead,
+we wish to extract the shape but without consuming the original data structure
+itself.
 
 This can be accomplished with a function which copies the data structure
 exactly, returning this duplicate along with a data structure of the same shape,
-but with the terminal nodes replaced with values of the unit type $1$  (the
-`spine'). For example, consider a pair of integers: \granin{(1, 2)}. Then
-applying \granin{copyShape} to this pair would yield \granin{(((), ()), (1,
-2))}. The original input pair is duplicated and returned on the right of the
-pair, while the left value contains a pair with the same structure as the input,
-but with values replaced with \granin{()}. This is useful, as it allows us to
-use the left value of the resulting pair to reason about the structure of the
-input (e.g., its depth / size), while preserving the original input. This is
-particularly useful for deriving size and length combinators for collection-like
-data structures.
+but with the terminal nodes replaced with values of the unit type
+$\mathsf{Unit}$  (the `spine'). For example, consider a pair of integers:
+\granin{(1, 2)}. Then applying \granin{copyShape} to this pair would yield
+\granin{(((), ()), (1, 2))}. The original input pair is duplicated and returned
+on the right of the pair, while the left value contains a pair with the same
+structure as the input, but with values replaced with \granin{()}. This is
+useful, as it allows us to use the left value of the resulting pair to reason
+about the structure of the input (e.g., its depth / size), while preserving the
+original input. This is particularly useful for deriving size and length
+combinators for collection-like data structures.
 \noindent
 As with ``drop'', we can derive such a
 function automatically:
 \begin{align*}
-\deriv{copyShape}{\tcF \alpha} : \tcF \alpha \multimap \tcF 1 \otimes \tcF \alpha
+\deriv{copyShape}{\tcF \alpha} : \tcF \alpha \multimap \tcF \mathsf{Unit} \otimes \tcF \alpha
 \end{align*}
 defined by
 $\deriv{copyShape}{A} = \lambda z . \deriv{copyShape}{A}^\emptyset z$
@@ -1066,14 +1099,14 @@ by an intermediate interpretation $\deriv{copyShape}{A}^\Sigma$, given by Figure
 \begin{figure}
 \begin{align*}
 \deriv{copyShape}{C^w}^\Sigma z & = ((),\ z) \\
-\deriv{copyShape}{1}^\Sigma z & = \derCaseOne{z}{()}{((),\ ())}\\
+\deriv{copyShape}{\mathsf{Unit}}^\Sigma z & = \derCaseOne{z}{()}{((),\ ())}\\
 \deriv{copyShape}{\alpha}^\Sigma z & = ((), z) \\
 \deriv{copyShape}{X}^\Sigma z & = \Sigma(X) z \\
 \deriv{copyShape}{A \oplus B}^\Sigma z & =
           \textbf{case}\ z\ \textbf{of} \\ 
               & \hspace{3em} \mathsf{inl}\ x \rightarrow 
               \textbf{case}\ {\llbracket A \rrbracket}^\Sigma_\mathsf{copyShape}(x)\ \textbf{of}\ (s,\ x') \rightarrow \\ 
-              & \hspace{9em} (\mathsf{inl}\ s,\ \mathsf{inr}\ x') \\ 
+              & \hspace{9em} (\mathsf{inl}\ s,\ \mathsf{inl}\ x') \\ 
               & \hspace{3em} \mathsf{inr}\ y \rightarrow  
               \textbf{case}\ {\llbracket B \rrbracket}^\Sigma_\mathsf{copyShape}(y)\ \textbf{of}\ (s,\ y') \rightarrow \\ 
               & \hspace{9em} (\mathsf{inr}\ s,\ \mathsf{inr}\ y') \\ 
@@ -1110,7 +1143,7 @@ Otherwise, the type checker produces an error,
 explaining why \granin{drop} is not derivable at type \granin{T}.
 
 \section{Related Work}
-\label{sec:der-related}
+\label{sec:deriving-related}
 In this section we consider some of the wider related work as they relate to the
 ideas presented in this chapter.
 \subsection{Generic Programming Methodology}
@@ -1138,8 +1171,8 @@ have been applied in the programming languages literature, e.g., for
 modelling streams of partial elements~\citep{uustalu2006essence}.
 
 \subsection{Graded Distributive Laws}
-Gaboardi et al. define families of graded distributive laws for graded monads
-and comonads~\citep{combining2016}. They include the ability to interact the
+\citet{DBLP:conf/icfp/GaboardiKOBU16} define families of graded distributive laws for graded monads
+and comonads. They include the ability to interact the
 grades, e.g., with operations such as $\Box_{\iota(r,f)} \Diamond_f A
 \rightarrow \Diamond_{\kappa(r,f)} \Box_r A$ between a graded comonad $\Box_r$
 and graded monad $\Diamond_f$ where $\iota$ and $\kappa$ capture information
@@ -1163,7 +1196,7 @@ for regular types. Exploring this is future work, for which the previous work on
 graded distributive laws can provide a useful scheme for considering the
 possibilities here. Furthermore, Granule has both graded comonads and graded
 monads so there is scope for exploring possible graded distributive laws between
-these in the future following Gaboardi et al.~\citep{combining2016}.
+these in the future following~\citet{DBLP:conf/icfp/GaboardiKOBU16}.
 
 \section{Conclusion}
 \label{sec:der-conclusion}
