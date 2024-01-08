@@ -10,15 +10,15 @@ Section~\ref{sec:linear-base-evaluation}.
 \begin{enumerate}
 \item $\otimes$-Intro:
 \begin{granule}
-and : forall a b . a -> b -> (a, b)
+and : forall { a b : Type } . a -> b -> (a, b)
 and x y = (x, y)
 \end{granule}
 \item $\otimes$-Elim: \\ 
 \begin{granule}
-and1 : forall a b .  (a, b [0]) -> a
+and1 : forall { a b : Type } .  (a, b [0]) -> a
 and1 (y, [u]) = y
     
-and2 : forall a b . (a [0], b) -> b
+and2 : forall { a b : Type } . (a [0], b) -> b
 and2 ([u], z) = z
 \end{granule}
 \item $\oplus$-Intro: 
@@ -35,7 +35,7 @@ or2 x = Right x
 \begin{granule}
 data Either a b = Left a | Right b
 
-or3 : forall a b c 
+or3 : forall { a b c : Type }
     . (a -> c) [0..1] 
     -> (b -> c) [0..1] 
     -> (Either a b) 
@@ -45,17 +45,17 @@ or3 [u] [v] (Left x5) = u x5
 \end{granule}
 \item SKI: 
 \begin{granule}
-s : forall a b c  
+s : forall { a b c : Type } 
   . (a -> (b -> c)) 
   -> (a -> b) 
   -> a [2] 
   -> c
 s x y [u] = (x u) (y u)
     
-k : forall a b . a -> b [0..1] -> a
+k : forall { a b : Type } . a -> b [0..1] -> a
 k x [z] = x
     
-i : forall a . a -> a
+i : forall { a : Type } . a -> a
 i x = x
 \end{granule}
 \end{enumerate}
@@ -65,7 +65,7 @@ i x = x
 \begin{enumerate}
 \item 0/1: 
 \begin{granule}
-comp-01 : forall a b c  
+comp-01 : forall { a b c : Type }
         . (a [] -> b []) [] 
         -> (b [] -> c []) [] 
         -> (a [] -> c) []
@@ -78,14 +78,14 @@ comp-01 [z] [u] =
 \end{granule}
 \item CBN: 
 \begin{granule}
-comp-cbn : forall a b c  
+comp-cbn : forall { a b c : Type }
          . (a [] -> b) [] 
          -> (b [] -> c) [] -> a [] -> c
 comp-cbn [u] [w] [v] = w [u [v]]
 \end{granule}
 \item CBV: 
 \begin{granule}
-comp-cbv : forall a b c  . 
+comp-cbv : forall { a b c : Type }  . 
          (a [] -> b []) [] 
          -> (b [] -> c []) [] 
          -> (a [] -> c []) []
@@ -114,7 +114,7 @@ compNat [u] y [v] = y [u [v]]
 \end{granule}
 \item lin:
 \begin{granule}
-lin : forall a b c  
+lin : forall { a b c : Type }
      . (a -> b) 
      -> (b -> c) 
      -> a 
@@ -129,7 +129,7 @@ lin x y z = y (x z)
 \begin{enumerate}
 \item $\otimes$-!:
 \begin{granule}
-pull : forall a b . (a [], b []) -> (a, b) []
+pull : forall { a b : Type } . (a [], b []) -> (a, b) []
 pull ([u], [v]) = [(u, v)]
 \end{granule}
 \item $\otimes$-$\mathbb{N}$:
@@ -150,7 +150,7 @@ pull ([u], [v]) = [(u, v)]
 \begin{granule}
 data Either a b = Left a | Right b
 
-pull : forall a b 
+pull : forall { a b : Type }
      . Either (a []) (b []) 
      -> (Either a b) []
 pull (Right [v]) = [Right v];
@@ -170,7 +170,7 @@ pull (Left [z]) = [Left z]
 \begin{granule}
 data Either a b = Left a | Right b
 
-pull : forall {a b : Type, k : Coeffect, c : k} 
+pull : forall { a b : Type, k : Coeffect, c : k } 
      . Either (a [c]) (b [c]) 
      -> (Either a b) [c]
 pull (Right [v]) = [Right v];
@@ -178,7 +178,7 @@ pull (Left [z]) = [Left z]
 \end{granule}
 \item $\multimap$-!:
 \begin{granule}
-push : forall a b  
+push : forall { a b : Type }
      . (a -> b) [] 
      -> a [] 
      -> b []
@@ -194,7 +194,7 @@ push [z] [u] = [z u]
 \end{granule}
 \item $\multimap$-$\mathcal{R}$:
 \begin{granule}
-push : forall {a b : Type, k : Coeffect, c : k} 
+push : forall { a b : Type, k : Coeffect, c : k } 
      . (a -> b) [c] 
      -> a [c] 
      -> b [c]
@@ -206,7 +206,7 @@ push [z] [u] = [z u]
 \begin{enumerate}
 \item vec5:
 \begin{granule}
-vec5 : forall a b  
+vec5 : forall { a b : Type }
      . (a -> b) [5] 
      -> ((((a, a), a), a), a) 
      -> ((((b, b), b), b), b)
@@ -215,7 +215,7 @@ vec5 [z] ((((x9, x10), x8), x6), x4) =
 \end{granule}
 \item vec10:
 \begin{granule}
-vec10 : forall a b 
+vec10 : forall { a b : Type }
       . (a -> b) [10] 
       -> (((((((((a, a), a), a), a), a), a), a), a), a)
       -> (((((((((b, b), b), b), b), b), b), b), b), b)
@@ -224,7 +224,7 @@ vec10 [z] (((((((((x19, x20), x18), x16), x14), x12), x10), x8), p), v) =
 \end{granule}
 \item vec15:
 \begin{granule}
-vec15 : forall a b 
+vec15 : forall { a b : Type }
       . (a -> b) [15] 
       -> ((((((((((((((a, a), a), a), a), a), a), a), a), a), a), a), a), a), a)
       -> ((((((((((((((b, b), b), b), b), b), b), b), b), b), b), b), b), b), b)
@@ -233,7 +233,7 @@ vec15 [z] ((((((((((((((x29, x30), x28), x26), x24), x22), x20), x18), x16), x14
 \end{granule}
 \item vec20:
 \begin{granule}
-vec20 : forall a b 
+vec20 : forall { a b : Type }
       . (a -> b) [20] 
       -> (((((((((((((((((((a, a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a), a)
       -> (((((((((((((((((((b, b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b), b)
@@ -248,7 +248,7 @@ vec20 [z] (((((((((((((((((((x39, x40), x38), x36), x34), x32), x30), x28), x26)
 \begin{granule}
 data Either a b where Left a | Right b
 
-splitPlus : forall a b c 
+splitPlus : forall { a b c : Type }
           . b [2..3] 
           -> Either a c 
           -> Either (a, b [2..2]) (c, b [3..3])
@@ -257,7 +257,7 @@ splitPlus [z] (Left x3) = Left (x3, [z])
 \end{granule}
 \item split$\otimes$:
 \begin{granule}
-splitPair : forall a  
+splitPair : forall { a : Type }
           . (a -> a -> a) [0..2] 
           -> a [10..10] 
           -> (a [2..2], a [6..6])
@@ -265,7 +265,7 @@ splitPair [z] [u] = ([(z u) u], [u])
 \end{granule}
 \item share:
 \begin{granule}
-share : forall a 
+share : forall { a : Type }
       . (a -> a -> a) [0..2] 
       -> a [10..10] 
       -> (a [2..2], a [6..6])
@@ -273,7 +273,7 @@ share [z] [u] = ([(z u) u], [u])
 \end{granule}
 \item Exm.~\ref{exm:security}:
 \begin{granule}
-dontLeak : forall a b 
+dontLeak : forall { a b : Type }
          . (a [Public], a [Private]) 
          -> ((a, ()) [Public] -> b)
          -> b
@@ -302,7 +302,7 @@ language GradedBase
 
 data List a = Nil | Cons a (List a)
     
-append : forall a 
+append : forall { a : Type }
        . (List a) %1 
        -> a %1 
        -> List a
@@ -318,7 +318,7 @@ language GradedBase
 
 data List a = Cons a (List a) | Nil
     
-concat : forall a 
+concat : forall { a : Type }
        . (List a) %1..Inf 
        -> (List a) %1..Inf 
        ->  List a
@@ -339,7 +339,7 @@ language GradedBase
 
 data List a = Nil | Cons a (List a) 
 
-empty : forall a b . () -> List a
+empty : forall { a b : Type } . () -> List a
 empty () = Nil
 \end{granule}
 \item snoc: 
@@ -350,7 +350,7 @@ data List a = Nil | Cons a (List a)
 
 data N = S N | Z
 
-snoc : forall a 
+snoc : forall { a : Type }
      . (List a) %1..Inf 
      -> a %1..Inf 
      -> List a
@@ -373,7 +373,7 @@ data List a = Cons a (List a) | Nil
     
 data N = S N | Z
         
-drop : forall a . N %0..Inf -> List (a) %0..Inf -> List a
+drop : forall { a : Type } . N %0..Inf -> List (a) %0..Inf -> List a
 spec 
     drop % 0..Inf
 drop x y = 
@@ -397,14 +397,14 @@ language GradedBase
 
 data List a = Cons a (List a) | Nil
     
-append : forall {a : Type} 
+append : forall { a : Type } 
        . (List a) %1..Inf 
        -> (List a) %1..Inf 
        ->  List a
 append Nil y = y;
 append (Cons z u) y = (Cons z) ((append u) y)
     
-flatten : forall a . (List (List a)) %0..Inf -> (List a)
+flatten : forall { a : Type } . (List (List a)) %0..Inf -> (List a)
 spec 
     flatten % 0..Inf , append %0..Inf
 flatten Nil = (append Nil) Nil;
@@ -424,18 +424,18 @@ data N = S N | Z
 
 data Bool = True | False; 
 
-append : forall {a : Type} 
+append : forall { a : Type } 
        . (List a) %1..Inf 
        -> (List a) %1..Inf 
        ->  List a
 append Nil y = y;
 append (Cons z u) y = (Cons z) ((append u) y)
 
-concat : forall a . (List (List a)) %1..Inf -> (List a)
+concat : forall { a : Type } . (List (List a)) %1..Inf -> (List a)
 concat Nil = Nil;
 concat (Cons u v) = (append u) (concat v)
 
-map : forall a b 
+map : forall { a b : Type }
     . (a %1..Inf -> b) %0..Inf 
     -> List a %1..Inf 
     -> List b
@@ -447,7 +447,7 @@ isEven Z = Nil;
 isEven (S Z) = Cons (S Z) Nil;
 isEven (S (S z)) = concat (Cons (isEven z) Nil)
 
-bind : forall a b 
+bind : forall { a b : Type }
      . List a %1..Inf 
      -> (a %1..Inf -> List b) %0..Inf 
      -> List b
@@ -466,7 +466,7 @@ language GradedBase
 
 data List a =  Cons a (List a) | Nil 
 
-return : forall { a b : Type} . a -> List a
+return : forall { a b : Type } . a -> List a
 return x = (Cons x) Nil
 \end{granule}
 with no Graded examples and Cartesian example(s):
@@ -502,7 +502,7 @@ language GradedBase
 
 data List a = Cons a (List a) | Nil 
     
-head : forall a . (List a) %0..1 -> a %0..1 -> a
+head : forall { a : Type } . (List a) %0..1 -> a %0..1 -> a
 head Nil y = y;
 head (Cons z u) y = z
 \end{granule}
@@ -516,7 +516,7 @@ language GradedBase
 
 data List a = Cons a (List a) | Nil 
 
-tail : forall a . List a %0..1 -> List a
+tail : forall { a : Type } . List a %0..1 -> List a
 tail Nil = Nil;
 tail (Cons y z) = z
 \end{granule}
@@ -532,7 +532,7 @@ data List a = Cons a (List a) | Nil
     
 data Maybe a = Just a | Nothing    
     
-last : forall a . (List a) %0..Inf -> Maybe a 
+last : forall { a : Type } . (List a) %0..Inf -> Maybe a 
 spec
     last %0..Inf
 last Nil = Nothing;
@@ -557,7 +557,7 @@ data List a = Cons a (List a) | Nil
     
 data N = S N | Z
     
-length : forall a . List a %0..Inf -> N 
+length : forall { a : Type } . List a %0..Inf -> N 
 spec
     length %0..Inf
 length Nil = Z;
@@ -579,7 +579,7 @@ neg : Bool %1..Inf -> Bool
 neg True = False;
 neg False = True 
     
-map : forall a b 
+map : forall { a b : Type } 
     . (a % 1..Inf -> b) %0..Inf 
     -> List a %1..Inf 
     -> List b
@@ -598,7 +598,7 @@ language GradedBase
 
 data List a =  Cons a (List a) | Nil 
 
-replicate5 : forall { a : Type} . a %5 -> List a 
+replicate5 : forall { a : Type } . a %5 -> List a 
 replicate5 x = (Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) Nil))))
 \end{granule}
 with no Graded examples and Cartesian example(s):
@@ -611,7 +611,7 @@ language GradedBase
 
 data List a =  Cons a (List a) | Nil 
 
-replicate10 : forall { a : Type} . a %10 -> List a 
+replicate10 : forall { a : Type } . a %10 -> List a 
 replicate10 x = (Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) ((Cons x) Nil)))))))))
 \end{granule}
 with no Graded examples and Cartesian example(s);
@@ -626,7 +626,7 @@ data List a =  Cons a (List a) | Nil
 
 data N = S N | Z
     
-replicateN : forall a 
+replicateN : forall { a : Type }
            . N %0..Inf 
            -> a %0..Inf 
            -> List a
@@ -645,7 +645,7 @@ language GradedBase
 
 data List a = Cons a (List a) | Nil
 
-stutter : forall a . List (a [2]) %1..Inf -> List a
+stutter : forall { a : Type } . List (a [2]) %1..Inf -> List a
 spec
     stutter % 0..Inf
 stutter Nil = Nil;
@@ -696,10 +696,10 @@ data Stream a = Next a (Stream a)
 ones : () %1..1 -> Stream Int
 ones () = Next 1 (ones ())
 
-head : forall a . Stream a %0..1 -> a 
+head : forall { a : Type } . Stream a %0..1 -> a 
 head (Next x xs) = x
 
-build : forall a . a %1..1 -> (Stream a) %1..1 -> Stream a
+build : forall { a : Type } . a %1..1 -> (Stream a) %1..1 -> Stream a
 build x y = (Next x) y
 \end{granule}
 with no Graded examples and Cartesian example(s):
@@ -722,10 +722,10 @@ neg : Bool %1..Inf -> Bool
 neg True = False; 
 neg False = True
 
-head : forall a . Stream a %0..Inf -> a 
+head : forall { a : Type } . Stream a %0..Inf -> a 
 head (Next x xs) = x
 
-map : forall a b 
+map : forall { a b : Type }
     . Stream a %1..Inf 
     -> (a %1..Inf -> b) %1..Inf 
     -> Stream b
@@ -749,10 +749,10 @@ data Bool = True | False
 ones : () %1..1 -> Stream Int
 ones () = Next 1 (ones ())
     
-head : forall a . (Stream a) %0..1 -> a
+head : forall { a : Type } . (Stream a) %0..1 -> a
 head (Next x _) = x
     
-take1 : forall a . Stream a %0..1 -> a 
+take1 : forall { a : Type } . Stream a %0..1 -> a 
 take1 (Next y z) = y
 \end{granule}
 with no Graded examples and Cartesian example(s):
@@ -770,10 +770,10 @@ data Bool = True | False
 ones : () %1..1 -> Stream Int
 ones () = Next 1 (ones ())
 
-head : forall a . (Stream a) %0..1 -> a
+head : forall { a : Type } . (Stream a) %0..1 -> a
 head (Next x _) = x
 
-take2 : forall a . Stream a %0..1 -> (a, a)
+take2 : forall { a : Type } . Stream a %0..1 -> (a, a)
 take2 (Next y (Next u v)) = (u, y)
 \end{granule}
 with no Graded examples and Cartesian example(s):
@@ -792,10 +792,10 @@ data Bool = True | False
 ones : () %1..1 -> Stream Int
 ones () = Next 1 (ones ())
 
-head : forall a . (Stream a) %0..1 -> a
+head : forall { a : Type } . (Stream a) %0..1 -> a
 head (Next x _) = x
 
-take3 : forall a . Stream a %0..1 -> (a, (a, a))
+take3 : forall { a : Type } . Stream a %0..1 -> (a, (a, a))
 take3 (Next y (Next u (Next w p))) = (y, (w, u))
 \end{granule}
 with no Graded examples and Cartesian example(s):
@@ -917,7 +917,7 @@ isEven (S (S z)) =
         Nothing -> Nothing;
         Just (S Z) -> Just (S Z)
 
-bind : forall a b 
+bind : forall { a b : Type }
      . Maybe a %1..1 
      -> (a %1..1 -> Maybe b) %0..1 
      -> Maybe b
@@ -934,7 +934,7 @@ language GradedBase
 
 data Maybe a = Nothing | Just a
 
-fromMaybe : forall a . Maybe a %(1..1) -> a %(0..1) -> a
+fromMaybe : forall { a : Type } . Maybe a %(1..1) -> a %(0..1) -> a
 fromMaybe Nothing y = y;
 fromMaybe (Just z) y = z
 \end{granule}
@@ -949,7 +949,7 @@ language GradedBase
 
 data Maybe a = Nothing | Just a
 
-return : forall a . a -> Maybe a
+return : forall { a : Type } . a -> Maybe a
 return x = Just x
 \end{granule}
 \item isJust: 
@@ -960,7 +960,7 @@ data Maybe a = Just a | Nothing
 
 data Bool = True | False 
 
-isJust : forall a . (Maybe a) %0..1 -> Bool
+isJust : forall { a : Type } . (Maybe a) %0..1 -> Bool
 isJust Nothing = False;
 isJust (Just y) = True
 \end{granule}
@@ -977,7 +977,7 @@ data Maybe a = Just a | Nothing
     
 data Bool = True | False 
     
-isNothing : forall a . (Maybe a) %0..1 -> Bool
+isNothing : forall { a : Type } . (Maybe a) %0..1 -> Bool
 isNothing Nothing = True;
 isNothing (Just y) = False
 \end{granule}
@@ -999,7 +999,7 @@ isOne : N %0..1 -> Bool
 isOne (S Z) = True;
 isOne _ = False
 
-map : forall a b 
+map : forall { a b : Type }
     . (a -> b) %(0..1) 
     -> (Maybe a) %(1..1) 
     -> Maybe b
@@ -1016,7 +1016,7 @@ language GradedBase
 
 data Maybe a = Nothing | Just a
 
-mplus : forall a b 
+mplus : forall { a b : Type }
       . Maybe a %(0..1) 
       -> Maybe b %(0..1) 
       -> Maybe (a, b)
@@ -1115,7 +1115,7 @@ neg : Bool %1..Inf -> Bool
 neg True = False; 
 neg False = True
 
-map : forall a b 
+map : forall { a b : Type }
     . Tree a %1..Inf 
     -> (a %1..Inf -> b) %0..Inf 
     -> Tree b
@@ -1134,7 +1134,7 @@ language GradedBase
 
 data Tree a = Leaf | Node (Tree a) a (Tree a)
 
-stutter : forall a b . Tree (a [2]) %1..Inf -> Tree (a, a)
+stutter : forall { a b : Type } . Tree (a [2]) %1..Inf -> Tree (a, a)
 spec
     stutter %0..Inf
 stutter Leaf = Leaf;
@@ -1164,7 +1164,7 @@ fold Leaf f acc = acc;
 fold (Node l x r) f acc = 
     fold l f (f x (fold r f acc))
 
-sum : forall a . Tree N %0..Inf -> N
+sum : forall { a : Type } . Tree N %0..Inf -> N
 spec 
     fold %1..Inf, add %1..Inf
 sum x = (add Z) (((fold x) (\p -> \q -> (add p) q)) Z)
@@ -1193,14 +1193,14 @@ comp x y z = y (x z)
 \begin{granule}
 language GradedBase
 
-copy : forall a . a %2 -> (a, a)
+copy : forall { a : Type } . a %2 -> (a, a)
 copy x = (x, x)
 \end{granule}
 \item push:
 \begin{granule}
 language GradedBase
 
-push : forall {a b : Type, k : Coeffect, c : k} 
+push : forall { a b : Type, k : Coeffect, c : k } 
      . (a -> b) %c 
      -> a %c 
      -> b [c]
