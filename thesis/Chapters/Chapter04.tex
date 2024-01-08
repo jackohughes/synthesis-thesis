@@ -1234,9 +1234,17 @@ of the next generation of programming languages with rich type systems for
 high-assurance programming.
 
 The calculus of this chapter serves somewhat as a bridge between the systems in
-Chapters~\ref{chapter:core} and~\ref{chapter:extended}. In the next chapter, we
-continue on from Chapter~\ref{chapter:core}, presenting a synthesis calculus for
-a fully graded typing calculus. This system, however, is significantly more
-expressive than the calculus of Section~\ref{sec:linear-base-calculus},
-incorporating ADTs, pattern matching, recursion, and  
+Chapters~\ref{chapter:core} and~\ref{chapter:extended}. We build upon the graded
+linear $\lambda$-calculus introduced in Section~\ref{sec:linear-base} and the
+extended types introduced in~\ref{chapter:core}, introducing pattern matching
+and recursion. This allowed us to write and subsequently automatically derive
+programs which express the \emph{push} behaviour that we saw in
+Section~\ref{sec:linear-base-conclusion} of Chapter~\ref{chapter:core}. 
+
+In the next chapter, we take these iterations and apply them to the fully graded
+``graded base'' calculus of Section~\ref{sec:graded-base}. We return to the
+type-directed synthesis approach of~\ref{chapter:core}, designing a synthesis
+calculus for a fully graded type system using the additive resource management
+scheme. This system, however, is significantly more expressive than that of
+Chapter~\ref{chapter:core}, incorporating ADTs, pattern matching, recursion, and  
 polymorphism. 

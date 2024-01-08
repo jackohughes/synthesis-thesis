@@ -133,9 +133,10 @@ vmap f Nil = Nil;
 vmap f (Cons x xs) = Cons (f x) (vmap f xs)
 \end{granule}
 The latter type not only provides us with a greater opportunity to prune
-grade-violating programs, its type is also much more descriptive of the user's intent.
-Adapting our approach to GADTs is future work, and mostly consists of extending
-the typing for our synthesis rule for \textbf{case} statements to handle GADT specialisation.
+grade-violating programs, its type is also much more descriptive of the user's
+intent. Adapting our approach to GADTs is future work, and mostly consists of
+extending the typing for our synthesis rule for \textbf{case} statements to
+handle GADT specialisation.
 
 GADTs are sometimes referred to as \emph{lightweight} dependent types. Dependent
 type systems allow arbitrary program properties to be expressed and verified
