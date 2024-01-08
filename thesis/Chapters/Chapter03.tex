@@ -204,7 +204,7 @@ the sum type $[[Sum A B]]$. Elimination of sums ($\textsc{Case}$) takes the
 \end{matrix}\right.
 \end{align*}
 where $r\!\sqcup\!s$ is the least-upper bound of grades $[[r]]$ and $[[s]]$ if
-it exists, derived from $\sqsubseteq$.
+it exists, derived from $\sqsubseteq$ (given by Definition~\ref{def:def-lub}).
 \end{definition}
 %
 As an example of the partiality of $\sqcup$, if one branch of a \textbf{case}
@@ -801,10 +801,10 @@ For all $[[ G1 ]]$, $[[ G2 ]], [[G1]] \sqcap [[G2]] =$
 \end{array}
 \end{matrix}\right.
 \end{align*}
-where $r\!\sqcap\!s$ is the greatest-lower bound of grades $[[r]]$
-and $[[s]]$ if it exists, derived from the pre-order $\sqsubseteq$. If 
-the greatest lower bound of two grades does not exist, then the operation fails, 
-terminating the branch of synthesis. 
+where $r\!\sqcap\!s$ is the greatest-lower bound of grades $[[r]]$ and $[[s]]$
+if it exists, derived from the pre-order $\sqsubseteq$ (given by
+Definition~\ref{def:glb}). If the greatest lower bound of two grades does not
+exist, then the operation fails, terminating the branch of synthesis. 
 \end{definition}
 %
 %

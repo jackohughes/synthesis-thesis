@@ -290,6 +290,27 @@ $({\mathcal{R}}, \cdot, {1}, {+}, {0}, {\sqsubseteq})$ parametrising the
 calculus (where $\cdot$ and $+$ are monotonic operations (which may be partial)
 with respect to the pre-order $\sqsubseteq$). 
 
+From this semiring structure, we can derive two partial operations on grades which will
+be useful later on: \emph{greatest lower bounds} ($\sqcap$), and \emph{least
+upper bounds} ($\sqcup$). These are given by Definitions~\ref{def:glb} and~\ref{def:def-lub},
+respectively.
+
+\begin{definition}[Partial greatest-lower bound of grades]
+  \label{def:glb}
+  For two grades $r$ and $s$ of a given semiring, $r \sqcap s$ is defined in
+  terms of the semiring's preorder: $r \sqcap s = t$ if $t \sqsubseteq r$ and $ 
+  t \sqsubseteq s$ and there exists no other $t'$ where $t' \sqsubseteq r$,  
+  $t' \sqsubseteq s$ and $ t \sqsubseteq t'$
+\end{definition}
+
+\begin{definition}[Partial least-upper bound of grades]
+  \label{def:def-lub}
+  For two grades $r$ and $s$ of a given semiring, $r \sqcup s$ is defined in
+  terms of the semiring's preorder: $r \sqcup s = t$ if $r \sqsubseteq t$ and $ 
+  s \sqsubseteq t$ and there exists no other $t'$ where $r \sqsubseteq t'$, 
+  $s \sqsubseteq t'$ and $t' \sqsubseteq t$
+\end{definition}
+
 As before, typing judgments are of the form $[[ G |- t : A ]]$, where $[[ G ]]$
 ranges over contexts:
 \begin{equation*}
@@ -516,7 +537,7 @@ s : forall { a b c : Type }
 s x y z' = let [z] = z' in (x z) (y z)
 \end{granule}
 Likewise, we can now correctly type and write the \emph{K} combinator from
-Section~\ref{sec:linear-lambda-calc} as 
+Section~\ref{sec:linear-lambda-calc} as:
 \begin{align*}
 k & : [[ {A -o [] 0 B} -o A ]] \\
 k & = [[ \x . \ y' . {let [ y ] = y' in x }]]
