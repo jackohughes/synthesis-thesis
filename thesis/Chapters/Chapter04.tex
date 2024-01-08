@@ -611,7 +611,7 @@ well-typed:
     \\
   = \; & \lambda z . \lambda y . \derCaseOne{z}{[f]}{\\ & \hspace{2em} \derCaseOne{(\derCaseOne{y}{(x', y')}
    { \\ & \hspace{5em} \derCaseOne{(x', y')}
-                {([u], [v])}{[(u, v)]}})}{[u]}{[(f \ u)]}}
+                {([u], [v])}{[(u, v)]}})}{[u]}{[(f \ u)]}} 
   \end{align*}
 }}
   %
@@ -1136,12 +1136,38 @@ replicating the constructors, reaching the crucial case where a
 polymorphically type $z : \alpha$ is mapped to $( (),\ z )$ in
 the third equation.
 
-Granule implements both these derived combinators in a similar
-way to \emph{push}/\emph{pull} providing \granin{copyShape}
-and \granin{drop} which can be derived for a type \granin{T} via type
-application, e.g. \granin{drop @T : T -> ()} if it can be derived.
-Otherwise, the type checker produces an error,
-explaining why \granin{drop} is not derivable at type \granin{T}.
+\subsection{Implementation in Granule}
+Granule implements both these derived combinators in a similar way to
+\emph{push}/\emph{pull} providing \granin{copyShape} and \granin{drop} which can
+be derived for a type \granin{T} via type application, e.g. \granin{drop @T : T
+-> ()} if it can be derived. Otherwise, the type checker produces an error,
+explaining why \granin{drop} is not derivable at type \granin{T}. As an example
+of using \granin{copyShape} in Granule, consider the case where we want to find
+the length of a list, without consuming the list itself. Without \granin{copyShape}, 
+we would have to write our \granin{length} function so that it returns the input list
+after computing its size, resulting in the rather cumbersome implementation:
+\begin{granule}
+data List = Cons a | Nil 
+
+data N = S N | Z
+
+length : forall { a : Type } . List a -> (N, List a)
+length Nil = (Z, Nil);
+length (Cons x xs) = 
+  let (n, xs') = length xs in (S n, Cons x xs')
+\end{granule}
+Using \granin{copyShape}, we can rewrite this definition of \granin{length} into
+a simpler form which doesn't have to worry about how it consumes its input:
+\begin{granule}
+length : forall { a : Type } List a -> N
+length Nil = Z
+length (Cons _ xs) = S (length xs)
+\end{granule}
+and then to call \granin{length} on a list, we instead pass in the shape of the 
+list rather than the list itself:
+\begin{granule}
+let (shape, myList') = copyShape@List myList in length shape
+\end{granule}
 
 \section{Related Work}
 \label{sec:deriving-related}
