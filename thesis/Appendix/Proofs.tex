@@ -694,7 +694,7 @@ rules are considered in turn.
          %
            \begin{align*}
              \inferrule*[right = \textsc{Approx}]
-             {\inferrule*[right = 1]
+             {\inferrule*[right = $\mathsf{Unit}$]
              {\quad}{[[ . |- () : Unit ]]}}
              {[[ G - G |- () : Unit ]]}
            \end{align*}
@@ -714,7 +714,7 @@ rules are considered in turn.
          Then we make the derivation:
          %
            \begin{align*}
-             \inferrule*[right = Let$1$]
+             \inferrule*[right = Let$\mathsf{Unit}$]
              {\inferrule*[right = Var]{\quad}{[[ x : Unit |- x : Unit ]]}
              \\ [[ G - D |- t : C ]]}
              {[[ (G - D), x : Unit |- let () = x in t : C ]]}
@@ -1053,7 +1053,7 @@ rules are considered in turn.
     \]
     From this, we can construct the typing derivation, matching the conclusion:
     \[
-    \inferrule*[Right=\textsc{1}]
+    \inferrule*[Right=$\mathsf{Unit}$]
     {\quad}
     {[[ . |- () : Unit ]]}
     \]
@@ -1070,7 +1070,7 @@ rules are considered in turn.
     From this, we can construct the typing derivation, matching the
     conclusion:
     \[
-    \inferrule*[Right=\textsc{Let1}]
+    \inferrule*[Right=\textsc{Let}$\mathsf{Unit}$]
     { \inferrule*[Right=\textsc{Var}]{\quad}{[[ x : Unit |- x : Unit ]]} \\ [[D |- t : C]]}
     {[[D, x : Unit |- let () = x in t : C ]]}
     \]
@@ -1600,7 +1600,7 @@ rules are considered in turn.
           \]
           From which, we can construct the following instantiation of the \addUnitIntroName\  synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=R1$^{+}$]
+    \inferrule*[right=$\mathsf{Unit}_{\textsc{R}}^{+}$]
     {\quad}
     {[[G |- Unit =>+ () ; .]]}
           \]
@@ -1615,7 +1615,7 @@ rules are considered in turn.
           \]
           from case 1 of the lemma. From which, we can construct the following instantiation of the \addBoxName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=R$\square^{+}$]
+    \inferrule*[right=$\square_{\textsc{R}}^{+}$]
     {[[G |- A =>+ t ; D]]}{[[G |- [] r A =>+ [t] ; r * D ]]}
           \]
       \item Case \fAddRSyncTransitionName \\
