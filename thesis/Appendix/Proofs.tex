@@ -1441,7 +1441,7 @@ rules are considered in turn.
           \]
           from case 1 of the lemma. From which, we can construct the following instatiation of the \addAbsName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=R$\multimap^{+}$]
+    \inferrule*[right=$\multimap_{\textsc{R}}^{+}$]
     {[[(G , O), x : A |- B =>+ t ; D, x : A]]}{[[G , O |- A -o B =>+ \x . t ; D]]}
           \]
           \item Case \fAddRAsyncTransitionName
@@ -1468,7 +1468,7 @@ rules are considered in turn.
           \]
           from case 2 of the lemma. From which, we can construct the following instatiation of the \addPairElimName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=L$\otimes^{+}$]
+    \inferrule*[right=$\otimes_{\textsc{L}}^{+}$]
     {[[ (G , O), x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B]]}
     {[[ G , (O, x3 : Tup A B) |- C =>+ letpair x1 x2 = x3 in t2 ; D, x3 : Tup A B ]]}
           \]
@@ -1486,7 +1486,7 @@ rules are considered in turn.
           \]
           from case 2 of the lemma. From which, we can construct the following instatiation of the \addSumElimName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=L$\oplus^{+}$]
+    \inferrule*[right=$\oplus_{\textsc{L}}^{+}$]
     {[[(G , O), x2 : A |- C =>+ t1 ; D1, x2 : A]] \\ [[(G , O), x3 : B |- C =>+ t2 ; D2,
       x3 : B ]]}{[[G , (O, x1 : Sum A B) ]] \vdash C \Rightarrow^{+} \textbf{case} \ x_{1}\ \textbf{of}\ \textbf{inl}\ x_{2} \rightarrow t_{1};\ \textbf{inr}\ x_{3} \rightarrow t_{2}\ |\  ([[D1]] \sqcup [[D2]]), [[x1 : Sum A B]]}
           \]
@@ -1501,7 +1501,7 @@ rules are considered in turn.
           \]
           from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnitElimName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=L1$^{+}$]
+    \inferrule*[right=$\mathsf{Unit}_{\textsc{L}}^{+}$]
     {[[G |- C =>+ t ; D]]}
     {[[G, x : Unit |- C =>+ let () = x in t ; D, x : Unit]]}
           \]
@@ -1516,7 +1516,7 @@ rules are considered in turn.
           \]
           from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnboxName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=L$\square^{+}$]
+    \inferrule*[right=$\square_{\textsc{L}}^{+}$]
     {[[ (G , O), x2 : [A] r |- B =>+ t ; D ]] \\ \textit{if}\ [[x2 : [A] s]] \in
       [[D]]\ \textit{then}\ [[s]] \sqsubseteq [[ r ]]\ \textit{else}\ 0 \sqsubseteq [[ r ]]}{[[G , (O, x1 : [] r A) |- B =>+
       let [x2] = x1 in t ; (D \ x2 ), x1 : [] r A ]]}
@@ -1563,7 +1563,7 @@ rules are considered in turn.
           \]
           from case 3 of the lemma. From which, we can construct the following instantiation of the \addPairIntroName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=R$\otimes^{+}$]
+    \inferrule*[right=$\otimes_{\textsc{R}}^{+}$]
     {[[G |- A =>+ t1 ; D1]] \\ [[G |- B =>+ t2 ; D2]]}
     {[[G |- Tup A B =>+ pair t1 t2 ; D1 + D2]]}
           \]
@@ -1584,12 +1584,12 @@ rules are considered in turn.
           \]
           from case 3 of the lemma. From which, we can construct the following instantiations of the \addSumIntroLName\ and \addSumIntroRName\ synthesis rules in the non-focusing calculus, respectively:
           \[
-    \inferrule*[right=R$\oplus_{1}^{+}$]
+    \inferrule*[right=$\oplus_{\textsc{R}}{1}^{+}$]
     {[[G |- A =>+ t ; D]]}
     {[[G |- Sum A B =>+ inl t ; D]]}
           \]
           \[
-    \inferrule*[right=R$\oplus_{2}^{+}$]
+    \inferrule*[right=R$\oplus_{\textsc{R}}{2}^{+}$]
     {[[G |- B =>+ t ; D]]}
     {[[G |- Sum A B =>+ inr t ; D]]}
           \]
@@ -1646,7 +1646,7 @@ rules are considered in turn.
           \]
           from case 3 of the lemma. From which, we can construct the following instantiation of the \addAppName synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=L$\multimap^{+}$]
+    \inferrule*[right=$\multimap_{\textsc{L}}^{+}$]
     {[[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G |- A =>+ t2 ; D2 ]]}{[[G, x1 : A -o B |- C =>+
     [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
           \]
@@ -1732,7 +1732,7 @@ rules are considered in turn.
           \]
           from case 3 of the lemma. From which, we can construct the following instantiation of the \addPruningPairIntroName\ synthesis rule in the non-focusing calculus:
           \[
-    \inferrule*[right=R$^{\prime}{\otimes^{+}}$]
+    \inferrule*[right=${\otimes_{\textsc{R}}^{\pm}}$]
     {[[G |- A =>+ t1 ; D1]] \\ [[G - D1 |- B =>+ t2 ; D2]]}
     {[[G |- Tup A B =>+ pair t1 t2 ; D1 + D2]]}
           \]
@@ -1754,7 +1754,7 @@ rules are considered in turn.
           \]
           from case 3 of the lemma. From which, we can construct the following instantiation of the \addPruningAppName\ synthesis rule in the non-focusing calculus:
           \[
-\inferrule*[right=L$^{\prime}\multimap^{+}$]
+\inferrule*[right=$\multimap_{\textsc{L}}^{\pm}$]
     {[[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G - D1 |- A =>+ t2 ; D2 ]]}{[[G, x1 : A -o B |- C =>+
     [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
           \]
@@ -1991,7 +1991,7 @@ $\tcF \overline{\alpha}$ as follows:
 %
 \begin{align*}
   \begin{array}{ll}
-  \deriv{fmap}{1}^\Sigma(f)\ z &= \ [[ case z of () -> () ]]\\
+  \deriv{fmap}{\mathsf{Unit}}^\Sigma(f)\ z &= \ [[ case z of () -> () ]]\\
   \deriv{fmap}{\alpha}^\Sigma(f)\ z &= \ f\ z\\
   \deriv{fmap}{X}^\Sigma(f)\ z &= \ (\Sigma(X)\ f)\ z \\
   \deriv{fmap}{\Box_{r}A}(f)\ z &= \derCaseOne{z}{ [[ [y] ]] }{ [ \deriv{fmap}{A}(f)\  [[ y ]] ] } \\
@@ -2615,17 +2615,17 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 \Sigma'(X)$ then $g \circ f = id$, in order to apply the recursive argument.
 %
 \begin{itemize}
-\item $T = 1$
+\item $T = \mathsf{Unit}$
 %
 \begin{align*}
 \begin{array}{rll}
-       & \deriv{pull}{1}^{\Sigma'}(\deriv{push}{1}^\Sigma \ z) & \\
+       & \deriv{pull}{\mathsf{Unit}}^{\Sigma'}(\deriv{push}{\mathsf{Unit}}^\Sigma \ z) & \\
 %
-\equiv & \deriv{pull}{1}^{\Sigma'}([[ case z of [ () ] -> () ]])
-& \{\textit{defn.}\ \deriv{push}{1}^\Sigma \} \\
+\equiv & \deriv{pull}{\mathsf{Unit}}^{\Sigma'}([[ case z of [ () ] -> () ]])
+& \{\textit{defn.}\ \deriv{push}{\mathsf{Unit}}^\Sigma \} \\
 %
 \equiv & [[ case (case z of [ () ] -> () ) of () -> [ () ] ]]
-& \{\textit{defn.}\ \deriv{pull}{1}^{\Sigma'}\} \\
+& \{\textit{defn.}\ \deriv{pull}{\mathsf{Unit}}^{\Sigma'}\} \\
 %
 \equiv & [[ case z of [()] -> case () of () -> [ () ] ]]
 & \{\textit{case assoc.}\} \\
@@ -2810,10 +2810,10 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 %
 \begin{align*}
 \begin{array}{rll}
-       & \deriv{push}{1}^\Sigma(\deriv{pull}{1}^{\Sigma'} \ z) & \\
+       & \deriv{push}{\mathsf{Unit}}^\Sigma(\deriv{pull}{\mathsf{Unit}}^{\Sigma'} \ z) & \\
 %
-\equiv & \deriv{push}{1}^{\Sigma}( [[ case z of () -> [ () ] ]] )
-& \{\textit{defn.}\ \deriv{pull}{1}^{\Sigma'} \} \\
+\equiv & \deriv{push}{\mathsf{Unit}}^{\Sigma}( [[ case z of () -> [ () ] ]] )
+& \{\textit{defn.}\ \deriv{pull}{\mathsf{Unit}}^{\Sigma'} \} \\
 %
 \equiv & [[ case (case z of () -> [ () ]) of [ () ] -> () ]]
 & \{\textit{defn.}\ \deriv{push}{1}^{\Sigma} \} \\
