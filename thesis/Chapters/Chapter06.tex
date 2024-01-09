@@ -1,7 +1,7 @@
 \chapter{Conclusion}
 \label{chapter:conclusion}
 In this dissertation, we have provided a framework for designing program
-synthesis tool based on linear and graded type systems, overcoming the
+synthesis tools based on linear and graded type systems, overcoming the
 challenges imposed by treating program values as resources, and leveraging the
 type systems' properties to build two efficient synthesis tools, targeting two
 common flavours of graded type system: the linear-base style and the graded-base
@@ -31,7 +31,7 @@ style. In summary, in our work we have succeeded in:
 Essentially, we have shown that program synthesis from linear and graded types
 is a feasible and effective approach to reducing the search space of a program
 synthesis task. The expressivity of linear and graded types in describing the
-static semantics of a program is highly valued by many programmers, so
+static semantics of a program offers many benefits to programmers, so
 harnessing this expressivity in synthesis is a something that we find will be
 useful to programs in this context, allowing the synthesis of programs often
 without the need for additional specification such as examples.
@@ -51,43 +51,13 @@ itself in the style of \textsc{Myth}~\citep{oseraMYTH1} and
 Leon~\citep{10.1145/2509136.2509555}, as well as considering possible
 semiring-dependent optimisations that may be applicable.
 
-\subsection{Subtractive Resource Management}
-Ultimately, we opted to focus on the additive resource management scheme for
-Chapter~\ref{chapter:extended} due to concerns regarding the efficiency of its
-implementation for a fully graded typing calculus.
-
-In the subtractive scheme, the $\textsc{Var}$ rule generates a constraint which
-determines if the use of a variable is permissible based on the rest of the
-partially synthesised program:
-\begin{align*}
-  \inferrule*[Right=Var]
-  {\exists s .\ r \sqsupseteq s + 1}
-  {\Gamma, x :_{r} A \vdash A \Rightarrow x\ |\ \Gamma, x :_{s} A}
-\end{align*}
-i.e., $r$ must overapproximate one use of $x$ plus the future use of
-$x$ given by the existential $s$.
-
-Our comparative evaluation of the additive and subtractive schemes in
-Section~\ref{sec:linear-base-evaluation} showed that these, and other associated
-constraints from the subtractive approach, are larger, typically more complex,
-and are discharged more frequently than their counterparts in the additive
-system (every time a variable usage is being considered in the above case).
-Their evaluation concluded that the only situation where subtractive decisively
-outperformed additive was on purely linear programs. This, coupled with the fact
-that the subtractive approach has limitations in the presence of polymorphic
-grades, influenced our decision to adopt the additive scheme, especially as we
-considered much more complex programs than in the calculi of
-Chapter~\ref{chapter:core}, e.g., targeting recursion.
-
 
 \subsection{SMT Solving}
 Related to the above, there is scope for improving the interaction between the
 synthesis tool and the SMT solver, to make synthesis more efficient. Both
 evaluations showed that the bulk of synthesis time is spent solving constraints
 in the SMT solver. Making this interaction more streamlined is therefore
-particularly appealing. One approach would be to run an ``online'' SMT solving
-procedure. This would reduce the overhead of discharging constraints to the
-solver by eliminating the need to re-solve already solved constraints. 
+particularly appealing. 
 
 Alternatively, one could imagine implementing custom solvers for the more
 commonly used semirings. From our lists of benchmarking examples in
@@ -108,7 +78,7 @@ a recursive function definition which takes a list as input, we have to give the
 list a $0..\infty$ interval grade to account for potentially unlimited usage.
 Take for example the \granin{map} benchmark:
 \begin{granule}
-map : forall a b . (a % 1..$\infty$ -> b) % 0..$\infty$ -> List a % 1..$\infty$ -> List b
+map : forall a b . (a -> b) % 0..$\infty$ -> List a % 1..$\infty$ -> List b
 spec
     map % 0..$\infty$
 map = ?
@@ -144,10 +114,13 @@ during type checking, with types being indexed by arbitrary program terms.
 Several works have endeavoured to integrate fully-dependent types into a
 quantitative setting~\citep{DBLP:journals/pacmpl/ChoudhuryEEW21,
 10.1145/3607862, McBride2016, 10.1145/2676726.2676969}. One such
-examples,~\citet{DBLP:conf/esop/MoonEO21}'s \textsc{GERTY}, is based on Granule
+example,~\citet{DBLP:conf/esop/MoonEO21}'s \textsc{GERTY} is based on Granule
 and has a prototype implementation, making it a particularly appealing target
 for experimenting with the synthesis in a fully-dependent graded setting, using
-the foundations laid by the work in this thesis.
+the foundations laid by the work in this thesis. Another is the Idris 2
+programming language~\citep{DBLP:journals/corr/abs-2104-00480}, which implements
+dependent types in a quantitative setting, and is an example of such resourceful
+systems being used in a practical system.
 
 
 \subsection{Large Language Models}
@@ -158,18 +131,19 @@ correct-by-construction synthesis based on specifications, rather than predicted
 programs which may violate more fine-grained type constraints (e.g., as provided
 by grades). Future approaches may combine both LLM approaches with deductive
 approaches, where the logical engine of the deductive approach can guide
-prediction. Exploring this is further work and a general opportunity and
-challenge for the deductive synthesis community.
+prediction, e.g. by being used for hyperparameter tuning. Exploring this is
+further work and a general opportunity and challenge for the deductive synthesis
+community.
 
 
 \section{Final Remarks}
-Type-directed program synthesis has been long been an attractive field in
+Type-directed program synthesis has long been an attractive field in
 computer science partially due to the potential it offers: the ability to write
 programs that are correct by construction, with significant help from the
 computer. 
 
 We feel that type-directed program synthesis complements linear and graded types
-very well: as richer types further constrain the number of possible inhabitants,
+very well. As richer types further constrain the number of possible inhabitants,
 theoretically there is less work to be done by the computer to identify the
 program which behaves according to the user's intent.
 

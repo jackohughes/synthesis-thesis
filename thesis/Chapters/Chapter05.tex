@@ -1896,6 +1896,35 @@ fromMaybe (Just z) y = z
 \section{Conclusion}
 \label{section:graded-base-conclusion}
 
+\subsection{Subtractive Resource Management}
+Ultimately, we opted to focus on the additive resource management scheme for
+Chapter~\ref{chapter:extended} due to the evidenced concerns regarding the
+efficiency of its implementation for a fully graded typing calculus.
+
+In the subtractive scheme, the $\textsc{Var}$ rule generates a constraint which
+determines if the use of a variable is permissible based on the rest of the
+partially synthesised program:
+\begin{align*}
+  \inferrule*[Right=Var]
+  {\exists s .\ r \sqsupseteq s + 1}
+  {\Gamma, x :_{r} A \vdash A \Rightarrow x\ |\ \Gamma, x :_{s} A}
+\end{align*}
+i.e., $r$ must overapproximate one use of $x$ plus the future use of
+$x$ given by the existential $s$, as in the synthesis rule for the subtractive
+synthesis calculus in Chapter~\ref{chapter:core} on page~\pageref{sub:grVar}.
+
+Our comparative evaluation of the additive and subtractive schemes in
+Section~\ref{sec:linear-base-evaluation} showed that these, and other associated
+constraints from the subtractive approach, are larger, typically more complex,
+and are discharged more frequently than their counterparts in the additive
+system (every time a variable usage is being considered in the above case).
+Our evaluation concluded that the only situation where subtractive decisively
+outperformed additive was on purely linear programs. This, coupled with the fact
+that the subtractive approach has limitations in the presence of polymorphic
+grades, influenced our decision to adopt the additive scheme, especially as we
+considered much more complex programs than in the calculi of
+Chapter~\ref{chapter:core}, e.g., targeting recursion.
+
 In this chapter we presented a synthesis calculus for a feature-rich type system
 based on the fully graded $\lambda$-calculus of section~\ref{sec:graded-base},
 which complements our graded linear system of Chapter~\ref{chapter:core} to
