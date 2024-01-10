@@ -1231,29 +1231,29 @@ rules are considered in turn.
           \[
             [[ (G , O), x2 : [A] r |- B =>- t ; D, x2 : [A] s]]  \tag{ih}\\
           \]
-          from case 2 of the lemma. From which, we can construct the following instatiation of the \subUnboxName synthesis rule in the non-focusing calculus:
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \subUnboxName synthesis rule in the non-focusing calculus:
           \[
   \inferrule*[right=\subUnboxName]
     {[[ (G , O), x2 : [A] r |- B =>- t ; D, x2 : [A] s]]  \\ 0 \sqsubseteq [[s]]}{[[G , (O, x1 : [] r A) |- B =>- let [x2] = x1 in t ; D ]]}
           \]
-        \item Case \subDerName \\
-          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
-          \[
-          \fSubDerRule
-          \]
-          By induction on the first premise, we have that:
-          \[
-            [[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]]  \tag{ih}\\
-          \]
-          from case 2 of the lemma. From which, we can construct the following instatiation of the \subDerName synthesis rule in the non-focusing calculus:
-          \[
-      \inferrule*[right=\subDerName]
-{[[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]] \\
-[[ y notin D ]] \\
-[[ exists s . r >= s + 1]]
-}
-{[[ G, x : [A] r |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
-          \]
+%         \item Case \subDerName \\
+%           In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+%           \[
+%           \fSubDerRule
+%           \]
+%           By induction on the first premise, we have that:
+%           \[
+%             [[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]]  \tag{ih}\\
+%           \]
+%           from case 2 of the lemma. From which, we can construct the following instantiation of the \subDerName synthesis rule in the non-focusing calculus:
+%           \[
+%       \inferrule*[right=\subDerName]
+% {[[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]] \\
+% [[ y notin D ]] \\
+% [[ exists s . r >= s + 1]]
+% }
+% {[[ G, x : [A] r |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
+%           \]
 
         \item Case \fSubLAsyncTransitionName \\
           In the case of the left asynchronous rule for transitioning an assumption from the focusing context $[[ O ]]$ to the non-focusing context $[[G]]$, the synthesis rule has the form:
@@ -1280,7 +1280,7 @@ rules are considered in turn.
           \[
             [[ D1 |- B =>- t2 ; D2 ]] \tag{ih2}
           \]
-          from case 3 of the lemma. From which, we can construct the following instatiation of the \subPairIntroName\ synthesis rule in the non-focusing calculus:
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \subPairIntroName\ synthesis rule in the non-focusing calculus:
           \[
     \inferrule*[right=\subPairIntroName]
     {[[G |- A =>- t1 ; D1]] \\ [[ D1 |- B =>- t2 ; D2 ]]}{[[G |- Tup A B =>- pair t1 t2 ; D2]]}
@@ -1300,7 +1300,7 @@ rules are considered in turn.
           \[
             [[G |- B =>- t ; D]] \tag{ih2}
           \]
-          from case 3 of the lemma. From which, we can construct the following instatiations of the \subSumIntroLname\ and \subSumIntroRname\ rule in the non-focusing calculus, respectively:
+          from case 3 of the lemma. From which, we can construct the following instantiations of the \subSumIntroLname\ and \subSumIntroRname\ rule in the non-focusing calculus, respectively:
           \[
     \inferrule*[right=\subSumIntroLname]
     {[[G |- A =>- t ; D]]}
@@ -1316,7 +1316,7 @@ rules are considered in turn.
           \[
           \fSubUnitIntroRule
           \]
-          From which, we can construct the following instatiation of the \subUnitIntroName\ synthesis rule in the non-focusing calculus:
+          From which, we can construct the following instantiation of the \subUnitIntroName\ synthesis rule in the non-focusing calculus:
           \[
     \inferrule*[right=\subUnitIntroName]
     {\quad}
@@ -1331,7 +1331,7 @@ rules are considered in turn.
           \[
             [[G |- A =>- t ; D]] \tag{ih}
           \]
-          from case 1 of the lemma. From which, we can construct the following instatiation of the \subBoxName synthesis rule in the non-focusing calculus:
+          from case 1 of the lemma. From which, we can construct the following instantiation of the \subBoxName synthesis rule in the non-focusing calculus:
           \[
   \inferrule*[right=\subBoxName]
   {[[G |- A =>- t ; D]]}{[[G |- [] r A =>- [t] ; G - r * (G - D)]]}
@@ -1362,18 +1362,36 @@ rules are considered in turn.
           \[
             [[D1 |- A =>- t2 ; D2]] \tag{ih2}
           \]
-          from case 3 of the lemma. From which, we can construct the following instatiation of the \subAppName synthesis rule in the non-focusing calculus:
+          from case 3 of the lemma. From which, we can construct the following instantiation of the \subAppName synthesis rule in the non-focusing calculus:
           \[
   \inferrule*[right=\subAppName]
   {[[G, x2 : B |- C =>- t1 ; D1]] \qquad [[ x2 notin D1 ]] \qquad [[D1 |- A =>- t2 ; D2]]}{[[G, x1 : A -o B
       |- C =>- [(x1 t2) / x2] t1 ; D2 ]]}
+          \]
+        \item Case \subDerName \\
+          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+          \[
+          \fSubDerRule
+          \]
+          By induction on the first premise, we have that:
+          \[
+            [[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]]  \tag{ih}\\
+          \]
+          from case 4 of the lemma. From which, we can construct the following instantiation of the \subDerName synthesis rule in the non-focusing calculus:
+          \[
+      \inferrule*[right=\subDerName]
+{[[ G, x : [A] s, y : A |- B =>- t ; D, x : [A] s' ]] \\
+[[ y notin D ]] \\
+[[ exists s . r >= s + 1]]
+}
+{[[ G, x : [A] r |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
           \]
           \item Case \subLinVarName \\
           In the case of the left synchronous rule for linear variable synthesis, the synthesis rule has the form:
           \[
           \fSubLinVarRule
           \]
-          From which, we can construct the following instatiation of the \subLinVarName\  synthesis rule in the non-focusing calculus:
+          From which, we can construct the following instantiation of the \subLinVarName\  synthesis rule in the non-focusing calculus:
           \[
                              \inferrule*[right=\subLinVarName]
                              {\quad}{[[G, x : A |- A =>- x ; G]]}
@@ -1383,7 +1401,7 @@ rules are considered in turn.
           \[
           \fSubGrVarRule
           \]
-          From which, we can construct the following instatiation of the \subGrVarName\  synthesis rule in the non-focusing calculus:
+          From which, we can construct the following instantiation of the \subGrVarName\  synthesis rule in the non-focusing calculus:
           \[
       \inferrule*[right=\subGrVarName]
   {[[ exists s . r <= {s + 1} ]]}{[[G, x : [A] r |- A =>- x ; G , x : [A] s]]}
@@ -1439,7 +1457,7 @@ rules are considered in turn.
           \[
             [[(G , O), x : A |- B =>+ t ; D, x : A]]   \tag{ih}
           \]
-          from case 1 of the lemma. From which, we can construct the following instatiation of the \addAbsName\ synthesis rule in the non-focusing calculus:
+          from case 1 of the lemma. From which, we can construct the following instantiation of the \addAbsName\ synthesis rule in the non-focusing calculus:
           \[
     \inferrule*[right=$\multimap_{\textsc{R}}^{+}$]
     {[[(G , O), x : A |- B =>+ t ; D, x : A]]}{[[G , O |- A -o B =>+ \x . t ; D]]}
@@ -1466,7 +1484,7 @@ rules are considered in turn.
           \[
             [[ (G , O), x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B]]   \tag{ih}
           \]
-          from case 2 of the lemma. From which, we can construct the following instatiation of the \addPairElimName\ synthesis rule in the non-focusing calculus:
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \addPairElimName\ synthesis rule in the non-focusing calculus:
           \[
     \inferrule*[right=$\otimes_{\textsc{L}}^{+}$]
     {[[ (G , O), x1 : A, x2 : B |- C =>+ t2 ; D, x1 : A, x2 : B]]}
@@ -1484,7 +1502,7 @@ rules are considered in turn.
           \[
            [[(G , O), x3 : B |- C =>+ t2 ; D2, x3 : B ]]   \tag{ih2}
           \]
-          from case 2 of the lemma. From which, we can construct the following instatiation of the \addSumElimName\ synthesis rule in the non-focusing calculus:
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \addSumElimName\ synthesis rule in the non-focusing calculus:
           \[
     \inferrule*[right=$\oplus_{\textsc{L}}^{+}$]
     {[[(G , O), x2 : A |- C =>+ t1 ; D1, x2 : A]] \\ [[(G , O), x3 : B |- C =>+ t2 ; D2,
@@ -1499,7 +1517,7 @@ rules are considered in turn.
           \[
            [[G |- C =>+ t ; D]]   \tag{ih}
           \]
-          from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnitElimName\ synthesis rule in the non-focusing calculus:
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \addUnitElimName\ synthesis rule in the non-focusing calculus:
           \[
     \inferrule*[right=$\mathsf{Unit}_{\textsc{L}}^{+}$]
     {[[G |- C =>+ t ; D]]}
@@ -1514,28 +1532,28 @@ rules are considered in turn.
           \[
             [[ (G , O), x2 : [A] r |- B =>+ t ; D ]] \tag{ih}
           \]
-          from case 2 of the lemma. From which, we can construct the following instatiation of the \addUnboxName\ synthesis rule in the non-focusing calculus:
+          from case 2 of the lemma. From which, we can construct the following instantiation of the \addUnboxName\ synthesis rule in the non-focusing calculus:
           \[
     \inferrule*[right=$\square_{\textsc{L}}^{+}$]
     {[[ (G , O), x2 : [A] r |- B =>+ t ; D ]] \\ \textit{if}\ [[x2 : [A] s]] \in
       [[D]]\ \textit{then}\ [[s]] \sqsubseteq [[ r ]]\ \textit{else}\ 0 \sqsubseteq [[ r ]]}{[[G , (O, x1 : [] r A) |- B =>+
       let [x2] = x1 in t ; (D \ x2 ), x1 : [] r A ]]}
           \]
-        \item Case \addDerName \\
-          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
-          \[
-          \fAddDerRule
-          \]
-          By induction on the premise, we have that:
-          \[
-           [[ G, x : [A] s, y : A |- B =>+ t ; D, y : A ]]   \tag{ih}
-          \]
-          from case 2 of the lemma. From which, we can construct the following instantiation of the \addDerName\ synthesis rule in the non-focusing calculus:
-          \[
-\inferrule*[right=der$^{+}$]
-{ [[ G, x : [A]s, y : A |- B =>+ t ; D, y : A ]] }
-{ [[ G, x : [A]s |- B =>+ {[pat x / y] t} ; D + x : [A]1 ]] }
-          \]
+%         \item Case \addDerName \\
+%           In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+%           \[
+%           \fAddDerRule
+%           \]
+%           By induction on the premise, we have that:
+%           \[
+%            [[ G, x : [A] s, y : A |- B =>+ t ; D, y : A ]]   \tag{ih}
+%           \]
+%           from case 2 of the lemma. From which, we can construct the following instantiation of the \addDerName\ synthesis rule in the non-focusing calculus:
+%           \[
+% \inferrule*[right=der$^{+}$]
+% { [[ G, x : [A]s, y : A |- B =>+ t ; D, y : A ]] }
+% { [[ G, x : [A]s |- B =>+ {[pat x / y] t} ; D + x : [A]1 ]] }
+%           \]
         \item Case \fAddLAsyncTransitionName \\
           In the case of the left asynchronous rule for transitioning an assumption from the focusing context $[[ O ]]$ to the non-focusing context $[[G]]$, the synthesis rule has the form:
           \[
@@ -1650,6 +1668,22 @@ rules are considered in turn.
     {[[G, x2 : B |- C =>+ t1 ; D1, x2 : B]] \\ [[G |- A =>+ t2 ; D2 ]]}{[[G, x1 : A -o B |- C =>+
     [(x1 t2) / x2] t1 ; (D1 + D2), x1 : A -o B]] }
           \]
+        \item Case \addDerName \\
+          In the case of the left asynchronous rule for dereliction, the synthesis rule has the form:
+          \[
+          \fAddDerRule
+          \]
+          By induction on the premise, we have that:
+          \[
+           [[ G, x : [A] s, y : A |- B =>+ t ; D, y : A ]]   \tag{ih}
+          \]
+          from case 4 of the lemma. From which, we can construct the following instantiation of the \addDerName\ synthesis rule in the non-focusing calculus:
+          \[
+\inferrule*[right=der$^{+}$]
+{ [[ G, x : [A]s, y : A |- B =>+ t ; D, y : A ]] }
+{ [[ G, x : [A]s |- B =>+ {[pat x / y] t} ; D + x : [A]1 ]] }
+          \]
+
           \item Case \addLinVarName \\
           In the case of the left synchronous rule for linear variable synthesis, the synthesis rule has the form:
           \[
@@ -3038,8 +3072,8 @@ synthesis of open terms from types, followed by soundness of synthesis for close
         from which we can construct the following derivation, making use of the admissibility of substitution:
         \begin{equation}
           \label{soundAppSub1}
-          \inferrule*[Right=App]{
-            \inferrule*[Right=Var]
+          \inferrule*[Right=App, leftskip=4em]{
+            \inferrule*[Right=Var, leftskip=4em]
               {[[ Sig |- {A ^q -> B} : Type ]]}
               {[[  Sig; x1 : [ A ^ q -> B ] 1 |- x1 : A ^ q -> B ]]} \\ [[  Sig; D2, x1 : [A ^ q -> B] s3 |- t2 : A]]}{ [[  Sig; {q * D2}, x1 : [ A ^ q -> B ] {1 + (q * s3)} |-  x1 t2 : B ]]}
         \end{equation}
@@ -3053,7 +3087,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
         and commutativity of $+$, such that
         $[[ s1 + s2 * (1 + (q * s3)) ]] =  [[ s1 + (s2 * 1) + (s2 * q * s3) ]] = [[  s2 + s1 + (s2 * q * s3) ]]$.
 
-\item Case $\textsc{Con}_{\textsc{R}}$\\
+\item Case $\textsc{C}_{\textsc{R}}$\\
         For synthesising a constructor introduction, we have the derivation:
         \begin{align*}
           \synConP
@@ -3085,7 +3119,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
             {  \Sigma ; [[ {0 * G} + q1 * D1 ]]+ ...+  [[ qn * Dn |- Con t1 ... tn :  K { A Many } ]]}
         \end{align*}
 
-\item Case $\textsc{Con}_{\textsc{L}}$ \\
+\item Case $\textsc{C}_{\textsc{L}}$ \\
         For synthesising a case statement, we have the derivation:
         \begin{align*}
           \hspace{-10em}\synCaseP
@@ -3344,7 +3378,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
             \[
               [[ alpha : k; . |- A =>+ t ; . ]]   \tag{ih}
             \]
-            from case 1 of the lemma. From which, we can construct the following instatiation of the $\textsc{TopLevel}$ synthesis rule in the non-focusing calculus:
+            from case 1 of the lemma. From which, we can construct the following instantiation of the $\textsc{TopLevel}$ synthesis rule in the non-focusing calculus:
             \[
       \inferrule*[right=$\textsc{TopLevel}$]
       {[[ alpha : k ; . |- A =>+ t ; . ]]}{[[ . ; . |- Forall alpha : k . A =>+ t ; . ]]}
@@ -3361,7 +3395,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
             \[
               [[ Sig; (G , O), x : [ A] q |- B =>+ t ; D, x : [A ] r]]   \tag{ih}
             \]
-            from case 2 of the lemma. From which, we can construct the following instatiation of the $\rightarrow_{\textsc{R}}$ synthesis rule in the non-focusing calculus:
+            from case 2 of the lemma. From which, we can construct the following instantiation of the $\rightarrow_{\textsc{R}}$ synthesis rule in the non-focusing calculus:
             \[
       \inferrule*[right=$\rightarrow_{\textsc{R}}$]
       {[[ Sig; (G , O), x : [ A ] q |- B =>+ t ; D, x : [A] r && r <<= q ]]}{[[  Sig ; G , O |- A -> B =>+ \x ^ q . t ; D]]}

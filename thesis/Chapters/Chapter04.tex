@@ -52,7 +52,7 @@ extend our graded linear $\lambda$-calculus of Section
 ~\ref{sec:linear-base} to incorporate data constructors and pattern matching, as well 
 as recursive data types. 
 
-We begin with a motivating example in Section~\ref{sec:motivating-example}
+\paragraph{Roadmap} We begin with a motivating example in Section~\ref{sec:motivating-example}
 before defining our extended calculus in Section~\ref{sec:der-calculus}
 providing an idealised, simply-typed subset of Granule with which we develop the
 core deriving mechanism. Section~\ref{sec:push-pull-deriv} gives the procedures
@@ -410,7 +410,6 @@ A type $A$ must therefore involve a sum type for $|A| > 1$.
 Since a wildcard pattern $[[ _ ]]\,$ discards a value, this is only
 allowed inside an unboxing pattern where the enclosing grade
 permits weakening, captured via $[[ 0 <<= r ]]$ in rule \textsc{[Pwild]}.
-
 
 \section{Automatically Deriving \emph{push} and \emph{pull}}
 \label{sec:push-pull-deriv}

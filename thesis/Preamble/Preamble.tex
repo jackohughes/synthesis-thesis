@@ -496,15 +496,15 @@
 % FOCUSED SUBTRACTIVE RULES
 \newcommand*{\fSubAbsRule}{
     \inferrule*[right=\fSubAbsName,Lab=RightAsync]
-    {[[G ; O, x : A |- B async =>- t ; D]] \quad\; [[ x notin D ]]}{[[ G ; O |- {A -o B} async =>- \ x . t ; D]]}
+    {[[G ; O, x : A |- C async =>- t ; D]] \quad\; [[ x notin D ]]}{[[ G ; O |- {A -o B} async =>- \ x . t ; D]]}
 }
 \newcommand*{\fSubAbsRuleNoLabel}{
     \inferrule*[right=\fSubAbsName]
-    {[[G ; O, x : A |- B async =>- t ; D]] \quad\; [[ x notin D ]]}{[[ G ; O |- {A -o B} async =>- \ x . t ; D]]}
+    {[[G ; O, x : A |- C async =>- t ; D]] \quad\; [[ x notin D ]]}{[[ G ; O |- {A -o B} async =>- \ x . t ; D]]}
 }
 \newcommand*{\fSubRAsyncTransitionRule}{
   \inferrule*[right=\fSubRAsyncTransitionName]
-  {[[ G ; O async |- C =>- t ; D ]] \\ [[ C ]] \text{ not right async}}{[[G ; O |-
+  {[[ G ; O async |- C =>- t ; D ]] \\ [[ C ]] \text{ not } \textsc{Right Async}}{[[G ; O |-
   C async =>- t ; D]]}
 }
 \newcommand*{\fSubPairElimRule}{
@@ -539,24 +539,24 @@
 }
 \newcommand*{\fSubDerRule}{
 \inferrule*[right=\fSubDerName]
-{[[ G ; {x : [A] s, y : A } async |- B =>- t ; D, x : [A] s' ]] \\
+{[[ G ; {x : [A] s, y : A } sync |- B =>- t ; D, x : [A] s' ]] \\
 [[ y notin D ]] \\
 [[ exists s . r >= s + 1]]
 }
-{[[ G ; {x : [A] r} async |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
+{[[ G ; {x : [A] r} sync |- B =>- [pat x/y] t ; D, x : [A] s' ]]}
 }
 \newcommand*{\fSubLAsyncTransitionRule}{
   \inferrule*[right=\fSubLAsyncTransitionName]
-  {[[G, x : A ; O async |- C =>- t ; D ]] \\ \text{ A not left async}}{[[G ; {O, x
+  {[[G, x : A ; O async |- C =>- t ; D ]] \\ A \text{ not } \textsc{Left Async}}{[[G ; {O, x
   : A} async |- C =>- t ; D]]}
 }
 \newcommand*{\fSubFocusRRule}{
 \inferrule*[right=\fSubFocusRName,lab=Focus]
-  {[[G ; . |- C sync =>- t ; D]] \\ \text{ C not atomic}}{[[ G ; . async |- C =>- t ; D]]}
+  {[[G ; . |- C sync =>- t ; D]] \\ C \text{ not atomic}}{[[ G ; . async |- C =>- t ; D]]}
 }
 \newcommand*{\fSubFocusRRuleNoLabel}{
 \inferrule*[right=\fSubFocusRName]
-  {[[G ; . |- C sync =>- t ; D]] \\ \text{ C not atomic}}{[[ G ; . async |- C =>- t ; D]]}
+  {[[G ; . |- C sync =>- t ; D]] \\ C \text{ not atomic}}{[[ G ; . async |- C =>- t ; D]]}
 }
 \newcommand*{\fSubFocusLRule}{
 \inferrule*[right=\fSubFocusLName]
@@ -584,12 +584,12 @@
 }
 \newcommand*{\fSubBoxRule}{
     \inferrule*[right=\fSubBoxName]
-    {[[G; . |- A async =>- t ; D]]}{[[G ; . |- { [] r A} sync =>- t ; G - r * (G - D)]]}
+    {[[G; . |- A sync =>- t ; D]]}{[[G ; . |- { [] r A} sync =>- t ; G - r * (G - D)]]}
 }
 \newcommand*{\fSubUnitIntroRule}{
     \inferrule*[right=\fSubUnitIntroName]
     {\quad}
-    {[[G |- Unit =>- () ; G]]}
+    {[[G ; . |- Unit sync =>- () ; G]]}
 }
 \newcommand*{\fSubRSyncTransitionRule}{
   \inferrule*[right=\fSubRSyncTransitionName]
@@ -615,7 +615,7 @@
 }
 \newcommand*{\fSubLSyncTransitionRule}{
   \inferrule*[right=\fSubLSyncTransitionName]
-  {[[G ; {x : A} async |- C =>- t ; D]] \\ \text{ A not atomic and not left sync}}{[[G ; {x : A} sync |- C =>- t ; D]]}
+  {[[G ; {x : A} async |- C =>- t ; D]] \\ A \text{ not atomic and not } \textsc{Left Sync}}{[[G ; {x : A} sync |- C =>- t ; D]]}
 }
 
 % FOCUSED ADDITIVE RULES
@@ -631,7 +631,7 @@
 }
 \newcommand*{\fAddRAsyncTransitionRule}{
   \inferrule*[right=\fAddRAsyncTransitionName]
-  {[[ G ; O async |- C =>+ t ; D ]] \\ [[ C ]] \text{ not right async}}{[[G ; O |-
+  {[[ G ; O async |- C =>+ t ; D ]] \\ [[ C ]] \text{ not } \textsc{Right Async}}{[[G ; O |-
   C async =>+ t ; D]]}
 }
 \newcommand*{\fAddPairElimRule}{
@@ -666,21 +666,21 @@
 }
 \newcommand*{\fAddDerRule}{
   \inferrule*[right=\fAddDerName]
-  { [[ G ; {x : [A]s, y : A} async |- B =>+ t ; D, y : A ]] }
-  { [[ G ; x : [A]s async |- B =>+ [pat x / y] t ; D + x : [A] 1 ]] }
+  { [[ G ; {x : [A]s, y : A} sync |- B =>+ t ; D, y : A ]] }
+  { [[ G ; x : [A]s sync |- B =>+ [pat x / y] t ; D + x : [A] 1 ]] }
 }
 \newcommand*{\fAddLAsyncTransitionRule}{
   \inferrule*[right=\fAddLAsyncTransitionName]
-  {[[G, x : A ; O async |- C =>+ t ; D ]] \\ \text{ A not left async}}{[[G ; {O, x
+  {[[G, x : A ; O async |- C =>+ t ; D ]] \\ A \text{ not } \textsc{Left Async}}{[[G ; {O, x
   : A} async |- C =>+ t ; D]]}
 }
 \newcommand*{\fAddFocusRRule}{
 \inferrule*[right=\fAddFocusRName,lab=Focus]
-  {[[G ; . |- C sync =>+ t ; D]] \\ \text{ C not atomic}}{[[ G ; . async |- C =>+ t ; D]]}
+  {[[G ; . |- C sync =>+ t ; D]] \\ C \text{ not atomic}}{[[ G ; . async |- C =>+ t ; D]]}
 }
 \newcommand*{\fAddFocusRRuleNoLabel}{
 \inferrule*[right=\fAddFocusRName]
-  {[[G ; . |- C sync =>+ t ; D]] \\ \text{ C not atomic}}{[[ G ; . async |- C =>+ t ; D]]}
+  {[[G ; . |- C sync =>+ t ; D]] \\ C \text{ not atomic}}{[[ G ; . async |- C =>+ t ; D]]}
 }
 \newcommand*{\fAddFocusLRule}{
 \inferrule*[right=\fAddFocusLName]
@@ -708,7 +708,7 @@
 }
 \newcommand*{\fAddBoxRule}{
     \inferrule*[right=\fAddBoxName]
-    {[[G; . |- A async =>+ t ; D]]}{[[G ; . |- { [] r A} sync =>+ [t] ; r * D]]}
+    {[[G; . |- A sync =>+ t ; D]]}{[[G ; . |- { [] r A} sync =>+ [t] ; r * D]]}
 }
 \newcommand*{\fAddUnitIntroRule}{
     \inferrule*[right=\fAddUnitIntroName]
@@ -741,7 +741,7 @@
 }
 \newcommand*{\fAddLSyncTransitionRule}{
   \inferrule*[right=\fAddLSyncTransitionName]
-  {[[G ; {x : A} async |- C =>+ t ; D]] \\ \text{ A not atomic and not left sync
+  {[[G ; {x : A} async |- C =>+ t ; D]] \\ A \text{ not atomic and not } \textsc{Left Sync
   }}{[[G ; {x : A} sync |- C =>+ t ; D]]}
 }
 

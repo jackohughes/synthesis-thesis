@@ -31,7 +31,7 @@ systems and graded monadic systems in the literature
 found to be equivalent, while the same treatment for the former remains ongoing
 work. 
 
-The remainder of this chapter formally defines these calculi, starting with the
+\paragraph{Roadmap} The remainder of this chapter formally defines these calculi, starting with the
 linear $\lambda$-calculus in Section~\ref{sec:linear-lambda-calc}. Following
 this, in Section~\ref{sec:graded-linear} we extend the linear $\lambda$-calculus
 with a graded modal type (Section~\ref{sec:linear-base}) before presenting the
@@ -572,9 +572,6 @@ compCoK x y z = let [u] = x in let [v] = z in y  [ u [v] ]
 The type scheme for \granin{compCoK} quantifies over grade variables \granin{r}
 and \granin{s} which are annotated with the kind \granin{Semiring}. The grades
 must then be used in the type in a polymorphic way.
-
-
-
 % The corresponding type derivation for 
 % this term is:
 % \begin{align*}

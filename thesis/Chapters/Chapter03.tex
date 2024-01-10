@@ -42,9 +42,6 @@ is a linear assumption in $\Gamma$ that is used in some way to construct $t$,
 then the synthesis algorithm must synthesise a $t$ which uses $x$ exactly once.
 Likewise, if $x :_r A$ is a graded assumption, then it must be used in $t$ in a
 way which satisfies its grade $r$.
-
-This issue of resource non-determinism has been encountered before in the
-context of automated theorem proving for linear logic, however, such . 
  
 This problem has been explored before in the context of automated theorem
 proving for linear logic, and has been termed the \textit{resource management
@@ -439,56 +436,14 @@ problems.
 \section{The Synthesis Calculi}
 \label{sec:linear-base-synthesis}
 
-We now present two synthesis calculi based on the subtractive and additive resource
-management schemes, respectively. The structure of the synthesis calculi mirrors a
-cut-free sequent calculus, with
-\textit{left} and \textit{right} rules for each type constructor. Right rules
-synthesise an introduction form for the goal type. Left rules
-eliminate (deconstruct) assumptions so that they may be
-used inductively to synthesise sub-terms. Each type in the
-core language has right and left
-rules corresponding to its constructors and destructors respectively.
-
-
-\begin{figure}[t]
-\begin{gather*}
-{\footnotesize{
-  \hspace{-3em}\begin{array}{c}
-    \subLinVar
-    \;\;\;
-    \subGrVar
-    \\[1.25em]
-    \subAbs
-    \\[1.25em]
-    \subApp
-    \\[1.25em]
-    \subDer
-    \\[1.25em]
-    \subBox
-    \\[1.25em]
-    \subUnbox
-    \\[1.25em]
-    \subPairIntro
-    \\[1.25em]
-    \subPairElim
-    \\[1.25em]
-    \subSumIntroL
-    \;\;\;
-    \subSumIntroR
-    \\[1.25em]
-    \subSumElim
-    \\[1.25em]
-    \subUnitIntro
-    \;\;\;
-    \subUnitElim
-  \end{array}
-}}
-\end{gather*}
-\caption{Collected rules of the subtractive synthesis calculus}
-\label{fig:sub-rules}
-  \end{figure}
-
-
+We now present two synthesis calculi based on the subtractive and additive
+resource management schemes, respectively. The structure of the synthesis
+calculi mirrors a cut-free sequent calculus, with \textit{left} and
+\textit{right} rules for each type constructor. Right rules synthesise an
+introduction form for the goal type. Left rules eliminate (deconstruct)
+assumptions so that they may be used inductively to synthesise sub-terms. Each
+type in the core language has right and left rules corresponding to its
+constructors and destructors respectively.
 
 \subsection{Subtractive Resource Management}
 \label{subsec:subtractive}
@@ -835,6 +790,7 @@ The right and left rules for units are then
 self-explanatory following the subtractive resource model:
 %
 \begin{align*}
+  \hspace{-3em}
 \begin{array}{c}
   \subUnitIntro
   \;\;
@@ -842,6 +798,44 @@ self-explanatory following the subtractive resource model:
 \end{array}
 \end{align*}
 
+
+\begin{figure}[t]
+\begin{gather*}
+{\footnotesize{
+  \hspace{-3em}\begin{array}{c}
+    \subLinVar
+    \;\;\;
+    \subGrVar
+    \\[1.25em]
+    \subAbs
+    \\[1.25em]
+    \subApp
+    \\[1.25em]
+    \subDer
+    \\[1.25em]
+    \subBox
+    \\[1.25em]
+    \subUnbox
+    \\[1.25em]
+    \subPairIntro
+    \\[1.25em]
+    \subPairElim
+    \\[1.25em]
+    \subSumIntroL
+    \;\;\;
+    \subSumIntroR
+    \\[1.25em]
+    \subSumElim
+    \\[1.25em]
+    \subUnitIntro
+    \;\;\;
+    \subUnitElim
+  \end{array}
+}}
+\end{gather*}
+\caption{Collected rules of the subtractive synthesis calculus}
+\label{fig:sub-rules}
+  \end{figure}
 %
 
 \subsubsection{Soundness of Subtractive Synthesis}
@@ -864,44 +858,6 @@ graded variables with grades reflecting their use in $[[ t ]]$.
 \end{restatable}
 The proof of soundness can be found in Section~\ref{proof:linear-sub-sound} of Appendix~\ref{appendix:proofs}. 
 
-
-\begin{figure}[H]
-{\footnotesize{
-\begin{gather*}
-\hspace{-3em}\begin{array}{c}
-  \addLinVar
-  \;\;\;
-  \addGrVar
-\\[1.25em]
-  \addDer
-\\[1.25em]
-  \addAbs
-\\[1.25em]
-  \addApp
-\\[1.25em]
-  \addBox
-\\[1.25em]
-  \addUnbox
-\\[1.25em]
-  \addPairIntro
-\\[1.25em]
-  \addPairElim
-\\[1.25em]
-  \addSumIntroL
-\;\;\;
-  \addSumIntroR
-\\[1.25em]
-  \addSumElim
-\\[1.25em]
-  \addUnitIntro
-\;\;\;
-  \addUnitElim
-      \end{array}
-  \end{gather*}
-}}
-\caption{Collected rules of the additive synthesis calculus}
-\label{fig:add-rules}
-  \end{figure}
 
 \subsection{Additive Resource Management}
 \label{subsec:additive}
@@ -1039,31 +995,102 @@ As in the subtractive approach, the right and left rules for unit types, are
 as expected.
 \begin{align*}
 \begin{array}{c}
-  \hspace{-0.5em}\addUnitIntro
+  \hspace{-3em}\addUnitIntro
   \;\;\;
   \addUnitElim
 \end{array}
   \end{align*}
 
 
+\begin{figure}[t]
+{\footnotesize{
+\begin{gather*}
+\hspace{-3em}\begin{array}{c}
+  \addLinVar
+  \;\;\;
+  \addGrVar
+\\[1.25em]
+  \addDer
+\\[1.25em]
+  \addAbs
+\\[1.25em]
+  \addApp
+\\[1.25em]
+  \addBox
+\\[1.25em]
+  \addUnbox
+\\[1.25em]
+  \addPairIntro
+\\[1.25em]
+  \addPairElim
+\\[1.25em]
+  \addSumIntroL
+\;\;\;
+  \addSumIntroR
+\\[1.25em]
+  \addSumElim
+\\[1.25em]
+  \addUnitIntro
+\;\;\;
+  \addUnitElim
+      \end{array}
+  \end{gather*}
+}}
+\caption{Collected rules of the additive synthesis calculus}
+\label{fig:add-rules}
+  \end{figure}
+
+
   \subsubsection{Soundness of Additive Synthesis}
+  \label{subsec:add-sound}
   Thus concludes the rules for additive synthesis. As with subtractive, we
   have prove that this calculus is sound.
   \begin{restatable}[Additive synthesis soundness]{lemma}{addSynthSound}
-\label{lemma:addSynthSound} For all $[[ G ]]$ and $[[ A ]]$:
+\label{lemma:addSynthSound} 
+Given a particular pre-ordered semiring $\mathcal{R}$ parametrising the calculi,
+then, for all contexts $[[ G ]]$ and $[[ D ]]$, types $[[ A ]]$ and terms $[[ t ]]$:
 %
 \begin{align*}
 [[ G |- A =>+ t ; D ]] \quad \implies \quad [[ D |- t : A ]]
 \end{align*}
 \end{restatable}
 Thus, the synthesised term $[[ t ]]$ is well-typed
-at $[[ A ]]$ using only the assumptions $[[ D ]]$ (where $[[D]]$ is a
-subset of $[[G]]$).
+at $[[ A ]]$ using only the assumptions $[[ D ]]$ whose grades capture variable use 
+in $[[ t ]]$.
 i.e., synthesised terms are well typed at the type from which they
 were synthesised.
+
+In the additive calculus, the soundness on its own does not
+guarantee that a synthesised program $t$ is \emph{well resourced}, i.e., the
+grades in $[[ D ]]$ may not be approximated by the grades in $[[ G ]]$. For
+example, a valid judgement under
+semiring $\mathbb{N}_\equiv$ is:
+
+\begin{align*}
+[[ x : [A] 2 |- A =>+ x ; x : [A] 1 ]]
+\end{align*}
+
+i.e., for goal $A$, if $x$ has type $A$ in the context then we synthesis $x$ as
+the result program, regardless of the grades. A synthesis judgement such as this
+may be part of a larger derivation in which the grades eventually match, i.e.,
+this judgement forms part of a larger derivation which has a further
+sub-derivation in which $x$ is used again and thus the total usage for $x$ is
+eventually $2$ as prescribed by the input context. However, at the level of an
+individual judgement we do not guarantee that the synthesised term is
+well-resourced. A reasonable \emph{pruning condition} that could be used to
+assess whether any synthesis judgement is \emph{potentially} well-resourced is
+$\exists [[ D' ]] . [[ (D + D') <<= G ]]$, i.e., there is some additional usage
+$[[ D' ]]$ (that might come from further on in the synthesis process) that
+`fills the gap' in resource use to produce $[[ D + D' ]]$ which is
+overapproximated by $[[ G ]]$. In this example, $[[ D' ]] = [[ x : [A] 1 ]]$
+would satisfy this constraint, explaining that there is some further possible
+single usage which will satisfy the incoming grade. 
+
+We apply this pruning condition at the synthesis of terms which are binders. 
+Therefore, synthesised closed terms are always well-resourced.
+
 The proof of soundness can be found in Section~\ref{proof:linear-add-sound} of
 Appendix~\ref{appendix:proofs}.
-
 \subsubsection{Additive pruning}
 %
 As seen above, the additive approach delays checking whether a variable is used
@@ -1173,7 +1200,9 @@ whenever the conclusion of the rule is derivable, then so are its premises. In
 other words, the order in which we apply invertible rules doesn't matter. By
 fixing a particular ordering on the application of these rules, we eliminate
 much of the non-determinism that arises from trying branches which differ only
-in the order in which invertible rules are applied. 
+in the order in which invertible rules are applied. This focused approach to
+synthesis ensures that we are restricted to generating programs in
+$\beta$-normal form.
 
 We take both of our calculi and apply this focusing technique to them,
 yielding two \textit{focusing} calculi. To do so, we augment our previous
@@ -1205,13 +1234,13 @@ indicates an asynchronous phase, while a $\Downarrow$ indicates a synchronous
 (focused) phase. The location of the arrow in the judgement indicates whether we
 are focusing on the left or right:
 \begin{enumerate}
-  \item Right Async: $\multimap_{\textsc{R}}$ rule with the judgement:
+  \item \textsc{Right Async}: $\multimap_{\textsc{R}}$ rule with the judgement:
         \begin{align*}\Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow t\ |\ \Delta \end{align*}
-        \item Left Async:  $\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, $\mathsf{Unit}_{\textsc{L}}$, $\textsc{Der}$, and $\Box_{\textsc{L}}$ rules with the judgement:
+        \item \textsc{Left Async}:  $\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, $\mathsf{Unit}_{\textsc{L}}$, $\textsc{Der}$, and $\Box_{\textsc{L}}$ rules with the judgement:
         \begin{align*}\Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow t\ |\ \Delta \end{align*}
-        \item Right Sync:  $\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, $\mathsf{Unit}_{\textsc{R}}$, and $\Box_{\textsc{R}}$ rules with the judgement:
+        \item \textsc{Right Sync}:  $\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, $\mathsf{Unit}_{\textsc{R}}$, and $\Box_{\textsc{R}}$ rules with the judgement:
         \begin{align*}\Gamma ; \Omega \vdash A \Downarrow\ \Rightarrow t\ |\ \Delta \end{align*}
-        \item Left Sync:   $\multimap_{\textsc{L}}$ rule with the judgement:
+        \item \textsc{Left Sync}:   $\multimap_{\textsc{L}}$ rule with the judgement:
         \begin{align*}\Gamma ; \Omega \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta \end{align*}
 \end{enumerate}
 
@@ -1219,15 +1248,16 @@ The complete calculi of focusing synthesis rules are given in
 Figures~\ref{fig:focus-sub-right-async}-\ref{fig:focus-sub-left-sync} for the
 subtractive calculus,
 and~\ref{fig:focus-add-right-async}-\ref{fig:focus-add-left-sync} for the
-additive, divided into focusing phases. The focusing rules for the additive pruning 
-calculus are identical to the additive calculus, save for the $\otimes^{+}_{\textsc{R}}$ and 
-$\multimap^{+}_{\textsc{L}}$ rules, which are given in Figure~\ref{fig:focus-add-pruning}.
+additive, divided into focusing phases. The focusing rules for the additive
+pruning calculus are identical to the additive calculus, save for the
+$\otimes^{+}_{\textsc{R}}$ and $\multimap^{+}_{\textsc{L}}$ rules, which are
+given in Figure~\ref{fig:focus-add-pruning}.
 
 For the most part, the translation from non-focused to focused rules is
 straightforward. The most notable change occurs in rules in which assumptions
-are bound. In the cases where a fresh assumption's type falls into the Left
-Async category (i.e. $\otimes$, $\oplus$, etc.), then it is bound in the ordered
-context $\Omega$ instead of $\Gamma$. Left Async rules operate on assumptions in
+are bound. In the cases where a fresh assumption's type falls into the \textsc{Left
+Async} category (i.e. $\otimes$, $\oplus$, etc.), then it is bound in the ordered
+context $\Omega$ instead of $\Gamma$. \textsc{Left Async} rules operate on assumptions in
 $\Omega$, rather than $\Gamma$. This results in invertible elimination rules
 being applied as fully as possible before \textit{focusing} on non-invertible
 rules when $\Omega$ is empty.  
@@ -1237,6 +1267,9 @@ calculus has a set of rules which determine which part of the synthesis
 judgement will be focused on: the \textsc{Focus} rules. These rules are given by
 Figures~\ref{fig:focus-sub-focus}, and~\ref{fig:focus-add-focus} for the
 subtractive and additive calculi, respectively.
+
+We briefly describe each set of rules for the focusing phases of the subtractive
+synthesis calculus.
 
 
 \begin{figure}[H]
@@ -1249,9 +1282,16 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Right Async rules of the focused subtractive synthesis calculus}
+  \caption{$\textsc{Right Async}$ rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-right-async}
 \end{figure}
+The $\textsc{Right Async}$ phase of focusing (Figure~\ref{fig:focus-sub-right-async})
+contains the focused form of the $\multimap_\textsc{R}^-$ rule, which simply
+binds the variable from the $\lambda$ term in $\Omega$ instead of $\Gamma$. The
+$\Uparrow_\textsc{R}^-$ rule handles the transition from a $\textsc{Right Async}$ phase to
+a $\textsc{Left Async}$ phase. It is applied when the goal type $C$ is no longer right
+asynchronous (i.e. not a $\multimap$), thus we switch to breaking down the
+assumptions in $\Omega$ by applying a sequence of $\textsc{Left Async}$ rules.
 
 \begin{figure}[H]
   \begin{align*}
@@ -1265,18 +1305,25 @@ subtractive and additive calculi, respectively.
   \\[1.25em]
   \fSubUnitElimRule
   \\[1.25em]
-  \fSubDerRule
-  \\[1.25em]
+  % \fSubDerRule
+  % \\[1.25em]
   \fSubLAsyncTransitionRule
   \end{array}
     }}
   \end{align*}
-  \caption{Left Async rules of the focused subtractive synthesis calculus}
+  \caption{$\textsc{Left Async}$ rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-left-async}
 \end{figure}
 
+The $\textsc{Left Async}$ phase of focusing
+(Figure~\ref{fig:focus-sub-left-async}) breaks down the assumptions in $\Omega$
+via the application of left rules. The $\Uparrow_\textsc{L}^-$ rule moves an
+assumption from $\Gamma$ to $\Omega$ if the assumption's type is not left
+asynchronous. 
+
 \begin{figure}[H]
   \begin{align*}
+    \hspace{-3em}
     {\footnotesize{
 \begin{array}{c}
   \fSubFocusRRuleNoLabel
@@ -1286,9 +1333,19 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Focus rules of the focused subtractive synthesis calculus}
+  \caption{$\textsc{Focus}$ rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-focus}
 \end{figure}
+
+The next set of rules are the $\textsc{Focus}$ rules
+(Figure~\ref{fig:focus-sub-focus}) which are used to determine what synchronous
+phase should be entered based on the type. In both rules, $\Omega$ is empty as a
+consequence of repeatedly applying left rules in the $\textsc{Left Async}$ phase
+until each assumption is broken into assumptions without left asynchronous
+types. The $\textsc{Focus}_\textsc{R}^-$ rule requires that the goal type not be
+atomic (i.e. a type variable), as the $\textsc{Right Sync}$ phase comprises
+right rules for types. Similarly, the $\textsc{Focus}_\textsc{L}^-$ requires
+that $\Gamma$ not be empty.  
 
 \begin{figure}[H]
   \begin{align*}
@@ -1308,15 +1365,23 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Right Sync rules of the focused subtractive synthesis calculus}
+  \caption{$\textsc{Right Sync}$ rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-right-sync}
 \end{figure}
+
+The $\textsc{Right Sync}$ rules are given by
+Figure~\ref{fig:focus-sub-right-sync}, comprising the right rules for $\otimes$,
+$\oplus$, $\Box$, and $\mathsf{Unit}$. The rule $\Downarrow_\textsc{R}^-$
+switches back to a $\textsc{Right Async}$ phase if the other rules cannot be
+applied.
 
 \begin{figure}[H]
   \begin{align*}
     {\footnotesize{
 \begin{array}{c}
   \fSubAppRuleNoLabel
+  \\[1.25em]
+  \fSubDerRule
   \\[1.25em]
   \fSubLinVarRule
   \,
@@ -1326,9 +1391,19 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Left Sync and Var rules of the focused subtractive synthesis calculus}
+  \caption{$\textsc{Left Sync}$ and $\textsc{Var}$ rules of the focused subtractive synthesis calculus}
   \label{fig:focus-sub-left-sync}
 \end{figure}
+
+Finally the $\textsc{Left Sync}$ set (Figure~\ref{fig:focus-sub-left-sync})
+contains the focused $\multimap_\textsc{L}^-$ rule while the $\textsc{Var}$ set
+contains the focused forms of $\textsc{LinVar}^-$ and $\textsc{GrVar}^-$. Both
+sets allow transition back to the $\textsc{Left Async}$ phase via the
+$\Downarrow_\textsc{L}^-$ rule.
+
+This focused form of the additive synthesis calculi follow an identical scheme,
+given by Figures \ref{fig:focus-add-right-async}-\ref{fig:focus-add-left-sync}. 
+
 
 \begin{figure}[H]
   \begin{align*}
@@ -1340,7 +1415,7 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Right Async rules of the focused additive synthesis calculus}
+  \caption{$\textsc{Right Async}$ rules of the focused additive synthesis calculus}
   \label{fig:focus-add-right-async}
 \end{figure}
 
@@ -1354,15 +1429,15 @@ subtractive and additive calculi, respectively.
   \\[1.25em]
   \fAddUnboxRule
   \\[1.25em]
-  \fAddDerRule
-  \\[1.25em]
+  % \fAddDerRule
+  % \\[1.25em]
   \fAddUnitElimRule
   \\[1.25em]
   \fAddLAsyncTransitionRule
   \end{array}
     }}
   \end{align*}
-  \caption{Left Async rules of the focused additive synthesis calculus}
+  \caption{$\textsc{Left Async}$ rules of the focused additive synthesis calculus}
   \label{fig:focus-add-left-async}
 \end{figure}
 
@@ -1376,7 +1451,7 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Focus rules of the focused additive synthesis calculus}
+  \caption{$\textsc{Focus}$ rules of the focused additive synthesis calculus}
   \label{fig:focus-add-focus}
 \end{figure}
 
@@ -1398,7 +1473,7 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Right Sync rules of the focused additive synthesis calculus}
+  \caption{$\textsc{Right Sync}$ rules of the focused additive synthesis calculus}
   \label{fig:focus-add-right-sync}
 \end{figure}
 
@@ -1408,6 +1483,8 @@ subtractive and additive calculi, respectively.
 \hspace{-2em}\begin{array}{c}
   \fAddAppRule
   \\[1.25em]
+  \fAddDerRule
+  \\[1.25em]
   \fAddLinVarRule
   \;\;\;
   \fAddGrVarRule
@@ -1416,7 +1493,8 @@ subtractive and additive calculi, respectively.
   \end{array}
     }}
   \end{align*}
-  \caption{Left Sync and Var rules of the focused additive synthesis calculus}
+  \caption{$\textsc{Left Sync}$ and $\textsc{Var}$ rules of the focused additive
+  synthesis calculus}
   \label{fig:focus-add-left-sync}
 \end{figure}
 
@@ -1439,23 +1517,19 @@ Figure~\ref{fig:focusingFSM}. States comprise the four phases of focusing, plus
 two additional states, \textsc{Focus}, and \textsc{Var}. Edges are then the
 synthesis rules that direct the transition between focusing phases. The
 transitions between these focusing phases are handled by dedicated focusing
-rules for each transition. For the asynchronous phases, the
-$\Uparrow_{R}$/$\Uparrow_{L}$ handle the transition between right to left
-phases, and left to focusing phases, respectively. Conversely, the
-$\Downarrow{R}$ rule deals with the transition from a right synchronous phase
-back to a right asynchronous phase, with the $\Downarrow{L}$ rule likewise
-transitioning to a left asynchronous phase. Depending on the current phase of
-focusing, these rules consider the goal type, the assumption currently being
-focused on's type, as well as the size of $\Omega$, to decide when to transition
-between focusing phases. 
+rules for each transition. For the asynchronous phases, the $\Uparrow_{R}$
+handles the transition between $\textsc{Right Async}$ to $\textsc{Left Async}$
+phases, while the $\Uparrow_{L}$ handles the transition from $\textsc{Left
+Async}$ to $\textsc{Focus}$ phases. Conversely, the $\Downarrow{R}$ rule deals
+with the transition from a $\textsc{Right Sync}$ phase back to a $\textsc{Right
+Async}$ phase, with the $\Downarrow{L}$ rule likewise transitioning to a
+$\textsc{Left Async}$ phase. Depending on the current phase of focusing, these
+rules consider the goal type, the type of the assumption currently being focused
+on, as well as the size of $\Omega$, to decide when to transition between
+$\textsc{Focus}$ phases.  
 
-This focused approach to synthesis ensures that we are restricted to generating
-programs in $\beta$-normal form, which eliminates a class of redundant programs
-for which behaviourally equivalent $\beta$-normal forms can be synthesised in
-less steps.
-
-\tikzset{
-->, % makes the edges directed
+\tikzset{ ->,
+% makes the edges directed
 node distance=5cm, % specifies the minimum distance between two nodes. Change if necessary.
 every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
 initial text=$ $, % sets the text that appears on the start arrow
@@ -1474,16 +1548,16 @@ initial text=$ $, % sets the text that appears on the start arrow
 \node[state, accepting] at (5, -12) (V) { \textsc{Var} \\ $\Gamma ; [[ x : A ]] \Downarrow\ \vdash A \Rightarrow t\ |\ \Delta $};
 \draw (RA) edge[loop above] node{$\multimap_{\textsc{R}}$} (RA)
 (RA) edge[above, bend left] node{$\Uparrow_{\textsc{R}}$} (LA)
-(LA) edge[loop above] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \\ $\mathsf{Unit}_\textsc{L}$, $\textsc{Der}$, \\ $\Box_{\textsc{L}}$, $\Uparrow_{\textsc{L}}$ } (LA)
+(LA) edge[loop above] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \\ $\mathsf{Unit}_\textsc{L}$, \\ $\Box_{\textsc{L}}$, $\Uparrow_{\textsc{L}}$ } (LA)
 % (LA) edge[loop right] node{$\Uparrow_{L}$} (LA)
-(LA) edge[left, bend right] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \ \ \ \\ $\mathsf{Unit}_\textsc{L}$, $\textsc{Der}$, \ \ \ \ \\ $\Box_{\textsc{L}}$, $\Uparrow_\textsc{L}$ \ \ \ \ \\  } (F)
+(LA) edge[left, bend right] node{$\otimes_{\textsc{L}}$, $\oplus_{\textsc{L}}$, \ \ \ \\ $\mathsf{Unit}_\textsc{L}$, \ \ \ \ \\ $\Box_{\textsc{L}}$, $\Uparrow_\textsc{L}$ \ \ \ \ \\  } (F)
 % (LA) edge[right, bend left] node{$\Uparrow_{L}$} (F)
 (F) edge[below, bend right] node{\ \ \ \  $\textsc{F}_{\textsc{R}}$} (RS)
 (RS) edge[left, bend left] node{$\Downarrow_{\textsc{L}}$} (RA)
 (F) edge[below, bend left] node{$\textsc{F}_{\textsc{L}}$\ \ } (LS)
 (LS) edge[right, bend right] node{$\Downarrow_{\textsc{L}}$} (LA)
 (LS) edge[below, bend right] node{$\multimap_{\textsc{L}}$} (RS)
-(LS) edge[loop below] node{$\multimap_{\textsc{L}}$} (LS)
+(LS) edge[loop below] node{$\multimap_{\textsc{L}}, \textsc{Der}$} (LS)
 (RS) edge[loop below] node{$\otimes_{\textsc{R}}$, $\oplus1_{\textsc{R}}$, $\oplus2_{\textsc{R}}$, \\ $\mathsf{Unit}_\textsc{R}$, $\Box_{\textsc{R}}$} (RS)
 (LS) edge[below, bend left] node{\\[0.1em] \ \ \ $\textsc{LinVar}$, \\ \ \ \ $\textsc{GrVar}$ } (V)
 ;
@@ -1503,17 +1577,17 @@ respectively.
 
 \begin{restatable}[Soundness of focusing for subtractive synthesis]{lemma}{focusSoundSub}
   \label{lemma:fSubSynthSound}
-For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$, $[[ B]]$
 then:
 \begin{align*}
   {\footnotesize{
 \begin{array}{lll}
- 1.\ \text{Right Async:} & [[ G ; O |- A async =>- t ; D ]] \quad &\iff \quad [[ G , O |- A =>- t ; D ]]\\
- 2.\ \text{Left Async:} & [[ G ; O async |- C =>- t ; D ]] \quad &\iff \quad [[ G , O |- C =>- t ; D ]]\\
- 3.\ \text{Right Sync:} & [[ G ; . |- A sync =>- t ; D ]] \quad &\iff \quad [[ G |- A =>- t ; D ]]\\
- 4.\ \text{Left Sync:} & [[ G ; {x : A }sync |- C =>- t ; D ]] \quad &\iff \quad [[ G, x : A |- C =>- t ; D ]]\\
- 5.\ \text{Focus Right:} & [[ G ; O async |- C =>- t ; D ]] \quad &\iff \quad [[ G |- C =>- t ; D ]]\\
- 6.\ \text{Focus Left:} & [[ G, x : A ; O async |- C =>- t ; D ]] \quad &\iff \quad [[ G |- C =>- t ; D ]]
+ 1.\ \textsc{Right Async:} & [[ G ; O |- A async =>- t ; D ]] \quad &\iff \quad [[ G , O |- A =>- t ; D ]]\\
+ 2.\ \textsc{Left Async:} & [[ G ; O async |- B =>- t ; D ]] \quad &\iff \quad [[ G , O |- B =>- t ; D ]]\\
+ 3.\ \textsc{Right Sync:} & [[ G ; . |- A sync =>- t ; D ]] \quad &\iff \quad [[ G |- A =>- t ; D ]]\\
+ 4.\ \textsc{Left Sync:} & [[ G ; {x : A }sync |- B =>- t ; D ]] \quad &\iff \quad [[ G, x : A |- B =>- t ; D ]]\\
+ 5.\ \textsc{Focus Right:} & [[ G ; . async |- B =>- t ; D ]] \quad &\iff \quad [[ G |- B =>- t ; D ]]\\
+ 6.\ \textsc{Focus Left:} & [[ G, x : A ; . async |- C =>- t ; D ]] \quad &\iff \quad [[ G, x : A |- B =>- t ; D ]]
 \end{array}
   }}
 \end{align*}
@@ -1524,17 +1598,17 @@ which contains assumptions with grades reflecting their use in $[[ t ]]$.
 
 \begin{restatable}[Soundness of focusing for additive synthesis]{lemma}{focusSoundAdd}
   \label{lemma:fAddSynthSound}
-For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$, $[[ B ]]$
 then:
 \begin{align*}
   {\footnotesize{
 \begin{array}{lll}
- 1.\ \text{Right Async:} & [[ G ; O |- A async =>+ t ; D ]] \quad &\iff \quad [[ G , O |- A =>+ t ; D ]]\\
- 2.\ \text{Left Async:} & [[ G ; O async |- C =>+ t ; D ]] \quad &\iff \quad [[ G , O |- C =>+ t ; D ]]\\
- 3.\ \text{Right Sync:} & [[ G ; . |- A sync =>+ t ; D ]] \quad &\iff \quad [[ G |- A =>+ t ; D ]]\\
- 4.\ \text{Left Sync:} & [[ G ; {x : A }sync |- C =>+ t ; D ]] \quad &\iff \quad [[ G, x : A |- C =>+ t ; D ]]\\
- 5.\ \text{Focus Right:} & [[ G ; O async |- C =>+ t ; D ]] \quad &\iff \quad [[ G |- C =>+ t ; D ]]\\
- 6.\ \text{Focus Left:} & [[ G, x : A ; O async |- C =>+ t ; D ]] \quad &\iff \quad [[ G |- C =>+ t ; D ]]
+ 1.\ \textsc{Right Async:} & \Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow^{+} t \mid \Delta \quad &\iff \quad \Gamma, \Omega \vdash A \Rightarrow^{+} t \mid \Delta \\
+ 2.\ \textsc{Left Async:} & \Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow^{+} t \mid \Delta \quad &\iff \quad \Gamma, \Omega \vdash B \Rightarrow^{+} t \mid \Delta \\
+ 3.\ \textsc{Right Sync:} & \Gamma ; \emptyset \vdash A \Downarrow\ \Rightarrow^{+} t \mid \Delta  \quad &\iff \quad \Gamma \vdash A \Rightarrow^{+} t \mid \Delta\\
+ 4.\ \textsc{Left Sync:} & \Gamma ; x : A \Downarrow\ \vdash  B \Rightarrow^{+} t \mid \Delta \quad &\iff \quad \Gamma, x : A \vdash B \Rightarrow^{+} t \mid \Delta \\
+ 5.\ \textsc{Focus Right:} & \Gamma ; \emptyset \Uparrow\ \vdash A \Rightarrow^{+} t \mid \Delta \quad &\iff \quad \Gamma \vdash B \Rightarrow^{+} t \mid \Delta \\
+ 6.\ \textsc{Focus Left:} & \Gamma, x : A ; \emptyset \Uparrow\ \vdash B \Uparrow\ \Rightarrow^{+} t \mid \Delta \quad &\iff \quad \Gamma, x : A \mid B \Rightarrow^{+} t \mid \Delta 
 \end{array}
   }}
 \end{align*}
@@ -1545,17 +1619,17 @@ which contains assumptions with grades reflecting their use in $[[ t ]]$.
 
 \begin{restatable}[Soundness of focusing for additive pruning synthesis]{lemma}{focusSoundAddPruning}
 \label{lemma:fAddPruningSynthSound}
-For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$, $[[ B ]]$
 then:
 \begin{align*}
   {\footnotesize{
 \begin{array}{lll}
- 1.\ \text{Right Async:} & \Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G , O |- A =>+ t ; D ]]\\
- 2.\ \text{Left Async:} & \Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G , O |- C =>+ t ; D ]]\\
- 3.\ \text{Right Sync:} & \Gamma ; \emptyset \vdash A \Downarrow\ \Rightarrow^{+} t \mid \Delta  \quad &\iff \quad [[ G |- A =>+ t ; D ]]\\
- 4.\ \text{Left Sync:} & \Gamma ; x : A \Downarrow\ \vdash  B \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G, x : A |- C =>+ t ; D ]]\\
- 5.\ \text{Focus Right:} & \Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G |- C =>+ t ; D ]]\\
- 6.\ \text{Focus Left:} & \Gamma, x : A ; \Omega \Uparrow\ \vdash B \Uparrow\ \Rightarrow^{+} t \mid \Delta \quad &\iff \quad [[ G |- B =>+ t ; D ]]
+ 1.\ \textsc{Right Async:} & \Gamma ; \Omega \vdash A \Uparrow\ \Rightarrow^{\pm} t \mid \Delta \quad &\iff \quad \Gamma, \Omega \vdash A \Rightarrow^{\pm} t \mid \Delta \\
+ 2.\ \textsc{Left Async:} & \Gamma ; \Omega \Uparrow\ \vdash A \Rightarrow^{\pm} t \mid \Delta \quad &\iff \quad \Gamma, \Omega \vdash B \Rightarrow^{\pm} t \mid \Delta \\
+ 3.\ \textsc{Right Sync:} & \Gamma ; \emptyset \vdash A \Downarrow\ \Rightarrow^{\pm} t \mid \Delta  \quad &\iff \quad \Gamma \vdash A \Rightarrow^{\pm} t \mid \Delta\\
+ 4.\ \textsc{Left Sync:} & \Gamma ; x : A \Downarrow\ \vdash  B \Rightarrow^{\pm} t \mid \Delta \quad &\iff \quad \Gamma, x : A \vdash B \Rightarrow^{\pm} t \mid \Delta \\
+ 5.\ \textsc{Focus Right:} & \Gamma ; \emptyset \Uparrow\ \vdash A \Rightarrow^{\pm} t \mid \Delta \quad &\iff \quad \Gamma \vdash B \Rightarrow^{\pm} t \mid \Delta \\
+ 6.\ \textsc{Focus Left:} & \Gamma, x : A ; \emptyset \Uparrow\ \vdash B \Uparrow\ \Rightarrow^{\pm} t \mid \Delta \quad &\iff \quad \Gamma, x : A \mid B \Rightarrow^{\pm} t \mid \Delta 
 \end{array}
   }}
 \end{align*}
@@ -2055,7 +2129,8 @@ our simplified language.
 
 In Granule, however, we can write the above as: 
 \begin{granule}
-push : forall {k : Semiring, r : k, a b : Type} . (a * b) [r] -> (a [r] * b [r])
+push : forall {k : Semiring, r : k, a b : Type} 
+     . (a * b) [r] -> (a [r] * b [r])
 push [(x, y)] = ([x], [y])
 \end{granule}
 by pattern matching on both the graded modality and the product. The ability to
