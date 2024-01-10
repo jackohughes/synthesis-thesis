@@ -110,7 +110,7 @@ hypothesis is that resource-and-type-directed synthesis speeds up type-directed
 synthesis, reducing the number of paths that need to be explored and the amount
 of additional specification (e.g. input-output examples) required.
 
-\subsection{Graded Type Systems}
+\section{Graded Type Systems}
 
 Graded type systems trace their roots to linear logic. In linear logic, data is
 treated as though it were a finite resource which must be consumed exactly once
@@ -375,13 +375,17 @@ the two. Thus, we adopt the following structure:
 
 \end{enumerate}
 
-Table~\ref{table:chapter-calculi} summarises the structure of the thesis by chapter, with respect 
-to the variants of resourceful calculi we consider.
+Table~\ref{table:chapter-calculi} summarises the structure of the thesis by
+chapter, with respect to the variants of resourceful calculi we consider. Note
+that as the chapters progress, the calculi form supersets of
+the previous iterations, e.g. ADTs in Chapter~\ref{chapter:deriving} also allow
+us to express the $\otimes$, $\oplus$, and $\mathsf{Unit}$ types
+of~\ref{chapter:core}.
 \begin{table}[H]
 \begin{align*}
 \setlength{\arraycolsep}{0.2em}
 \begin{array}{r|c|c}
-      & \text{ Linear} + \text{Graded } & \text{ Graded}\\
+      & \text{ Linear base } & \text{ Graded base }\\
       \hline
       \text{Chapter~\ref{chapter:background}} & \multimap,\ \Box_r & \rightarrow \\
       \text{Chapter~\ref{chapter:core}} & \multimap,\ \Box_r,\ \otimes,\ \oplus,\ \mathsf{Unit} &  \\
