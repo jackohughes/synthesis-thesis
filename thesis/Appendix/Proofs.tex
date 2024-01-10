@@ -1808,13 +1808,14 @@ inverse proofs in Section~\ref{proof:inverse-proofs}.
 \subsection{Typed Equational Theory}
 \label{sec:typed-eq}
 
-Figure~\ref{fig:equational} defines an equational theory for
-\grminip{}. The equational theory is typed, but for brevity we elide
-the typing for most cases since it follows
-exactly from the structure of the terms. The fully typed
- rules are provided in the appendix~\cite{appendix}. For
-those rules which are type restricted, we include the full
-typed-equality judgment here. The typability of these equations relies on previous work on the Granule language which proves that pattern matching and substitution are well typed~\cite{DBLP:journals/pacmpl/OrchardLE19}.
+Figure~\ref{fig:equational} defines an equational theory for the linear base
+Granule typing calculus used in Chapter~\ref{chapter:deriving}. The equational
+theory is typed, and we provide the typed forms of the rules in
+Figure~\ref{fig:typed-eqt}. For those rules which are type restricted, we
+include the full typed-equality judgment here. The type-ability of these equations
+relies on previous work on the Granule language which proves that pattern
+matching and substitution are well
+typed~\cite{DBLP:journals/pacmpl/OrchardLE19}.
 
 \begin{figure}[h]
   \begin{align*}
@@ -1843,7 +1844,7 @@ typed-equality judgment here. The typability of these equations relies on previo
 \GRANULEdruleEquivXXcaseGen{}
     \end{array}
    \end{align*}
- \caption{Equational theory for \grminip{}}
+ \caption{Equational theory for linear base Granule}
  \label{fig:equational}
 \end{figure}
 
@@ -1914,6 +1915,8 @@ Lastly generalisation of an arbitrary boxed pattern to a variable is permitted t
 
 
 
+
+  \begin{figure}
 {\scalebox{0.92}{\begin{minipage}{1.0\linewidth}
       \begin{align*}
         {\footnotesize{
@@ -1933,6 +1936,9 @@ Lastly generalisation of an arbitrary boxed pattern to a variable is permitted t
         }}
 \end{align*}
 \end{minipage}}}
+\label{fig:typed-eqt}
+\caption{Typed equational theory for linear base Granule}
+\end{figure}
 %
 In $\GRANULEdruleEquivXXcaseAssocName{}$
 the predicate $[[ lin p ]]$ classifies those
