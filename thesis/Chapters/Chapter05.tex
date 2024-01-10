@@ -146,7 +146,7 @@ $[[ G ]]$, given by:
 \tag{\textit{variable contexts}}
 \end{equation*}
 %
-That is, a type variable context may be empty $\emptyset$, extended with a a
+That is, a type variable context may be empty $\emptyset$, extended with a
 kind-annotated type variable $\alpha : \kappa$ or extended with a recursion
 variable $X$. Recursion variables always have kind $\text{Type}$. Similarly, a
 variable context may be empty or extended with a \textit{graded} assumption $ [[
@@ -154,7 +154,7 @@ x : [A] r ]]$. Graded assumptions must be used in a way which adheres to the
 constraints of the grade $[[ r ]]$. Structural exchange is permitted, allowing a
 context to be arbitrarily reordered. A global context $[[ Defs ]]$ parametrises
 the system, containing top-level definitions and data constructors annotated
-with type schemes. 
+with type schemes. This context is elided in the rules as it never changes.
 
 Another judgment types top-level terms (definitions) with polymorphic type
 schemes:
@@ -216,10 +216,10 @@ typing rules for the new additions.
     \end{array}
     }}
     \end{align*}
-    \vspace{-1em}
+    % \vspace{-1em}
     \caption{Typing rules for the fully graded polymorphic $\lambda$-calculus}
     \label{fig:typing-graded-poly1}
-    \vspace{-0.5em}
+    % \vspace{-0.5em}
 \end{figure}
 
 \begin{figure}[t]
@@ -240,10 +240,10 @@ typing rules for the new additions.
     \end{array}
     }}
     \end{align*}
-    \vspace{-1em}
+    % \vspace{-1em}
     \caption{Typing rules for the fully graded polymorphic calculus extensions}
     \label{fig:typing-graded-poly2}
-    \vspace{-0.5em}
+    % \vspace{-0.5em}
 \end{figure}
 The use of top-level definitions is typed by the \textsc{Def} rule. The
 definition $x$ must be present in the global definition context $[[ Defs ]]$,
@@ -254,7 +254,7 @@ W~\citep{milner1978theory}.
 
 The graded $\lambda$-calculus fragment of our language remains mostly the same
 as in Section~\ref{sec:graded-base}, combined with the pattern typing of
-Section~\ref{section:der-calculus} of Chapter~\ref{chapter:deriving}. However,
+Section~\ref{sec:der-calculus} of Chapter~\ref{chapter:deriving}. However,
 the \textsc{Var} rule also checks the kind of the assumption $x$'s type in the
 premise.  
 
@@ -264,7 +264,7 @@ way for equi-recursive types.
 Introduction and elimination of data constructors is given by the \textsc{Con}
 and \textsc{Case} rules respectively, with \textsc{Case} also handling graded
 modality elimination via pattern matching, as in
-Section~\ref{section:der-calculus}. For \textsc{Con}, we may type a data
+Section~\ref{sec:der-calculus}. For \textsc{Con}, we may type a data
 constructor $[[C]]$ of some data type $[[ K {A Many} ]]$ (with zero or more type
 parameters represented by $[[ {A Many} ]]$) if it is present in the global
 context of data constructors $D$. Data constructors are closed requiring our
@@ -295,7 +295,7 @@ Figure~\ref{fig:pat-typing}.
     \end{array}
       }}
     \end{align*}
-    \vspace{-1.25em}
+    % \vspace{-1.25em}
       \caption{Pattern typing rules for the fully graded typing calculus}
     \label{fig:pat-typing}
 \end{figure}
@@ -364,8 +364,9 @@ variables were used in $[[ t ]]$. As with the typing rules, top-level
 definitions and data constructors in scope are contained in a set $[[ Defs ]]$,
 which parametrises the system and is elided in the rules. $[[ Sig ]]$ is a
 context of kind-annotated type variables, which we elide in rules where it is
-passed inductively to the premise(s). The graded context $[[ D ]]$ need not use
-all the variables in $[[ G ]]$, nor with exactly the same grades. 
+passed inductively to the premise(s). As in the additive scheme of
+Chapter~\ref{chapter:core}, the graded context $[[ D ]]$ need not use all the
+variables in $[[ G ]]$, nor with exactly the same grades. 
 
 We next present the synthesis calculus in stages, similarly to
 Chapter~\ref{chapter:core}. Each type former of the core calculus (with the
