@@ -1,21 +1,30 @@
 \chapter{An Extended Synthesis Calculus}
 \label{chapter:extended}
+In Chapter~\ref{chapter:core} we showed two ways in which a calculus of
+type-directed synthesis rules can incorporate grades to ensure that synthesised
+programs are both well-typed and well-resourced. We compared the performance of
+these calculi against each other, however, we have yet to show that synthesis
+with grades makes the task of program synthesis easier, by reducing the search
+space of programs. 
 
 So far, we have considered a language with a several basic types, but which
-falls short of the full expressive power of Granule. In this chapter, we
-consider a target language which is significantly more expressive than what we
-have seen thus far, constituting a fully-fledged functional programming
-language.
+falls short of the full features that one would expect in a practical functional
+language. In this chapter, we consider a target language which is significantly
+more expressive than what we have seen thus far, constituting a fully-fledged
+functional programming language, with (recursive) ADTs, recursion, and rank 1
+polymorphic definitions. 
 
-The above features could all have been added to the calculi from
-Chapter~\ref{chapter:core}, however, we take the inclusion of these new language
-features as an opportunity to also explore synthesis in a fully graded type
-system. As mentioned in~\ref{chapter:background}, the fully-graded linear-lambda
-calculus is one of the two dominant flavours of quantitative type system. This
-approach is common amongst implementations of quantitative type systems, such
-as Idris 2, the Linear Types language extension to GHC, and the
-\emph{GradedBase} language extension of Granule. 
+Chapter~\ref{chapter:deriving} introduced many of these features to the calculi
+from ``linear base'' system of Chapter~\ref{chapter:core}, however, we take the
+this chapter as an opportunity to also explore synthesis in a fully graded type
+system. As mentioned in Chapter~\ref{chapter:background}, the fully-graded
+linear-lambda calculus is one of the two dominant flavours of quantitative type
+system. This approach is common amongst implementations of quantitative type
+systems, such as Idris 2, the \emph{Linear Types} language extension to GHC, and
+the \emph{GradedBase} language extension of Granule (which forms the target
+language of our implementation). 
 
+\paragraph{Roadmap}
 We begin by extending the calculus of Section~\ref{sec:graded-base}, adding the
 synthesis of recursion, polymorphic user-defined algebraic data types, as well
 as the synthesis of recursive function definitions from polymorphic type
@@ -27,20 +36,21 @@ management scheme for this language in
 Section~\ref{section:graded-base-synthesis}, describing the rules in turn,
 introducing some additional features such as the ability to specify input-output
 examples for a desired synthesis problem (Section~\ref{sec:examples}), and
-additional post-synthesis refactoring
-procedures(Section~\ref{sec:graded-base-refactoring}). We then apply focusing to
-this calculus in Section~\ref{section:graded-base-focusing}, as we did in
+additional post-synthesis refactoring procedures as an extension of the
+procedures in Section~\ref{sec:linear-base-refactoring}
+(Section~\ref{sec:graded-base-refactoring}). We then apply focusing to this
+calculus in Section~\ref{section:graded-base-focusing}, as we did in
 Chapter~\ref{chapter:core}, using this focused form as the basis of the
 implementation of our synthesis tool.
 
-The synthesis tool is evaluated We evaluate our implementation on a set of 46
-benchmarks (Section~\ref{section:graded-base-evaluation}), including several non-trivial
+We evaluate our implementation on a set of 46 benchmarks
+(Section~\ref{section:graded-base-evaluation}), including several non-trivial
 programs which use algebraic data types and recursion.
 
 In Section~\ref{sec:linear-haskell}, to demonstrate the practicality and
 versatility of our approach, we apply our algorithm to synthesising programs in
-Haskell from type signatures that use GHC's \emph{linear types} extension.
-
+Haskell from type signatures that use GHC's \emph{Linear Types} extension,
+bringing our approach to a mainstream language.
 
 \section{A Fully Graded Target Language}
 \label{section:graded-base-typing}
@@ -53,8 +63,7 @@ polymorphism. The syntax of types is given by:
 \begin{align*}
     \hspace{-0.9em}[[ A ]] , [[ B ]] & ::=
            [[ A ^ r -> B ]]
-      \mid K
-      \mid [[ A B ]]
+      \mid [[ K {A Many} ]]
       \mid [[ [] r A ]]
       \mid \mu X . [[ A ]]
       \mid X
@@ -62,6 +71,7 @@ polymorphism. The syntax of types is given by:
     {\small{\tag{\textit{types}}}}
 \end{align*}
 \begin{align*}
+  \vspace{-1em}
     \hspace{-0.9em} K & ::=
            [[ Unit ]]
       \mid [[ Prod ]]
@@ -69,6 +79,14 @@ polymorphism. The syntax of types is given by:
     {\small{\tag{\textit{type constructors}}}}
 \end{align*}
 \begin{align*}
+  \vspace{-1em}
+  \hspace{-0.9em} \kappa & ::= 
+    \mathsf{Type}
+    \mid \kappa_1 \rightarrow \kappa_2
+    {\small{\tag{\textit{kinds}}}}
+\end{align*}
+\begin{align*}
+  \vspace{-1em}
     \hspace{-0.9em} \tau & ::=
            [[ Forall alpha : k . A  ]]
     {\small{\tag{\textit{type schemes}}}}
@@ -94,6 +112,7 @@ The syntax of terms is given by:
         {\small{\tag{\textit{terms} }}}
 \end{align*}
 \begin{align*}
+  \vspace{-1em}
         \hspace{-0.8em} [[ p ]] ::= \;
                & [[ x ]]
           \mid [[ _ ]]
@@ -101,45 +120,56 @@ The syntax of terms is given by:
           \mid [[ Con p1 ... pn ]]
         {\small{\tag{\textit{patterns}}}}
 \end{align*}
-Terms consist of a graded $\lambda$-calculus, a \textit{promotion} construct
- $[t]$ which introduces a graded modality explicitly, as well as data
- constructor introduction ($[[ Con t1 ... tn ]]$) and elimination via
- $\textbf{case}$ expressions with patterns, which are defined via the syntax of
- patterns $[[ p ]]$.
+Terms consist of a graded $\lambda$-calculus, a promotion construct $[t]$ which
+ introduces a graded modality explicitly, as well as data constructor
+ introduction ($[[ Con t1 ... tn ]]$) and elimination via $\textbf{case}$
+ expressions with patterns, which are defined via the syntax of patterns $[[ p
+ ]]$. Note that this syntax is equivalent to that of~\ref{chapter:deriving},
+ however, we omit $\textbf{letrec}$. Recursive function
+ definitions are instead given by writing a $\lambda$ term under a polymorphic
+ type scheme. 
 
 Typing judgements have the form $[[  Sig ; G |- t : A ]]$ assigning a type $[[ A
-]]$ to a term $ [[ t ]]$ under type variables $[[ Sig ]]$ and variable context
+]]$ to a term $ [[ t ]]$ under a type variable context $[[ Sig ]]$ and variable context
 $[[ G ]]$, given by:
 
 \begin{equation*}
+  [[ Sig ]] ::= \emptyset
+  \mid [[ Sig ]], \alpha : \kappa
+\tag{\textit{contexts}}
+\end{equation*}
+\begin{equation*}
+  \vspace{-1em}
   [[ D ]], [[ G ]] ::= \emptyset
   \mid [[ G , x : [ A ] r ]]
 \tag{\textit{contexts}}
 \end{equation*}
 %
-That is, a context may be empty $\emptyset$ or extended with a \textit{graded}
-assumption $ [[ x : [A] r ]]$. Graded assumptions must be used in a way which
-adheres to the constraints of the grade $[[ r ]]$. Structural exchange is
-permitted, allowing a context to be arbitrarily reordered. A global context $[[
-Defs ]]$ parametrises the system, containing top-level definitions and data
-constructors annotated with type schemes. A context of kind annotated type
-variables $[[ Sig ]]$ is used for kinding and when instantiating a type scheme
-from $[[ Defs ]]$. 
+That is, a type variable context may be empty $\emptyset$ or extended with a a
+kind-annotated type variable $\alpha : \kappa$. Similarly, a variable context
+may be empty or extended with a \textit{graded} assumption $ [[ x : [A] r ]]$.
+Graded assumptions must be used in a way which adheres to the constraints of the
+grade $[[ r ]]$. Structural exchange is permitted, allowing a context to be
+arbitrarily reordered. A global context $[[ Defs ]]$ parametrises the system,
+containing top-level definitions and data constructors annotated with type
+schemes. 
 
-Given a typing judgment $[[  Sig ; G |- t : A ]]$ we say that $t$ is both
-\emph{well typed} and \emph{well resourced} to highlight the role of grading in
-accounting for resource use via the semiring information. Another judgment types
-top-level terms (definitions) with polymorphic type schemes:
+Another judgment types top-level terms (definitions) with polymorphic type
+schemes:
 \begin{align*}
 \tyTopP
 \end{align*}
 This rule takes the type scheme and adds its universally quantified type
 variables to $[[ Sig ]]$, where they can be used subsequently in the typing
-rules. The rule's premise then types the body at $A$, using the typing rules for
-terms of Figure~\ref{fig:typing-graded-poly}, whose rules help explain the
-meaning of the syntax with reference to their static semantics.
-
-\begin{figure}[H]
+rules. This rule corresponds to the generalisation step of typing polymorphic
+definitions~\citep{milner1978theory}. The rule's premise then types the body at
+$A$, using the typing rules for terms of Figures~\ref{fig:typing-graded-poly1},
+and~\ref{fig:typing-graded-poly2} whose rules help explain the meaning of the
+syntax with reference to their static semantics. Figure~\ref{fig:typing-graded-poly1} 
+simply gives the rules from the fully graded $\lambda$-calculus of Section~\ref{sec:graded-base}
+adapted to include polymorphism, while Figure~\ref{fig:typing-graded-poly2} gives the
+typing rules for the new additions.
+\begin{figure}[t]
     \begin{align*}
       {{
     \hspace{0em}\begin{array}{c}
@@ -174,8 +204,6 @@ meaning of the syntax with reference to their static semantics.
     \begin{array}{c}
     \tyVarP
     \\[1.25em]
-    \tyDefP
-        \\[1.25em]
     \tyAbsP
     \;\;\;
     \tyAppP
@@ -183,6 +211,22 @@ meaning of the syntax with reference to their static semantics.
     \tyPrP
     \;\;\;
     \tyApproxP
+    \end{array}
+    }}
+    \end{align*}
+    \vspace{-1em}
+    \caption{Typing rules for the fully graded polymorphic $\lambda$-calculus}
+    \label{fig:typing-graded-poly1}
+    \vspace{-0.5em}
+\end{figure}
+
+\begin{figure}[t]
+    \begin{align*}
+    {\footnotesize{
+    \hspace{-2.5em}
+    % \\[1.25em]
+    \begin{array}{c}
+    \tyDefP
         \\[1.25em]
     \tyConP
         \\[1.25em]
@@ -195,38 +239,44 @@ meaning of the syntax with reference to their static semantics.
     }}
     \end{align*}
     \vspace{-1em}
-    \caption{Typing rules for the fully graded polymorphic calculus}
-    \label{fig:typing-graded-poly}
+    \caption{Typing rules for the fully graded polymorphic calculus extensions}
+    \label{fig:typing-graded-poly2}
     \vspace{-0.5em}
 \end{figure}
-Top-level definitions are typed by the \textsc{Def} rule. The definition $x$
-must be present in the global definition context $[[ Defs ]]$, with the type
-scheme $[[  Forall alpha : k . A' ]]$. The type $[[ A ]]$ results from
-instantiating all of the universal variables to types via the judgment $[[ Sig
-|- inst A A' ]]$ in a standard way as in Algorithm W~\citep{milner1978theory}.
+The use of top-level definitions is typed by the \textsc{Def} rule. The
+definition $x$ must be present in the global definition context $[[ Defs ]]$,
+with the type scheme $[[  Forall alpha : k . A' ]]$. The type $[[ A ]]$ results
+from instantiating all of the universal variables to types via the judgment $[[
+Sig |- inst A A' ]]$ in a standard way as in Algorithm
+W~\citep{milner1978theory}.
 
-The graded $\lambda$-calculus fragment of our language remains mostly the same 
-as in Section~\ref{sec:graded-base}. However, the \textsc{Var} rule also checks 
-the kind of the assumption $x$'s type in the premise.  
+The graded $\lambda$-calculus fragment of our language remains mostly the same
+as in Section~\ref{sec:graded-base}, combined with the pattern typing of
+Section~\ref{section:der-calculus} of Chapter~\ref{chapter:deriving}. However,
+the \textsc{Var} rule also checks the kind of the assumption $x$'s type in the
+premise.  
 
 Recursion is typed via the $\mu_1$ and $\mu_2$ rules, in a standard
-way.
+way for equi-recursive types.
 
-Introduction and elimination of data constructors is given by
-the \textsc{Con} and \textsc{Case} rules respectively,
-with \textsc{Case} also handling graded modality elimination via
-pattern matching. For \textsc{Con}, we may type a data constructor
-$[[C]]$ of some data type $[[ K {A Many} ]]$ (with zero or more type
+Introduction and elimination of data constructors is given by the \textsc{Con}
+and \textsc{Case} rules respectively, with \textsc{Case} also handling graded
+modality elimination via pattern matching, as in
+Section~\ref{section:der-calculus}. For \textsc{Con}, we may type a data
+constructor $[[C]]$ of some data type $[[ K {A Many} ]]$ (with zero or more type
 parameters represented by $[[ {A Many} ]]$) if it is present in the global
-context of data constructors $D$. Data constructors are closed
-requiring our context $[[ G ]]$ to have zero-use grades, thus we scale
-$[[G]]$ by $0$. Elimination of data constructors take place via
-pattern matching over a constructor. Patterns $[[p]]$ are typed by the
-judgement $[[ r |- p : A |> D ]]$ which states that a pattern $[[p]]$
-has type $[[A]]$ and produces a context of typed binders $[[D]]$. The
-grade $[[r]]$ to the left of the turnstile represents the grade
-information arising from usage in the context generated by this
-pattern match. The pattern typing rules are given by
+context of data constructors $D$. Data constructors are closed requiring our
+context $[[ G ]]$ to have zero-use grades, thus we scale $[[G]]$ by $0$.
+Elimination of data constructors take place via pattern matching over a
+constructor. Patterns $[[p]]$ are typed by the judgement $[[ r |- p : A |> D ]]$
+which states that a pattern $[[p]]$ has type $[[A]]$ and produces a context of
+typed binders $[[D]]$. The grade $[[r]]$ to the left of the turnstile represents
+the grade information arising from usage in the context generated by this
+pattern match. This is similar to the approach used for pattern typing in
+Section~\ref{section:der-calculus}, however, we note that we no longer have the
+linear forms of the rules. 
+
+The pattern typing rules are given by
 Figure~\ref{fig:pat-typing}.
 
 \begin{figure}[t]
@@ -244,7 +294,7 @@ Figure~\ref{fig:pat-typing}.
       }}
     \end{align*}
     \vspace{-1.25em}
-      \caption{Pattern typing rules of for the fully graded typing calculus}
+      \caption{Pattern typing rules for the fully graded typing calculus}
     \label{fig:pat-typing}
 \end{figure}
 
@@ -252,7 +302,9 @@ Variable patterns are typed by \textsc{PVar}, which simply produces a singleton
 context containing an assumption $[[ x : [A] r]]$ from the variable pattern with
 any grade $[[ r ]]$. A wildcard pattern $\_$, typed by the \textsc{PWild} rule,
 is only permissible with grades that allow for weakening, i.e., where $0
-\sqsubseteq r$. Pattern matching over data constructors is handled by the
+\sqsubseteq r$. 
+
+Pattern matching over data constructors is handled by the
 \textsc{PCon} rule. A data constructor may have up to zero or more sub-patterns
 ($[[ p1 ]] ... [[ pn ]]$), each of which is typed under the grade $[[ qi ]]
 \cdot [[ r ]]$ (where $[[ qi ]]$ is the grade of corresponding argument type for
@@ -262,19 +314,22 @@ more than one data constructor for the data type (written $|[[ K {A Many} ]]| >
 1$), then $[[ r ]]$ must approximate 1 because pattern matching on a data
 constructor incurs some usage since it reveals information about that
 constructor.\footnote{A discussion of this additional constraint on grades for
-case expressions is given by \citet{DBLP:journals/corr/abs-2112-14966} comparing
-how this manifests in various approaches.} By contrast, pattern matching on a
-type with only one constructor cannot convey any information by itself and so no
-usage requirement is imposed. Finally, elimination of a graded modality (often
-called \textit{unboxing}) takes place via the \textsc{PBox} rule, with syntax
-$[[ [p] ]]$. Like \textsc{PCon}, this rule propagates the grade information of
-the box pattern's type $[[s]]$ to the enclosed sub-pattern $[[ p ]]$, yielding a
-context with the grades $[[r * s]]$. One may observe that \textsc{PBox} (and by
-extension \textsc{Pr}) could be considered as special cases of \textsc{PCon}
-(and \textsc{Con} respectively), if we were to treat our promotion construct as
-a data constructor with the type $[[ A ^ r -> {[] r A} ]]$. We find it helpful
-to keep explicit modality introduction and elimination distinct from
-constructors, however, particularly with regard to synthesis.
+case expressions is given in Section~\ref{sec:related-work-deriving}
+of~\ref{chapter:deriving} comparing how this manifests in various approaches.}
+
+By contrast, pattern matching on a type with only one constructor cannot convey
+any information by itself and so no usage requirement is imposed. Finally,
+elimination of a graded modality (often called \textit{unboxing}) takes place
+via the \textsc{PBox} rule, with syntax $[[ [p] ]]$. Like \textsc{PCon}, this
+rule propagates the grade information of the box pattern's type $[[s]]$ to the
+enclosed sub-pattern $[[ p ]]$, yielding a context with the grades $[[r * s]]$.
+
+One may observe that \textsc{PBox} (and by extension \textsc{Pr}) could be
+considered as special cases of \textsc{PCon} (and \textsc{Con} respectively), if
+we were to treat our promotion construct as a data constructor with the type $[[
+A ^ r -> {[] r A} ]]$. We find it helpful to keep explicit modality introduction
+and elimination distinct from constructors, however, particularly with regard to
+synthesis.
 
 \subsection{Metatheory}
 Lastly we note that the fully graded system also enjoys admissibility of
@@ -305,113 +360,19 @@ That is, given an input context $[[ G ]]$, for goal type $[[ A ]]$ we can
 synthesise the term $[[ t ]]$ with the output context $[[ D ]]$ describing how
 variables were used in $[[ t ]]$. As with the typing rules, top-level
 definitions and data constructors in scope are contained in a set $[[ Defs ]]$,
-which parametrises the system. $[[ Sig ]]$ is a context of kind-annotated type
-variables, which we elide in rules where it is passed inductively to the
-premise(s). The graded context $[[ D ]]$ need not use all the variables in $[[ G
-]]$, nor with exactly the same grades. Instead, the relationship between
-synthesis and typing is given by the central soundness result, which we state
-up-front: % (the appendix provides the proof):
-%(Appendix~\ref{sec:soundness-proofs} provides the proof):
+which parametrises the system and is elided in the rules. $[[ Sig ]]$ is a
+context of kind-annotated type variables, which we elide in rules where it is
+passed inductively to the premise(s). The graded context $[[ D ]]$ need not use
+all the variables in $[[ G ]]$, nor with exactly the same grades. 
 
-\begin{restatable}[Soundness of synthesis]{theorem}{synthSound}
-\label{lemma:synthSound}
-Given a particular pre-ordered semiring $\mathcal{R}$ parametrising the calculi,
-then:
-\begin{enumerate}
-\item For all contexts $[[ G ]]$ and $[[ D ]]$, types $[[ A ]]$, terms $[[ t ]]$:
-\begin{align*}
-[[ Sig; G |- A =>+ t ; D ]] \quad \implies \quad [[ Sig; D |- t : A ]]
-\end{align*}
-i.e. $[[ t ]]$ has type $[[ A ]]$
-under context $[[ D ]]$ whose grades capture variable use in $[[ t ]]$.
-\item At the top-level,
-for all type schemes $[[ Forall alpha : k . A ]]$ and terms $[[ t ]]$ then:
-%
-\begin{align*}
-[[ . ; . |- Forall alpha : k . A =>+ t ; . ]]
-\quad \implies \quad [[  . ; . |- t : Forall alpha : k . A ]]
-\end{align*}
-%
-\end{enumerate}
-\end{restatable}
-
-\begin{figure}
-    \begin{align*}
-      {\footnotesize{
-    \hspace{-3em}\begin{array}{c}
-      \synDefP
-      \\[1.25em]
-      \synTopP
-      \;\;\;
-      \synVarP
-      \\[1.25em]
-      \synAbsP
-      \\[1.25em]
-      \synAppP
-      \\[1.25em]
-      \synConP
-      \\[1.25em]
-      \synCaseP
-      \\[1.25em]
-      \synBoxP
-      \\[1.25em]
-      \synUnboxP
-      \\[1.25em]
-      \synMuRP
-      \;\;\;\;
-      \synMuLP
-        \end{array}
-      }}
-      \end{align*}
-    \caption{Collected rules of the fully graded synthesis calculus}
-    \end{figure}
-%
-The first part of soundness on its own does not guarantee that a synthesised
-program $t$ is \emph{well resourced}, i.e., the grades in $[[ D ]]$ may not be
-approximated by the grades in $[[ G ]]$. For example, a valid judgement (whose
-more general rule is seen shortly) under semiring $\mathbb{N}_\equiv$ is:
-%
-\begin{align*}
-[[ x : [A] 2 |- A =>+ x ; x : [A] 1 ]]
-\end{align*}
-%
-i.e., for goal $A$, if $x$ has type $A$ in the context then we synthesis $x$ as
-the result program, regardless of the grades. A synthesis judgement such as this
-may be part of a larger derivation in which the grades eventually match, i.e.,
-this judgement forms part of a larger derivation which has a further
-sub-derivation in which $x$ is used again and thus the total usage for $x$ is
-eventually $2$ as prescribed by the input context. However, at the level of an
-individual judgement we do not guarantee that the synthesised term is
-well-resourced. A reasonable \emph{pruning condition} that could be used to
-assess whether any synthesis judgement is \emph{potentially} well-resourced is
-$\exists [[ D' ]] . [[ (D + D') <<= G ]]$, i.e., there is some additional usage
-$[[ D' ]]$ (that might come from further on in the synthesis process) that
-`fills the gap' in resource use to produce $[[ D + D' ]]$ which is
-overapproximated by $[[ G ]]$. In this example, $[[ D' ]] = [[ x : [A] 1 ]]$
-would satisfy this constraint, explaining that there is some further possible
-single usage which will satisfy the incoming grade. However,
-Chapter~\ref{chapter:core} showed that excessive pruning at every step becomes
-too costly in a general setting. Instead, we apply such pruning more
-judiciously, only requiring that variable use is well-resourced at the point of
-synthesising binders. Therefore synthesised closed terms are always
-well-resourced (second part of the soundness theorem).
-
-Section~\ref{proofs:graded-base-soundness} of Appendix~\ref{appendix:proofs} provides the soundness
-proof, which in part resembles a translation from sequent calculus to natural
-deduction, but also with the management of grades between synthesis and type
-checking.
-
-For open terms, the implementation checks that from a user-given top-level goal
-$A$ for which $[[ G |- A => t ; D ]]$ is derivable then $t$ is only provided as
-a valid (well-typed and well-resourced) result if $[[ D <<= G ]]$.
-
-We next present the synthesis calculus in stages. Each type former of the core
-calculus (with the exception of type variables) has two corresponding synthesis
-rules: a right rule for introduction (labelled $\textsc{R}$) and a left rule for
-elimination (labelled $\textsc{L}$). We frequently apply the algorithmic reading
-of the judgements, where meta-level terms to the left of $\Rightarrow$ are
-inputs (i.e., context $[[ G ]]$ and goal type $[[ A ]]$) and terms to the right
-of $\Rightarrow$ are outputs (i.e., the synthesised term $[[ t ]]$ and the usage
+We next present the synthesis calculus in stages, similarly to
+Chapter~\ref{chapter:core}. Each type former of the core calculus (with the
+exception of type variables) has two corresponding synthesis rules: a right rule
+for introduction (labelled $\textsc{R}$) and a left rule for elimination
+(labelled $\textsc{L}$). We frequently apply the algorithmic reading of the
+judgements, where meta-level terms to the left of $\Rightarrow$ are inputs
+(i.e., context $[[ G ]]$ and goal type $[[ A ]]$) and terms to the right of
+$\Rightarrow$ are outputs (i.e., the synthesised term $[[ t ]]$ and the usage
 context $[[ D ]]$).
 %Section~\ref{subsection:rules} focuses primarily on a
 %simply-typed core of synthesis, explaining how each synthesis
@@ -437,8 +398,7 @@ type, providing the entry-point to synthesis:
 \end{align*}
 This rule takes the universally quantified type variables $\overline{\alpha : \kappa}$
 from the type scheme and adds them to the type variable context $\Sigma$;
-type variables are only equal to themselves. This rule corresponds
-to the generalisation step of typing polymorphic definitions~\citep{milner1978theory}.
+type variables are only equal to themselves.
 
 \subsubsection{Variables}
 For any goal type $A$, if there is a variable in the context matching this type
@@ -479,21 +439,21 @@ respectively. An abstraction is synthesised like so:
     \synAbs
 \end{align*}
 %
-Reading bottom up, to synthesise a term of type
-$[[ A ^ q -> B ]]$ in context $[[ G ]]$ we first
-extend the context
-with a fresh variable assumption $[[ x : [A] q ]]$ and synthesise a term of type $[[ B ]]$ that will ultimately become the body
-of the function. The type $[[ A ^ q -> B ]]$ conveys that $[[ A ]]$ must be
-used according to $[[ q ]]$ in our term for $[[ B ]]$. The fresh variable
-$[[ x ]]$  is passed to the premise of the rule using
-the grade of the binder: $[[ q ]]$. The $[[ x ]]$ must then be used to synthesise a term
-$[[ t ]]$ with $[[ q ]]$ usage. In the premise, after synthesising $[[ t ]]$ we obtain an output context
-$[[ D, x : [A] r ]]$. As mentioned, the $\textsc{Var}$ rule ensures
-that $[[ x ]]$ is present in this context, even if it was not used in the
-synthesis of $[[ t ]]$ (e.g., $[[ r ]] = 0$).
-The rule ensures the usage of bound term ($r$) in $[[t]]$ does not violate the
-input grade $q$ via the requirement that $[[ r ]] \sqsubseteq [[ q ]]$ i.e. that $[[ r ]]$
-\textit{approximates} $[[ q ]]$. If met, $[[ D ]]$ becomes the output context of the rule's conclusion.
+Reading bottom up, to synthesise a term of type $[[ A ^ q -> B ]]$ in context
+$[[ G ]]$ we first extend the context with a fresh variable assumption $[[ x :
+[A] q ]]$ and synthesise a term of type $[[ B ]]$ that will ultimately become
+the body of the function. The type $[[ A ^ q -> B ]]$ conveys that $[[ A ]]$
+must be used according to $[[ q ]]$ in our term for $[[ B ]]$. The fresh
+variable $[[ x ]]$  is passed to the premise of the rule using the grade of the
+binder: $[[ q ]]$. The variable $[[ x ]]$ must then be used to synthesise a term
+$[[ t ]]$ with $[[ q ]]$ usage. In the premise, after synthesising $[[ t ]]$ we
+obtain an output context $[[ D, x : [A] r ]]$. The $\textsc{Var}$ and
+$\textsc{C}_\textsc{R}$ rules (i.e. terminal rules) ensure that $[[ x ]]$ is
+present in this context, even if it was not used in the synthesis of $[[ t ]]$
+(e.g., $[[ r ]] = 0$). The rule ensures the usage of bound term ($r$) in $[[t]]$
+does not violate the input grade $q$ via the requirement that $[[ r ]]
+\sqsubseteq [[ q ]]$ i.e. that $[[ q ]]$ \textit{approximates} $[[ r ]]$. If
+met, $[[ D ]]$ becomes the output context of the rule's conclusion.
 
 The counterpart to abstraction synthesises an
 application from the occurrence of a function in the context (a left rule):
@@ -528,27 +488,49 @@ In the conclusion of the rule, a term is synthesised
 which substitutes in $[[ t1 ]]$ the result placeholder variable $[[ x2 ]]$ for the application
 $[[ x1 t2 ]]$.
 
-The first premise yields an output context
-$[[ D1, x1 : [ A ^ q -> B ] s1, x2 : [B] s2 ]]$.
-The output context of the conclusion is obtained by taking the context addition of
-$[[ D1 ]]$ and $[[ s2 * {q * D2} ]]$. The output context $[[ D2 ]]$ is first scaled by
-$[[ q ]]$ since $[[ t2 ]]$ is used according to $[[ q ]]$ when applied to
-$[[ x1 ]]$ (as per the type of $[[ x1 ]]$). We then scale this again by $[[ s2 ]]$
-which represents the usage of the entire application $[[ x1 t2 ]]$ inside
-$[[ t1 ]]$.
+The first premise yields an output context $[[ D1, x1 : [ A ^ q -> B ] s1, x2 :
+[B] s2 ]]$. The output context of the conclusion is obtained by taking the
+context addition of $[[ D1 ]]$ and $[[ s2 * {q * D2} ]]$. The output context $[[
+D2 ]]$ is first scaled by $[[ q ]]$ since $[[ t2 ]]$ is used according to $[[ q
+]]$ when applied to $[[ x1 ]]$ (as per the type of $[[ x1 ]]$). We then scale
+this again by $[[ s2 ]]$ which represents the usage of the entire application
+$[[ x1 t2 ]]$ inside $[[ t1 ]]$.
 
-The output grade of $[[ x1 ]]$ follows a similar pattern
-since this rule permits the re-use of
-$[[ x1 ]]$ inside both premises of the application (which
-differs from our treatment of synthesis in a linear setting).
-As $[[ x1 ]]$'s input grade $[[ r1 ]]$ may permit multiple uses both inside the
-synthesis of the application argument $[[ t2 ]]$ and in $[[ t1 ]]$ itself, the
-total usage of $[[ t1 ]]$ across both premises must be calculated. In the first
-premise $[[ x1 ]]$ is used according to $[[ s1 ]]$, and in the second according
-to $[[ s3 ]]$. As with $[[ D2 ]]$, we take the semiring multiplication of $[[ s3 ]]$ and $[[ q ]]$ and then
-multiply this by $[[ s2 ]]$ to yield the final usage of $[[ x1 ]]$ in $[[ t2 ]]$.
-We then add this to $[[ s2 + s1 ]]$ to yield the total usage of $[[ x1 ]]$ in
-$[[ t1 ]]$.
+The output grade of $[[ x1 ]]$ follows a similar pattern since this rule permits
+the re-use of $[[ x1 ]]$ inside both premises of the application (which differs
+from our treatment of synthesis in a linear setting). As $[[ x1 ]]$'s input
+grade $[[ r1 ]]$ may permit multiple uses both inside the synthesis of the
+application argument $[[ t2 ]]$ and in $[[ t1 ]]$ itself, the total usage of $[[
+t1 ]]$ across both premises must be calculated. 
+
+% The logic behind this grade
+% calculation is illustrated in the soundness proof for $\rightarrow_\textsc{L}$. 
+In the first premise $[[ x1 ]]$ is used according to $[[ s1 ]]$, and in the
+second according to $[[ s3 ]]$. As with $[[ D2 ]]$, we take the semiring
+multiplication of $[[ s3 ]]$ and $[[ q ]]$ and then multiply this by $[[ s2 ]]$
+to yield the final usage of $[[ x1 ]]$ in $[[ t2 ]]$. We then add this to $[[ s2
++ s1 ]]$ to yield the total usage of $[[ x1 ]]$ in $[[ t1 ]]$.
+
+% The total usage of $[[ x1 ]]$ 
+% in the application $[[ x1 t2 ]]$ is thus given by $s2 * q * s3$. 
+
+
+
+% In the proof, this allows us to construct a typing derivation for the
+% application $[[ x1 t2 ]]$. We make use of the distributive property of semirings
+% along with the commutativity of $+$ and unitality of $1$ such that $ = (s_2 \cdot 1) + (s_2 \cdot q \cdor s_3) = s_2 \cdot q \cdot s_3 $ to yield the typing
+% context $[[ D2 ]], x_1 :_{1 \cdot (q \cdot s_3)} A^q \rightarrow B$, $()$
+
+
+% \begin{align*}
+%   \hspace{6em}
+%           \inferrule*[Right=App, leftskip=4em]{
+%             \inferrule*[Right=Var, leftskip=4em]
+%               {[[ Sig |- {A ^q -> B} : Type ]]}
+%               {[[  Sig; x1 : [ A ^ q -> B ] 1 |- x1 : A ^ q -> B ]]} \\ [[  Sig; D2, x1 : [A ^ q -> B] s3 |- t2 : A]]}{ [[  Sig; {q * D2}, x1 : [ A ^ q -> B ] {1 + (q * s3)} |-  x1 t2 : B ]]}
+% \end{align*}
+
+
 
 \subsubsection{Using polymorphic definitions}
 
@@ -817,6 +799,84 @@ incremented. Combined with focusing (see Section~\ref{section:graded-base-focusi
 provides the basis for an efficient implementation of the above rules.
 
 % The benchmarks in Section~\ref{sec:evaluation} make heavy use of polymorphism.
+\begin{figure}[H]
+    \begin{align*}
+      {\footnotesize{
+    \hspace{-4em}\begin{array}{c}
+      \synDefP
+      \\[2.25em]
+      \synTopP
+      \;\;\;
+      \synVarP
+      \\[2.25em]
+      \synAbsP
+      \\[2.25em]
+      \synAppP
+      \\[2.25em]
+      \synConP
+      \\[2.25em]
+      \synCaseP
+      \\[2.25em]
+      \synBoxP
+      \\[2.25em]
+      \synUnboxP
+      \\[2.25em]
+      \synMuRP
+      \;\;\;\;
+      \synMuLP
+        \end{array}
+      }}
+      \end{align*}
+    \caption{Collected rules of the fully graded synthesis calculus}
+    \end{figure}
+
+
+\subsection{Soundness of Synthesis}
+The relationship between synthesis and typing is given by the central soundness
+result: % (the appendix provides the proof):
+%(Appendix~\ref{sec:soundness-proofs} provides the proof):
+
+\begin{restatable}[Soundness of synthesis]{theorem}{synthSound}
+\label{lemma:synthSound}
+Given a particular pre-ordered semiring $\mathcal{R}$ parametrising the calculi,
+then:
+\begin{enumerate}
+\item For all contexts $[[ G ]]$ and $[[ D ]]$, types $[[ A ]]$, terms $[[ t ]]$:
+\begin{align*}
+[[ Sig; G |- A =>+ t ; D ]] \quad \implies \quad [[ Sig; D |- t : A ]]
+\end{align*}
+i.e. $[[ t ]]$ has type $[[ A ]]$
+under context $[[ D ]]$ whose grades capture variable use in $[[ t ]]$.
+\item At the top-level,
+for all type schemes $[[ Forall alpha : k . A ]]$ and terms $[[ t ]]$ then:
+%
+\begin{align*}
+[[ . ; . |- Forall alpha : k . A =>+ t ; . ]]
+\quad \implies \quad [[  . ; . |- t : Forall alpha : k . A ]]
+\end{align*}
+%
+\end{enumerate}
+\end{restatable}
+The first part of soundness takes the same form as soundness for the additive
+calculus of Chapter~\ref{chapter:core} (see page~\ref{subsec:add-sound}), i.e.
+it does not on its own guarantee well-resourcedness. The grades in the output
+context $[[ D ]]$  may not be approximated by the grades in the input context
+$[[ G ]]$. Instead, an individual synthesis judgement forms part of a larger
+derivation which is well-resourced.
+%
+As in Chapter~\ref{chapter:core} we apply pruning judiciously, only requiring
+that variable use is well-resourced at the point of synthesising binders.
+Therefore synthesised closed terms are always well-resourced (second part of the
+soundness theorem).
+
+For open terms, the implementation checks that from a user-given top-level goal
+$A$ for which $[[ G |- A => t ; D ]]$ is derivable then $t$ is only provided as
+a valid (well-typed and well-resourced) result if $[[ D <<= G ]]$.
+
+Section~\ref{proofs:graded-base-soundness} of Appendix~\ref{appendix:proofs}
+provides the soundness proof, which in part resembles a translation from sequent
+calculus to natural deduction, but also with the management of grades between
+synthesis and type checking.
 
 \section{Input-Output Examples}
 
@@ -1008,12 +1068,12 @@ Appendix~\ref{appendix:proofs}.
   \begin{align*}
     {\footnotesize{
   \hspace{-3.5em}\begin{array}{lll}
-   1.\ Right\ Async: & [[ Defs ; Sig; G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G , O ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   2.\ Left\ Async: & [[ Defs ; Sig; G ; O async |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]]  ; [[ G , O ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   3.\ Right\ Sync: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   4.\ Left\ Sync: & [[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [ A] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   5.\ Focus\ Right: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ;  [[ G ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   6.\ Focus\ Left: & [[ Defs ]] ; [[ Sig ]]; [[ G ]], [[ x : [A] r ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [A ] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]
+   1.\ \textsc{Right Async}: & [[ Defs ; Sig; G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G , O ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   2.\ \textsc{Left Async}: & [[ Defs ; Sig; G ; O async |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]]  ; [[ G , O ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   3.\ \textsc{Right Sync}: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   4.\ \textsc{Left Sync}: & [[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [ A] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   5.\ \textsc{Focus Right}: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ;  [[ G ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   6.\ \textsc{Focus Left}: & [[ Defs ]] ; [[ Sig ]]; [[ G ]], [[ x : [A] r ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [A ] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]
   \end{array}
     }}
   \end{align*}

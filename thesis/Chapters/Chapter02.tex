@@ -269,13 +269,14 @@ We refer to the system in this section as the \textit{graded
 linear $\lambda$-calculus}, reflecting the underlying linear structure of the
 system.
 
-% Granule's full type
-% system extends this graded linear core with polymorphism, algebraic data types,
-% indexed types, pattern matching, and recursion.
+Given a typing judgment $[[ G |- t : A ]]$ we say that $t$ is both
+\emph{well-typed} and \emph{well-resourced} to highlight the role of grading in
+accounting for resource use via the semiring information.
 
 This system forms the basis of the target language for our synthesis tool in
 Chapter~\ref{chapter:core}, although we extend it with some basic types for 
 increased expressivity.
+
 
 The types of the graded linear $\lambda$-calculus are given by:
 \begin{align*}
