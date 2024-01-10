@@ -5,15 +5,22 @@ synthesis tools based on linear and graded type systems, overcoming the
 challenges imposed by treating program values as resources, and leveraging the
 type systems' properties to build two efficient synthesis tools, targeting two
 common flavours of graded type system: the linear-base style and the graded-base
-style. In summary, in our work we have succeeded in: 
+style. 
+
+In our thesis statement in Chapter~\ref{chapter:intro}, we claimed that this
+work would demonstrate how linear and graded types could be integrated into a
+synthesis tool. The synthesis calculi we have developed evidence this claim, and
+we have also demonstrated their efficiency with respect to the search space of
+programs in our evaluation in Chapter~\ref{chapter:extended}. 
+
+In summary, in our work we have succeeded in: 
 \begin{itemize}
     \item Building several core calculi for two varieties of quantitative type
           systems, encompassing the major approaches in the literature, with
           both styles differing in expressivity and imposing unique
           requirements. 
     \item Implementing these synthesis calculi as tools for Granule, as fully
-          integrated 
-          components of the Granule toolchain. 
+          integrated components of the Granule toolchain. 
     \item Evaluating each of these systems in a variety of criteria, our main
           result being that synthesis with graded types is an effective way of
           reducing the program synthesis search space.  
@@ -43,13 +50,14 @@ tools for their own type systems.
 \section{Future Directions}
 \label{section:future}
 
-Our goal was to create a program synthesis tool for Granule which assists the
-programmer in writing programs with resource-sensitive types. We intend to
-pursue further improvements to our tool which serve this end, including reducing
-the overhead of SMT solving, integrating examples into the search algorithm
-itself in the style of \textsc{Myth}~\citep{oseraMYTH1} and
-Leon~\citep{10.1145/2509136.2509555}, as well as considering possible
-semiring-dependent optimisations that may be applicable.
+Our goal was to demonstrate the viability of a resource-aware type-directed
+program synthesis tool which assists the programmer in writing
+programs with resource-sensitive types. We intend to pursue further improvements
+to our tool which serve this end, including reducing the overhead of SMT
+solving, integrating examples into the search algorithm itself in the style of
+\textsc{Myth}~\citep{oseraMYTH1} and Leon~\citep{10.1145/2509136.2509555}, as
+well as considering possible semiring-dependent optimisations that may be
+applicable.
 
 
 \subsection{SMT Solving}
