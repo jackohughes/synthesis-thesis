@@ -383,6 +383,7 @@ Ass {{ tex As }} :: 'Assume_' ::=
       {{ com Ty Var context }}
       {{ tex {\alpha : \kappa} }}
   | recvar T :: :: RecVar {{ com RecVar }}{{ tex {X} \mapsto {f} [[ T ]] }}
+  | XVar :: :: RecVar2 {{ com RecVar2 }} {{ tex {X} : \text{Type} }}
     % Things for recursive mappings in derivations
   | X |-> t : A :: M :: RMapping {{ tex X \mapsto [[ t ]] : [[ A ]] }}
   | X |-> t     :: M :: RMappingShorthand {{ tex X \mapsto [[ t ]] }}
@@ -962,31 +963,34 @@ Sig |- A : Type
 Sig |- {[] r A} : Type
 
 
-Sig |- A : k    && Sig |- B : k
+Sig |- A : Type    && Sig |- B : Type
 ----------------------------------------- :: Prod
-Sig |-  Tup A B : k
+Sig |-  Tup A B : Type
 
 
-Sig |- A : k    && Sig |- B : k
+Sig |- A : Type    && Sig |- B : Type
 ----------------------------------------- :: Sum
-Sig |-  Sum A B : k
+Sig |-  Sum A B : Type
 
 ------------------------------------ :: Unit
 Sig |- Unit : Type
 
-
-Sig |- A : Type
------------------------------------- :: MuR
+Sig, XVar |- A : Type
+------------------------------------ :: Mu
 Sig |- {Mu A} : Type
 
-
-Sig |- A : Type
------------------------------------- :: MuL
-Sig |- {A [Mu X . A / X]} : Type
+% Sig |- X : Type 
+% Sig |- A : Type
+% ------------------------------------ :: MuL
+% Sig |- {A [Mu X . A / X]} : Type
 
 
 ------------------------------------ :: Var
 Sig, alphaS : k |- alphaT : k
+
+
+------------------------------------ :: Rec 
+Sig, XVar |- X : Type 
 
 defn
 Sig ; G |- A =>+ t ; D :: :: SynthesiseAddPoly :: 'Syn'

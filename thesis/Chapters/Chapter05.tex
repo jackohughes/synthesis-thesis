@@ -136,23 +136,25 @@ $[[ G ]]$, given by:
 \begin{equation*}
   [[ Sig ]] ::= \emptyset
   \mid [[ Sig ]], \alpha : \kappa
-\tag{\textit{contexts}}
+  \mid [[ Sig ]], X : \text{Type}
+\tag{\textit{type variable contexts}}
 \end{equation*}
 \begin{equation*}
   \vspace{-1em}
   [[ D ]], [[ G ]] ::= \emptyset
   \mid [[ G , x : [ A ] r ]]
-\tag{\textit{contexts}}
+\tag{\textit{variable contexts}}
 \end{equation*}
 %
-That is, a type variable context may be empty $\emptyset$ or extended with a a
-kind-annotated type variable $\alpha : \kappa$. Similarly, a variable context
-may be empty or extended with a \textit{graded} assumption $ [[ x : [A] r ]]$.
-Graded assumptions must be used in a way which adheres to the constraints of the
-grade $[[ r ]]$. Structural exchange is permitted, allowing a context to be
-arbitrarily reordered. A global context $[[ Defs ]]$ parametrises the system,
-containing top-level definitions and data constructors annotated with type
-schemes. 
+That is, a type variable context may be empty $\emptyset$, extended with a a
+kind-annotated type variable $\alpha : \kappa$ or extended with a recursion
+variable $X$. Recursion variables always have kind $\text{Type}$. Similarly, a
+variable context may be empty or extended with a \textit{graded} assumption $ [[
+x : [A] r ]]$. Graded assumptions must be used in a way which adheres to the
+constraints of the grade $[[ r ]]$. Structural exchange is permitted, allowing a
+context to be arbitrarily reordered. A global context $[[ Defs ]]$ parametrises
+the system, containing top-level definitions and data constructors annotated
+with type schemes. 
 
 Another judgment types top-level terms (definitions) with polymorphic type
 schemes:
@@ -187,9 +189,9 @@ typing rules for the new additions.
         \\[1.25em]
         \kSum
         \\[1.25em]
-        \kMuR
-        \;\;\;
-        \kMuL
+        \kRec
+        \;\;\; 
+        \kMu
     \end{array}
       }}
     \end{align*}
