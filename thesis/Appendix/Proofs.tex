@@ -1810,11 +1810,10 @@ inverse proofs in Section~\ref{proof:inverse-proofs}.
 
 Figure~\ref{fig:equational} defines an equational theory for the linear base
 Granule typing calculus used in Chapter~\ref{chapter:deriving}. The equational
-theory is typed, and we provide the typed forms of the rules in
-Figure~\ref{fig:typed-eqt}. For those rules which are type restricted, we
-include the full typed-equality judgment here. The type-ability of these equations
-relies on previous work on the Granule language which proves that pattern
-matching and substitution are well
+theory is typed, and we provide the typed forms of the rules also. For those
+rules which are type restricted, we include the full typed-equality judgment
+here. The type-ability of these equations relies on previous work on the Granule
+language which proves that pattern matching and substitution are well
 typed~\cite{DBLP:journals/pacmpl/OrchardLE19}.
 
 \begin{figure}[h]
@@ -1861,13 +1860,13 @@ functions over \textbf{letrec} expressions, stating that if a function
 $f$ can be applied to the entire \textbf{letrec} expression, then this
 is equivalent to applying $f$ to just the body term $[[t2]]$.
 
-Term elimination is via \textbf{case},
-requiring rules for both $\beta$- and $\eta$-equality on
-case expressions, as well as rules for associativity and
-distributivity. In $\beta_{case}$, a term $t$ is matched against a
-pattern $[[ pj ]]$ in the context of the term $[[ tj ]]$ through the use of the partial function
-$(t\ \rhd\ [[ pj ]])[[ tj ]] = t'$ which may substitute terms bound in $[[ pj ]]$
-into $[[ tj ]]$ to yield $t'$ if the match is successful. This partial function is defined inductively:
+Term elimination is via \textbf{case}, requiring rules for both $\beta$- and
+$\eta$-equality on case expressions, as well as rules for associativity and
+distributivity. In $\beta_{case}$, a term $t$ is matched against a pattern $[[
+pj ]]$ in the context of the term $[[ tj ]]$ through the use of the partial
+function $(t\ \rhd\ [[ pj ]])[[ tj ]] = t'$ which may substitute terms bound in
+$[[ pj ]]$ into $[[ tj ]]$ to yield $t'$ if the match is successful. This
+partial function is defined inductively:
 %
 {{
 \begin{align*}
@@ -1899,19 +1898,26 @@ As a predicate to the $\beta_{case}$ rule, we require that $j$ be
 minimal, i.e.\ the first pattern $[[pj]]$ in $[[p1]] ... [[ pn ]]$ for
 which $(t\ \rhd\ [[ pj ]])[[ tj ]] = t'$ is defined. Rule $\eta_{case}$ states that if all branches of the case expression share a common term $t_{2}$ which differs between branches only in the occurrences of terms that match the pattern used, then we can substitute $t_{1}$ for the pattern inside $t_{2}$.
 
-Associativity of case expressions is provided by the
-\textsc{CaseAssoc} rule. This rule allows us to restructure nested
-case expressions such that the output terms $[[ ti ]]$ of the inner
-case may be matched against the patterns of the outer case, to achieve
-the same resulting output terms $[[ t'i ]]$. The \textsc{[CaseAssoc]}
-rule provides a graded alternative to the \textsc{CaseAssoc} rule,
-where the nested case expression is graded, provided that the patterns
-$[[ p'i ]]$ of the outer case expression are also graded. Notably,
-this rule only holds when the patterns of the inner case expression
-are linear (i.e., variable or constant) so that there are no nested box patterns, represented via the $[[ lin pi ]]$ predicate. As with \textbf{letrec}, distributivity of functions over a case expression is given by \textsc{CaseDistrib}.
+Associativity of case expressions is provided by the \textsc{CaseAssoc} rule.
+This rule allows us to restructure nested case expressions such that the output
+terms $[[ ti ]]$ of the inner case may be matched against the patterns of the
+outer case, to achieve the same resulting output terms $[[ t'i ]]$. The
+\textsc{[CaseAssoc]} rule provides a graded alternative to the
+\textsc{CaseAssoc} rule, where the nested case expression is graded, provided
+that the patterns $[[ p'i ]]$ of the outer case expression are also graded.
+Notably, this rule only holds when the patterns of the inner case expression are
+linear (i.e., variable or constant) so that there are no nested box patterns,
+represented via the $[[ lin pi ]]$ predicate. As with \textbf{letrec},
+distributivity of functions over a case expression is given by
+\textsc{CaseDistrib}.
 
 
-Lastly generalisation of an arbitrary boxed pattern to a variable is permitted through the \textsc{CaseGen} rule. Here, a boxed pattern $[[  [pi] ]]$ and the output term of the case may be converted to a variable if the output term is equivalent to the pattern inside the box. The term $[[t]]$ being matched against must therefore have a grade approximatable by 1, as witnessed by the predicate $[[ 1 <<= r ]]$ in the typing derivation.
+Lastly generalisation of an arbitrary boxed pattern to a variable is permitted
+through the \textsc{CaseGen} rule. Here, a boxed pattern $[[  [pi] ]]$ and the
+output term of the case may be converted to a variable if the output term is
+equivalent to the pattern inside the box. The term $[[t]]$ being matched against
+must therefore have a grade approximatable by 1, as witnessed by the predicate
+$[[ 1 <<= r ]]$ in the typing derivation.
 
 
 

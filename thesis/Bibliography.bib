@@ -1120,24 +1120,6 @@ isbn="978-3-540-48333-5",
   note    = "Unpublished"
 }
 
-@article{choudhury2021,
-author = {Choudhury, Pritam and Eades III, Harley and Eisenberg, Richard A. and Weirich, Stephanie},
-title = {A Graded Dependent Type System with a Usage-Aware Semantics},
-year = {2021},
-issue_date = {January 2021},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-volume = {5},
-number = {POPL},
-url = {https://doi.org/10.1145/3434331},
-doi = {10.1145/3434331},
-journal = {Proc. ACM Program. Lang.},
-month = jan,
-articleno = {50},
-numpages = {32},
-keywords = {heap semantics, quantitative reasoning, Irrelevance, linearity}
-}
-
 @inproceedings{benton1992linear,
   title={Linear lambda-calculus and categorical models revisited},
   author={Benton, Nick and Bierman, Gavin and De Paiva, Valeria and Hyland, Martin},
@@ -1156,44 +1138,6 @@ keywords = {heap semantics, quantitative reasoning, Irrelevance, linearity}
   year={1994},
   doi = {10.1007/3-540-57880-3\_20},
   organization={Springer}
-}
-
-@article{linear-haskell,
-author = {Bernardy, Jean-Philippe and Boespflug, Mathieu and Newton, Ryan R. and Peyton Jones, Simon and Spiwack, Arnaud},
-title = {Linear {H}askell: Practical Linearity in a Higher-Order Polymorphic Language},
-year = {2017},
-issue_date = {January 2018},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-volume = {2},
-number = {POPL},
-url = {https://doi.org/10.1145/3158093},
-doi = {10.1145/3158093},
-abstract = {Linear type systems have a long and storied history, but not a clear path forward to integrate with existing languages such as OCaml or Haskell. In this paper, we study a linear type system designed with two crucial properties in mind: backwards-compatibility and code reuse across linear and non-linear users of a library. Only then can the benefits of linear types permeate conventional functional programming. Rather than bifurcate types into linear and non-linear counterparts, we instead attach linearity to function arrows. Linear functions can receive inputs from linearly-bound values, but can also operate over unrestricted, regular values. To demonstrate the efficacy of our linear type system&nbsp;—&nbsp;both how easy it can be integrated in an existing language implementation and how streamlined it makes it to write programs with linear types&nbsp;—&nbsp;we implemented our type system in ghc, the leading Haskell compiler, and demonstrate two kinds of applications of linear types: mutable data with pure interfaces; and enforcing protocols in I/O-performing functions.},
-journal = {Proc. ACM Program. Lang.},
-month = dec,
-articleno = {5},
-numpages = {29},
-keywords = {linear types, Haskell, linear logic, polymorphism, typestate, GHC, laziness}
-}
-
-@article{abel-barnardy-icfp2020,
-author = {Abel, Andreas and Bernardy, Jean-Philippe},
-title = {A Unified View of Modalities in Type Systems},
-year = {2020},
-issue_date = {August 2020},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-volume = {4},
-number = {ICFP},
-url = {https://doi.org/10.1145/3408972},
-doi = {10.1145/3408972},
-abstract = {We propose to unify the treatment of a broad range of modalities in typed lambda calculi. We do so by defining a generic structure of modalities, and show that this structure arises naturally from the structure of intuitionistic logic, and as such finds instances in a wide range of type systems previously described in literature. Despite this generality, this structure has a rich metatheory, which we expose.},
-journal = {Proc. ACM Program. Lang.},
-month = aug,
-articleno = {90},
-numpages = {28},
-keywords = {subtyping, linear types, modal logic}
 }
 
 @inproceedings{eisenberg2016visible,

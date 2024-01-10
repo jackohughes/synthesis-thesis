@@ -83,7 +83,9 @@
 \GRANULEprodline{|}{ {} }{}{}{}{\GRANULEcom{Nothing}}\GRANULEprodnewline
 \GRANULEprodline{|}{ \textbf{letrec}\  \GRANULEnt{t_{{\mathrm{1}}}} \ =\  \GRANULEnt{t_{{\mathrm{2}}}} \ \textbf{in}\  \GRANULEnt{t_{{\mathrm{3}}}} }{}{}{}{\GRANULEcom{LetRec}}\GRANULEprodnewline
 \GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{copyShape} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{CopyShape}}\GRANULEprodnewline
-\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{drop} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{Drop}}}
+\GRANULEprodline{|}{ \llbracket{  \GRANULEnt{A}  }\rrbracket_{\mathsf{drop} }^{ \Gamma }  \GRANULEnt{t} }{}{}{}{\GRANULEcom{Drop}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \Sigma ( \GRANULEnt{t} ) \ }{}{}{}{\GRANULEcom{Lookup}}\GRANULEprodnewline
+\GRANULEprodline{|}{ \begin{array}{l} \textbf{case} \  \GRANULEnt{t}  \ \textbf{of} \\  \GRANULEnt{MLCases}  \end{array} } {\textsf{S}}{}{}{\GRANULEcom{Multi-line case}}}
 
 \newcommand{\GRANULECon}{
 \GRANULErulehead{C}{::=}{\GRANULEcom{Constructors}}\GRANULEprodnewline
