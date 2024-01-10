@@ -242,6 +242,17 @@ Linear and graded types provide a rich specification of program behaviour, which
 is enforced statically by the type checker. But how do we harness this
 information to make    
 writing programs automatically easier?  
+
+\paragraph{Thesis Statement} 
+\label{para:thesis-statement}
+\begin{quote}
+      This work will demonstrate that linear and graded
+types can be integrated into type-directed program synthesis to prune incorrect
+branches from the search space of candidate programs, yielding an efficient
+program synthesis algorithm which ensures that generated programs are type
+correct and \emph{well-resourced} (i.e. they use linear values linearly, and
+graded values according to their grades) by construction. 
+\end{quote}
  
 The primary aim of this work is to demonstrate the feasibility and power of
 using resourceful types as the basis of a type-directed program synthesis tool,
