@@ -839,6 +839,7 @@ self-explanatory following the subtractive resource model:
 %
 
 \subsubsection{Soundness of Subtractive Synthesis}
+\label{sec:linear-base-sub-sound}
 This completes subtractive synthesis calculus. We conclude
 with a key result, that synthesised terms are well-typed at the type from which they
 were synthesised:
@@ -858,6 +859,21 @@ graded variables with grades reflecting their use in $[[ t ]]$.
 \end{restatable}
 The proof of soundness can be found in Section~\ref{proof:linear-sub-sound} of Appendix~\ref{appendix:proofs}. 
 
+The proof is fairly straightforward by induction. As a simple example, consider the 
+case of the $\multimap_\textsc{R}^-$ rule. By induction on the premise of the 
+rule we have:
+\begin{align*}
+  [[ (G, x : A) - D |- t : B ]]
+\end{align*}
+Then, since $[[x notin D]]$ then by the definition of context
+    subtraction we have that $[[ (G, x : A) - D ]] = [[ (G - D), x : A ]]$.
+    From this, we can construct the following derivation, matching the
+    conclusion:
+    %
+    \begin{align*}
+    \inferrule*[Right=Abs]
+    {[[ (G - D) , x : A |- t : B]]}{[[ G - D |- \x. t : A -o B ]]}
+    \end{align*}
 
 \subsection{Additive Resource Management}
 \label{subsec:additive}
@@ -1091,6 +1107,25 @@ Therefore, synthesised closed terms are always well-resourced.
 
 The proof of soundness can be found in Section~\ref{proof:linear-add-sound} of
 Appendix~\ref{appendix:proofs}.
+
+As in Section~\ref{sec:linear-base-sub-sound}, the proof is fairly
+straightforward, by induction. Again, consider the $\multimap_\textsc{R}^+$ rule 
+as an example. By induction we then have that:
+%
+\begin{align*}
+  [[ (G, x : A) - D |- t : B ]]
+\end{align*}
+%
+Since $[[x notin D]]$ then by the definition of context
+subtraction we have that $[[ (G, x : A) - D ]] = [[ (G - D), x : A ]]$.
+From this, we can construct the following derivation, matching the
+conclusion:
+%
+\begin{align*}
+\inferrule*[Right=Abs]
+{[[ (G - D) , x : A |- t : B]]}{[[ G - D |- \x. t : A -o B ]]}
+\end{align*}
+
 \subsubsection{Additive pruning}
 %
 As seen above, the additive approach delays checking whether a variable is used

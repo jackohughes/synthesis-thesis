@@ -506,32 +506,42 @@ grade $[[ r1 ]]$ may permit multiple uses both inside the synthesis of the
 application argument $[[ t2 ]]$ and in $[[ t1 ]]$ itself, the total usage of $[[
 t1 ]]$ across both premises must be calculated. 
 
-% The logic behind this grade
-% calculation is illustrated in the soundness proof for $\rightarrow_\textsc{L}$. 
 In the first premise $[[ x1 ]]$ is used according to $[[ s1 ]]$, and in the
 second according to $[[ s3 ]]$. As with $[[ D2 ]]$, we take the semiring
 multiplication of $[[ s3 ]]$ and $[[ q ]]$ and then multiply this by $[[ s2 ]]$
 to yield the final usage of $[[ x1 ]]$ in $[[ t2 ]]$. We then add this to $[[ s2
 + s1 ]]$ to yield the total usage of $[[ x1 ]]$ in $[[ t1 ]]$.
 
-% The total usage of $[[ x1 ]]$ 
-% in the application $[[ x1 t2 ]]$ is thus given by $s2 * q * s3$. 
+The reasoning behind this grade calculation is illustrated in the soundness
+proof for $\rightarrow_\textsc{L}$. As in the additive synthesis calculus of
+Chapter~\ref{chapter:core}, a synthesis judgment is sound if we can type the
+synthesised term against the goal type using the assumptions of the output
+context. We give the full details of soundness in
+Section~\ref{sec:graded-soundness} but use the $\rightarrow_\textsc{L}$ to aid
+in understanding how the output grades are used when typing the synthesised
+term.
 
+The total usage of $[[ x1 ]]$ in the application $[[ x1 t2 ]]$ is thus given by
+$1 + (q \cdot s_3)$. Since we use $[[ x1 ]]$ once on the left hand side of the
+application and according to $s_3$ inside $[[ t2 ]]$, while application scales the
+argument grade by the function type's grade $q$. This means we can construct the
+following typing derivation:
 
+\begin{align*}
+  \hspace{6em}
+          \inferrule*[Right=App, leftskip=4em]{
+            \inferrule*[Right=Var, leftskip=4em]
+              {[[ Sig |- {A ^q -> B} : Type ]]}
+              {[[  Sig; x1 : [ A ^ q -> B ] 1 |- x1 : A ^ q -> B ]]} \\ [[  Sig; D2, x1 : [A ^ q -> B] s3 |- t2 : A]]}{ [[  Sig; {q * D2}, x1 : [ A ^ q -> B ] {1 + (q * s3)} |-  x1 t2 : B ]]}
+\end{align*}
+where 
+\begin{align*}
+[[  Sig; D2, x1 : [A ^ q -> B] s3 |- t2 : A]]
+\end{align*}
+is an inductive hypothesis obtained from the second premise of the
+$\rightarrow_\textsc{L}$ rule. The rest of $x$'s output grade is then left to
+type its usage in $t_1$. 
 
-% In the proof, this allows us to construct a typing derivation for the
-% application $[[ x1 t2 ]]$. We make use of the distributive property of semirings
-% along with the commutativity of $+$ and unitality of $1$ such that $ = (s_2 \cdot 1) + (s_2 \cdot q \cdor s_3) = s_2 \cdot q \cdot s_3 $ to yield the typing
-% context $[[ D2 ]], x_1 :_{1 \cdot (q \cdot s_3)} A^q \rightarrow B$, $()$
-
-
-% \begin{align*}
-%   \hspace{6em}
-%           \inferrule*[Right=App, leftskip=4em]{
-%             \inferrule*[Right=Var, leftskip=4em]
-%               {[[ Sig |- {A ^q -> B} : Type ]]}
-%               {[[  Sig; x1 : [ A ^ q -> B ] 1 |- x1 : A ^ q -> B ]]} \\ [[  Sig; D2, x1 : [A ^ q -> B] s3 |- t2 : A]]}{ [[  Sig; {q * D2}, x1 : [ A ^ q -> B ] {1 + (q * s3)} |-  x1 t2 : B ]]}
-% \end{align*}
 
 
 
@@ -835,6 +845,7 @@ provides the basis for an efficient implementation of the above rules.
 
 
 \subsection{Soundness of Synthesis}
+\label{sec:graded-soundness}
 The relationship between synthesis and typing is given by the central soundness
 result: % (the appendix provides the proof):
 %(Appendix~\ref{sec:soundness-proofs} provides the proof):
