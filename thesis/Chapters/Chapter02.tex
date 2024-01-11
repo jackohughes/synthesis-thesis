@@ -20,7 +20,9 @@ lineages:
         modal type operators. We refer to these as ``graded linear'' or ``linear
         base'' systems.
   \item Systems where grades permeate the program, and are introduced via
-        annotations on function arrows. This is the approach taken by Linear
+        annotations on function arrows. These systems do away with the
+        underlying linear basis that typifies the former category of systems.
+        This is the approach taken by Linear
         Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}, where grades (or
         ``multiplicities'') are specified using the \granin{\%} operator. We
         refer to these as ``fully graded'' or ``graded base'' systems.
@@ -31,11 +33,14 @@ systems and graded monadic systems in the literature
 found to be equivalent, while the same treatment for the former remains ongoing
 work. 
 
-\paragraph{Roadmap} The remainder of this chapter formally defines these calculi, starting with the
-linear $\lambda$-calculus in Section~\ref{sec:linear-lambda-calc}. Following
-this, in Section~\ref{sec:graded-linear} we extend the linear $\lambda$-calculus
-with a graded modal type (Section~\ref{sec:linear-base}) before presenting the
-fully graded $\lambda$-calculus (Section~\ref{sec:graded-base}), before finally
+\paragraph{Roadmap} The remainder of this chapter formally defines these
+calculi, starting with the linear $\lambda$-calculus in
+Section~\ref{sec:linear-lambda-calc}. Following this, in
+Section~\ref{sec:graded-linear} we extend the linear $\lambda$-calculus with a
+graded modal type (Section~\ref{sec:linear-base}) before presenting the fully
+graded $\lambda$-calculus (Section~\ref{sec:graded-base}). In
+Section~\ref{sec:op-sem} we briefly provide a call-by-name operational semantics
+for our calculi, and note that substitution is admissible in each. Finally
 outlining our approach to how we use these calculi in synthesis in
 Section~\ref{sec:two-typing}. Throughout, we include examples of programs
 typeable in their respective calculi as Granule code, providing a gentle
@@ -149,7 +154,7 @@ The syntax of terms is the same as STLC, given by:
   {\small{\tag{terms}}}
 \end{align*}
 That is, a term is either a linear variable usage $x$, an abstraction which binds a
-linear variable $x$ in the term $t$, or an application of the argument $t1$ to $t2$. 
+linear variable $x$ in the term $t$, or an application of the argument $t_1$ to $t_2$. 
 
 \begin{figure}[t]
 \begin{gather*}
@@ -235,7 +240,7 @@ as $y$ is discarded in the body of the abstraction, violating linearity. Again,
 in Granule we could try to write this program as:
 \begin{granule}
 k : forall { a b : Type } . a -> b -> a
-k x y = x
+k x y = x                  -- ill-typed
 \end{granule}
 However, this will fail to type check, due to the aforementioned violation of
 linearity.
@@ -250,7 +255,8 @@ differing view of graded types mentioned at the top of this chapter. The first
 directly follows from the calculus in~\ref{sec:linear-lambda-calc}, merely
 extending it with a \emph{graded modal type}. The second reflects the other
 approach to graded type systems where instead of the underlying linear
-structure, grades are introduced via the function type. 
+structure, grades are introduced via the function type because all assumptions
+carry a grade.
 
 \subsection{The Graded Linear $\lambda$-calculus}
 \label{sec:linear-base}
@@ -464,7 +470,7 @@ graded assumption with grade $1$.
 
 We allow grade \textit{approximation} via their resource algebras through the
 application of the $\textsc{Approx}$ rule. A grade $s$ may be converted to
-another grade $r$, providing that $r$ \textit{approximates} $s$, where the
+another grade $r$, providing that $r$ iw \textit{approximated} by $s$, where the
 relation $\sqsubseteq$ is the pre-order provided with the semiring. This
 relation is occasionally lifted pointwise to contexts: we write $[[ G <<= G' ]]$
 to mean that $[[ G' ]]$ overapproximates $[[ G ]]$ meaning that for all $[[ (x :
@@ -548,6 +554,19 @@ with the equivalent Granule code:
 k : forall { a b : Type } . a -> b [0] -> a
 k x y' = let [y] = y' in x
 \end{granule}
+Granule also includes pattern matching (which we extend our calculi with in
+Chapter~\ref{chapter:deriving}), allowing us to refactor the above two programs
+to pattern match on the graded modalities in the function equation patterns:
+\begin{granule}
+s : forall { a b c : Type } 
+  . (a -> (b -> c)) -> (a -> b) -> (a [2] -> c)
+s x y [z] = (x z) (y z)
+
+k : forall { a b : Type } . a -> b [0] -> a
+k x [y] = x
+\end{granule}
+
+
 \end{example}
 \begin{example}
 \label{example:graded-granule}
@@ -570,9 +589,9 @@ compCoK : forall {k : Semiring, r s : k, a b c : Type}
      -> c
 compCoK x y z = let [u] = x in let [v] = z in y  [ u [v] ]
 \end{granule}
-The type scheme for \granin{compCoK} quantifies over grade variables \granin{r}
-and \granin{s} which are annotated with the kind \granin{Semiring}. The grades
-must then be used in the type in a polymorphic way.
+The type scheme for \granin{compCoK} quantifies over the semiring \granin{k},
+and then grade variables \granin{r} and \granin{s} with the kind \granin{k}. The
+grades must then be used in the type in a polymorphic way.
 % The corresponding type derivation for 
 % this term is:
 % \begin{align*}
@@ -857,11 +876,13 @@ k x y = x
 \end{granule}
 \end{example}
 
-\subsection{Operational Semantics}
+\section{Operational Semantics}
 \label{sec:op-sem}
-We briefly present the reduction rules for an operational semantics for our
-calculi~\citep{tale-of-two-calculi}. Note that the rules are identical for both the graded linear and fully
-graded systems! Figure~\ref{fig:opsem} collects the rules.
+We briefly present the reduction rules for a call-by-name operational semantics
+for our calculi~\citep{tale-of-two-calculi}. The Granule interpreter also provides a
+call-by-value semantics which can be enabled via a language extension. Note that
+the rules are identical for both the graded linear and fully graded systems!
+Figure~\ref{fig:opsem} collects the rules.
 \begin{figure}[H]
 % \hspace{-0.5em}
 \begin{align*}
@@ -885,7 +906,12 @@ graded systems! Figure~\ref{fig:opsem} collects the rules.
  subsequent chapters, instead providing them for completeness and to give an
  intuition of the dynamic behaviour of our calculi. 
 
-
+\paragraph{Admissibility of Substitution}
+\label{ref:substitution}
+Lastly, we remark that substitution is admissible in each of the calculi. Rather
+than provide the details at this point, we present the lemmas for
+both of the calculi once we have extended them with the additional types
+mentioned above in their respective chapters.
 
 \section{Two Typing Calculi}
 \label{sec:two-typing}
@@ -902,27 +928,23 @@ techniques for resource management in automated theorem proving for linear
 logic~\citep{HODAS1994327, CERVESATO2000133}. Therefore,
 Chapter~\ref{chapter:core} uses the graded linear $\lambda$-calculus as a
 natural starting point for the design of a synthesis calculus, where we build
-upon the existing proof search literature to accommodate for graded modal types.
-To do so we extend graded linear $\lambda$-calculus with some other useful types
+upon the existing proof search literature to accommodate graded modal types.
+In doing so we also extend graded linear $\lambda$-calculus with some other useful types
 to make our language more practical, such as linear multiplicative products
 $\otimes$, additive sums $\oplus$, and a $\mathsf{Unit}$ type.
 
-In Chapter~\ref{chapter:extended} we then pivot to a synthesis calculi for a
+Having established how to handle synthesis in the graded linear setting, in
+Chapter~\ref{chapter:extended} we then pivot to a synthesis calculi for a
 language derived from the fully graded $\lambda$-calculus, as this is the
 approach that is most commonly in use by practical systems
 today~\citep{DBLP:journals/corr/abs-2104-00480,
-DBLP:journals/pacmpl/BernardyBNJS18}. In doing so, we also extend our fully graded
-$\lambda$-calculus with recursive ADTs, recursive function definitions, and
-polymorphism. As we have seen, systems based on both approaches are in use
+DBLP:journals/pacmpl/BernardyBNJS18}. In doing so, we also extend our fully
+graded $\lambda$-calculus with recursive ADTs, recursive function definitions,
+and polymorphism. As we have seen, systems based on both approaches are in use
 today, and both pose their unique challenges in designing a synthesis tool.
 Furthermore, the target programming language Granule of our implementations
-includes both approaches.\footnote{As of Granule v0.9.3.0}
-
-\label{ref:substitution}
-Lastly, we remark that substitution is admissible in each of the calculi. Rather
-than provide the details at this point, we present the lemmas for
-both of the calculi once we have extended them with the additional types
-mentioned above in their respective chapters.
+includes both approaches.\footnote{As of Granule v0.9.3.0. Available at:
+https://github.com/granule-project/granule/releases/tag/v0.9.3.0}
 
 By this point we are in a strong position to tackle the problem of program
 synthesis, beginning with a simple introduction to the core issues at the heart
