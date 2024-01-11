@@ -17,19 +17,19 @@ polymorphic definitions.
 Chapter~\ref{chapter:deriving} introduced many of these features to the calculi
 from ``linear base'' system of Chapter~\ref{chapter:core}, however, we take the
 this chapter as an opportunity to also explore synthesis in a fully graded type
-system. As mentioned in Chapter~\ref{chapter:background}, the fully-graded
-linear-lambda calculus is one of the two dominant flavours of quantitative type
+system. As mentioned in Chapter~\ref{chapter:background}, the fully graded
+$\lambda$-calculus is one of the two dominant flavours of quantitative type
 system. This approach is common amongst implementations of quantitative type
 systems, such as Idris 2, the \emph{Linear Types} language extension to GHC, and
 the \emph{GradedBase} language extension of Granule (which forms the target
 language of our implementation). 
 
 \paragraph{Roadmap}
-We begin by extending the calculus of Section~\ref{sec:graded-base}, adding the
-synthesis of recursion, polymorphic user-defined algebraic data types, as well
-as the synthesis of recursive function definitions from polymorphic type
-schemes. Section~\ref{section:graded-base-typing} provides a full formal description 
-of our target language.
+We begin by extending the calculus of Section~\ref{sec:graded-base}, adding
+polymorphic recursive user-defined algebraic data types, as well as recursive
+function definitions with polymorphic type schemes.
+Section~\ref{section:graded-base-typing} provides a full formal description of
+our target language.
 
 We then provide a program synthesis calculus with an additive resource
 management scheme for this language in
@@ -69,24 +69,18 @@ polymorphism. The syntax of types is given by:
       \mid X
       \mid \alpha
     {\small{\tag{\textit{types}}}}
-\end{align*}
-\begin{align*}
-  \vspace{-1em}
+    \\
     \hspace{-0.9em} K & ::=
            [[ Unit ]]
       \mid [[ Prod ]]
       \mid [[ Coprod ]]
     {\small{\tag{\textit{type constructors}}}}
-\end{align*}
-\begin{align*}
-  \vspace{-1em}
+    \\
   \hspace{-0.9em} \kappa & ::= 
     \mathsf{Type}
     \mid \kappa_1 \rightarrow \kappa_2
     {\small{\tag{\textit{kinds}}}}
-\end{align*}
-\begin{align*}
-  \vspace{-1em}
+    \\
     \hspace{-0.9em} \tau & ::=
            [[ Forall alpha : k . A  ]]
     {\small{\tag{\textit{type schemes}}}}
@@ -110,9 +104,7 @@ The syntax of terms is given by:
           \mid [[ Con t1 ... tn ]]
           \mid [[ case t of p1 -> t1 ; * ; pn -> tn  ]]
         {\small{\tag{\textit{terms} }}}
-\end{align*}
-\begin{align*}
-  \vspace{-1em}
+        \\
         \hspace{-0.8em} [[ p ]] ::= \;
                & [[ x ]]
           \mid [[ _ ]]
@@ -125,26 +117,24 @@ Terms consist of a graded $\lambda$-calculus, a promotion construct $[t]$ which
  introduction ($[[ Con t1 ... tn ]]$) and elimination via $\textbf{case}$
  expressions with patterns, which are defined via the syntax of patterns $[[ p
  ]]$. Note that this syntax is equivalent to that of~\ref{chapter:deriving},
- however, we omit $\textbf{letrec}$. Recursive function
- definitions are instead given by writing a $\lambda$ term under a polymorphic
- type scheme. 
+ however, we omit $\textbf{letrec}$. Top-level recursive function definitions
+ are instead assumed to be in-scope during synthesis, with the user providing
+ the set of definitions that the synthesis algorithm may use. 
 
 Typing judgements have the form $[[  Sig ; G |- t : A ]]$ assigning a type $[[ A
 ]]$ to a term $ [[ t ]]$ under a type variable context $[[ Sig ]]$ and variable context
-$[[ G ]]$, given by:
+$[[ G ]]$, defined:
 
-\begin{equation*}
+\begin{align*}
   [[ Sig ]] ::= \emptyset
   \mid [[ Sig ]], \alpha : \kappa
   \mid [[ Sig ]], X : \text{Type}
 \tag{\textit{type variable contexts}}
-\end{equation*}
-\begin{equation*}
-  \vspace{-1em}
+\\
   [[ D ]], [[ G ]] ::= \emptyset
   \mid [[ G , x : [ A ] r ]]
 \tag{\textit{variable contexts}}
-\end{equation*}
+\end{align*}
 %
 That is, a type variable context may be empty $\emptyset$, extended with a
 kind-annotated type variable $\alpha : \kappa$ or extended with a recursion
