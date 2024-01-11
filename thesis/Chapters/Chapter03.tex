@@ -22,37 +22,40 @@ judgement of the form:
     \Gamma \vdash t : A {\small{\tag{type checking}}}
 \end{align*}
 which states that under some context of assumptions $\Gamma$ we can assign the
-program term $t$ the type $A$. Synthesis inverts this judgement form, leaving us
+program term $t$ the type $A$. 
+In type-checking, we typically think of starting with a term and 
+generating its type. Synthesis inverts this interpretation, leaving us
 with a \textit{synthesis judgement} form:
 \begin{align*}
     \Gamma \vdash A \Rightarrow t {\small{\tag{synthesis}}}
 \end{align*}
 which states that we can construct a program term $t$ from the type $A$, using
 the assumptions in $\Gamma$. Program synthesis then becomes a task of
-inductively enumerating programs in a ``bottom-up'' starting from the goal type
-$A$: we break $A$ into sub-goals, from which sub-terms are synthesised until the
-goal cannot be broken into further sub-goals. At this point, we either
-synthesise a usage of a variable from $\Gamma$ if possible, or synthesis fails.
-This is the essence of type-directed program synthesis. 
+inductively enumerating programs ``bottom-up'' starting from the goal type $A$:
+we break $A$ into sub-goals, from which sub-terms are synthesised until the goal
+cannot be broken into further sub-goals. At this point, we either synthesise a
+usage of a variable from $\Gamma$ if possible, a constructor for a null-ary data
+type if one is available, or synthesis fails. This is the essence of type-directed program
+synthesis. 
 
 Resourceful types introduce another dimension to synthesis: how do we ensure
 that the assumptions in $\Gamma$ are used according to their resource
-constraints as described by grades in the synthesised term $t$? I.e. if $x : A$
+constraints as described by their linearity or grades in the synthesised term $t$? I.e. if $x : A$
 is a linear assumption in $\Gamma$ that is used in some way to construct $t$,
 then the synthesis algorithm must synthesise a $t$ which uses $x$ exactly once.
 Likewise, if $x :_r A$ is a graded assumption, then it must be used in $t$ in a
 way which satisfies its grade $r$.
  
-This problem has been explored before in the context of automated theorem
-proving for linear logic, and has been termed the \textit{resource management
-problem}. We describe this problem in detail in
-Section~\ref{sec:resource-management} and propose two candidate solutions,
-basing our approach on the \textit{input-output context management} model
-described by~\citet{HODAS1994327}, and further developed
-by~\citet{CERVESATO2000133}. 
+The linear side of this problem has been explored before in the context of
+automated theorem proving for linear logic, and has been termed the
+\textit{resource management problem}. We describe this problem in detail in
+Section~\ref{sec:resource-management} and propose two candidate solutions which
+incorporate grades as well as linearity, basing our approach on the
+\textit{input-output context management} model described
+by~\citet{HODAS1994327}, and further developed by~\citet{CERVESATO2000133}. 
 
 The challenges posed by ensuring the well-resourcedness of synthesised programs
-are most illustrated by the inclusion in our target language of multiplicative
+are best illustrated by the inclusion in our target language of multiplicative
 conjunction, and additive disjunction. Therefore, prior to fully describing the
 problem of resource management and our proposed solutions, we first expand our
 target language with multiplicative product ($\otimes$), and unit types
@@ -69,11 +72,11 @@ Section~\ref{sec:linear-base-synthesis} as augmented inversions of the typing
 rules. Each calculus is based on a one of our proposed solutions to the resource
 management problem.  
 
-Both calculi are implemented as part of a synthesis tool for
+Both calculi are implemented as a synthesis tool for
 Granule.\footnote{The exact implementation of the rules as they stand is
 deprecated, but may be found in Granule release v0.7.8.0:
 https://github.com/granule-project/granule/releases/tag/v0.7.8.0} The calculi
-are turned into an algorithm using Haskell. In order to do so, we apply an
+are turned into an algorithm written in Haskell. In order to do so, we apply an
 important technique from proof search literature to our calculi:
 \emph{focusing}~\citep{focusing}. Focusing removes much of the unnecessary
 non-determinism present in our synthesis rules by fixing an ordering on the
@@ -149,7 +152,7 @@ $\textbf{case}$ is used to distinguish the constructors.
   {[[ G1 |- t1 : Sum A B ]] \\ [[ G2, x1 : A |- t2 : C]] \\ [[ G3, x2 : B |- t3 : C]]}
     {\Gamma + (\Gamma_{2} \sqcup \Gamma_{3}) \vdash\ \textbf{case} \ t_{1}\ \textbf{of}\ \textbf{inl}\ x_{1} \rightarrow t_{2};\ \textbf{inr}\ x_{2} \rightarrow t_{3} : C }
 \\[1.25em]
-\inferrule*[right = 1]
+\inferrule*[right = $\mathsf{Unit}$]
  {\quad}{[[ . |- () : Unit ]]}
 \;\;\;
 \inferrule*[right = LetUnit]
@@ -252,11 +255,11 @@ to the interval grade $0...1$ giving us the ability to discard the irrelevant fu
 Graded modalities can capture a form of information-flow security, tracking the
 flow of labelled data through a
 program~\citep{DBLP:journals/pacmpl/OrchardLE19}, with a 2-point semiring of
-security levels where $\mathcal{L} = \{ \text{Hi}, \text{Lo} \}$ forms a set of
+security levels where $\mathcal{L} = \{ \text{Private}, \text{Public} \}$ forms a set of
 abstract labels, denoting \emph{high} and \emph{low} security permissions
-respectively, with a lattice formed by the total order with $Lo \sqsubseteq Hi$.
-Multiplication is given by $\sqcup$, and addition by $\sqcap$, with $0$ = $\text{Hi}$
-and $1$ = $\text{Lo}$. 
+respectively, with a lattice formed by the total order with $\text{Private} \sqsubseteq \text{Public}$.
+Multiplication is given by $\sqcup$, and addition by $\sqcap$, with $0$ = $\text{Private}$
+and $1$ = $\text{Public}$. 
 
 This allows the following well-typed program, eliminating a pair of $\text{Lo}$
 and $\text{Hi}$ security values, picking the left one to pass to a continuation
@@ -272,7 +275,7 @@ expecting a $[[ Public ]]$ input:
 \end{example}
 
 \subsection{Metatheory}
-Finally, as hinted at on page~\ref{ref:substitution} of
+Finally, as hinted at on page~\pageref{ref:substitution} of
 Chapter~\ref{chapter:background}, the admissibility of substitution is a key
 result that holds for this language~\citep{DBLP:journals/pacmpl/OrchardLE19},
 which is leveraged in soundness of the synthesis calculi.
@@ -1433,7 +1436,7 @@ applied.
 Finally the $\textsc{Left Sync}$ set (Figure~\ref{fig:focus-sub-left-sync})
 contains the focused $\multimap_\textsc{L}^-$ rule while the $\textsc{Var}$ set
 contains the focused forms of $\textsc{LinVar}^-$ and $\textsc{GrVar}^-$. Both
-sets allow transition back to the $\textsc{Left Async}$ phase via the
+sets allow for transition to $\textsc{Left Async}$ via the
 $\Downarrow_\textsc{L}^-$ rule.
 
 This focused form of the additive synthesis calculi follow an identical scheme,
@@ -1684,9 +1687,7 @@ schemes treating universal type variables as logical atoms. Multiplicative
 products are primitive in Granule, although additives coproducts are provided
 via ADTs, from which we define a core sum type to use defined: 
 \begin{granule}
-  data Either a b
-    = Left a 
-    | Right b
+  data Either a b = Left a | Right b
 \end{granule}
 Constraints on resource usage are handled via Granule's existing
 symbolic engine, which compiles constraints on grades (for various semirings)
@@ -1697,7 +1698,8 @@ belongs to) is inferred using Granule's type
 checker, which is used to generate an existential variable representing
 the remaining available usage of the graded assumption.
 
-We use the LogicT monad for backtracking search~\citep{logict} and the Scrap
+We use the LogicT monad for backtracking \emph{enumerative} search of the 
+space of candidate programs~\citep{logict} and the Scrap
 Your Reprinter library for splicing synthesised code into syntactic ``holes''
 (represented by \granin{?} in Granule), preserving the rest of the program
 text~\citep{clarke2017scrap}.
@@ -1953,18 +1955,6 @@ measurements are computed as the mean of 20 trials. We used
 Z3 version 4.8.8 on a Linux laptop with an Intel i7-8665u @ 4.8 Ghz
 and 16 Gb of RAM.
 
-
-\subsection{Results and Analysis}
-%
-For each synthesis problem, we recorded whether synthesis was successful or not
-(denoted $\success$ or \fail), the mean total synthesis time ($\mu{T}$), and the
-number of calls made to the SMT solver (\textsc{N}). Table~\ref{tab:results}
-summarises the results with the fastest case for each benchmark highlighted. For
-all benchmarks that used the SMT solver, the solver accounted for
-$91.73\%-99.98\%$ of synthesis time, so we report only the mean total synthesis
-time $\mu{T}$, rather than showing the SMT solver time separately as this gives
-a good proxy of the solver time. We set a timeout of 120 seconds.
-
 \begin{table}[H]
 {\small{
 \begin{center}
@@ -2041,8 +2031,19 @@ with standard sample error in brackets}
 \end{table}
 
 
+\subsection{Results and Analysis}
+%
+For each synthesis problem, we recorded whether synthesis was successful or not
+(denoted $\success$ or \fail), the mean total synthesis time ($\mu{T}$), and the
+number of calls made to the SMT solver (\textsc{N}). Table~\ref{tab:results}
+summarises the results with the fastest case for each benchmark highlighted. For
+all benchmarks that used the SMT solver, the solver accounted for
+$91.73\%-99.98\%$ of synthesis time, so we report only the mean total synthesis
+time $\mu{T}$, rather than showing the SMT solver time separately as this gives
+a good proxy of the solver time. We set a timeout of 120 seconds.
 
 \subsubsection{Additive versus subtractive}
+
 As conjectured in H1, the additive approach generally synthesises programs with
 fewer calls to the solver than subtractive. Our first hypothesis holds for
 almost all benchmarks, with the subtractive approach often far exceeding the
@@ -2101,19 +2102,18 @@ approach. However, additive pruning failed to synthesis two
  ($\otimes$-$\mathbb{N}$) and in the semiring ($\otimes$-$\mathcal{R}$).
 
 
-Overall, the additive approach outperforms the subtractive and is successful at
-synthesising more examples, including ones polymorphic in grades and even the
-semiring itself. Given that the literature on linear logic theorem proving is
+Overall, the additive approach outperforms the subtractive and is able to
+synthesise more examples, including ones polymorphic in grades and even the
+semiring. Given that the literature on linear logic theorem proving is
 typically subtractive, this is an interesting result. 
 
 \section{Related Work}
 \label{sec:linear-base-related}
-Before~\citet{HODAS1994327}, the problem of resource
-non-determinism was first identified by~\citet{harlandpym}. Their
-solution delays splitting of contexts at a multiplicative connective. They later
-explored the implementation details of this approach, proposing a solution where
-proof search is formulated in terms of constraints on propositions. The logic
-programming language Lygon~\citep{lygon} implements this approach.
+Before~\citet{HODAS1994327}, the problem of resource non-determinism was first
+identified by~\citet{harlandpym}. Their solution delays splitting of contexts at
+a multiplicative connective. They propoesed a solution where proof search is
+formulated in terms of constraints on propositions. The logic programming
+language Lygon~\citep{lygon} implements this approach.
 
 Our approach to synthesis implements a \textit{backward} style of proof search:
 starting from the goal, recursively search for solutions to sub-goals. In
@@ -2121,7 +2121,7 @@ contrast to this, \textit{forward} reasoning approaches attempt to reach the
 goal by building sub-goals from previously proved sub-goals until the overall
 goal is proved.~\citet{10.1007/11532231_6,10.1007/11538363_15} consider forward
 approaches to proof search in linear logic using the \textit{inverse
-method}~\citep{DEGTYAREV2001179} where the issue of resource non-determinism
+method}~\citep{DEGTYAREV2001179} where the resource non-determinism
 that is typical to backward approaches is absent.
 
 \section{Conclusion}
@@ -2168,10 +2168,10 @@ push : forall {k : Semiring, r : k, a b : Type}
      . (a * b) [r] -> (a [r] * b [r])
 push [(x, y)] = ([x], [y])
 \end{granule}
-by pattern matching on both the graded modality and the product. The ability to
-perform this \emph{deep} pattern matching greatly increases the expressivity of
-our language, and allows us to both type and potentially synthesis much more
-interesting and realistic Granule programs.
+by pattern matching on both the graded modality and the product in a single
+nexted pattern match. The ability to perform this \emph{deep} pattern matching
+greatly increases the expressivity of our language, and allows us to both type
+and potentially synthesis much more interesting and realistic Granule programs.
 
 In the following chapter, we present an alternative approach to generating
 programs which exhibit this distributive behaviour using a generic programming
@@ -2182,7 +2182,7 @@ calculi presented here and in Chapter~\ref{chapter:extended}, providing users
 with a means to automatically generate programs purely from a type for a common
 class of graded programs, as well as some useful structural combinators. In
 describing this mechanism, we begin to enhance our language with more advanced
-features such pattern matching and recursion, further laying the foundations for
+features such as pattern matching and recursion, further laying the foundations for
 Chapter~\ref{chapter:extended}, and bringing our typing calculus closer in line
 with what can be expressed in Granule.  
 
