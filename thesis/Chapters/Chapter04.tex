@@ -39,11 +39,9 @@ push for linear function types ($\mathsf{F} = \multimap$).
 
 As a standalone methodology for generating a common class of graded programs,
 this ``deriving mechanism'' serves as a complement to the synthesis calculi of
-Chapter~\ref{chapter:core}. Synthesis problems which exhibit this distributive
-behaviour pose issues in the existing calculi. However, in many cases the
-solution programs to these distributive problems are straightforwardly derivable
-from the type alone, making the costly enumerative search of type-directed synthesis
-unnecessary.
+Chapter~\ref{chapter:core}. In many cases the solution programs to these
+distributive problems are straightforwardly derivable from the type alone,
+making the costly enumerative search of type-directed synthesis unnecessary.
 
 Thus, we present a tool for an automatic procedure which calculates distributive
 laws from graded types and present a formal analysis of their properties. This
@@ -162,7 +160,7 @@ $\infty$ times. Imagine now we have a value \granin{myPairList : (List (a, b))
 [r]}. \emph{We need another distributive law}, this time of the graded modality
 over the \granin{List} data type. Since \granin{List} was user-defined, we now
 must roll our own \granin{pushList} operation with type \granin{List ((a, b)
-[r]) -> List (a [r], b [r])}, and so we are back to having to make specialised
+[r]) -> List (a [r], b [r])}, and so we are back to making specialised
 combinators for our data types.
 
 The crux of this chapter is that such distributive laws can be automatically
@@ -1308,18 +1306,19 @@ closely resembles the \textsc{$+$-elim} rule for \abname{}:
 %
 \begin{align*}
   {\footnotesize{
-\dfrac{
+\inferrule*[right=$\textsc{STcase}$]{
   \Delta ; \Gamma_1 \vdash q : A_1 \oplus A_2
   \qquad
+  % \\
   \Delta ; \Gamma_2 \vdash b_1 : A_1 \xrightarrow{q} B
-  \qquad
+  \\\\
+  % \qquad
   \Delta ; \Gamma_2 \vdash b_2 : A_2 \xrightarrow{q} B
   \qquad
   1 \leq q
 }
 {\Delta ; q \cdot \Gamma_1 + \Gamma_2 \vdash \mathbf{case}_q\ a\
   \mathbf{of}\ b_1; b_2 : B}
-\textsc{STcase}
   }}
 \end{align*}
 %
