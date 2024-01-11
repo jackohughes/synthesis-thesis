@@ -294,6 +294,36 @@ journal = {Software Engineering, IEEE Transactions on},
 doi = {10.1109/TSE.1979.234198}
 }
 
+@article{synthesis2,
+author = {Frankle, Jonathan and Osera, Peter-Michael and Walker, David and Zdancewic, S.},
+year = {2016},
+month = {01},
+pages = {802-815},
+title = {Example-directed synthesis: a type-theoretic interpretation},
+volume = {51},
+journal = {ACM SIGPLAN Notices},
+doi = {10.1145/2914770.2837629}
+}
+
+@article{10.1145/1809028.1806632,
+author = {Kuncak, Viktor and Mayer, Mika\"{e}l and Piskac, Ruzica and Suter, Philippe},
+title = {Complete Functional Synthesis},
+year = {2010},
+issue_date = {June 2010},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {45},
+number = {6},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/1809028.1806632},
+doi = {10.1145/1809028.1806632},
+abstract = {Synthesis of program fragments from specifications can make programs easier to write and easier to reason about. To integrate synthesis into programming languages, synthesis algorithms should behave in a predictable way - they should succeed for a well-defined class of specifications. They should also support unbounded data types such as numbers and data structures. We propose to generalize decision procedures into predictable and complete synthesis procedures. Such procedures are guaranteed to find code that satisfies the specification if such code exists. Moreover, we identify conditions under which synthesis will statically decide whether the solution is guaranteed to exist, and whether it is unique. We demonstrate our approach by starting from decision procedures for linear arithmetic and data structures and transforming them into synthesis procedures. We establish results on the size and the efficiency of the synthesized code. We show that such procedures are useful as a language extension with implicit value definitions, and we show how to extend a compiler to support such definitions. Our constructs provide the benefits of synthesis to programmers, without requiring them to learn new concepts or give up a deterministic execution model.},
+journal = {SIGPLAN Not.},
+month = {jun},
+pages = {316–329},
+numpages = {14},
+keywords = {bapa, decision procedure, presburger arithmetic, synthesis procedure}
+}
 
 @inproceedings{z3,
 author = {de Moura, Leonardo and Bjørner, Nikolaj},
@@ -821,6 +851,15 @@ year = {2015},
 biburl    = {https://repository.upenn.edu/edissertations/1926}
 }
 
+@misc{osera2019constraintbased,
+      title={Constraint-Based Type-Directed Program Synthesis}, 
+      author={Peter-Michael Osera},
+      year={2019},
+      eprint={1907.03105},
+      archivePrefix={arXiv},
+      primaryClass={cs.PL}
+}
+
 @misc{pfenninglecture,
   author        = {Pfenning, Frank},
   title         = {Lecture notes in Linear Logic},
@@ -1329,6 +1368,15 @@ keywords = {haskell, datatype-generic programming, type classes}
   biburl       = {https://dblp.org/rec/journals/corr/abs-2112-14966.bib},
   bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
+
+
+@inproceedings{esop-synthesis,
+  author    = {Jack Hughes and
+               Dominic Orchard},
+  title     = {Program Synthesis from Graded Types},
+  year      = {2024},
+}
+
 @inproceedings{DBLP:conf/lopstr/HughesO20,
   author    = {Jack Hughes and
                Dominic Orchard},

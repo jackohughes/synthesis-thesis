@@ -7,7 +7,7 @@ computer shares the burden of writing the program with the human by writing part
 or all of the program for them. The essence of program synthesis is the
 automatic generation of program code from some specification of desired program
 behaviour. Program synthesis techniques take many forms and have been applied to
-almost all paradigms of programming, from early example driven approaches such
+almost all paradigms of programming, from early example-driven approaches such
 as \citet{deadalus}'s \textsc{Deadalus} and \citet{10.1145/321992.322002}'s \textsc{Thesys} systems, to
 machine learning approaches such as \textit{inductive logic
 programming}~\citep{MUGGLETON1994629}, to synthesising transformations between
@@ -26,7 +26,7 @@ abstract specification of program behaviour.
 
 \emph{Type-directed program synthesis} is a well-studied technique for automatically
 generating program code from a given type specification - the \textit{goal}
-type. This approach has a long history, which is deeply intertwined with
+type~\citep{oseraMYTH1,10.1145/1809028.1806632, synthesis2, DBLP:conf/cav/AlbarghouthiGK13, 10.1145/2737924.2737977, osera2019constraintbased}. This approach has a long history, which is deeply intertwined with
 automated theorem proving and proof synthesis, thanks to the Curry-Howard
 correspondence~\citep{manna1980deductive,10.5555/1624562.1624585}. 
 
@@ -197,27 +197,29 @@ function. This system is the default basis of
 Granule~\citep{DBLP:journals/pacmpl/OrchardLE19}. The second approach does away
 with this linear basis, embedding graded modalities into the function types à la
 Idris 2~\citep{DBLP:journals/corr/abs-2104-00480}, McBride's
-QTT~\citep{McBride2016,quantitative-type-theory}, the core of Linear
-Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}, and the unified graded
-modal calculus of \citep{DBLP:journals/pacmpl/AbelB20}. In these systems, grades
-are expressed as annotations function arrows, i.e. $A^2 \rightarrow B$ expresses
-a similar idea as before, where $A$ is an argument type graded by $2$. However,
-in these systems, we do not need to do any unboxing to be able to use the value
-of type $A$ according to its grade in the body of the function.
+QTT~\citep{McBride2016,quantitative-type-theory}, the coeffect calculi
+of~\citet{DBLP:conf/icalp/PetricekOM13} and~\citet{petricek2014coeffects}, the
+core of Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}, and the
+unified graded modal calculus of \citep{DBLP:journals/pacmpl/AbelB20}. In these
+systems, grades are expressed as annotations function arrows, i.e. $A^2
+\rightarrow B$ expresses a similar idea as before, where $A$ is an argument type
+graded by $2$. However, in these systems, we do not need to do any unboxing to
+be able to use the value of type $A$ according to its grade in the body of the
+function.
 
 As graded type systems develop into fully fledged programming languages such as
-Idris 2~\citep{DBLP:journals/corr/abs-2104-00480}, and as traditionally non
-graded languages, such as Haskell, incorporate features from graded types into
-their existing type systems~\citep{DBLP:journals/pacmpl/BernardyBNJS18}, the
-proposition of harnessing the information conveyed by these richer types becomes
-increasingly attractive. As of this moment, program synthesis in the context of
-graded types has remained relatively unexplored despite the growing prevalence
-of such systems. Past works have tackled the problem of proof search in Linear
-Logic~\citep{HODAS1994327, CERVESATO2000133}, which are analogous, through the
-lens of Curry-Howard, to program synthesis solutions for linear types. These
-works lay the foundations for our approach here, however, graded types
-pose an entirely new set of challenges and integrating them into these existing
-approaches is complex.
+Idris 2~\citep{DBLP:journals/corr/abs-2104-00480}, and as traditionally
+non-graded languages, such as Haskell, incorporate features from graded types
+into their existing type systems~\citep{DBLP:journals/pacmpl/BernardyBNJS18},
+the proposition of harnessing the information conveyed by these richer types
+becomes increasingly attractive. As of this moment, program synthesis in the
+context of graded types has remained relatively unexplored despite the growing
+prevalence of such systems. Past works have tackled the problem of proof search
+in Linear Logic~\citep{HODAS1994327, CERVESATO2000133}, which are analogous,
+through the lens of Curry-Howard, to program synthesis solutions for linear
+types. These works lay the foundations for our approach here, however, graded
+types pose an entirely new set of challenges and integrating them into these
+existing approaches is complex.
 
 For this work, we consider Granule~\citep{DBLP:journals/pacmpl/OrchardLE19} to
 be an ideal candidate for the target language of a program synthesis tool for
@@ -232,7 +234,7 @@ synthesis algorithm itself.
 Granule also provides a language extension, known as \emph{GradedBase}, which
 does away with this linear type system as its foundation. Instead, grades
 permeate the type system à la~\citet{petricek2014coeffects} and other graded
-base systems. This extension provides us with a language capable of giving a
+base systems (as mentioned above). This extension provides us with a language capable of giving a
 broad representation of graded type systems. This will factor heavily into the
 design of our calculi, and we structure the rest of the thesis with this in
 mind.
@@ -246,12 +248,12 @@ writing programs automatically easier?
 \paragraph{Thesis Statement} 
 \label{para:thesis-statement}
 \begin{quote}
-      This work will demonstrate that linear and graded
+      Linear and graded
 types can be integrated into type-directed program synthesis to prune incorrect
 branches from the search space of candidate programs, yielding an efficient
 program synthesis algorithm which ensures that generated programs are type
-correct and \emph{well-resourced} (i.e. they use linear values linearly, and
-graded values according to their grades) by construction. 
+correct and \emph{well-resourced} (by construction), i.e. they use linear values linearly, and
+graded values according to their grades.
 \end{quote}
  
 The primary aim of this work is to demonstrate the feasibility and power of
@@ -393,7 +395,7 @@ of~\ref{chapter:core}.
       \text{Chapter~\ref{chapter:extended}} & & \rightarrow,\ \text{ADTs},\ \text{Recursion}
 \end{array}
 \end{align*}
-\caption{Typing calculi per chapter}
+\caption{Typing calculi per chapter. Each calculus forms a superset of the calculi of previous chapters}
 \label{table:chapter-calculi}
 \end{table}
 
@@ -441,4 +443,12 @@ previously published papers:
     the disparity between Granule's $\Box$ modality and Linear Logic's !, and
     how ! can be recovered in Granule through the use of a grade-level operator
     defined in this paper.  
+
+    \item \citet{esop-synthesis} Program Synthesis from Graded Types. In 33rd
+    European Symposium on Programming. (Conditionally accepted)
+     
+    This paper presents a program synthesis calculus and implementation for a
+    fully graded type system à la~\citet{petricek2014coeffects}, and
+    demonstrates how these techniques can be applied to Linear Haskell. This
+    work forms the basis of much of Chapter~\ref{chapter:extended}.
 \end{itemize}
