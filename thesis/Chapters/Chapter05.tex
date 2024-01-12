@@ -22,7 +22,8 @@ $\lambda$-calculus is one of the two dominant flavours of quantitative type
 system. This approach is common amongst implementations of quantitative type
 systems, such as Idris 2, the \emph{Linear Types} language extension to GHC, and
 the \emph{GradedBase} language extension of Granule (which forms the target
-language of our implementation). 
+language of our implementation). The majority of content of this chapter is 
+derived from~\citet{esop-synthesis}.
 
 \paragraph{Roadmap}
 We begin by extending the calculus of Section~\ref{sec:graded-base}, adding
@@ -1962,8 +1963,8 @@ fromMaybe (Just z) y = z
 
 \paragraph{Subtractive Resource Management}
 Ultimately, we opted to focus on the additive resource management scheme for
-Chapter~\ref{chapter:extended} due to the evidenced concerns regarding the
-efficiency of its implementation for a fully graded typing calculus.
+Chapter~\ref{chapter:extended} due to the evidence regarding the efficiency of
+its implementation for a fully graded typing calculus.
 
 In the subtractive scheme, the $\textsc{Var}$ rule generates a constraint which
 determines if the use of a variable is permissible based on the rest of the
@@ -1993,12 +1994,13 @@ In this chapter we presented a synthesis calculus for a feature-rich type system
 based on the fully graded $\lambda$-calculus of section~\ref{sec:graded-base},
 which complements our graded linear system of Chapter~\ref{chapter:core} to
 allow us to synthesise programs for the major approaches to graded type systems.
-We found through our experimental evaluation that synthesising programs in this
-calculus requires the exploration of fewer synthesis paths when using the
-information provided by grades to prune the search space of candidate programs.
-In terms of pure speed, un-graded type-directed program synthesis outperformed
-our implementation, largely due to the overhead of discharging constraints to an
-SMT solver. 
+This approach to synthesis enabled us to synthesise Haskell programs using
+graded types via the Linear Types language extension. We found through our
+experimental evaluation that synthesising programs in this calculus requires the
+exploration of fewer synthesis paths when using the information provided by
+grades to prune the search space of candidate programs. In terms of pure speed,
+un-graded type-directed program synthesis outperformed our implementation,
+largely due to the overhead of discharging constraints to an SMT solver. 
 
 This discrepancy in speed necessitates that our synthesis tool seek a more
 efficient means of interfacing with the solver. However, the theoretical

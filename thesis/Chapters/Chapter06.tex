@@ -15,7 +15,7 @@ programs in our evaluation in Chapter~\ref{chapter:extended}.
 
 In summary, in our work we have succeeded in: 
 \begin{itemize}
-    \item Building several core calculi for two varieties of quantitative type
+    \item Building several core calculi for two varieties of graded type
           systems, encompassing the major approaches in the literature, with
           both styles differing in expressivity and imposing unique
           requirements. 
@@ -30,7 +30,7 @@ In summary, in our work we have succeeded in:
     based on a generic programming methodology. 
     \item Adapting our synthesis technique to Haskell, showing the viability of
           our framework as a foundation for building synthesis tools for other
-          quantitative type systems in the real world.
+          graded type systems in the real world.
     \item Proved the soundness of each of these systems, reasoning about the
           behavioural properties of our synthesis calculi. 
 \end{itemize}
@@ -73,7 +73,8 @@ Tables~\ref{fig:list-of-types} and~\ref{tab:problems}, we can see the natural
 number, and intervals over the natural numbers semirings appear frequently, more
 than any other semiring. An SMT solver which focuses purely on solving in these
 semirings, sacrificing the generality provided by solvers such as Z3~\citep{z3},
-may be a worthwhile avenue of exploration. 
+may be a worthwhile avenue of exploration. This approach would also avoid the
+overhead of serialising constraints to SMT-LIB format and starting up Z3. 
 
 
 \subsection{Generalised Algebraic Data Types}
@@ -130,6 +131,20 @@ programming language~\citep{DBLP:journals/corr/abs-2104-00480}, which implements
 dependent types in a quantitative setting, and is an example of such resourceful
 systems being used in a practical system.
 
+\subsection{Ownership-Based Type Systems}
+Linearity is closely related to the notions of
+\emph{uniqueness}~\citep{10.1007/3-540-57529-4_42, 10.1007/3-540-57787-4_23}, as
+well as \emph{ownership} and \textit{borrowing}~\citep{Mycroft2013}. The
+programming language Rust uses a system based these
+ideas~\citep{10.1145/2692956.2663188, 10.1145/3158154, jung2019stacked}, providing memory safety
+guarantees through the ``borrow checker'', which ensures that only one owner of
+a value can write to its memory location at any time. Multiple reads are
+permitted, however, via \textit{borrowing}. ~\citet{DBLP:conf/esop/MarshallVO22}
+give a type theoretic view of Rust's borrow checker, which Rust treats as a
+separate entity from the type checker. This view opens the gateway for
+type-directed program synthesis, where techniques we provide for synthesis in
+this work can be generalised to incorporate Rust-like approaches to resourceful
+types. 
 
 \subsection{Large Language Models}
 With the rise in LLMs (Large Language Models) showing their power at program
@@ -153,7 +168,9 @@ computer.
 We feel that type-directed program synthesis complements linear and graded types
 very well. As richer types further constrain the number of possible inhabitants,
 theoretically there is less work to be done by the computer to identify the
-program which behaves according to the user's intent.
+program which behaves according to the user's intent. A potential future
+extension to this work is to use this resourceful information to help inform
+users why their desired program was not able to be synthesised. 
 
 Programming with linear and graded types can require significantly more
 forethought than standard functional programming, and programs which seem
