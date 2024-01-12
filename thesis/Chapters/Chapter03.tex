@@ -12,8 +12,8 @@ this chapter is derived from~\citet{DBLP:conf/lopstr/HughesO20}.
 In Chapter~\ref{chapter:intro} we posed the question ``how do we harness [linear
 and graded types] to make writing programs automatically easier?''. This chapter
 goes some way to providing an answer, by showing how we can  
-incorporate these types into the design of a synthesis tool, using resource
-constraints in synthesis to prune the search space of programs. 
+integrate these types into the design of a synthesis tool, using resource
+constraints to prune the search space of programs. 
 
 As mentioned in Chapter~\ref{chapter:intro}, type-directed program synthesis can
 be framed as an inversion of type checking. In type checking, we have a
@@ -42,7 +42,7 @@ Resourceful types introduce another dimension to synthesis: how do we ensure
 that the assumptions in $\Gamma$ are used according to their resource
 constraints as described by their linearity or grades in the synthesised term $t$? I.e. if $x : A$
 is a linear assumption in $\Gamma$ that is used in some way to construct $t$,
-then the synthesis algorithm must synthesise a $t$ which uses $x$ exactly once.
+then the synthesis tool must synthesise a $t$ which uses $x$ exactly once.
 Likewise, if $x :_r A$ is a graded assumption, then it must be used in $t$ in a
 way which satisfies its grade $r$.
  
@@ -563,8 +563,8 @@ body of the synthesised term $t$.
 The output context of the premise then contains $[[x]]$ graded by $s'$, which
 reflects how $[[x]]$ was used in the synthesis of $[[t]]$, i.e. if $[[x]]$ was
 not used then $s' = s$. The premise $[[ exists s . r >= s + 1 ]]$ constrains the
-number of times dereliction can be applied so that it does not exceed $x$'s
-original grade $r$.
+number of derelictions that can be used so that the grade $r$ is not
+exceeded.
 
 One may observe that the $\subDerName$ rule makes the presence of the
 $\subGrVarName$ rule admissible. Synthesising the usage of a graded variable can
@@ -637,7 +637,8 @@ from those on the left. The last conjunct states $q$ is the greatest element
 \mathcal{R}$ satisfying the subtraction constraint then $[[ q >= q']]$ e.g., if
 $r = [[ Intrv 2 3 ]]$ and $s = [[ Intrv 0 1]]$ then $q = [[ Intrv 2 2 ]]$
 instead of, say, $[[ Intrv 0 1]]$. This \emph{maximality} condition is important
-for soundness (i.e. that synthesised programs are well-typed); we discuss soundness further on page \pageref{soundness-ref}.
+for soundness (i.e. that synthesised programs are well-typed); we discuss
+soundness further in Section~\ref{sec:linear-base-sub-sound}.
 
 Thus for \subBoxName, $[[ G - D ]]$ is multiplied by the goal type grade $r$ to obtain how these
   variables are used in $[[t]]$ after promotion. This is then subtracted from
@@ -668,8 +669,8 @@ by $q_2 = 0...1$; the final output grade for $x$ in the \subBoxName rule.
 
 
 
-Synthesis of graded modality elimination, is handled by the
-  \subUnboxName\ left rule:
+Synthesis of graded modality elimination is handled by the
+  \subUnboxName\ rule:
   \begin{align*}
     \subUnbox
     \end{align*}
@@ -716,7 +717,7 @@ of the pair. As with \subAppName, we also ensure that these bound assumptions mu
 \end{array}
 \end{align*}
 \subsubsection{Sums}
-The introduction rules for sum types, \subSumIntroLname\ and \subSumIntroRname, are straightforward:
+The right rules for sum types, \subSumIntroLname\ and \subSumIntroRname, are straightforward:
 \begin{align*}
   \subSumIntroL
 \;\;\;
@@ -1102,17 +1103,15 @@ $[[ D' ]]$ (that might come from further on in the synthesis process) that
 `fills the gap' in resource use to produce $[[ D + D' ]]$ which is
 overapproximated by $[[ G ]]$. In this example, $[[ D' ]] = [[ x : [A] 1 ]]$
 would satisfy this constraint, explaining that there is some further possible
-single usage which will satisfy the incoming grade. 
-
-We apply this pruning condition at the synthesis of terms which are binders. 
-Therefore, synthesised closed terms are always well-resourced.
+single usage which will satisfy the incoming grade. We apply this pruning
+condition at the synthesis of terms which are binders. Therefore, synthesised
+closed terms are always well-resourced.
 
 The proof of soundness can be found in Section~\ref{proof:linear-add-sound} of
 Appendix~\ref{appendix:proofs}.
 
 As in Section~\ref{sec:linear-base-sub-sound}, the proof is fairly
-straightforward, by induction. Again, consider the $\multimap_\textsc{R}^+$ rule 
-as an example. By induction we then have that:
+straightforward, by induction. Again, we consider the $\multimap_\textsc{R}^+$ rule. By induction we have that:
 %
 \begin{align*}
   [[ (G, x : A) - D |- t : B ]]
@@ -1238,8 +1237,7 @@ other words, the order in which we apply invertible rules doesn't matter. By
 fixing a particular ordering on the application of these rules, we eliminate
 much of the non-determinism that arises from trying branches which differ only
 in the order in which invertible rules are applied. This focused approach to
-synthesis ensures that we are restricted to generating programs in
-$\beta$-normal form.
+restricts synthesis to generating programs in $\beta$-normal form.
 
 We take both of our calculi and apply this focusing technique to them,
 yielding two \textit{focusing} calculi. To do so, we augment our previous
@@ -1261,9 +1259,8 @@ When focusing we apply a chain of synchronous rules until:
 \begin{itemize}
   \item We reach a position where no rules may be applied (at which point the branch terminates).
   \item We have synthesised a term for our goal.
-  \item We have exposed an asynchronous connective at which point we switch
+  \item We have exposed an asynchronous connective at which point we switch back to applying asynchronous rules.
 \end{itemize}
-  back to applying asynchronous rules.
 We divide our synthesis rules into four categories, each with their own
 judgement form, which refines the focusing judgement above with an arrow
 indicating which part of the judgement is currently in focus. An $\Uparrow$
@@ -1355,7 +1352,7 @@ assumptions in $\Omega$ by applying a sequence of $\textsc{Left Async}$ rules.
 The $\textsc{Left Async}$ phase of focusing
 (Figure~\ref{fig:focus-sub-left-async}) breaks down the assumptions in $\Omega$
 via the application of left rules. The $\Uparrow_\textsc{L}^-$ rule moves an
-assumption from $\Gamma$ to $\Omega$ if the assumption's type is not left
+assumption from $\Gamma$ to $\Omega$ if the type is not left
 asynchronous. 
 
 \begin{figure}[H]
@@ -1738,9 +1735,7 @@ pair x y = (x, y)
 An unboxing term is synthesised via the \subUnboxName\ abd \addUnboxName\ rules
 rule as a let expression which pattern matches over a box pattern, yielding an
 assumption with the grade's usage. Such terms can also be refactored both into
-function equations and to avoid nested let bindings. For example, we may write
-the $k$ combinator using an explicit graded modality:
-
+function equations and to avoid excessive use of let bindings: 
 \begin{granule}
 k : forall { a b : Type } . a -> b [0] -> a
 k x y = let [z] = y in x
@@ -1750,7 +1745,7 @@ which we can then refactor into
 k : forall { a b : Type } . a -> b [0] -> a
 k x [z] = z
 \end{granule}
-This procedure includes programs which perform a nested unboxing, refactoring:
+This procedure includes programs which perform a nested unboxing:
 \begin{granule}
 comp : forall {k : Semiring, n m : k, a b c : Type} 
      . (a [m] -> b) [n] 
@@ -1759,7 +1754,7 @@ comp : forall {k : Semiring, n m : k, a b c : Type}
      -> c
 comp x y z = let [u] = x in let [v] = z in y [ u [v] ]
 \end{granule}
-into:
+is refactored into:
 \begin{granule}
 comp : forall {k : Semiring, n m : k, a b c : Type}
      . (a [m] -> b) [n] 
