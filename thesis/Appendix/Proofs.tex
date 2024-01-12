@@ -1816,33 +1816,78 @@ here. The type-ability of these equations relies on previous work on the Granule
 language which proves that pattern matching and substitution are well
 typed~\cite{DBLP:journals/pacmpl/OrchardLE19}.
 
-\begin{figure}[h]
-  \begin{align*}
-    \hspace{-10em}\begin{array}{c}
-      \setlength{\arraycolsep}{0.15em}
-  \begin{array}{rlr}
-    [[ ( \ x . t2 ) t1 ]] \ &\equiv \ [[t2]] [ [[t1]] / [[ x ]] ]  \ & \ \beta \\
-    [[ \ x . {t x} ]] \ &\equiv \ [[t]]   \ & ( [[ x ]] \# [[ t ]] ) \
-                                            \eta \\ \\
-    [[ letrec x = t1 in t2  ]] &\equiv \ [[ t2 ]] [ [[ letrec x = t1 in t1 ]] / [[ x ]] ]  & \ \beta_{letrec} \\
-    [[ f (letrec x = t1 in t2)  ]] &\equiv \ [[ letrec x = t1 in (f t2)  ]]  &
-                                                                     {\small{\textsc{LetRecDsitrib}}} \\
-    \\
-    [[ case t of many pi ti ]] \ &\equiv \ (t \rhd [[ pj ]] )[[ tj ]]  \ & \;\; (\textsf{minimal}(j)) \ \beta_{case} \\
-    [[ case t1 of many pi { [ pi / z ] t2  } ]] \ &\equiv \ [[ [ t1 / z ] t2  ]] & \ \eta_{case} \\
-    %[[ case t1 of p1 -> {t2 [ p1 / z ]} ; * ; pn -> {t2 [ pn / z ]} ]] \ &\equiv \ [[ t2 [ t1 / z ] ]] & \ \eta_{case} \\
-%    [[ case (case t of p1 -> t1; * ; pn -> tn ) of p1' -> t1'; * ; pn' -> tn' ]] &\equiv \ [[ case t of p1 -> (case t1 of p1' -> t1'); * ; pn -> (case tn of pn' -> tn') ]] & \ \textit{case assoc.} \\
-   [[ case (case t of many pi ti) of many pi' ti' ]] &\equiv\
-   [[ case t of many pi (case ti of many pi' ti') ]] &\ {\small{\GRANULEdruleEquivXXcaseAssocName{}}}\\
-   [[ f (case t of many pi ti) ]] \ &\equiv\ [[ case t of many pi (f ti) ]] & \ {\small{\textsc{CaseDistrib}}} \\
-   [[ case [case t of many pi ti] of many [pi'] ti' ]] &\equiv\
-   [[ case [t] of many [pi] {case [ti] of many [pi'] ti'} ]] & \;\; ([[ lin  pi ]]) \ {\small{\GRANULEdruleEquivXXcaseBoxAssocName{}}}\\
-   %
-  \end{array}
-\\ \\
-\GRANULEdruleEquivXXcaseGen{}
-    \end{array}
-   \end{align*}
+\begin{figure}[H]
+  % \begin{itemize}
+    % \item $\beta$: 
+    \begin{align*}
+    \beta: \;\; [[ ( \ x . t2 ) t1 ]] \ \equiv \ [[t2]] [ [[t1]] / [[ x ]] ]
+    \end{align*}
+    % \item $\eta$:
+    \vspace{-3em}
+    \begin{align*}
+      \eta: \;\; [[ \ x . {t x} ]] \ \equiv \ [[t]] \quad  ( [[ x ]] \# [[ t ]] ) 
+    \end{align*}
+    % \item $\beta_\textsc{Let}$: 
+    \vspace{-3em}
+    \begin{align*}
+      \beta\textsc{Let}: \;\; [[ letrec x = t1 in t2  ]] \equiv \ [[ t2 ]] [ [[ letrec x = t1 in t1 ]] / [[ x ]] ] 
+    \end{align*}
+    % \item $\textsc{Dist}_\textsc{Let}$: 
+    \vspace{-3em}
+    \begin{align*}
+     \textsc{Dist}\textsc{Let}: \;\; [[ f (letrec x = t1 in t2)  ]] \equiv \ [[ letrec x = t1 in (f t2)  ]] 
+    \end{align*}
+    % \item $\beta_\textsc{Case}$: 
+    \vspace{-3em}
+    \begin{align*} 
+       \beta\textsc{Case}: \;\; [[ case t of many pi ti ]] \ \equiv \ (t \rhd [[ pj ]] )[[ tj ]]  \  \quad (\textsf{minimal}(j))
+    \end{align*}  
+    % \item $\eta_\textsc{Case}$:
+    \vspace{-3em}
+    \begin{align*}
+      \eta\textsc{Case}: \;\; [[ case t1 of many pi { [ pi / z ] t2  } ]] \ \equiv \ [[ [ t1 / z ] t2  ]]
+    \end{align*}
+    % \item $\textsc{Assoc}_\textsc{Case}$:
+    \vspace{-3em}
+    \begin{align*}
+     & \textsc{AssocCase}: \;\; [[ case (case t of many pi ti) of many pi' ti' ]] \\ 
+     & \qquad\qquad\qquad \equiv\ [[ case t of many pi (case ti of many pi' ti') ]]  
+    \end{align*}
+    % \item $\textsc{Dist}_\textsc{Case}$: 
+    \vspace{-3em}
+    \begin{align*}
+     \textsc{DistCase}: \;\; [[ f (case t of many pi ti) ]] \equiv\ [[ case t of many pi (f ti) ]]
+    \end{align*}
+    % \item $\textsc{Assoc}_\Box$: 
+    \vspace{-3em}
+    \begin{align*}
+    & \textsc{Assoc}\Box: \;\; [[ case [case t of many pi ti] of many [pi'] ti' ]] \\ 
+    & \qquad\qquad\qquad \equiv\ [[ case [t] of many [pi] {case [ti] of many [pi'] ti'} ]] \quad ([[ lin  pi ]])
+    \end{align*}
+  % \end{itemize}
+                                          
+%    [[ f (case t of many pi ti) ]] \ &\equiv\ [[ case t of many pi (f ti) ]] & \ {\small{\textsc{CaseDistrib}}} \\
+  % \end{align*}
+%   \begin{align*}
+%     \hspace{-10em}\begin{array}{c}
+%       \setlength{\arraycolsep}{0.15em}
+%   \begin{array}{rlr}
+%     \\
+%     [[ case t of many pi ti ]] \ &\equiv \ (t \rhd [[ pj ]] )[[ tj ]]  \ & \;\; (\textsf{minimal}(j)) \ \beta_{case} \\
+%     [[ case t1 of many pi { [ pi / z ] t2  } ]] \ &\equiv \ [[ [ t1 / z ] t2  ]] & \ \eta_{case} \\
+%     %[[ case t1 of p1 -> {t2 [ p1 / z ]} ; * ; pn -> {t2 [ pn / z ]} ]] \ &\equiv \ [[ t2 [ t1 / z ] ]] & \ \eta_{case} \\
+% %    [[ case (case t of p1 -> t1; * ; pn -> tn ) of p1' -> t1'; * ; pn' -> tn' ]] &\equiv \ [[ case t of p1 -> (case t1 of p1' -> t1'); * ; pn -> (case tn of pn' -> tn') ]] & \ \textit{case assoc.} \\
+%    [[ case (case t of many pi ti) of many pi' ti' ]] &\equiv\
+%    [[ case t of many pi (case ti of many pi' ti') ]] &\ {\small{\GRANULEdruleEquivXXcaseAssocName{}}}\\
+%    [[ f (case t of many pi ti) ]] \ &\equiv\ [[ case t of many pi (f ti) ]] & \ {\small{\textsc{CaseDistrib}}} \\
+%    [[ case [case t of many pi ti] of many [pi'] ti' ]] &\equiv\
+%    [[ case [t] of many [pi] {case [ti] of many [pi'] ti'} ]] & \;\; ([[ lin  pi ]]) \ {\small{\GRANULEdruleEquivXXcaseBoxAssocName{}}}\\
+%    %
+%   \end{array}
+% \\ \\
+% \GRANULEdruleEquivXXcaseGen{}
+%     \end{array}
+%    \end{align*}
  \caption{Equational theory for linear base Granule}
  \label{fig:equational}
 \end{figure}
@@ -1923,21 +1968,21 @@ $[[ 1 <<= r ]]$ in the typing derivation.
 
 
   \begin{figure}
-{\scalebox{0.92}{\begin{minipage}{1.0\linewidth}
+{\scalebox{0.82}{\begin{minipage}{1.0\linewidth}
       \begin{align*}
         {\footnotesize{
         \hspace{-6em}
   \begin{array}{c}
-\GRANULEdruleEquivXXbeta{} \\[1.25em]
-\GRANULEdruleEquivXXeta{} \\[1.25em]
-\GRANULEdruleEquivXXletrecBeta{} \\[1.25em]
-\GRANULEdruleEquivXXletrecDist{} \\[1.25em]
-\GRANULEdruleEquivXXcaseBeta{} \\[1.25em]
-\GRANULEdruleEquivXXcaseEta{} \\[1.25em]
-\GRANULEdruleEquivXXcaseGen{} \\[1.25em]
-\GRANULEdruleEquivXXcaseAssoc{} \\[1.25em]
-\GRANULEdruleEquivXXcaseBoxAssoc{} \\[1.25em]
-\GRANULEdruleEquivXXcaseDist{} \\[1.25em]
+\GRANULEdruleEquivXXbeta{} \\[2.25em]
+\GRANULEdruleEquivXXeta{} \\[2.25em]
+\GRANULEdruleEquivXXletrecBeta{} \\[2.25em]
+\GRANULEdruleEquivXXletrecDist{} \\[2.25em]
+\GRANULEdruleEquivXXcaseBeta{} \\[2.25em]
+\GRANULEdruleEquivXXcaseEta{} \\[2.25em]
+\GRANULEdruleEquivXXcaseGen{} \\[2.25em]
+\GRANULEdruleEquivXXcaseAssoc{} \\[2.25em]
+\GRANULEdruleEquivXXcaseBoxAssoc{} \\[2.25em]
+\GRANULEdruleEquivXXcaseDist{} \\[2.25em]
 \end{array}
         }}
 \end{align*}
@@ -1956,7 +2001,9 @@ are variables or constructor patterns only.
 \begin{restatable}[`Case push' property]{prop}{casePush}
 %
 \[
+  {\footnotesize{
 \GRANULEdruleEquivXXcasePushDerived{}
+  }}
 \]
 \end{restatable}
 
@@ -2177,13 +2224,20 @@ and \emph{pull} distributive laws is well-typed.
 
 
 {\footnotesize{
+\begin{equation}
+  \label{eq:push-deriv-sum-term}
+[[ case z of [ inl ( x ) ] -> inl push Sig A ( [ x ] ) ;
+  [ inr ( y ) ] -> inr push Sig B ( [ y ] ) ]] 
+\end{equation}
+}}
+
+{\footnotesize{
 \begin{align*}
   \hspace{-7em}\inferrule*[right=Case]{
     % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Sum A B |- z : Sum A B ]]} \\
   \eqref{eq:push-deriv-sum-sub1} \\ \eqref{eq:push-deriv-sum-sub2} \\
   \eqref{eq:push-deriv-sum-sub3} \\ \eqref{eq:push-deriv-sum-sub4}
-  }{[[ z : [] r (Sum A B) |- case z of [ inl ( x ) ] -> inl push Sig A ( [ x ] ) ;
-  [ inr ( y ) ] -> inr push Sig B ( [ y ] ) : Sum {{ A} [ [] r ai /* ai ]} {{
+  }{ [[ z : [] r (Sum A B) ]] \vdash  \eqref{eq:push-deriv-sum-term}: [[ Sum {{ A} [ [] r ai /* ai ]} {{
   B} [ [] r ai /* ai ] } ]]}
 \end{align*}
  }}
@@ -2236,12 +2290,19 @@ and \emph{pull} distributive laws is well-typed.
    }
 
 \footnotesize{
+  \begin{equation}
+    \label{eq:push-deriv-pair-term}
+  [[ case z of [ Pair x y ] -> pair {
+  push Sig A ( [ x ] )}  {push Sig B ( [ y ] )} ]]
+  \end{equation}
+}
+
+\footnotesize{
 \begin{align*}
   \inferrule*[right=Case]{
   % \inferrule*[right=var,leftskip=7em]{\quad}{[[ z : Tup A B |- z : Tup A B ]]} \\
   \eqref{eq:push-deriv-pair-sub1} \\ \eqref{eq:push-deriv-pair-sub2}
-  }{[[ z : [] r (Tup A B) |- case z of [ Pair x y ] -> pair {
-  push Sig A ( [ x ] )}  {push Sig B ( [ y ] )} : Tup {{A} [ [] ri ai /* ai ]} {{
+  }{[[ z : [] r (Tup A B) ]] \vdash \eqref{eq-push-deriv-pair-term} : [[ Tup {{A} [ [] ri ai /* ai ]} {{
   B} [ [] ri ai /* ai ]} ]]}
 \end{align*}
     }
@@ -2249,17 +2310,24 @@ and \emph{pull} distributive laws is well-typed.
 \item $\deriv{push}{ [[ A -o B ]]}^{\Sigma} : [[ {[] r (A -o B)} -> ({{A} [ [] r ai /* ai ]}
   -o {{B} [ [] ri ai /* ai ]}) ]]$
 
-\footnotesize{
+  \footnotesize{
 \begin{equation}
-\label{eq:push-deriv-abs-sub3}
-\inferrule*[right=app]{ \inferrule*[right=push, leftskip=10em]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai]} ]]} \\ \inferrule*[right=Pr, rightskip=15em]{\inferrule*[right=app]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
+  \label{push-deriv-fun-1}
+\inferrule*[right=Pr, rightskip=15em]{\inferrule*[right=app]{\inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[
           f : {A -o B} |- f : A -o B ]]}}{ [[ f : [ { A
       -o B }  ] 1 |- f : A -o B ]]} \\
       \inferrule*[right=der]{\inferrule*[right=var]{\quad}{[[ x : A  |- x : A
           ]]}}{[[  x : [ A ] 1 |- x : A ]]}}{[[ f : [ { A
       -o B } ] 1, x : [ A ] 1 |- f x : B
     ]]}}{[[ f : [ {A -o B} ] r, x : [ A ]
-    {BigMeet ri} |- [ f x ] : {[] r {B }}]]}}
+    {BigMeet ri} |- [ f x ] : {[] r {B }}]]}
+\end{equation}
+  }
+
+\footnotesize{
+\begin{equation}
+\label{eq:push-deriv-abs-sub3}
+\inferrule*[right=app]{ \inferrule*[right=push, leftskip=10em]{\quad}{[[ . |- pushP Sig B : {[] r B} -o {B [ [] r ai /* ai]} ]]} \\ \eqref{push-deriv-fun-1} }
 {[[ f : [ {A -o B} ] r, x : [ A ] {BigMeet ri} |- push Sig B [ f x ] : {{B [ [] r ai /* ai ] } }  ]]}
 \end{equation}
  }
@@ -2293,17 +2361,23 @@ and \emph{pull} distributive laws is well-typed.
 \end{equation}
     }
 
+  
+\footnotesize{
+\begin{equation}
+  \label{push-deriv-fun-term}
+[[ case z of [f] -> case pull Sig A (y) of [ x
+  ] -> push Sig B [ f x ] ]] 
+\end{equation}
+}
+
 {\footnotesize{
 \begin{align*}
 \hspace{-5em}\inferrule*[right=abs]
   {\inferrule*[right=Case]{
  % \inferrule*[right=Var]{\quad}{[[ z : [] r (A -o B) |- z : [] r ( A -o B ) ]]}
   \eqref{eq:push-deriv-abs-sub1} \\
-  \eqref{eq:push-deriv-abs-sub2}}{[[ z : [] r (A -o B), y : {  A }  |- case z
-  of [f] -> case pull Sig A (y)  of [ x
-  ] -> push Sig B [ f x ] : {B} [ [] r ai /* ai ] ]]}}
-{[[ z : [] r (A -o B) |- \ y . case z of [f] -> case pull Sig A (y) of [ x
-  ] -> push Sig B [ f x ] : {{A [ [] r ai /* ai ]}} -o {{B [ [] r ai /* ai ]}} ]]}
+  \eqref{eq:push-deriv-abs-sub2}}{[[ z : [] r (A -o B), y : {  A } ]] \vdash \eqref{push-deriv-fun-term} : [[ {B} [ [] r ai /* ai ] ]]}}
+{[[ z : [] r (A -o B) ]] \vdash \lambda y . \eqref{push-deriv-fun-term} : [[ {{A [ [] r ai /* ai ]}} -o {{B [ [] r ai /* ai ]}} ]]}
 \end{align*}
     }}
 
@@ -2312,12 +2386,20 @@ and \emph{pull} distributive laws is well-typed.
   ai ] }) ]]$
     (i.e. $\tcF\ \overline{\alpha_i} = [[ mu X . A ]]$).
 
+
+\footnotesize{
+  \begin{equation}
+    \label{eq:rec-eq-new}
+\inferrule*[right=var,leftskip=10em]{\quad}{[[ Sig, f
+      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}) |- f : {mu X . {[] r A}}
+                                 -o (mu X . { A [ [] r ai /* ai ]}) ]]}
+  \end{equation}
+}
+
     \footnotesize{
 \begin{equation}
 \label{eq:pull-deriv-rec-sub1}
-      \inferrule*[right=app]{\inferrule*[right=var,leftskip=10em]{\quad}{[[ Sig, f
-      : {mu X . {[] r A}} -o (mu X . {A [ [] r ai /* ai ]}) |- f : {mu X . {[] r A}}
-                                 -o (mu X . { A [ [] r ai /* ai ]}) ]]}
+      \inferrule*[right=app]{\eqref{eq:rec-eq-new}
       \\ \inferrule*[right=var,rightskip=10em]{\quad}{[[ Sig, z : {mu X . {[]
             r A}} |- z :
       {mu X . {[] r A} } ]]}}{[[ Sig, f
@@ -2490,14 +2572,24 @@ Sum A B ) [ [] ri ai /* ai ] |> y : B [ [] ri ai /* ai ] ]]}
 \end{equation}
     }
 
+
+\footnotesize{
+  \hspace{-8em}
+\begin{equation}
+\label{eq:pull-deriv-sum-sub8}
+[[ case z of inl ( x ) -> ( case pull Sig A ( x ) of [ x' ] -> [
+  inl (
+  x' ) ] ) ; inr ( y ) -> ( case pull Sig B ( y ) of [ y' ] -> [ inr ( y' ) ] ) ]]
+\end{equation}
+}
+\\
+
 \footnotesize{
 \begin{align*}
- \hspace{-15em}\inferrule*[right=case,leftskip=5em]{
+ \inferrule*[right=case,leftskip=5em]{
   \eqref{eq:pull-deriv-sum-sub2} \\ \eqref{eq:pull-deriv-sum-sub3} \\
   \\ \eqref{eq:pull-deriv-sum-sub6} \\ \eqref{eq:pull-deriv-sum-sub7} }
-  {[[ z : {Sum A B} [ [] ri ai /* ai ] |- case z of inl ( x ) -> ( case pull Sig A ( x ) of [ x' ] -> [
-  inl (
-  x' ) ] ) ; inr ( y ) -> ( case pull Sig B ( y ) of [ y' ] -> [ inr ( y' ) ] ) : [] {BigMeet ri} {
+  {[[ z : {Sum A B} [ [] ri ai /* ai ] ]] \vdash \eqref{eq:pull-deriv-sum-sub8} : [[ [] {BigMeet ri} {
   Sum A B} ]]}
 \end{align*}
 }
@@ -2712,7 +2804,7 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 \end{align*}
 \item $T = A \oplus B$:
 
-{\scalebox{0.88}{\begin{minipage}{1\linewidth}
+{\scalebox{0.70}{\begin{minipage}{1\linewidth}
 \begin{align*}
 \hspace{-7em}\begin{array}{rll}
        & \deriv{pull}{A \oplus B}^{\Sigma'}(\deriv{push}{A \oplus B}^\Sigma \ z) & \\
@@ -2770,7 +2862,7 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 %
 \item $T = A \otimes B$:
 
-{\scalebox{0.85}{\begin{minipage}{1\linewidth}
+{\scalebox{0.70}{\begin{minipage}{1\linewidth}
 \begin{align*}
 \hspace{-7em}\begin{array}{rll}
        & \deriv{pull}{A \otimes B}^{\Sigma'}(\deriv{push}{A \otimes B}^\Sigma \ z) & \\
@@ -2805,6 +2897,8 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 
 \item $T = \mu X . A$:
 %
+
+{\scalebox{0.70}{\begin{minipage}{1\linewidth}
 \begin{align*}
 \hspace{-12em}\begin{array}{rll}
   & \deriv{pull}{\mu X . A}^{\Sigma'}(\deriv{push}{\mu X . A}^{\Sigma}\ z)& \\
@@ -2838,6 +2932,9 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 \equiv & z & \{\textit{induction}\}
 \end{array}
 \end{align*}
+\end{minipage}
+}}
+\\
 \end{proof}
 
 \pullPushInverse*
@@ -2902,7 +2999,7 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 \item $T = A \oplus B$
 %
 
-{\scalebox{0.84}{\begin{minipage}{1\linewidth}
+{\scalebox{0.7}{\begin{minipage}{1\linewidth}
 \begin{align*}
 \hspace{-5em}\begin{array}{rll}
   & \deriv{push}{A \oplus B}^\Sigma(\deriv{pull}{A \oplus B}^{\Sigma'} \ z) & \\
@@ -2938,7 +3035,7 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 %
 \item $T = A \otimes B$
 
-{\scalebox{0.82}{\begin{minipage}{1\linewidth}
+{\scalebox{0.7}{\begin{minipage}{1\linewidth}
 \begin{align*}
   \hspace{-7em}\begin{array}{rll}
     & \deriv{push}{A \otimes B}^{\Sigma}(\deriv{pull}{A \otimes B}^{\Sigma'}\ z) & \\
@@ -2970,6 +3067,8 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 %
 \item $T = \mu X . A$
 %
+
+{\scalebox{0.7}{\begin{minipage}{1\linewidth}
 \begin{align*}
   \hspace{-12em}\begin{array}{rll}
   & \deriv{push}{\mu X . A}^{\Sigma}(\deriv{pull}{\mu X . A}^{\Sigma'}\ z)& \\
@@ -3003,6 +3102,8 @@ under the assumption that for all $X$, every $f \in \Sigma(X)$ and $g \in
 \equiv & z & \{\textit{induction}\}
   \end{array}
 \end{align*}
+\end{minipage}
+}}
 \end{itemize}
 \end{proof}
 
@@ -3509,20 +3610,23 @@ synthesis of open terms from types, followed by soundness of synthesis for close
       \end{enumerate}
   \item Case 4. Right Sync: \\
       \begin{enumerate}
-        \item Case $\textsc{Con}_{\textsc{R}}$\\
+        \item Case $\textsc{C}_{\textsc{R}}$\\
             In the case of the right synchronous rule for constructor introduction, the synthesis rule has the form:
+            \footnotesize{
               \[
-              \inferrule*[Right=$\textsc{Con}_{\textsc{R}}$]
+              \inferrule*[Right=$\textsc{C}_{\textsc{R}}$]
               { [[ ( Con Forall : B'1 - q1 .*. B'n - qn -> {K {A' Many}}) elem Defines  ]] \\\\
                [[ Sig |- inst {B1 - q1 .*. Bn - qn -> {K {A Many}}} {B'1 - q1 .*. B'n - qn -> {K {A' Many}}} ]] \\\\
                 \Sigma ; [[ G ]] ; \emptyset \vdash [[ Bi ]] \Downarrow\ \Rightarrow [[ ti ]] \mid\ [[ Di ]]}
               {  \Sigma ; [[  G ]] ; \emptyset \vdash [[{K {A Many}}]] \Downarrow\ \Rightarrow [[Con t1 ... tn]] \mid\ [[  {D1 + ... + Dn} ]]}
               \]
+            }
             By induction on the second premise, we have that:
               \[
               [[  Sig ; G |- Bi =>+ ti ; Di]] \tag{ih}
               \]
-            from case 4 of the lemma. From which, we can construct the following instantiation of the $\textsc{Con}_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+            from case 4 of the lemma. From which, we can construct the following instantiation of the $\textsc{C}_{\textsc{R}}$\ synthesis rule in the non-focusing calculus:
+            \footnotesize{
               \[
               \inferrule*[Right=$\textsc{Con}_{\textsc{R}}$]
               {
@@ -3532,6 +3636,7 @@ synthesis of open terms from types, followed by soundness of synthesis for close
               }
               {[[  Sig ; G |- K {A Many} =>+ Con t1 ... tn ; {0 * G} + {(q1 * D1) + ... + (qn * Dn)} ]]}
               \]
+            }
         \item Case $\Box_{\textsc{R}}$ \\
   
             In the case of the right synchronous rule for graded modality introduction, the synthesis rule has the form:
