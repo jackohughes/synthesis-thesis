@@ -1072,12 +1072,12 @@ Appendix~\ref{appendix:proofs}.
   \begin{align*}
     {\footnotesize{
   \hspace{-3.5em}\begin{array}{lll}
-   1.\ \textsc{Right Async}: & [[ Defs ; Sig; G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G , O ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   2.\ \textsc{Left Async}: & [[ Defs ; Sig; G ; O async |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]]  ; [[ G , O ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   3.\ \textsc{Right Sync}: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   4.\ \textsc{Left Sync}: & [[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [ A] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   5.\ \textsc{Focus Right}: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ;  [[ G ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
-   6.\ \textsc{Focus Left}: & [[ Defs ]] ; [[ Sig ]]; [[ G ]], [[ x : [A] r ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [A ] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]
+   1.\ \textsc{Right Async}: & [[ Defs ; Sig; G ; O |- A async => t ; D ]] \quad &\iff \quad [[ Defs ]] ; [[ Sig ]] ; [[ G , O ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   2.\ \textsc{Left Async}: & [[ Defs ; Sig; G ; O async |- B => t ; D ]] \quad &\iff \quad [[ Defs ]] ; [[ Sig ]]  ; [[ G , O ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   3.\ \textsc{Right Sync}: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\iff \quad [[ Defs ]] ; [[ Sig ]] ; [[ G ]] \vdash [[ A ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   4.\ \textsc{Left Sync}: & [[ Defs ; Sig ; G ; {x : [A] r} sync |- B => t ; D ]] \quad &\iff \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [ A] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   5.\ \textsc{Focus Right}: & [[ Defs ]] ; [[ Sig ]] ; [[ G ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\iff \quad [[ Defs ]] ; [[ Sig ]] ;  [[ G ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]\\
+   6.\ \textsc{Focus Left}: & [[ Defs ]] ; [[ Sig ]]; [[ G ]], [[ x : [A] r ]] ; \emptyset \Uparrow\ \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\iff \quad [[ Defs ]] ; [[ Sig ]] ; [[ G, x : [A ] r ]] \vdash [[ B ]] \Rightarrow [[ t ]] \mid [[ D ]]
   \end{array}
     }}
   \end{align*}
