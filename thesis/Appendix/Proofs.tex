@@ -3362,21 +3362,22 @@ synthesis of open terms from types, followed by soundness of synthesis for close
 % \end{proof}
 \subsection{Soundness of Focusing for the Fully Graded Synthesis Calculus}
 \label{proof:focus-graded-sound}
-\begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
-  For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
-  then:
-  \begin{align*}
-  \begin{array}{lll}
-   1.\ TopLevel: & \emptyset ; \emptyset ; \emptyset \vdash [[ Forall alpha : k . A ]] \Rightarrow [[ t ]] \mid \emptyset \quad &\implies \quad  \emptyset ; \emptyset \vdash [[ Forall alpha : k . A ]] \Rightarrow [[ t ]] \mid \emptyset\\
-   1.\ Right\ Async: & [[ Sig ]] ; [[ G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Sig ; G ,, O |- A =>+ t ; D ]]\\
-   2.\ Left\ Async: & [[ Sig ]] ; [[ G ; O async |- B => t ; D ]] \quad &\implies \quad [[  Sig ; G ,, O |- B =>+ t ; D ]]\\
-   3.\ Right\ Sync: & [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[  Sig ; G |- A =>+ t ; D ]]\\
-   4.\ Left\ Sync: & [[ Sig ]] ; [[ G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Sig; G, x : [ A] r |- B =>+ t ; D ]]\\
-   5.\ Focus\ Right: &  [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Sig ; G |- B =>+ t ; D ]]\\
-   6.\ Focus\ Left: & [[ Sig ]]  ; [[ G, x : [A] r ]] ; \emptyset \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Sig; G, x : [A ] r |- B =>+ t ; D ]]
-  \end{array}
-  \end{align*}
-  \end{restatable}
+\gradedBaseFocusingSoundness*
+% \begin{restatable}[Soundness of focusing for graded-base synthesis]{lemma}{gradedBaseFocusingSoundness}
+%   For all contexts $[[ G ]]$, $[[ O ]]$ and types $[[ A ]]$
+%   then:
+%   \begin{align*}
+%   \begin{array}{lll}
+%    1.\ TopLevel: & \emptyset ; \emptyset ; \emptyset \vdash [[ Forall alpha : k . A ]] \Rightarrow [[ t ]] \mid \emptyset \quad &\implies \quad  \emptyset ; \emptyset \vdash [[ Forall alpha : k . A ]] \Rightarrow [[ t ]] \mid \emptyset\\
+%    1.\ Right\ Async: & [[ Sig ]] ; [[ G ; O |- A async => t ; D ]] \quad &\implies \quad [[ Sig ; G ,, O |- A =>+ t ; D ]]\\
+%    2.\ Left\ Async: & [[ Sig ]] ; [[ G ; O async |- B => t ; D ]] \quad &\implies \quad [[  Sig ; G ,, O |- B =>+ t ; D ]]\\
+%    3.\ Right\ Sync: & [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ A ]] \Downarrow\ \ \Rightarrow [[ t ]] \mid\  [[ D ]] \quad &\implies \quad [[  Sig ; G |- A =>+ t ; D ]]\\
+%    4.\ Left\ Sync: & [[ Sig ]] ; [[ G ; {x : [A] r} sync |- B => t ; D ]] \quad &\implies \quad [[ Sig; G, x : [ A] r |- B =>+ t ; D ]]\\
+%    5.\ Focus\ Right: &  [[ Sig ]] ; [[ G ]] ; \emptyset \vdash [[ B]] \Rightarrow [[ t]] \mid\ [[ D ]] \quad &\implies \quad [[ Sig ; G |- B =>+ t ; D ]]\\
+%    6.\ Focus\ Left: & [[ Sig ]]  ; [[ G, x : [A] r ]] ; \emptyset \vdash [[ B]] \Rightarrow [[t ]] \mid\ [[ D ]] \quad &\implies \quad [[ Sig; G, x : [A ] r |- B =>+ t ; D ]]
+%   \end{array}
+%   \end{align*}
+%   \end{restatable}
   \begin{proof}
   \begin{enumerate}
   \item Case: 1. TopLevel: \\
