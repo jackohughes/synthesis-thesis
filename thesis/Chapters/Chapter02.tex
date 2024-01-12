@@ -226,7 +226,8 @@ Granule features ML style polymorphism, thus top level definitions are annotated
 with type schemes which quantify over kind-annotated type variables.
 % Granule has ML style polymorphism (Rank-1 polymorphism), thus we quantify over 
 
-In contrast, the \emph{K} combinator from SKI combinatory logic is not typeable:
+In contrast, the \emph{K} combinator from SKI combinatory logic is not typeable in the 
+linear $\lambda$-calculus:
 \label{k-example}
 \begin{align*}
   \tag{ill-typed}
@@ -240,7 +241,7 @@ as $y$ is discarded in the body of the abstraction, violating linearity. Again,
 in Granule we could try to write this program as:
 \begin{granule}
 k : forall { a b : Type } . a -> b -> a
-k x y = x                  -- ill-typed
+k x y = x             -- ill-typed
 \end{granule}
 However, this will fail to type check, due to the aforementioned violation of
 linearity.
@@ -475,10 +476,10 @@ We allow grade \textit{approximation} via their resource algebras through the
 application of the $\textsc{Approx}$ rule. A grade $s$ may be converted to
 another grade $r$, providing that $r$ iw \textit{approximated} by $s$, where the
 relation $\sqsubseteq$ is the pre-order provided with the semiring. This
-relation is occasionally lifted pointwise to contexts: we write $[[ G <<= G' ]]$
-to mean that $[[ G' ]]$ overapproximates $[[ G ]]$ meaning that for all $[[ (x :
-[A] r) ]] \in [[ G ]]$ then $[[ (x : [A] r') ]] \in [[ G' ]]$ and $[[ r <<= r'
-]]$. This relation ignores linear assumptions in $[[G]]$ and $[[G']]$.
+relation is occasionally lifted pointwise to contexts, ignoring linear
+assumptions: we write $[[ G <<= G' ]]$ to mean that $[[ G' ]]$ overapproximates
+$[[ G ]]$ meaning that for all $[[ (x : [A] r) ]] \in [[ G ]]$ then $[[ (x : [A]
+r') ]] \in [[ G' ]]$ and $[[ r <<= r' ]]$. 
 
 Introduction and elimination of the graded modality is provided by the
 $\textsc{Pr}$ and $\textsc{Let}$ rules respectively. The $\textsc{Pr}$ rule
@@ -559,7 +560,7 @@ k x y' = let [y] = y' in x
 \end{granule}
 Granule also includes pattern matching (which we extend our calculi with in
 Chapter~\ref{chapter:deriving}), allowing us to refactor the above two programs
-to pattern match on the graded modalities in the function equation patterns:
+to pattern match on the graded modalities in the function equations:
 \begin{granule}
 s : forall { a b c : Type } 
   . (a -> (b -> c)) -> (a -> b) -> (a [2] -> c)
@@ -860,7 +861,7 @@ compCoK : forall {k : Semiring, r s : k, a b c : Type}
 compCoK x y z = let [v] = z in y  [ u [v] ]
 \end{granule}
 leveraging the fact that omitting a grade annotation in the type yields a $1$
-grade. Likewise, the \emph{S} and \emph{K} combinators can be typed and written as: 
+grade. Likewise, \emph{S} and \emph{K} can be typed and written as: 
 \begin{align*}
 s & : (A^1 \rightarrow (B^1 \rightarrow C))^1 \rightarrow (A^1 \rightarrow B)^1 \rightarrow (A^2 \rightarrow C) \\
 s & = \lambda x . \lambda y . \lambda z . (x\ z)\ (y\ z)\\
