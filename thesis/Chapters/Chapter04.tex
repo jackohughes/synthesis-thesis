@@ -50,17 +50,17 @@ extend our graded linear $\lambda$-calculus of Section
 ~\ref{sec:linear-base} to incorporate data constructors and pattern matching, as well 
 as recursive data types. 
 
-\paragraph{Roadmap} We begin with a motivating example in Section~\ref{sec:motivating-example}
-before defining our extended calculus in Section~\ref{sec:der-calculus}
-providing an idealised, simply-typed subset of Granule with which we develop the
-core deriving mechanism. Section~\ref{sec:push-pull-deriv} gives the procedures
-for deriving \emph{push} and \emph{pull} operators for the calculus.
-Section~\ref{sec:implementation-der} describes the details of how these
-procedures are realised in the Granule language. We then provide examples of how
-several other structural combinators in Granule may be derived using this tool
-in Section~\ref{sec:deriving-other}. Finally, Section~\ref{sec:deriving-related}
-discusses related work, while Section~\ref{sec:der-conclusion} highlights future
-work.
+\paragraph{Roadmap} We begin with a motivating example in
+Section~\ref{sec:motivating-example} before defining our extended calculus in
+Section~\ref{sec:der-calculus} providing an idealised, simply-typed subset of
+Granule with which we develop the core deriving mechanism.
+Section~\ref{sec:push-pull-deriv} gives the procedures for deriving \emph{push}
+and \emph{pull} operators for the calculus. Section~\ref{sec:implementation-der}
+describes the details of how these procedures are realised in the Granule
+language. We then provide examples of how other structural combinators in
+Granule may be derived using this tool in Section~\ref{sec:deriving-other}.
+Finally, Section~\ref{sec:deriving-related} discusses related work, while
+Section~\ref{sec:der-conclusion} highlights future work.
 
 We start with a motivating example typifying the kind of software engineering
 impedance problem that distributive laws solve. We do so in Granule code since
@@ -90,7 +90,7 @@ of the form \granin{(a, b [0])} but rather \granin{(a, b) [r]} for some grading
 term \granin{r} which permits weakening? Such a situation readily arises when we
 are composing functional code, say between libraries or between a library and
 user code. In this situation, \granin{fst myPair} is ill-typed. Instead, we
-could define a different first projection function for use with \granin{myPair} as:
+could define a different first projection function for use with \granin{myPair}:
 %
 \begin{granule}
 fst' : forall { a b : Type, s : Semiring, r : s } 
