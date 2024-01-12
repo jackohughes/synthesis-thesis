@@ -450,14 +450,17 @@ contexts given by Definition~\ref{def:zeroedContexts}:
 \begin{definition}[Zeroed graded contexts]
   \label{def:zeroedContexts}
   For all contexts $[[ G ]]$, $ [[ [ G, 0 ] ]]$ is defined:
-\begin{align*}
+\begin{align*} 
   % \begin{array}{c}
-    \hspace{-0.9em}
+    % \hspace{-0.9em}
     [ \emptyset ]_0 = \emptyset
-    \qquad
-    [[ [ {G, x : [A] r} ] ]]_0 = [[ [ G, 0 ] ]], [[ {x : [ A ] r} ]] \quad \text{iff}\ r \sqsupseteq 0
+    \qquad & \qquad
+    [[ [ {G, x : [A] 0} ] ]]_0 = [[ [ G, 0 ] ]], [[ {x : [ A ] 0} ]] 
     % \\
-    \qquad
+    \\
+    [[ [ {G, x : [A] r} ] ]]_0 =\ \perp 
+    % \\
+    \qquad & \qquad
    [[ [ G, x : A ] ]]_0 =\ \perp
   % \end{array}
 \end{align*}
