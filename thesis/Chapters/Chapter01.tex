@@ -25,7 +25,7 @@ programming languages, and results from the fact that types form a high-level
 abstract specification of program behaviour. 
 
 \emph{Type-directed program synthesis} is a well-studied technique for
-automatically generating program code from a given type specification - the
+automatically generating program code from a type specification - the
 \textit{goal} type~\citep{oseraMYTH1,10.1145/1809028.1806632, synthesis2,
 DBLP:conf/cav/AlbarghouthiGK13, 10.1145/2737924.2737977,
 osera2019constraintbased}. This approach has a long history, which is deeply
@@ -243,9 +243,8 @@ mind.
 
 \section{Contributions}
 Linear and graded types provide a rich specification of program behaviour, which
-is enforced statically by the type checker. But how do we harness this
-information to make    
-writing programs automatically easier?  
+is enforced by the type checker. But how do we use this
+information to make writing programs automatically easier?  
 
 \paragraph{Thesis Statement} 
 \label{para:thesis-statement}
@@ -342,7 +341,7 @@ the two. Thus, we adopt the following structure:
         multiplicative conjunction (product types $\otimes$ and unit $\mathsf{Unit}$) and
         additive disjunction (sum types $\otimes$). These calculi are then
         implemented targeting default Granule. We produce a comparative
-        evaluation of the implemented synthesis tool, contrasting the efficiency
+        evaluation of the implemented tool, contrasting the efficiency
         of the two resource management approaches against each other, before
         selecting the most performant to use going forward.  
 
@@ -404,8 +403,8 @@ of~\ref{chapter:core}.
 This approach strikes a balance between maximising coverage of different
 approaches to resourceful type systems, and avoiding unnecessary repetition,
 whilst gradually increasing the complexity of the target language. By the end, we
-will then have two synthesis tool implementations for Granule, targeting both
-styles of graded type systems.
+will have two synthesis tool implementations for Granule, targeting both
+styles of graded systems.
 
 \section{Publications}
 In this thesis, the content of some chapters is formed from
