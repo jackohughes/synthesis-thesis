@@ -85,31 +85,34 @@ to Granule's expressive power~\citep{DBLP:journals/pacmpl/OrchardLE19}. Consider
 our list type benchmarks for example. In most cases, when we want to synthesise
 a recursive function definition which takes a list as input, we have to give the
 list a $0..\infty$ interval grade to account for potentially unlimited usage.
-Take for example the \granin{map} benchmark:
+Take for example a program that replicates a value some number of times to create a list typed:
 \begin{granule}
-map : forall a b . (a -> b) % 0..$\infty$ -> List a % 1..$\infty$ -> List b
+rep : forall { a : Type } . Int -> a % 0..$\infty$ -> List a 
 spec
-    map % 0..$\infty$
-map = ?
+    rep % 0..$\infty$
+rep = ?
 \end{granule}
-With indexed types, we can be much more precise. Consider a size-indexed vector type,
-defined as:
+Given a standard indexed type of natural numbers, defined: 
 \begin{granule}
-data Vec (n : Nat) t where
-  Nil  : Vec 0 t;
-  Cons : t -> Vec n t -> Vec (n+1) t
+data N (n : Nat) where
+  Z : N 0;
+  S : N n -> N (n+1)
 \end{granule}
-%
-The corresponding \granin{map} function
-can be given a much tighter specification, connecting the usage of the
-input function to the length of the vector, from which we could
-synthesise the program:
+and sized-indexed vectors:
 \begin{granule}
-vmap : forall {a b : Type, n : Nat} . (a -> b) %n -> Vec n a -> Vec n b
+data Vec (n : Nat) (a : Type) where
+  Nil  : Vec 0 ;
+  Cons : a -> Vec n a -> Vec (n+1) a
+\end{granule}
+a refined \granin{rep} function can be given a much tighter specification,
+connecting the usage of the input function to the length of the vector, from
+which we could synthesise the program:
+\begin{granule}
+vrep : forall { n : Nat, a : Type } . N n -> a % n -> Vec n a 
 spec
-    vmap % n
-vmap f Nil = Nil;
-vmap f (Cons x xs) = Cons (f x) (vmap f xs)
+    vrep % n
+vrep Z c = Nil;
+vrep (S n) c = Cons c (vrep n c)
 \end{granule}
 The latter type not only provides us with a greater opportunity to prune
 grade-violating programs, its type is also much more descriptive of the user's
