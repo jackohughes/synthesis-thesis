@@ -11,7 +11,7 @@ So far, we have considered a language with a several basic types, but which
 falls short of the full features that one would expect in a practical functional
 language. In this chapter, we consider a target language which is significantly
 more expressive than what we have seen thus far, constituting a fully-fledged
-functional programming language, with (recursive) ADTs, recursion, and rank 1
+functional programming language, with (recursive) ADTs, recursion, and 
 polymorphic definitions. 
 
 Chapter~\ref{chapter:deriving} introduced many of these features to the calculi
@@ -123,7 +123,7 @@ Terms consist of a graded $\lambda$-calculus, a promotion construct $[t]$ which
 
 Typing judgements have the form $[[  Sig ; G |- t : A ]]$ assigning a type $[[ A
 ]]$ to a term $ [[ t ]]$ under a type variable context $[[ Sig ]]$ and variable context
-$[[ G ]]$, defined:
+$[[ G ]]$:
 
 \begin{align*}
   [[ Sig ]] ::= \emptyset
@@ -325,7 +325,7 @@ synthesis.
 
 \subsection{Metatheory}
 Lastly we note that the fully graded system also enjoys admissibility of
-substitution~\citep{DBLP:journals/pacmpl/AbelB20}
+substitution~\citep{DBLP:journals/pacmpl/AbelB20, tale-of-two-calculi}
 which is critical in type preservation proofs,
 and is needed in our proof of soundness for synthesis:
 %
@@ -383,9 +383,9 @@ that $[[ G |- A =>+ t ; D ]]$.
 \subsection{Core Synthesis Rules}
 \label{subsection:rules}
 \subsubsection{Top-level}
-We begin with the \textsc{TopLevel} rule, which is
-for a judgment form with a type scheme goal instead of just a
-type, providing the entry-point to synthesis:
+We begin with the \textsc{TopLevel} rule, which is the entry-point to synthesis, 
+for a judgment form with a type scheme goal instead of a
+type:
 \begin{align*}
   \synTopP
 \end{align*}
